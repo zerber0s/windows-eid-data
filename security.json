@@ -1,0 +1,104 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Security",
+    "version": "0.1.0",
+    "generatedAt": "2026-02-27T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4624,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An account was successfully logged on",
+      "summary": "Successful logon session creation.",
+      "details": "Used to validate interactive, network, service, and batch logons. Pivot on LogonType, TargetUserName, and source address.",
+      "category": "Logon/Authentication",
+      "tags": ["logon", "authentication"],
+      "relatedEventIds": [4625, 4634, 4672],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    },
+    {
+      "id": 4625,
+      "log": "Security",
+      "level": "AuditFailure",
+      "title": "An account failed to log on",
+      "summary": "Failed logon attempt recorded.",
+      "details": "Useful for brute force or password spray detection. Pivot on Status/SubStatus and source address.",
+      "category": "Logon/Authentication",
+      "tags": ["failure", "bruteforce"],
+      "relatedEventIds": [4624, 4740],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    },
+    {
+      "id": 4688,
+      "log": "Security",
+      "level": "AuditSuccess",
+      "title": "A new process has been created",
+      "summary": "Process creation event.",
+      "details": "High-value telemetry when command-line logging is enabled. Pivot on ParentProcessName and CommandLine.",
+      "category": "Process Execution",
+      "tags": ["process", "execution"],
+      "relatedEventIds": [4689],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    },
+    {
+      "id": 4697,
+      "log": "Security",
+      "level": "AuditSuccess",
+      "title": "A service was installed in the system",
+      "summary": "Service installation recorded in Security log.",
+      "details": "Persistence indicator. Correlate with System 7045.",
+      "category": "Persistence/Services",
+      "tags": ["service", "persistence"],
+      "relatedEventIds": [7045],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    },
+    {
+      "id": 1102,
+      "log": "Security",
+      "level": "Information",
+      "title": "The audit log was cleared",
+      "summary": "Security log cleared.",
+      "details": "High severity because it may indicate evidence destruction.",
+      "category": "Log Tampering",
+      "tags": ["log-cleared", "defense-evasion"],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    }
+  ]
+}
