@@ -1,0 +1,58 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - System",
+    "version": "0.1.0",
+    "generatedAt": "2026-02-27T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/system.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 7045,
+      "log": "System",
+      "provider": "Service Control Manager",
+      "channel": "System",
+      "level": "Information",
+      "title": "A service was installed in the system",
+      "summary": "New service installation recorded.",
+      "details": "Common persistence mechanism. Correlate with Security 4697 and process creation.",
+      "category": "Persistence/Services",
+      "tags": ["service", "persistence"],
+      "relatedEventIds": [4697],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    },
+    {
+      "id": 6008,
+      "log": "System",
+      "provider": "EventLog",
+      "channel": "System",
+      "level": "Error",
+      "title": "The previous system shutdown was unexpected",
+      "summary": "Unexpected shutdown detected.",
+      "details": "Indicates crash, forced reboot, or power loss.",
+      "category": "System Lifecycle",
+      "tags": ["shutdown", "crash"],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-02-27"
+    }
+  ]
+}
