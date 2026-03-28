@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.1.0",
-    "generatedAt": "2026-02-27T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-03-28T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -19,6 +19,24 @@
     ]
   },
   "entries": [
+    {
+      "id": 1102,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Eventlog",
+      "channel": "Security",
+      "level": "Information",
+      "title": "The audit log was cleared",
+      "summary": "Security log cleared.",
+      "details": "High severity because it may indicate evidence destruction. Correlate with System 104 for System log clearing.",
+      "category": "Log Tampering",
+      "tags": ["log-cleared", "defense-evasion"],
+      "relatedEventIds": [104],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-1102"
+      },
+      "lastReviewed": "2026-02-27"
+    },
     {
       "id": 4624,
       "log": "Security",
@@ -40,6 +58,8 @@
     {
       "id": 4625,
       "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
       "level": "AuditFailure",
       "title": "An account failed to log on",
       "summary": "Failed logon attempt recorded.",
@@ -54,8 +74,136 @@
       "lastReviewed": "2026-02-27"
     },
     {
+      "id": 4634,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An account was logged off",
+      "summary": "Logon session terminated.",
+      "details": "Generated when a logon session ends and no longer exists. Correlate with 4624 using LogonID to track session duration. Note: 4647 is generated for user-initiated interactive/RDP logoffs; 4634 marks session termination.",
+      "category": "Logon/Authentication",
+      "tags": ["logoff", "authentication"],
+      "relatedEventIds": [4624, 4647],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4634"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4647,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "User initiated logoff",
+      "summary": "User-initiated interactive logoff recorded.",
+      "details": "Generated when a user initiates a logoff from an interactive or RDP session. Unlike 4634 which marks session termination, 4647 records the user's intent to log off. Correlate with 4634 using LogonID to confirm session end.",
+      "category": "Logon/Authentication",
+      "tags": ["logoff", "authentication"],
+      "relatedEventIds": [4634, 4624],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4647"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4648,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A logon was attempted using explicit credentials",
+      "summary": "Explicit credential logon attempt recorded.",
+      "details": "Generated when a process uses explicit credentials such as runas or scheduled task authentication. Pivot on SubjectUserName, TargetUserName, TargetServerName, and ProcessName. Common in lateral movement and privilege escalation scenarios.",
+      "category": "Logon/Authentication",
+      "tags": ["logon", "explicit-credentials", "runas"],
+      "relatedEventIds": [4624, 4769],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4648"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4656,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A handle to an object was requested",
+      "summary": "Object handle request recorded.",
+      "details": "Generated when access to a file, registry key, or kernel object is requested. Records the requested access rights but not whether the operation was performed — correlate with 4663 to confirm execution. Requires SACL configuration on monitored objects.",
+      "category": "Object Access",
+      "tags": ["file-access", "registry-access", "object-access"],
+      "relatedEventIds": [4663, 4670],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4656"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4663,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An attempt was made to access an object",
+      "summary": "Object access attempt recorded.",
+      "details": "Generated when a specific access right is exercised on a file, registry key, or kernel object with a matching SACL. Pivot on ObjectName, SubjectUserName, and Accesses. Requires SACL configuration on monitored objects to generate.",
+      "category": "Object Access",
+      "tags": ["file-access", "registry-access", "object-access"],
+      "relatedEventIds": [4656, 4670],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4663"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4670,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Permissions on an object were changed",
+      "summary": "Object DACL/permissions changed.",
+      "details": "Generated when the permissions (DACL) of a file, registry key, or token object are changed. OldSd and NewSd fields contain SDDL representations of the change. Requires SACL configuration on monitored objects.",
+      "category": "Object Access",
+      "tags": ["permissions", "acl-change", "object-access"],
+      "relatedEventIds": [4663, 4656],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4670"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4672,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Special privileges assigned to new logon",
+      "summary": "Sensitive privileges assigned at logon.",
+      "details": "Generated when a new logon session is assigned sensitive privileges such as SeDebugPrivilege, SeBackupPrivilege, or SeTakeOwnershipPrivilege. Very common for SYSTEM logons. Monitor for unexpected accounts with high-value privileges in PrivilegeList.",
+      "category": "Privilege Use",
+      "tags": ["privilege", "authentication"],
+      "relatedEventIds": [4624],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
       "id": 4688,
       "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
       "level": "AuditSuccess",
       "title": "A new process has been created",
       "summary": "Process creation event.",
@@ -70,8 +218,28 @@
       "lastReviewed": "2026-02-27"
     },
     {
+      "id": 4689,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A process has exited",
+      "summary": "Process termination event.",
+      "details": "Generated every time a process exits. Pair with 4688 using ProcessId to track full process lifetime. Useful for detecting short-lived processes indicative of payload execution or LOLBin abuse.",
+      "category": "Process Execution",
+      "tags": ["process", "execution"],
+      "relatedEventIds": [4688],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4689"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
       "id": 4697,
       "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
       "level": "AuditSuccess",
       "title": "A service was installed in the system",
       "summary": "Service installation recorded in Security log.",
@@ -86,19 +254,454 @@
       "lastReviewed": "2026-02-27"
     },
     {
-      "id": 1102,
+      "id": 4698,
       "log": "Security",
-      "level": "Information",
-      "title": "The audit log was cleared",
-      "summary": "Security log cleared.",
-      "details": "High severity because it may indicate evidence destruction.",
-      "category": "Log Tampering",
-      "tags": ["log-cleared", "defense-evasion"],
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A scheduled task was created",
+      "summary": "New scheduled task creation recorded.",
+      "details": "Generated every time a new scheduled task is created. High-fidelity persistence indicator. Examine TaskContent XML for command paths and LogonType. Tasks in the root Task Scheduler Library node are commonly associated with manual or malicious creation.",
+      "category": "Persistence/Scheduled Tasks",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [4699, 4700, 4702],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4698"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4699,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A scheduled task was deleted",
+      "summary": "Scheduled task deletion recorded.",
+      "details": "Generated every time a scheduled task is deleted. Deletion of root-level tasks may indicate cleanup of malicious persistence. Correlate with 4698 to trace task lifecycle.",
+      "category": "Persistence/Scheduled Tasks",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [4698, 4700, 4702],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4699"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4700,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A scheduled task was enabled",
+      "summary": "Scheduled task enabled.",
+      "details": "Generated every time a scheduled task is enabled. Monitor for re-enabling of previously disabled tasks, especially tasks located in the root Task Scheduler Library node.",
+      "category": "Persistence/Scheduled Tasks",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [4698, 4699, 4702],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4700"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4702,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A scheduled task was updated",
+      "summary": "Scheduled task modified.",
+      "details": "Generated every time a scheduled task is updated. Examine TaskContentNew XML for changes to the command or LogonType. A LogonType of Password stores credentials in Credential Manager in cleartext.",
+      "category": "Persistence/Scheduled Tasks",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [4698, 4699, 4700],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4702"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4720,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was created",
+      "summary": "New user account created.",
+      "details": "Generated every time a new user object is created on domain controllers, member servers, and workstations. Monitor for unexpected account creation, unusual UAC flags, SID history population, or accounts with pre-set delegation.",
+      "category": "Account Management",
+      "tags": ["account-created", "user-management"],
+      "relatedEventIds": [4722, 4726, 4738],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4720"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4722,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was enabled",
+      "summary": "User account enabled.",
+      "details": "Generated when a user or computer object is enabled. Monitor for re-enabling of dormant, disabled, or previously quarantined accounts.",
+      "category": "Account Management",
+      "tags": ["account-enabled", "user-management"],
+      "relatedEventIds": [4720, 4725],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4722"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4725,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was disabled",
+      "summary": "User account disabled.",
+      "details": "Generated when a user or computer object is disabled. Useful for detecting disabling of service accounts or security tooling accounts as a precursor to attack.",
+      "category": "Account Management",
+      "tags": ["account-disabled", "user-management"],
+      "relatedEventIds": [4722, 4720],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4725"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4726,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was deleted",
+      "summary": "User account deleted.",
+      "details": "Generated every time a user object is deleted on domain controllers, member servers, and workstations. Monitor for deletion of service, administrative, or recently created accounts.",
+      "category": "Account Management",
+      "tags": ["account-deleted", "user-management"],
+      "relatedEventIds": [4720],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4726"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4728,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was added to a security-enabled global group",
+      "summary": "Member added to global security group.",
+      "details": "Generated when a member is added to a security-enabled global group such as Domain Admins. Pivot on TargetUserName (the group name) and MemberSid. High-value alert for additions to privileged groups.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4729, 4732, 4756],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4729,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was removed from a security-enabled global group",
+      "summary": "Member removed from global security group.",
+      "details": "Generated when a member is removed from a security-enabled global group. Monitor for removal from privileged groups such as Domain Admins. Pivot on TargetUserName (group name) and MemberSid.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4728, 4733, 4757],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4732,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was added to a security-enabled local group",
+      "summary": "Member added to local security group.",
+      "details": "Generated when a new member is added to a security-enabled local group. Critical for monitoring additions to the local Administrators group. Pivot on TargetUserName (group name) and MemberSid.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4733, 4728, 4756],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4732"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4733,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was removed from a security-enabled local group",
+      "summary": "Member removed from local security group.",
+      "details": "Generated when a member is removed from a security-enabled local group. Monitor for unexpected removals from critical groups such as local Administrators. Pivot on TargetUserName (group name) and MemberSid.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4732, 4729, 4757],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4733"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4738,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was changed",
+      "summary": "User account attributes modified.",
+      "details": "Generated every time a user object is changed. A separate event is generated per attribute change. Unchanged attributes appear as '-'. Monitor UAC flag changes (e.g., Trusted For Delegation enabled), password changes on critical accounts, and AllowedToDelegateTo modifications.",
+      "category": "Account Management",
+      "tags": ["account-changed", "user-management"],
+      "relatedEventIds": [4720, 4722, 4725],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4738"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4740,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was locked out",
+      "summary": "User account locked out.",
+      "details": "Generated every time a user account is locked out. CallerComputerName identifies the machine that triggered the lockout. Common indicator of password spray, brute force, or misconfigured service credentials.",
+      "category": "Account Management",
+      "tags": ["lockout", "bruteforce"],
+      "relatedEventIds": [4625, 4776],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4740"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4756,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was added to a security-enabled universal group",
+      "summary": "Member added to universal security group.",
+      "details": "Generated when a member is added to a security-enabled universal group. Universal groups span multiple domains, so additions can affect enterprise-wide permissions. Pivot on TargetUserName and MemberSid.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4757, 4728, 4732],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4757,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A member was removed from a security-enabled universal group",
+      "summary": "Member removed from universal security group.",
+      "details": "Generated when a member is removed from a security-enabled universal group. Universal groups span multiple domains, so removals may affect enterprise-wide permissions. Pivot on TargetUserName (group name) and MemberSid.",
+      "category": "Group Management",
+      "tags": ["group-membership", "privilege-escalation"],
+      "relatedEventIds": [4756, 4729, 4733],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4768,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A Kerberos authentication ticket (TGT) was requested",
+      "summary": "Kerberos TGT request recorded.",
+      "details": "Generated on domain controllers when a TGT is issued or the request fails. Monitor for RC4 encryption type (0x17) which may indicate AS-REP roasting or downgrade attacks. Failure result codes 0x10 and 0x18 do not generate this event — those are captured by 4771. Pivot on TargetUserName, TicketEncryptionType, and IpAddress.",
+      "category": "Kerberos",
+      "tags": ["kerberos", "authentication", "ticket"],
+      "relatedEventIds": [4769, 4771],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4769,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A Kerberos service ticket was requested",
+      "summary": "Kerberos TGS ticket request recorded.",
+      "details": "Generated on domain controllers when a TGS ticket is requested. Failure code 0x20 (expired ticket) is routine. Monitor for RC4 encryption type (0x17) which may indicate Kerberoasting. Pivot on ServiceName, TicketEncryptionType, and IpAddress.",
+      "category": "Kerberos",
+      "tags": ["kerberos", "authentication", "ticket"],
+      "relatedEventIds": [4768, 4771],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4771,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "Kerberos pre-authentication failed",
+      "summary": "Kerberos TGT request failed.",
+      "details": "Generated on domain controllers when the KDC fails to issue a TGT. Failure code 0x18 (wrong password) is a brute-force indicator. Failure code 0x10 indicates smart card issues. Not generated if 'Do not require Kerberos preauthentication' is set on the account.",
+      "category": "Kerberos",
+      "tags": ["kerberos", "authentication", "failure"],
+      "relatedEventIds": [4769, 4768],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4771"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4776,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The computer attempted to validate the credentials for an account",
+      "summary": "NTLM credential validation attempt recorded.",
+      "details": "Generated every time NTLM authentication is used, on the computer that holds the account. Captures all NTLM attempts on domain controllers for domain accounts. Monitor for repeated error codes (0xC000006A bad password, 0xC000006D generic failure) as brute-force indicators.",
+      "category": "Logon/Authentication",
+      "tags": ["ntlm", "authentication", "credential-validation"],
+      "relatedEventIds": [4624, 4625],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4776"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4946,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A change has been made to Windows Firewall exception list. A rule was added",
+      "summary": "Windows Firewall rule added locally.",
+      "details": "Generated when a new Windows Firewall rule is locally added. Does not generate for Group Policy-applied rules. Monitor for unexpected rule additions that may open network access for attacker-controlled traffic.",
+      "category": "Firewall/Policy Change",
+      "tags": ["firewall", "policy-change", "defense-evasion"],
+      "relatedEventIds": [4947, 4948],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4946"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4947,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A change has been made to Windows Firewall exception list. A rule was modified",
+      "summary": "Windows Firewall rule modified locally.",
+      "details": "Generated when a Windows Firewall rule is locally modified. Does not generate for Group Policy-applied changes. Pivot on RuleName and RuleId. Monitor for modifications that weaken existing blocking rules.",
+      "category": "Firewall/Policy Change",
+      "tags": ["firewall", "policy-change", "defense-evasion"],
+      "relatedEventIds": [4946, 4948],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4947"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 4948,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A change has been made to Windows Firewall exception list. A rule was deleted",
+      "summary": "Windows Firewall rule deleted locally.",
+      "details": "Generated when a Windows Firewall rule is locally deleted. Does not generate for Group Policy-applied deletions. Deletion of blocking rules is a common defense evasion technique. Monitor for any rule deletions on critical servers.",
+      "category": "Firewall/Policy Change",
+      "tags": ["firewall", "policy-change", "defense-evasion"],
+      "relatedEventIds": [4946, 4947],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4948"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 5140,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A network share object was accessed",
+      "summary": "Network share accessed.",
+      "details": "Generated once per session on first access to a network share. Pivot on ShareName, IpAddress, and SubjectUserName. Monitor for access to administrative shares (C$, ADMIN$, IPC$) from unexpected hosts or accounts.",
+      "category": "Network Share Access",
+      "tags": ["file-share", "lateral-movement", "network"],
+      "relatedEventIds": [5145],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140"
+      },
+      "lastReviewed": "2026-03-28"
+    },
+    {
+      "id": 5145,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A network share object was checked to see whether client can be granted desired access",
+      "summary": "Detailed network share file/folder access check.",
+      "details": "More granular than 5140; generated per-file or per-folder on network share access. Failure events indicate share-level access denials. High-volume event — filter on RelativeTargetName and Accesses for suspicious write, delete, or execute patterns.",
+      "category": "Network Share Access",
+      "tags": ["file-share", "lateral-movement", "network"],
+      "relatedEventIds": [5140],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5145"
+      },
+      "lastReviewed": "2026-03-28"
     }
   ]
 }
