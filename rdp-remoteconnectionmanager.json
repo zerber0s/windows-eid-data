@@ -1,0 +1,109 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - RDP RemoteConnectionManager",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/rdp-remoteconnectionmanager.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 261,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Listener RDP-Tcp received a connection",
+      "summary": "RDP listener received an inbound TCP connection.",
+      "details": "Generated when the RDP listener (RDP-Tcp) accepts an inbound TCP connection on the target host. This is the earliest indicator in the RemoteConnectionManager log that a connection attempt is in progress — it fires before authentication. The event records the source IP of the connecting client. Because it precedes authentication, it will be generated for both successful and failed connection attempts; correlate with EID 1149 on the same source IP to confirm authentication succeeded.",
+      "category": "RDP Connection",
+      "tags": ["rdp", "network", "remote-access", "lateral-movement"],
+      "relatedEventIds": [1149, 1158],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate source IP with EID 1149 to confirm the connection resulted in successful authentication",
+          "EID 261 without a subsequent EID 1149 from the same IP may indicate a port scan, failed NLA negotiation, or brute-force attempt"
+        ],
+        "commonFalsePositives": [
+          "Legitimate RDP connections from admin hosts",
+          "RDP health checks from monitoring infrastructure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1149,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: User authentication succeeded",
+      "summary": "RDP user authentication succeeded; source IP recorded.",
+      "details": "Generated on the target host when a user successfully authenticates to RDP, including via Network Level Authentication (NLA). Key fields: Param1 (username), Param2 (domain), Param3 (source IP address of the client). This event is one of the most valuable for RDP forensics because it captures the source IP even when NLA is used and the connection precedes an interactive logon. The absence of a domain (Param2 is blank) may indicate a local account logon. Correlate with LocalSessionManager EID 21 using username and timestamp to confirm the session was fully established.",
+      "category": "RDP Authentication",
+      "tags": ["rdp", "authentication", "lateral-movement", "remote-access"],
+      "relatedEventIds": [261, 1158, 21, 4624],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pivot on Param3 (source IP) to identify the origin of the RDP connection",
+          "Blank Param2 (domain) indicates a local account; non-blank indicates a domain account",
+          "Correlate Param1 (username) and timestamp with LocalSessionManager EID 21 to confirm session establishment",
+          "EID 1149 without a subsequent LocalSessionManager EID 21 may indicate authentication succeeded but the session was not fully initialized"
+        ],
+        "commonFalsePositives": [
+          "Legitimate admin or user RDP sessions",
+          "Jump server or bastion host activity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1158,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services accepted a new TCP connection from client",
+      "summary": "RDP service accepted and assigned an incoming TCP connection.",
+      "details": "Generated when the Remote Desktop Services stack accepts a new inbound TCP connection and assigns it to a connection handler. Key field: ClientIP (source IP and ephemeral port of the connecting client, e.g., 192.168.1.10:54321). This event fires in the same flow as EID 261 but is generated by a different component and provides the full IP:port tuple. Useful for correlating RDP traffic to network flow logs. Correlate with EID 1149 on the same source IP to confirm authentication was completed.",
+      "category": "RDP Connection",
+      "tags": ["rdp", "network", "remote-access", "lateral-movement"],
+      "relatedEventIds": [261, 1149],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ClientIP field includes the ephemeral port — strip the port to get the source IP for correlation with EID 1149",
+          "Cross-reference source IP with network flow data (e.g., firewall or NetFlow logs) to build a full connection picture"
+        ],
+        "commonFalsePositives": [
+          "Legitimate RDP connections",
+          "Network scanner probing TCP 3389"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}
