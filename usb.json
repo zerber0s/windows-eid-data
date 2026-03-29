@@ -1,0 +1,134 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - USB / DriverFrameworks",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/usb.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 2003,
+      "log": "DriverFrameworks",
+      "provider": "Microsoft-Windows-DriverFrameworks-UserMode",
+      "channel": "Microsoft-Windows-DriverFrameworks-UserMode/Operational",
+      "level": "Information",
+      "title": "Device instance detected",
+      "summary": "A USB device was connected and detected by Windows.",
+      "details": "Generated when Windows detects a new device instance, typically when a USB device is physically connected. Key field: the device instance ID, which encodes the device class, vendor ID (VID), product ID (PID), and serial number (if the device has one). The VID and PID can be used to identify the device type and manufacturer. Devices without a serial number will share an instance ID across connections, making per-connection attribution harder. Correlate with EID 2004 to confirm the device was successfully initialized, and with System log EID 20001 for driver installation events.",
+      "category": "USB Device",
+      "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
+      "relatedEventIds": [2004, 2100, 2101],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Extract VID and PID from the device instance ID to identify the device class (storage, input, network adapter, etc.)",
+          "Serial number presence in the instance ID enables per-device tracking across multiple connection events",
+          "Correlate connection timestamps with user logon events (Security EID 4624) to attribute the device connection to a specific user session"
+        ],
+        "commonFalsePositives": [
+          "Any routine USB device connection (keyboards, mice, headsets, hubs)",
+          "USB charging of personal devices"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/user-mode-driver-framework-design-guide"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 2004,
+      "log": "DriverFrameworks",
+      "provider": "Microsoft-Windows-DriverFrameworks-UserMode",
+      "channel": "Microsoft-Windows-DriverFrameworks-UserMode/Operational",
+      "level": "Information",
+      "title": "Device instance enumerated",
+      "summary": "A detected USB device was successfully enumerated by Windows.",
+      "details": "Generated when Windows successfully enumerates a device instance following detection (EID 2003). Enumeration confirms the device was recognized and its properties read by the driver framework. Correlate with EID 2003 using the device instance ID to confirm the full connection sequence. A device that generates EID 2003 but not EID 2004 may indicate a driver failure or an unsupported device class.",
+      "category": "USB Device",
+      "tags": ["usb", "removable-media", "physical-access"],
+      "relatedEventIds": [2003, 2100, 2101],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 2003 using the device instance ID to confirm successful device recognition",
+          "Device present in EID 2003 but absent in EID 2004 may indicate a blocked or unsupported device"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate USB device being connected and enumerated normally"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/user-mode-driver-framework-design-guide"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 2100,
+      "log": "DriverFrameworks",
+      "provider": "Microsoft-Windows-DriverFrameworks-UserMode",
+      "channel": "Microsoft-Windows-DriverFrameworks-UserMode/Operational",
+      "level": "Information",
+      "title": "Device connection attempt initiated",
+      "summary": "The driver framework is initiating a connection with a device instance.",
+      "details": "Generated when the user-mode driver framework (UMDF) begins establishing a connection to a device instance. This event is part of the same connection sequence as EID 2003 and 2004, providing an additional timestamp reference for when driver-level communication with the device began. Key field: the device instance ID. Useful for establishing precise connection timing when correlating USB events with other log sources such as file system activity or user logon events.",
+      "category": "USB Device",
+      "tags": ["usb", "removable-media", "physical-access"],
+      "relatedEventIds": [2003, 2004, 2101],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Use the timestamp alongside EID 2003 and 2004 to establish precise device connection timing",
+          "Correlate device connection timing with file access or copy events to detect data exfiltration to removable media"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate USB device connection"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/user-mode-driver-framework-design-guide"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 2101,
+      "log": "DriverFrameworks",
+      "provider": "Microsoft-Windows-DriverFrameworks-UserMode",
+      "channel": "Microsoft-Windows-DriverFrameworks-UserMode/Operational",
+      "level": "Information",
+      "title": "Device connection established",
+      "summary": "The driver framework successfully established a connection with the device.",
+      "details": "Generated when the user-mode driver framework (UMDF) successfully completes connection to a device instance. This confirms the device is fully operational and ready for use — for USB storage devices, this is the point at which the volume becomes accessible to the file system. Correlate with EID 2100 to measure driver initialization time. For insider threat and data exfiltration investigations, EID 2101 combined with subsequent file system events provides the clearest evidence that a storage device was connected and used.",
+      "category": "USB Device",
+      "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
+      "relatedEventIds": [2003, 2004, 2100],
+      "notesGuidance": {
+        "investigationPivots": [
+          "For USB storage, this event marks when the volume became accessible — correlate with file copy events immediately following this timestamp",
+          "Correlate with Security EID 4663 (object access) on removable drive paths to identify what files were accessed or copied",
+          "Device connection near the end of an employee's last working day is a common insider threat indicator"
+        ],
+        "commonFalsePositives": [
+          "Any routine USB device connection completing initialization"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/wdf/user-mode-driver-framework-design-guide"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}

@@ -69,7 +69,7 @@
         "id": { "type": "integer", "minimum": 0 },
         "log": {
           "type": "string",
-          "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "Other"]
+          "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Other"]
         },
         "provider": { "type": "string" },
         "channel": { "type": "string" },

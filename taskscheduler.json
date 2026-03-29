@@ -1,0 +1,167 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Task Scheduler",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 106,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Task registered",
+      "summary": "A new scheduled task was registered.",
+      "details": "Generated when a new scheduled task is registered in the Task Scheduler. Key field: TaskName (full path, e.g., \\Microsoft\\Windows\\TaskName). Complements Security EID 4698 but fires independently and may capture task registrations that do not generate a Security audit event depending on audit policy configuration. Tasks registered under the root folder (\\TaskName with no subfolder) rather than a vendor-specific subfolder are more commonly associated with manual or malicious creation.",
+      "category": "Task Lifecycle",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [140, 141, 200, 201, 4698],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Tasks in the root scheduler namespace (no subfolder) warrant closer inspection",
+          "Correlate TaskName with Security EID 4698 TaskContent XML to review the full task definition",
+          "Check the registering user context — SYSTEM-registered tasks created outside of normal software installs are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Software installers and updaters registering scheduled tasks",
+          "Group Policy-deployed tasks"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 140,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Task updated",
+      "summary": "An existing scheduled task was updated.",
+      "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log — correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
+      "category": "Task Lifecycle",
+      "tags": ["scheduled-task", "persistence"],
+      "relatedEventIds": [106, 141, 200, 4702],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with Security EID 4702 to review the updated task XML",
+          "Compare timing of the update against known software update windows"
+        ],
+        "commonFalsePositives": [
+          "Software auto-updaters modifying their own scheduled tasks",
+          "Group Policy refreshes updating task definitions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 141,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Task removed",
+      "summary": "A scheduled task was deleted.",
+      "details": "Generated when a scheduled task is removed from the Task Scheduler. Key field: TaskName. Deletion of a recently created or recently triggered task may indicate cleanup of a malicious persistence mechanism. Correlate TaskName with EID 106 and EID 200 to determine whether the task was ever executed before deletion.",
+      "category": "Task Lifecycle",
+      "tags": ["scheduled-task", "persistence", "defense-evasion"],
+      "relatedEventIds": [106, 140, 200, 4699],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 106 to determine when the task was originally created",
+          "Correlate with EID 200 to confirm whether the task executed before being deleted",
+          "Deletion shortly after execution is a strong cleanup indicator"
+        ],
+        "commonFalsePositives": [
+          "Software uninstallers removing their own scheduled tasks",
+          "One-time setup tasks that self-delete after running"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 200,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Action started",
+      "summary": "A scheduled task action (executable) began executing.",
+      "details": "Generated when a scheduled task action starts. Key fields: TaskName and ActionName (the executable or script path that was launched). This is the primary execution evidence event in the Task Scheduler log and is not captured by the Security log EIDs 4698-4702, which only cover task lifecycle (create/modify/delete/enable), not execution. Pivot on ActionName to identify what was run and correlate with Security EID 4688 to find the resulting process creation event.",
+      "category": "Task Execution",
+      "tags": ["scheduled-task", "execution", "persistence"],
+      "relatedEventIds": [201, 106, 4698, 4688],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ActionName is the key field — inspect the full executable path and any arguments",
+          "Correlate TaskName with EID 106 to determine how long the task existed before execution",
+          "Cross-reference ActionName with Security EID 4688 CommandLine for full argument visibility (if command-line auditing is enabled)",
+          "Execution from temp directories, user profile paths, or with encoded/obfuscated arguments is a strong malicious indicator"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software running scheduled maintenance or update tasks",
+          "Windows built-in tasks (e.g., Defrag, Windows Defender scans)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 201,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Action completed",
+      "summary": "A scheduled task action finished executing.",
+      "details": "Generated when a scheduled task action finishes. Key fields: TaskName, ActionName, and ResultCode. A ResultCode of 0 indicates successful completion. Non-zero result codes may indicate the action failed or was terminated. Pair with EID 200 using TaskName to measure execution duration. Abnormally short execution times for tasks that should run longer, or consistent non-zero result codes, may indicate detection and termination by a security tool.",
+      "category": "Task Execution",
+      "tags": ["scheduled-task", "execution", "persistence"],
+      "relatedEventIds": [200, 106],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 200 using TaskName to calculate execution duration",
+          "Non-zero ResultCode may indicate the process was killed or failed — correlate with Defender or EDR telemetry",
+          "Very short durations (sub-second) combined with non-zero result codes may indicate security tool intervention"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate scheduled task completing normally"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - WMI Activity",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 5857,
+      "log": "WMI",
+      "provider": "Microsoft-Windows-WMI-Activity",
+      "channel": "Microsoft-Windows-WMI-Activity/Operational",
+      "level": "Information",
+      "title": "WMI provider host started",
+      "summary": "WMI provider DLL loaded into a provider host process.",
+      "details": "Generated when a WMI provider host (WmiPrvSE.exe) successfully loads a provider. Key fields: ProviderName, ProviderPath (full DLL path), and HostProcess. Most legitimate WMI providers load from System32 or known application directories. A ProviderPath pointing to a temp directory, user profile, or uncommon location is a strong indicator of a malicious WMI provider registered for persistence or lateral movement.",
+      "category": "WMI Provider",
+      "tags": ["wmi", "provider", "persistence", "lateral-movement"],
+      "relatedEventIds": [5861],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Check ProviderPath for DLLs outside of System32 or known application directories",
+          "Correlate HostProcess PID with process creation logs (Security EID 4688) to identify the parent",
+          "Cross-reference ProviderName with known legitimate WMI providers"
+        ],
+        "commonFalsePositives": [
+          "Legitimate third-party software registering WMI providers",
+          "Management and monitoring agents (e.g., SCCM, antivirus)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 5860,
+      "log": "WMI",
+      "provider": "Microsoft-Windows-WMI-Activity",
+      "channel": "Microsoft-Windows-WMI-Activity/Operational",
+      "level": "Information",
+      "title": "WMI temporary event subscription registered",
+      "summary": "A temporary (non-persistent) WMI event subscription was registered.",
+      "details": "Generated when a temporary WMI event subscription is created. Temporary subscriptions exist only in memory and do not survive a reboot, unlike permanent subscriptions (EID 5861). Key fields: NamespaceName, Query (the WMI event filter query), and the registering process. While less commonly used for persistence than permanent subscriptions, temporary subscriptions can be used for in-session lateral movement triggers or to respond to specific system conditions during an active intrusion.",
+      "category": "WMI Subscription",
+      "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
+      "relatedEventIds": [5861],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Examine the Query field for suspicious event filters (e.g., triggering on process creation or logon events)",
+          "Correlate the registering process with Security EID 4688 to identify what created the subscription",
+          "Temporary subscriptions do not persist — if persistence is suspected, look for EID 5861 instead"
+        ],
+        "commonFalsePositives": [
+          "Monitoring and management tools that use WMI event subscriptions",
+          "PowerShell scripts using Register-WmiEvent or Register-CimIndicationEvent"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 5861,
+      "log": "WMI",
+      "provider": "Microsoft-Windows-WMI-Activity",
+      "channel": "Microsoft-Windows-WMI-Activity/Operational",
+      "level": "Information",
+      "title": "WMI permanent event subscription registered",
+      "summary": "A persistent WMI event subscription was registered.",
+      "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
+      "category": "WMI Subscription",
+      "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
+      "relatedEventIds": [5857, 5860],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Check Consumer type: CommandLineEventConsumer or ActiveScriptEventConsumer indicate code execution capability",
+          "Examine Query for event filters that trigger on process creation, logon, or system startup",
+          "Query WMI namespace root\\subscription for __EventFilter, __EventConsumer, and __FilterToConsumerBinding objects to enumerate all active subscriptions",
+          "Correlate with Security EID 4688 to identify which process registered the subscription"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software using WMI subscriptions for monitoring or self-healing (e.g., some AV products, backup agents)",
+          "SCCM and other endpoint management tools"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}

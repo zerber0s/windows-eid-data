@@ -1,0 +1,198 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Defender",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1116,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Malware or unwanted software detected",
+      "summary": "Windows Defender detected a threat.",
+      "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBins (e.g., powershell.exe, mshta.exe, wscript.exe) are higher priority than detections in temp directories.",
+      "category": "Threat Detection",
+      "tags": ["defender", "malware", "detection"],
+      "relatedEventIds": [1117],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pivot on Process Name to identify what was executing the detected payload",
+          "Correlate Path with file creation events to determine how the file arrived on the system",
+          "Detection Source of 'Real-Time Protection' means the threat was caught during active execution; 'Scheduled Scan' may indicate an older dormant file",
+          "Correlate timestamp with Security EID 4688 to find related process activity"
+        ],
+        "commonFalsePositives": [
+          "Security research tools or red team utilities flagged as PUA/PUP",
+          "Packed or obfuscated legitimate software triggering heuristic detections"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1117,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Information",
+      "title": "Antivirus took action to protect machine from malware",
+      "summary": "Windows Defender took a remediation action on a detected threat.",
+      "details": "Generated when Windows Defender performs a remediation action following a detection (EID 1116). Key fields: Threat Name, Action (Quarantine, Remove, Allow, Block, Clean), Action Status (success or failure), and ThreatID. Action Status of failure means the threat was detected but not successfully remediated — the file or process may still be active. Correlate ThreatID with EID 1116 to link detection and response. An action of 'Allow' or 'No Action Taken' may indicate the threat was excluded or the user overrode the detection.",
+      "category": "Threat Detection",
+      "tags": ["defender", "malware", "detection", "remediation"],
+      "relatedEventIds": [1116],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Action Status failure means the file or process may still be present — escalate immediately",
+          "Action of 'Allow' or 'No Action Taken' warrants investigation into whether an exclusion was in place",
+          "Correlate ThreatID with EID 1116 to get the full detection context including file path and process"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software quarantined due to false positive detection",
+          "Security tooling excluded from scanning triggering no-action outcomes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1121,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Attack Surface Reduction rule triggered in block mode",
+      "summary": "An ASR rule blocked a potentially malicious operation.",
+      "details": "Generated when an Attack Surface Reduction (ASR) rule fires in block mode and prevents an operation. Key fields: the rule GUID (identifies which ASR rule triggered), Process Name (the process that attempted the blocked operation), and Path (the target file or object). Each ASR rule GUID maps to a specific rule such as 'Block Office applications from creating executable content' or 'Block credential stealing from Windows LSASS'. An ASR block during an incident is a high-confidence signal that an attacker technique was attempted and stopped.",
+      "category": "Attack Surface Reduction",
+      "tags": ["defender", "asr", "defense-in-depth", "blocked"],
+      "relatedEventIds": [1122],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Map the rule GUID to a specific ASR rule using Microsoft's ASR rule reference to understand what technique was blocked",
+          "Process Name reveals what attempted the blocked operation — flag Office apps, scripting engines, or LOLBins",
+          "Correlate timestamp and process with Security EID 4688 to build the full execution chain"
+        ],
+        "commonFalsePositives": [
+          "Legitimate Office macros or scripts blocked by overly broad ASR rules",
+          "Developer tools triggering code-execution ASR rules"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1122,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Information",
+      "title": "Attack Surface Reduction rule triggered in audit mode",
+      "summary": "An ASR rule would have blocked an operation but is in audit mode.",
+      "details": "Generated when an ASR rule fires in audit mode — the operation was allowed to proceed but would have been blocked in enforcement mode. Key fields are identical to EID 1121: rule GUID, Process Name, and Path. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement. Treat audit events from known-bad processes with the same urgency as block events.",
+      "category": "Attack Surface Reduction",
+      "tags": ["defender", "asr", "audit"],
+      "relatedEventIds": [1121],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Audit mode means the operation succeeded — treat as executed attacker activity, not just an attempt",
+          "Same pivot fields as EID 1121: rule GUID, Process Name, Path",
+          "Use audit events to identify which ASR rules should be promoted to block mode"
+        ],
+        "commonFalsePositives": [
+          "Same as EID 1121 — audit mode means no blocking occurred, so false positive impact is limited to alert noise"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 5001,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Real-time protection is disabled",
+      "summary": "Windows Defender real-time protection was turned off.",
+      "details": "Generated when Windows Defender real-time protection is disabled. This is a high-priority alert during an incident — disabling real-time protection is a common attacker technique to prevent detection of subsequent payloads. Correlate the timestamp with process creation and logon events to identify what account or process disabled protection. Legitimate causes include Group Policy-managed AV exclusions, third-party AV coexistence, and IT administrative actions; these should be validated against change management records.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper"],
+      "relatedEventIds": [5007],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate timestamp with Security EID 4688 and 4624 to identify what process or account made the change",
+          "Check whether the change corresponds to a known Group Policy or administrative action",
+          "Real-time protection disabled immediately before a malware detection or payload execution is a strong compromise indicator"
+        ],
+        "commonFalsePositives": [
+          "IT administrators temporarily disabling protection for maintenance or software installation",
+          "Third-party AV products disabling Defender as part of coexistence management",
+          "Group Policy enforcing a disabled state on managed endpoints"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 5007,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Information",
+      "title": "Antimalware platform configuration changed",
+      "summary": "A Windows Defender configuration setting was modified.",
+      "details": "Generated when any Windows Defender configuration setting changes. Key field: the old and new configuration values, recorded in the format 'HKLM\\...\\value = old value -> new value'. Configuration changes of particular interest include additions to ExclusionPath, ExclusionProcess, or ExclusionExtension (attackers add exclusions to prevent detection of their tools), and changes to DisableRealtimeMonitoring, DisableBehaviorMonitoring, or DisableIOAVProtection. Exclusion additions should be correlated against known software deployments.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper", "exclusion"],
+      "relatedEventIds": [5001],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Changes to ExclusionPath or ExclusionProcess are the highest-priority — they may be hiding attacker tooling",
+          "Correlate the changed value with the file or directory path to determine what is being excluded",
+          "Correlate timestamp with Security EID 4688 and 4624 to identify what made the configuration change"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installers adding Defender exclusions during setup",
+          "Group Policy or MDM pushing exclusion policies to managed endpoints"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}
