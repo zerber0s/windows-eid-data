@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Application",
-    "version": "0.1.0",
-    "generatedAt": "2026-03-28T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/application.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -31,11 +31,23 @@
       "category": "Application Crash",
       "tags": ["crash", "application-error", "exploit-detection"],
       "relatedEventIds": [1001, 1002],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FaultingModuleName of UNKNOWN or ntdll.dll with an unusual offset may indicate shellcode execution",
+          "ExceptionCode 0xc000001d (illegal instruction) or 0xc0000409 (stack buffer overrun) are higher-fidelity exploitation indicators than 0xc0000005",
+          "Check FaultingApplicationName against the known software inventory — crashes in unexpected processes warrant investigation",
+          "Correlate with EID 1001 for WER bucket data and Security EID 4688 for process creation context"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software bugs causing crashes",
+          "Third-party applications crashing due to OS compatibility issues or missing dependencies"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 1001,
@@ -49,11 +61,21 @@
       "category": "Application Crash",
       "tags": ["crash", "wer", "application-error"],
       "relatedEventIds": [1000, 1002],
+      "notesGuidance": {
+        "investigationPivots": [
+          "BucketId can correlate the same crash signature across multiple hosts — useful for detecting a weaponized file distributed across the environment",
+          "P1–P8 signature fields identify the faulting module and exception type — match against EID 1000 for cross-validation",
+          "Timing relative to EID 1000 is typically seconds; a gap may indicate a delayed WER report or queued reporting"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate application crash generating a WER report"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 1002,
@@ -67,11 +89,22 @@
       "category": "Application Crash",
       "tags": ["hang", "application-error"],
       "relatedEventIds": [1000, 1001],
+      "notesGuidance": {
+        "investigationPivots": [
+          "HangType distinguishes a Windows-detected ghost window (UI hang) from a user-terminated process — user termination of an unexpected process warrants investigation",
+          "A hang in a known-good process (e.g., Word, Excel) immediately after opening a document may indicate exploit attempt",
+          "Correlate with Security EID 4688 to check what the hanging process was doing before it became unresponsive"
+        ],
+        "commonFalsePositives": [
+          "Legitimate applications hanging due to resource exhaustion, deadlocks, or network timeouts",
+          "Long-running processes being terminated by users after perceived unresponsiveness"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 1026,
@@ -85,11 +118,23 @@
       "category": "Application Crash",
       "tags": ["dotnet", "crash", "exception"],
       "relatedEventIds": [1000],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Exception type is the primary pivot: System.Security.SecurityException may indicate AppLocker or WDAC blocking a .NET assembly",
+          "System.BadImageFormatException on an unexpected assembly path may indicate a failed reflective load or in-memory execution attempt",
+          "Stack trace namespaces that do not correspond to known installed software are a strong indicator of malicious .NET tooling",
+          "Correlate the faulting assembly path with file creation events to determine how it arrived on the system"
+        ],
+        "commonFalsePositives": [
+          "Legitimate .NET applications with unhandled exceptions due to bugs or misconfiguration",
+          "Version mismatches between .NET runtime and application assemblies"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 1033,
@@ -103,11 +148,22 @@
       "category": "Software Installation",
       "tags": ["msi", "install", "software"],
       "relatedEventIds": [11707, 11708],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ProductName against an approved software inventory — unexpected products warrant investigation",
+          "Correlate timestamp with Security EID 4624 and 4688 to identify the account and process that initiated the install",
+          "Installation outside approved change windows or on systems that should not receive new software is a priority alert"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installations performed by IT or automated patch management",
+          "Software self-update mechanisms triggering silent installs"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 1034,
@@ -121,11 +177,22 @@
       "category": "Software Installation",
       "tags": ["msi", "uninstall", "software", "defense-evasion"],
       "relatedEventIds": [11724],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ProductName is the critical field — cross-reference against a list of installed security tools (AV, EDR, logging agents)",
+          "Correlate with Security EID 4688 to identify the process that called msiexec.exe for the removal",
+          "Removal of a security product immediately before or after other suspicious activity is a high-confidence defense evasion indicator"
+        ],
+        "commonFalsePositives": [
+          "IT-initiated software removal during offboarding or refresh cycles",
+          "Vendor-initiated silent updates that remove and reinstall components"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 11707,
@@ -139,11 +206,21 @@
       "category": "Software Installation",
       "tags": ["msi", "install", "software"],
       "relatedEventIds": [1033, 11708],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Confirms installation success — pair with EID 1033 to establish the full install timeline",
+          "Correlate ProductName with software inventory; presence of unknown or dual-use tools (e.g., remote access software) is a priority alert",
+          "Check the installing account context via concurrent Security EID 4624/4688 events"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installations by IT or automated deployment systems"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 11708,
@@ -157,11 +234,22 @@
       "category": "Software Installation",
       "tags": ["msi", "install", "failure", "software"],
       "relatedEventIds": [1033, 11707],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Repeated failures for the same ProductName may indicate an attacker retrying a blocked payload installation",
+          "Correlate with AppLocker or WDAC event logs to determine if a policy blocked the install",
+          "Check the installing account — failure due to insufficient privileges from an unexpected account is suspicious"
+        ],
+        "commonFalsePositives": [
+          "Failed installs due to missing dependencies, disk space, or user-cancelled prompts",
+          "Installers failing due to version conflicts with existing software"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 11724,
@@ -175,11 +263,22 @@
       "category": "Software Installation",
       "tags": ["msi", "uninstall", "software", "defense-evasion"],
       "relatedEventIds": [1034],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Cross-reference ProductName against a list of security tools — confirmed removal of defensive software requires immediate escalation",
+          "Correlate with EID 1034 to establish the full removal timeline",
+          "Identify the account and process via concurrent Security EID 4624/4688 events"
+        ],
+        "commonFalsePositives": [
+          "Routine software removal by IT during system refresh or decommission",
+          "Vendor silent updates that remove old versions before installing new ones"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     }
   ]
 }

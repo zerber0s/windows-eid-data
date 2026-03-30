@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "0.1.0",
-    "generatedAt": "2026-03-28T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -31,11 +31,22 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "engine-lifecycle", "execution"],
       "relatedEventIds": [403],
+      "notesGuidance": {
+        "investigationPivots": [
+          "HostApplication is the primary pivot — flag -EncodedCommand, -WindowStyle Hidden, -NonInteractive, or -ExecutionPolicy Bypass in the invocation string",
+          "HostApplication values showing invocation from wscript.exe, mshta.exe, cmd.exe, or Office processes are high-priority",
+          "Correlate with EID 403 to calculate session duration — very short sessions may indicate one-liner or fileless execution"
+        ],
+        "commonFalsePositives": [
+          "Legitimate administrative PowerShell sessions",
+          "Scheduled tasks and software agents invoking PowerShell for automation"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 403,
@@ -49,11 +60,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "engine-lifecycle"],
       "relatedEventIds": [400],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 400 to calculate session duration — sub-second sessions are characteristic of one-liner payload execution",
+          "Missing EID 403 after EID 400 may indicate the engine was forcibly killed (e.g., by a security tool or crash)"
+        ],
+        "commonFalsePositives": [
+          "Any normal PowerShell session ending"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 500,
@@ -67,11 +87,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "command", "execution"],
       "relatedEventIds": [501, 4103],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CommandLine field records the command name — use as a coarse filter to identify suspicious cmdlets, then correlate with EID 4103 for full parameter detail",
+          "Pair with EID 501 to calculate per-command execution time"
+        ],
+        "commonFalsePositives": [
+          "High-volume event during any PowerShell session — filter to specific command names of interest"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 501,
@@ -85,11 +114,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "command", "execution"],
       "relatedEventIds": [500],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 500 to calculate per-command duration",
+          "On its own this event has low fidelity — value increases when correlated with EID 4103 or 4104"
+        ],
+        "commonFalsePositives": [
+          "Any normal command completion during a PowerShell session"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 600,
@@ -103,11 +141,21 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "provider"],
       "relatedEventIds": [400],
+      "notesGuidance": {
+        "investigationPivots": [
+          "WSMan provider loaded in a non-interactive or automated session may indicate PowerShell remoting activity",
+          "Registry and Certificate providers loaded in unexpected contexts warrant review of subsequent EID 4103/4104 for what was accessed",
+          "Correlate provider load order with EID 400 HostApplication to understand the session context"
+        ],
+        "commonFalsePositives": [
+          "All standard providers (FileSystem, Registry, Certificate, etc.) load during normal interactive PowerShell sessions"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 800,
@@ -121,11 +169,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "pipeline", "execution"],
       "relatedEventIds": [4103],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Primarily useful on systems without EID 4103 module logging configured — treat as a fallback data source",
+          "Command name in this event can serve as a coarse filter; investigate further using other available telemetry"
+        ],
+        "commonFalsePositives": [
+          "Any pipeline execution in a PowerShell session"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4100,
@@ -139,11 +196,22 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "error", "execution"],
       "relatedEventIds": [4104],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ErrorRecord field may expose command names, module names, or file paths associated with attacker tooling even when execution failed",
+          "Clusters of errors referencing known offensive cmdlets (e.g., Invoke-Mimikatz, Set-MpPreference, Add-MpPreference) are high-confidence attack indicators",
+          "Correlate with EID 4104 on the same ScriptBlockId to review the full script that generated the error"
+        ],
+        "commonFalsePositives": [
+          "Script errors in legitimate automation due to missing modules or version mismatches",
+          "Interactive users running commands with incorrect syntax"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4103,
@@ -157,11 +225,22 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "module-logging", "execution"],
       "relatedEventIds": [4104, 4105, 4106],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Full parameter values are recorded — look for credential strings, encoded payloads, or remote host names in parameter fields",
+          "SubjectUserName and HostApplication establish user and process context",
+          "Correlate with EID 4104 to link module-level execution to the script block that invoked it"
+        ],
+        "commonFalsePositives": [
+          "High-volume event in environments with module logging enabled — filter to specific modules or cmdlets of interest",
+          "Legitimate administrative scripts generating large volumes of module logging events"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4104,
@@ -175,11 +254,23 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution", "defense-evasion"],
       "relatedEventIds": [4103, 4105, 4106, 4100],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ScriptBlockText is post-deobfuscation — even heavily encoded or concatenated scripts appear in cleartext here",
+          "Warning-level (3) events are AMSI-triggered and generated regardless of GPO configuration — always treat these as high priority",
+          "MessageNumber/MessageTotal fields identify fragments of a split script — reassemble in order for full content",
+          "Search ScriptBlockText for known IOCs: download cradles (Net.WebClient, IEX, Invoke-Expression), credential access (mimikatz, sekurlsa), and lateral movement cmdlets"
+        ],
+        "commonFalsePositives": [
+          "Legitimate security tools and scripts that use encoding or obfuscation for intellectual property protection",
+          "AMSI-triggered Warning events from security testing or red team activity in authorized environments"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4105,
@@ -193,11 +284,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution"],
       "relatedEventIds": [4106, 4104],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ScriptBlockId links this event back to the EID 4104 script block content — use it to identify what was being executed",
+          "Correlate timestamp with network connections and Security EID 4688 process creation to build a full execution timeline"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate script block invocation"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4106,
@@ -211,11 +311,20 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution"],
       "relatedEventIds": [4105, 4104],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 4105 using ScriptBlockId to calculate execution duration",
+          "Missing EID 4106 after EID 4105 may indicate the runspace was killed, crashed, or hijacked — correlate with Application EID 1000"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate script block completing normally"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     }
   ]
 }

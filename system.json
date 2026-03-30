@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - System",
-    "version": "0.2.0",
-    "generatedAt": "2026-03-28T00:00:00Z",
+    "version": "0.3.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/system.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -31,11 +31,22 @@
       "category": "System Lifecycle",
       "tags": ["startup", "boot"],
       "relatedEventIds": [13, 41, 6008],
+      "notesGuidance": {
+        "investigationPivots": [
+          "An EID 12 not preceded by EID 13 indicates an unexpected reboot — correlate with EID 41 and 6008 for root cause",
+          "Unexpected reboots during an active incident may indicate attacker-initiated restarts to apply persistence or clear memory",
+          "Use startup timestamps to identify gaps in log coverage that may represent evidence destruction windows"
+        ],
+        "commonFalsePositives": [
+          "Normal system startups after planned reboots or shutdowns",
+          "Windows Update-initiated reboots"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 13,
@@ -49,11 +60,20 @@
       "category": "System Lifecycle",
       "tags": ["shutdown"],
       "relatedEventIds": [12, 41],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Absence of EID 13 between two EID 12 events is the key signal — this pattern indicates an unclean shutdown",
+          "Correlate shutdown time with user logon activity (Security EID 4634/4647) to determine if a user was active at the time"
+        ],
+        "commonFalsePositives": [
+          "Normal planned shutdowns initiated by users or IT"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 41,
@@ -67,11 +87,22 @@
       "category": "System Lifecycle",
       "tags": ["crash", "reboot", "power"],
       "relatedEventIds": [6008, 12, 13],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 6008 for the previous shutdown timestamp to establish when the unexpected reboot occurred",
+          "Check %SystemRoot%\\Minidump for crash dump files — kernel-mode crashes (BSOD) leave minidumps that can identify the faulting driver or code",
+          "An attacker-initiated hard reboot (e.g., via shutdown /r /f) generates this event — correlate with Security EID 4688 for shutdown.exe or equivalent"
+        ],
+        "commonFalsePositives": [
+          "Power loss or hardware failure",
+          "Kernel panic caused by a buggy driver or faulty hardware"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 104,
@@ -85,11 +116,21 @@
       "category": "Log Tampering",
       "tags": ["log-cleared", "defense-evasion"],
       "relatedEventIds": [1102],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify who cleared the log via concurrent Security EID 4624 and 4688 events around the same timestamp",
+          "Correlate with Security EID 1102 — simultaneous clearing of both logs is a strong evidence destruction indicator",
+          "Log clearing near the end of a timeline gap may indicate the attacker was covering tracks before departing"
+        ],
+        "commonFalsePositives": [
+          "IT administrators clearing logs for maintenance (rare, and should be documented in change records)"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 6008,
@@ -99,15 +140,26 @@
       "level": "Error",
       "title": "The previous system shutdown was unexpected",
       "summary": "Unexpected shutdown detected.",
-      "details": "Indicates crash, forced reboot, or power loss.",
+      "details": "Indicates crash, forced reboot, or power loss. The event records the date and time of the unexpected shutdown. Correlate with EID 41 which fires after the subsequent reboot.",
       "category": "System Lifecycle",
       "tags": ["shutdown", "crash"],
       "relatedEventIds": [41, 12],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The timestamp in this event indicates when the previous unexpected shutdown occurred — use it to anchor your investigation timeline",
+          "Correlate with EID 41 on the same boot to cross-validate the crash timing",
+          "An unexpected shutdown immediately following a period of suspicious activity is a strong indicator of attacker-initiated reboot"
+        ],
+        "commonFalsePositives": [
+          "Power outage or UPS failure",
+          "Hardware failure causing unexpected system halt"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7023,
@@ -121,11 +173,21 @@
       "category": "Persistence/Services",
       "tags": ["service", "crash", "error"],
       "relatedEventIds": [7031, 7034],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Service name is the primary pivot — errors in security products (AV, EDR, audit log service) warrant immediate investigation",
+          "Error code can indicate access denied (0x5), which may mean an attacker modified permissions to prevent restart",
+          "Correlate with EID 7036 to confirm whether the service entered the stopped state"
+        ],
+        "commonFalsePositives": [
+          "Misconfigured third-party services terminating due to dependency or configuration errors"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7031,
@@ -139,11 +201,22 @@
       "category": "Persistence/Services",
       "tags": ["service", "crash", "error"],
       "relatedEventIds": [7034, 7023],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Crash count field — a high or incrementing count may indicate an attacker repeatedly killing a service that auto-restarts",
+          "Corrective action field — 'Restart the service' means the service came back; 'Run a program' may reveal a recovery command",
+          "Correlate with Security EID 4688 to identify processes that may have terminated the service"
+        ],
+        "commonFalsePositives": [
+          "Buggy or resource-starved third-party services entering crash loops",
+          "Services crashing due to OS patching or dependency changes"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7034,
@@ -157,11 +230,21 @@
       "category": "Persistence/Services",
       "tags": ["service", "crash", "error"],
       "relatedEventIds": [7031, 7023],
+      "notesGuidance": {
+        "investigationPivots": [
+          "No recovery action means the service stays stopped — if it is a security product, the system may be unprotected",
+          "Crash count distinguishes a one-time failure from a repeating pattern — repeated crashes without recovery may indicate deliberate termination",
+          "Correlate with Security EID 4688 around the same timestamp to check for suspicious process activity"
+        ],
+        "commonFalsePositives": [
+          "Services that crash due to bugs and are not configured with recovery actions"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7036,
@@ -175,11 +258,21 @@
       "category": "Persistence/Services",
       "tags": ["service", "service-state"],
       "relatedEventIds": [7045, 7040],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Filter on security-relevant service names (e.g., WinDefend, Sense, EventLog, wuauserv) — unexpected stops are high priority",
+          "Correlate unexpected service stops with Security EID 4688 to identify what process triggered the state change",
+          "A service entering stopped state without a preceding EID 7023/7031/7034 may indicate a graceful but unauthorized stop"
+        ],
+        "commonFalsePositives": [
+          "Normal service state changes during Windows Update, patch application, or system maintenance"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7040,
@@ -193,11 +286,22 @@
       "category": "Persistence/Services",
       "tags": ["service", "persistence", "service-config"],
       "relatedEventIds": [7045, 7036],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The old and new start type values are the key pivot — a change from Disabled or Manual to Automatic or Boot Start is a persistence indicator",
+          "Changes to defensive service start types (e.g., disabling WinDefend auto-start) are defense evasion",
+          "Correlate with Security EID 4688 to identify the process that made the change"
+        ],
+        "commonFalsePositives": [
+          "Software installers configuring their service start types during installation",
+          "Group Policy applying service configuration changes"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 7045,
@@ -207,15 +311,27 @@
       "level": "Information",
       "title": "A service was installed in the system",
       "summary": "New service installation recorded.",
-      "details": "Common persistence mechanism. Correlate with Security 4697 and process creation.",
+      "details": "Generated when a new service is installed on the system. Key fields: ServiceName, ImagePath (the executable path), ServiceType, and StartType. ImagePath pointing outside of System32 or known application directories, or containing encoded commands or scripting engines, is a strong persistence indicator. Correlate with Security EID 4697 which captures the same event in the Security log.",
       "category": "Persistence/Services",
       "tags": ["service", "persistence"],
       "relatedEventIds": [4697],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ImagePath is the primary pivot — flag paths outside System32 or known application directories, especially user-writable locations or temp directories",
+          "ImagePath containing cmd.exe, powershell.exe, or scripting engines indicates a script-based service (common attacker technique)",
+          "Correlate with Security EID 4697 to identify the account that installed the service",
+          "StartType of Boot Start or System Start means the service runs before most security tooling"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installing services during setup",
+          "Windows Update and driver installations adding new services"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     }
   ]
 }

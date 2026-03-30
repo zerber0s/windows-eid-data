@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.2.0",
-    "generatedAt": "2026-03-28T00:00:00Z",
+    "version": "0.3.0",
+    "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -31,11 +31,21 @@
       "category": "Log Tampering",
       "tags": ["log-cleared", "defense-evasion"],
       "relatedEventIds": [104],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName identifies the account that cleared the log — flag any non-IT account",
+          "Correlate with System EID 104 — simultaneous clearing of both Security and System logs is a strong evidence destruction indicator",
+          "Review the timestamp and check for any log entries from just before the clear for an attacker timeline"
+        ],
+        "commonFalsePositives": [
+          "IT administrators clearing logs for storage management (rare, should be in change records)"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-1102"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4624,
@@ -49,11 +59,23 @@
       "category": "Logon/Authentication",
       "tags": ["logon", "authentication"],
       "relatedEventIds": [4625, 4634, 4672],
+      "notesGuidance": {
+        "investigationPivots": [
+          "LogonType is the primary pivot: 2=interactive (console), 3=network (SMB/WMI), 10=RemoteInteractive (RDP), 4=batch, 5=service",
+          "IpAddress/WorkstationName identifies the source — flag logons from unexpected hosts or external IPs",
+          "TargetUserName combined with LogonType 3 from an admin account outside business hours is a common lateral movement pattern",
+          "Correlate LogonID with EID 4634/4647 to track session duration"
+        ],
+        "commonFalsePositives": [
+          "Normal user and service account logons",
+          "High-frequency network logons (LogonType 3) from backup, monitoring, or endpoint management systems"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4625,
@@ -67,11 +89,23 @@
       "category": "Logon/Authentication",
       "tags": ["failure", "bruteforce"],
       "relatedEventIds": [4624, 4740],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubStatus 0xC000006A (wrong password) vs 0xC0000064 (bad username) distinguishes valid-user brute force from username enumeration",
+          "Many failures against many accounts from one source = password spray; many failures against one account = brute force",
+          "IpAddress/WorkstationName identifies the source — external IPs or unfamiliar workstations are high priority",
+          "Correlate with EID 4740 to identify accounts that were locked out as a result"
+        ],
+        "commonFalsePositives": [
+          "Misconfigured service accounts using stale credentials",
+          "Users failing to log on after a password change before updating saved credentials"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4634,
@@ -85,11 +119,20 @@
       "category": "Logon/Authentication",
       "tags": ["logoff", "authentication"],
       "relatedEventIds": [4624, 4647],
+      "notesGuidance": {
+        "investigationPivots": [
+          "LogonID links this event back to EID 4624 — use it to calculate full session duration",
+          "Long-lived sessions (hours to days) for network logon types may indicate persistent attacker access or a long-running tool"
+        ],
+        "commonFalsePositives": [
+          "Normal session termination for any logon type"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4634"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4647,
@@ -103,11 +146,20 @@
       "category": "Logon/Authentication",
       "tags": ["logoff", "authentication"],
       "relatedEventIds": [4634, 4624],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate LogonID with EID 4624 to identify the originating logon and calculate session duration",
+          "EID 4647 without a subsequent EID 4634 may indicate the session terminated abnormally before the logon record was closed"
+        ],
+        "commonFalsePositives": [
+          "Normal user-initiated logoff from interactive or RDP sessions"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4647"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4648,
@@ -121,11 +173,22 @@
       "category": "Logon/Authentication",
       "tags": ["logon", "explicit-credentials", "runas"],
       "relatedEventIds": [4624, 4769],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName vs TargetUserName mismatch indicates credential substitution — flag when TargetUserName is a more privileged account",
+          "TargetServerName identifies the remote target — flag connections to domain controllers, servers, or internal infrastructure",
+          "ProcessName of unexpected executables (e.g., cmd.exe, wmic.exe, PowerShell) using explicit credentials is a lateral movement indicator"
+        ],
+        "commonFalsePositives": [
+          "Administrators using runas to run tools under a different account",
+          "Scheduled tasks configured with explicit credentials triggering at execution time"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4648"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4656,
@@ -139,11 +202,21 @@
       "category": "Object Access",
       "tags": ["file-access", "registry-access", "object-access"],
       "relatedEventIds": [4663, 4670],
+      "notesGuidance": {
+        "investigationPivots": [
+          "AccessMask field records what access was requested — flag WriteData, DELETE, or WRITE_DAC on sensitive objects",
+          "ObjectName identifies the file or registry key — correlate against a list of sensitive paths (SAM, NTDS, LSASS, credential stores)",
+          "Correlate with EID 4663 to confirm whether the handle was used for actual access"
+        ],
+        "commonFalsePositives": [
+          "Normal file and registry access by legitimate applications — high volume on systems without targeted SACLs"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4656"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4663,
@@ -157,11 +230,21 @@
       "category": "Object Access",
       "tags": ["file-access", "registry-access", "object-access"],
       "relatedEventIds": [4656, 4670],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Accesses field shows what operation was performed — WriteData/AddFile or DELETE on sensitive paths are high priority",
+          "ObjectName identifies the specific file or registry key accessed — flag sensitive paths such as SAM, NTDS.dit, credential manager stores",
+          "SubjectUserName combined with ProcessName reveals what account and process performed the access"
+        ],
+        "commonFalsePositives": [
+          "Legitimate application access to monitored files — high volume without targeted SACL scoping"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4663"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4670,
@@ -175,11 +258,22 @@
       "category": "Object Access",
       "tags": ["permissions", "acl-change", "object-access"],
       "relatedEventIds": [4663, 4656],
+      "notesGuidance": {
+        "investigationPivots": [
+          "OldSd and NewSd are SDDL strings — diff them to determine what permissions were added or removed",
+          "Permission changes on security tool directories, log directories, or credential stores may indicate defense evasion or pre-staging",
+          "SubjectUserName combined with ObjectName identifies who changed permissions on what"
+        ],
+        "commonFalsePositives": [
+          "Software installers modifying file or registry permissions during setup",
+          "Group Policy applying permission changes to managed objects"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4670"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4672,
@@ -193,11 +287,22 @@
       "category": "Privilege Use",
       "tags": ["privilege", "authentication"],
       "relatedEventIds": [4624],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PrivilegeList is the key field — SeDebugPrivilege enables memory access to other processes (used by credential dumpers), SeBackupPrivilege enables reading any file",
+          "Correlate LogonID with EID 4624 to identify the logon session that received the privileges",
+          "Unexpected non-admin accounts assigned SeDebugPrivilege or SeTcbPrivilege are high-confidence escalation indicators"
+        ],
+        "commonFalsePositives": [
+          "SYSTEM logons are very high volume and routinely receive sensitive privileges — baseline and filter these",
+          "Administrator logons receiving their normal assigned privileges"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4688,
@@ -211,11 +316,22 @@
       "category": "Process Execution",
       "tags": ["process", "execution"],
       "relatedEventIds": [4689],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CommandLine (requires audit policy: Include command line in process creation events) is the highest-value field — search for encoded commands, download cradles, and LOLBin abuse",
+          "ParentProcessName establishes the process chain — unexpected parents (e.g., Office spawning cmd.exe, or wscript.exe spawning PowerShell) are strong malicious indicators",
+          "SubjectUserName identifies the account context — SYSTEM or service account spawning interactive shells is suspicious",
+          "Correlate NewProcessId with EID 4689 to track process lifetime"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate process creation — very high volume; effective use requires focused filtering on suspicious parent-child relationships or command patterns"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4689,
@@ -229,11 +345,20 @@
       "category": "Process Execution",
       "tags": ["process", "execution"],
       "relatedEventIds": [4688],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 4688 using ProcessId to calculate process lifetime — sub-second or very short-lived processes are characteristic of one-liner or stager execution",
+          "ExitStatus of non-zero may indicate the process failed or was killed — correlate with Defender or EDR telemetry"
+        ],
+        "commonFalsePositives": [
+          "Normal process termination for any application"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4689"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4697,
@@ -247,11 +372,22 @@
       "category": "Persistence/Services",
       "tags": ["service", "persistence"],
       "relatedEventIds": [7045],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName identifies the account that installed the service — flag non-admin or unexpected accounts",
+          "Correlate with System EID 7045 for the ServiceFileName (executable path) to assess the binary location",
+          "ServiceType and ServiceStartType reveal whether the service runs as a kernel driver or user-mode process, and whether it starts at boot"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installing services during setup",
+          "Windows Update adding or updating system services"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-02-27"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4698,
@@ -265,11 +401,23 @@
       "category": "Persistence/Scheduled Tasks",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [4699, 4700, 4702],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TaskContent XML contains the full task definition — inspect the Action element for the executable path and arguments",
+          "LogonType of Password in the TaskContent stores credentials in Credential Manager; S4U or InteractiveToken are also worth noting",
+          "Tasks created in the root scheduler namespace (no subfolder) are more commonly malicious than vendor-subfoldered tasks",
+          "SubjectUserName identifies who created the task"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software installers creating scheduled tasks",
+          "Group Policy deploying tasks to managed endpoints"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4698"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4699,
@@ -283,11 +431,22 @@
       "category": "Persistence/Scheduled Tasks",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [4698, 4700, 4702],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate TaskName with EID 4698 to determine when the task was created and whether it ran before deletion",
+          "Cross-reference with Task Scheduler EID 200 to confirm whether the task executed before being deleted — execution followed by deletion is a strong cleanup indicator",
+          "SubjectUserName identifies who deleted the task"
+        ],
+        "commonFalsePositives": [
+          "Software uninstallers removing their own scheduled tasks",
+          "One-time setup tasks configured to self-delete after completion"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4699"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4700,
@@ -301,11 +460,22 @@
       "category": "Persistence/Scheduled Tasks",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [4698, 4699, 4702],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Re-enabling a previously disabled task may indicate repurposing of a dormant persistence mechanism",
+          "Correlate TaskName with EID 4698 to review the original task definition and action",
+          "SubjectUserName combined with timing — enablement outside business hours or during an active incident is suspicious"
+        ],
+        "commonFalsePositives": [
+          "Group Policy or software re-enabling tasks that were disabled during maintenance",
+          "IT re-enabling tasks after troubleshooting"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4700"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4702,
@@ -319,11 +489,22 @@
       "category": "Persistence/Scheduled Tasks",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [4698, 4699, 4700],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TaskContentNew XML shows the updated definition — diff the Action element against EID 4698 TaskContent to identify what changed",
+          "Changes to the executable path or arguments of an existing task are a high-fidelity persistence modification indicator",
+          "SubjectUserName and timing of the update relative to other suspicious activity helps establish attacker presence"
+        ],
+        "commonFalsePositives": [
+          "Software auto-updaters modifying their own scheduled task definitions",
+          "Group Policy refreshes updating task configurations"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4702"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4720,
@@ -337,11 +518,22 @@
       "category": "Account Management",
       "tags": ["account-created", "user-management"],
       "relatedEventIds": [4722, 4726, 4738],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName identifies who created the account — flag creation by non-IT accounts or automated processes",
+          "TargetUserName (the new account name) — generic, numeric, or system-like names (e.g., svc_, admin$) created unexpectedly are suspicious",
+          "Correlate with EID 4732 to see if the new account was immediately added to a privileged group"
+        ],
+        "commonFalsePositives": [
+          "IT provisioning new user accounts as part of onboarding",
+          "Automated provisioning systems creating service or application accounts"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4720"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4722,
@@ -355,11 +547,22 @@
       "category": "Account Management",
       "tags": ["account-enabled", "user-management"],
       "relatedEventIds": [4720, 4725],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetUserName identifies the re-enabled account — check whether it is a dormant, terminated employee, or service account",
+          "SubjectUserName identifies who enabled the account",
+          "Re-enabling an account immediately followed by a logon event (EID 4624) from an unexpected source is a strong compromise indicator"
+        ],
+        "commonFalsePositives": [
+          "IT re-enabling accounts for users returning from leave",
+          "Automated processes re-enabling accounts after lockout resolution"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4722"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4725,
@@ -373,11 +576,22 @@
       "category": "Account Management",
       "tags": ["account-disabled", "user-management"],
       "relatedEventIds": [4722, 4720],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Disabling of a security service account (e.g., an EDR or logging service account) may indicate defense evasion",
+          "SubjectUserName identifies who disabled the account — flag unexpected actors",
+          "Correlate with EID 7036 (service stopped) if the disabled account is associated with a service"
+        ],
+        "commonFalsePositives": [
+          "IT disabling accounts as part of offboarding procedures",
+          "Automated systems disabling accounts due to policy (e.g., inactivity-based disabling)"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4725"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4726,
@@ -391,11 +605,22 @@
       "category": "Account Management",
       "tags": ["account-deleted", "user-management"],
       "relatedEventIds": [4720],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate TargetUserName with EID 4720 — deletion of a recently created account may indicate attacker cleanup",
+          "Deletion of a service or admin account that was never supposed to be removed warrants investigation",
+          "SubjectUserName identifies who deleted the account"
+        ],
+        "commonFalsePositives": [
+          "IT deprovisioning accounts during offboarding",
+          "Automated systems removing stale or expired accounts"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4726"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4728,
@@ -409,11 +634,21 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4729, 4732, 4756],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetUserName is the group name — additions to Domain Admins, Enterprise Admins, or Schema Admins are critical priority",
+          "MemberSid identifies the added account — resolve the SID to determine whether it is a known account",
+          "SubjectUserName identifies who made the change — flag non-IT accounts or automated processes"
+        ],
+        "commonFalsePositives": [
+          "IT adding users to groups as part of role-based access provisioning"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4729,
@@ -427,11 +662,21 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4728, 4733, 4757],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Removal from Domain Admins or other privileged groups — correlate with EID 4728 to determine if this is part of an add/remove pattern (attacker covering tracks)",
+          "MemberSid identifies the removed account — check whether removal was expected or authorized",
+          "Removal of a security service account from a group may impair its function"
+        ],
+        "commonFalsePositives": [
+          "IT removing users from groups during role changes or offboarding"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4732,
@@ -445,11 +690,22 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4733, 4728, 4756],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetUserName of Administrators is the highest priority — local admin access enables full control of the system",
+          "MemberSid of a domain account added to local Administrators is a common post-exploitation privilege escalation step",
+          "SubjectUserName identifies who added the member — flag unexpected actors"
+        ],
+        "commonFalsePositives": [
+          "IT adding service accounts or admin users to local groups as part of deployment",
+          "Software installers requiring local admin membership for their service accounts"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4732"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4733,
@@ -463,11 +719,21 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4732, 4729, 4757],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Removal from Administrators group — may indicate cleanup after temporary privilege escalation",
+          "Correlate with EID 4732 to identify an add/remove pattern on the same account (attacker adding and then removing themselves)",
+          "MemberSid of a service or security account unexpectedly removed may impair system defenses"
+        ],
+        "commonFalsePositives": [
+          "IT removing users from local groups during offboarding or role changes"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4733"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4738,
@@ -481,11 +747,22 @@
       "category": "Account Management",
       "tags": ["account-changed", "user-management"],
       "relatedEventIds": [4720, 4722, 4725],
+      "notesGuidance": {
+        "investigationPivots": [
+          "UserAccountControl flag changes are the highest priority — enabling Trusted For Delegation or DONT_REQUIRE_PREAUTH are delegation/AS-REP roasting setup indicators",
+          "AllowedToDelegateTo modifications set up constrained delegation and can be used for privilege escalation",
+          "TargetUserName combined with SubjectUserName — changes made by an account to a different account's properties are suspicious"
+        ],
+        "commonFalsePositives": [
+          "IT managing user account attributes as part of normal AD administration",
+          "Automated provisioning systems updating account properties"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4738"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4740,
@@ -499,11 +776,22 @@
       "category": "Account Management",
       "tags": ["lockout", "bruteforce"],
       "relatedEventIds": [4625, 4776],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CallerComputerName identifies the source machine — investigate that host for the authentication activity that caused lockouts",
+          "Multiple accounts locked out around the same time from the same source indicates a password spray",
+          "Correlate with EID 4625 on the CallerComputerName to identify the failing authentication attempts"
+        ],
+        "commonFalsePositives": [
+          "Misconfigured services using stale credentials triggering lockouts",
+          "Users forgetting their password after a recent change"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4740"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4756,
@@ -517,11 +805,21 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4757, 4728, 4732],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Universal group membership affects all domains in the forest — additions to Enterprise Admins or universal privileged groups have the broadest impact",
+          "MemberSid identifies the added account — resolve the SID and check whether the account is known and authorized",
+          "SubjectUserName identifies who made the change"
+        ],
+        "commonFalsePositives": [
+          "IT provisioning users into forest-wide groups as part of role assignments"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4757,
@@ -535,11 +833,21 @@
       "category": "Group Management",
       "tags": ["group-membership", "privilege-escalation"],
       "relatedEventIds": [4756, 4729, 4733],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4756 to detect add/remove patterns — an account added and then removed may indicate temporary privilege use",
+          "Removal from Enterprise Admins or equivalent universal groups is unusual and warrants validation",
+          "MemberSid identifies the removed account"
+        ],
+        "commonFalsePositives": [
+          "IT removing users from forest-wide groups during role changes or offboarding"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4768,
@@ -553,11 +861,22 @@
       "category": "Kerberos",
       "tags": ["kerberos", "authentication", "ticket"],
       "relatedEventIds": [4769, 4771],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TicketEncryptionType 0x17 (RC4-HMAC) when AES is expected may indicate a downgrade attack or AS-REP roasting targeting an account with pre-auth disabled",
+          "IpAddress identifies the source of the TGT request — unexpected hosts or IP ranges are a pivot point",
+          "TargetUserName for service or admin accounts requesting TGTs from unusual hosts warrants investigation"
+        ],
+        "commonFalsePositives": [
+          "Normal Kerberos authentication for all domain users — very high volume on domain controllers",
+          "Legacy systems that do not support AES and genuinely require RC4"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4769,
@@ -571,11 +890,22 @@
       "category": "Kerberos",
       "tags": ["kerberos", "authentication", "ticket"],
       "relatedEventIds": [4768, 4771],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TicketEncryptionType 0x17 (RC4) for a service account is the primary Kerberoasting indicator — especially when requested from an unusual host",
+          "ServiceName identifies the target SPN — requests for SPNs associated with high-privilege service accounts (MSSQLSvc, HTTP/admin) are high priority",
+          "Bulk TGS requests (many EID 4769 events in a short time from one source) indicate automated Kerberoasting"
+        ],
+        "commonFalsePositives": [
+          "Normal service ticket requests for any service accessed by domain users — high volume",
+          "Failure code 0x20 (expired ticket) is routine and not indicative of attack"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4771,
@@ -589,11 +919,22 @@
       "category": "Kerberos",
       "tags": ["kerberos", "authentication", "failure"],
       "relatedEventIds": [4769, 4768],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Failure code 0x18 (KRB_AP_ERR_BAD_INTEGRITY / wrong password) in volume against one account = brute force; across many accounts = password spray",
+          "IpAddress identifies the attacking source — correlate with network logs to trace origin",
+          "TargetUserName combined with high failure volume is the key detection signal"
+        ],
+        "commonFalsePositives": [
+          "Users with expired or forgotten passwords generating isolated failures",
+          "Smart card or certificate issues generating failure code 0x10"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4771"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4776,
@@ -607,11 +948,22 @@
       "category": "Logon/Authentication",
       "tags": ["ntlm", "authentication", "credential-validation"],
       "relatedEventIds": [4624, 4625],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ErrorCode 0xC000006A (wrong password) in volume indicates brute force or pass-the-hash failure",
+          "Workstation field identifies the source machine — flag sources that are not domain-joined or are unexpected for the target account",
+          "NTLM authentication in an environment that should use Kerberos may indicate pass-the-hash or a non-domain-joined attacker host"
+        ],
+        "commonFalsePositives": [
+          "Legacy applications that do not support Kerberos and use NTLM",
+          "Workgroup machines and non-domain-joined systems authenticating via NTLM"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4776"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4946,
@@ -625,11 +977,22 @@
       "category": "Firewall/Policy Change",
       "tags": ["firewall", "policy-change", "defense-evasion"],
       "relatedEventIds": [4947, 4948],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Rule direction is key — inbound rules that allow traffic on non-standard ports or from any source are high priority",
+          "RuleName field may provide context but can be set to anything by the creator — do not rely on it alone",
+          "Correlate timestamp with Security EID 4688 to identify the process that added the rule"
+        ],
+        "commonFalsePositives": [
+          "Software installers adding firewall rules for their application during setup",
+          "IT administrators adding rules for legitimate network access requirements"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4946"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4947,
@@ -643,11 +1006,22 @@
       "category": "Firewall/Policy Change",
       "tags": ["firewall", "policy-change", "defense-evasion"],
       "relatedEventIds": [4946, 4948],
+      "notesGuidance": {
+        "investigationPivots": [
+          "RuleId links to the original rule — determine what the rule controlled before modification",
+          "Modifications that change an action from Block to Allow or expand scope to Any are high priority",
+          "Correlate with Security EID 4688 to identify the process that modified the rule"
+        ],
+        "commonFalsePositives": [
+          "Software updates modifying their own firewall rules",
+          "IT administrators adjusting rules for operational requirements"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4947"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4948,
@@ -661,11 +1035,22 @@
       "category": "Firewall/Policy Change",
       "tags": ["firewall", "policy-change", "defense-evasion"],
       "relatedEventIds": [4946, 4947],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Deletion of a blocking rule is higher priority than deletion of an allow rule — determine what traffic the deleted rule was blocking",
+          "RuleId links back to EID 4946 if the rule was originally added locally — trace the rule's history",
+          "Correlate with network activity following the deletion to determine if the removed rule was blocking attacker C2 or lateral movement traffic"
+        ],
+        "commonFalsePositives": [
+          "Software uninstallers removing their own firewall rules",
+          "IT administrators removing obsolete rules"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4948"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 5140,
@@ -679,11 +1064,22 @@
       "category": "Network Share Access",
       "tags": ["file-share", "lateral-movement", "network"],
       "relatedEventIds": [5145],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ShareName of C$, ADMIN$, or IPC$ from an unexpected source is a lateral movement indicator — these shares are used by tools like PsExec, Impacket, and CrackMapExec",
+          "IpAddress identifies the connecting host — flag sources outside expected management IP ranges",
+          "Correlate with EID 5145 for file-level detail on what was accessed within the share"
+        ],
+        "commonFalsePositives": [
+          "Backup software accessing administrative shares",
+          "Endpoint management tools (SCCM, Ansible) accessing ADMIN$ for deployment"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 5145,
@@ -697,11 +1093,22 @@
       "category": "Network Share Access",
       "tags": ["file-share", "lateral-movement", "network"],
       "relatedEventIds": [5140],
+      "notesGuidance": {
+        "investigationPivots": [
+          "RelativeTargetName shows the specific file or folder path within the share — flag access to executables, scripts, or sensitive configuration files",
+          "Accesses field showing WriteData, AppendData, or DELETE on share paths is a data staging or destructive access indicator",
+          "Failure events indicate access was denied — repeated failures from one source may indicate reconnaissance or an unauthorized access attempt"
+        ],
+        "commonFalsePositives": [
+          "Normal file server access by users — very high volume; effective use requires targeted filtering",
+          "Backup operations accessing large numbers of files across shares"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5145"
       },
-      "lastReviewed": "2026-03-28"
+      "lastReviewed": "2026-03-29"
     }
   ]
 }
