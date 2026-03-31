@@ -147,6 +147,9 @@
       "category": "Defender Configuration",
       "tags": ["defender", "defense-evasion", "tamper"],
       "relatedEventIds": [5007],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate timestamp with Security EID 4688 and 4624 to identify what process or account made the change",
@@ -177,6 +180,9 @@
       "category": "Defender Configuration",
       "tags": ["defender", "defense-evasion", "tamper", "exclusion"],
       "relatedEventIds": [5001],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Changes to ExclusionPath or ExclusionProcess are the highest-priority — they may be hiding attacker tooling",

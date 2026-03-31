@@ -31,6 +31,9 @@
       "category": "WMI Provider",
       "tags": ["wmi", "provider", "persistence", "lateral-movement"],
       "relatedEventIds": [5861],
+      "mitreAttack": [
+        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Check ProviderPath for DLLs outside of System32 or known application directories",
@@ -60,6 +63,10 @@
       "category": "WMI Subscription",
       "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
       "relatedEventIds": [5861],
+      "mitreAttack": [
+        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
+        { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Examine the Query field for suspicious event filters (e.g., triggering on process creation or logon events)",
@@ -89,6 +96,10 @@
       "category": "WMI Subscription",
       "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
       "relatedEventIds": [5857, 5860],
+      "mitreAttack": [
+        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
+        { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Check Consumer type: CommandLineEventConsumer or ActiveScriptEventConsumer indicate code execution capability",

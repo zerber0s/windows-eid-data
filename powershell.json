@@ -31,6 +31,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "engine-lifecycle", "execution"],
       "relatedEventIds": [403],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "HostApplication is the primary pivot — flag -EncodedCommand, -WindowStyle Hidden, -NonInteractive, or -ExecutionPolicy Bypass in the invocation string",
@@ -60,6 +63,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "engine-lifecycle"],
       "relatedEventIds": [400],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 400 to calculate session duration — sub-second sessions are characteristic of one-liner payload execution",
@@ -87,6 +93,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "command", "execution"],
       "relatedEventIds": [501, 4103],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "CommandLine field records the command name — use as a coarse filter to identify suspicious cmdlets, then correlate with EID 4103 for full parameter detail",
@@ -114,6 +123,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "command", "execution"],
       "relatedEventIds": [500],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 500 to calculate per-command duration",
@@ -141,6 +153,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "provider"],
       "relatedEventIds": [400],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "WSMan provider loaded in a non-interactive or automated session may indicate PowerShell remoting activity",
@@ -169,6 +184,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "pipeline", "execution"],
       "relatedEventIds": [4103],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Primarily useful on systems without EID 4103 module logging configured — treat as a fallback data source",
@@ -196,6 +214,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "error", "execution"],
       "relatedEventIds": [4104],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ErrorRecord field may expose command names, module names, or file paths associated with attacker tooling even when execution failed",
@@ -225,6 +246,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "module-logging", "execution"],
       "relatedEventIds": [4104, 4105, 4106],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Full parameter values are recorded — look for credential strings, encoded payloads, or remote host names in parameter fields",
@@ -254,6 +278,10 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution", "defense-evasion"],
       "relatedEventIds": [4103, 4105, 4106, 4100],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" },
+        { "techniqueId": "T1027", "techniqueName": "Obfuscated Files or Information" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ScriptBlockText is post-deobfuscation — even heavily encoded or concatenated scripts appear in cleartext here",
@@ -284,6 +312,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution"],
       "relatedEventIds": [4106, 4104],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ScriptBlockId links this event back to the EID 4104 script block content — use it to identify what was being executed",
@@ -311,6 +342,9 @@
       "category": "PowerShell Execution",
       "tags": ["powershell", "script-block-logging", "execution"],
       "relatedEventIds": [4105, 4104],
+      "mitreAttack": [
+        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 4105 using ScriptBlockId to calculate execution duration",

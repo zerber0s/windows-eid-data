@@ -31,6 +31,9 @@
       "category": "RDP Client",
       "tags": ["rdp", "lateral-movement", "remote-access"],
       "relatedEventIds": [1025, 1102],
+      "mitreAttack": [
+        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "The server field identifies the RDP target — pivot to that host's LocalSessionManager and RemoteConnectionManager logs",
@@ -60,6 +63,9 @@
       "category": "RDP Client",
       "tags": ["rdp", "lateral-movement", "remote-access"],
       "relatedEventIds": [1024, 1102],
+      "mitreAttack": [
+        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 1024 using the server field to calculate session duration",
@@ -88,6 +94,9 @@
       "category": "RDP Client",
       "tags": ["rdp", "lateral-movement", "remote-access", "network"],
       "relatedEventIds": [1024, 1025],
+      "mitreAttack": [
+        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Use the IP address in the server field when EID 1024 only recorded a hostname — helps correlate with network logs",

@@ -31,6 +31,9 @@
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [140, 141, 200, 201, 4698],
+      "mitreAttack": [
+        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Tasks in the root scheduler namespace (no subfolder) warrant closer inspection",
@@ -60,6 +63,9 @@
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence"],
       "relatedEventIds": [106, 141, 200, 4702],
+      "mitreAttack": [
+        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with Security EID 4702 to review the updated task XML",
@@ -88,6 +94,10 @@
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence", "defense-evasion"],
       "relatedEventIds": [106, 140, 200, 4699],
+      "mitreAttack": [
+        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" },
+        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with EID 106 to determine when the task was originally created",
@@ -117,6 +127,9 @@
       "category": "Task Execution",
       "tags": ["scheduled-task", "execution", "persistence"],
       "relatedEventIds": [201, 106, 4698, 4688],
+      "mitreAttack": [
+        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ActionName is the key field — inspect the full executable path and any arguments",
@@ -147,6 +160,9 @@
       "category": "Task Execution",
       "tags": ["scheduled-task", "execution", "persistence"],
       "relatedEventIds": [200, 106],
+      "mitreAttack": [
+        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 200 using TaskName to calculate execution duration",

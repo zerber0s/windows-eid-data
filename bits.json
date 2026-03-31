@@ -31,6 +31,9 @@
       "category": "BITS Transfer",
       "tags": ["bits", "lolbin", "file-transfer", "persistence"],
       "relatedEventIds": [59, 60],
+      "mitreAttack": [
+        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ProcessPath identifies what created the job — flag anything outside of known system or software update processes",
@@ -60,6 +63,9 @@
       "category": "BITS Transfer",
       "tags": ["bits", "lolbin", "file-transfer", "c2"],
       "relatedEventIds": [3, 60],
+      "mitreAttack": [
+        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "The url field reveals the download source or upload destination — check against threat intel",
@@ -89,6 +95,9 @@
       "category": "BITS Transfer",
       "tags": ["bits", "lolbin", "file-transfer"],
       "relatedEventIds": [3, 59],
+      "mitreAttack": [
+        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Compare bytesTransferred against bytesTotal from EID 59 to assess whether the transfer completed",

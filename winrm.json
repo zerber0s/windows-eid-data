@@ -31,6 +31,9 @@
       "category": "WinRM Session",
       "tags": ["winrm", "lateral-movement", "powershell-remoting", "remote-access"],
       "relatedEventIds": [8, 91, 168, 4624],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with Security EID 4624 LogonType 3 using the same timestamp and username to confirm the network logon",
@@ -60,6 +63,9 @@
       "category": "WinRM Session",
       "tags": ["winrm", "lateral-movement", "remote-access"],
       "relatedEventIds": [6, 91],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with EID 6 to calculate session duration",
@@ -87,6 +93,9 @@
       "category": "WinRM Session",
       "tags": ["winrm", "lateral-movement", "powershell-remoting", "remote-access"],
       "relatedEventIds": [6, 8, 168],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ResourceUri identifies the shell type — a cmd shell URI from an unexpected host warrants immediate investigation",
@@ -116,6 +125,9 @@
       "category": "WinRM Authentication",
       "tags": ["winrm", "authentication", "lateral-movement", "remote-access"],
       "relatedEventIds": [6, 91, 4624],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Authentication mechanism is a key pivot: CredSSP delegates credentials and is higher risk; NTLM where Kerberos is expected may indicate pass-the-hash",

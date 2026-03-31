@@ -116,6 +116,9 @@
       "category": "Log Tampering",
       "tags": ["log-cleared", "defense-evasion"],
       "relatedEventIds": [1102],
+      "mitreAttack": [
+        { "techniqueId": "T1070.001", "techniqueName": "Indicator Removal: Clear Windows Event Logs" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Identify who cleared the log via concurrent Security EID 4624 and 4688 events around the same timestamp",
@@ -286,6 +289,9 @@
       "category": "Persistence/Services",
       "tags": ["service", "persistence", "service-config"],
       "relatedEventIds": [7045, 7036],
+      "mitreAttack": [
+        { "techniqueId": "T1543.003", "techniqueName": "Create or Modify System Process: Windows Service" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "The old and new start type values are the key pivot — a change from Disabled or Manual to Automatic or Boot Start is a persistence indicator",
@@ -315,6 +321,9 @@
       "category": "Persistence/Services",
       "tags": ["service", "persistence"],
       "relatedEventIds": [4697],
+      "mitreAttack": [
+        { "techniqueId": "T1543.003", "techniqueName": "Create or Modify System Process: Windows Service" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ImagePath is the primary pivot — flag paths outside System32 or known application directories, especially user-writable locations or temp directories",

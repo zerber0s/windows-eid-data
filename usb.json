@@ -31,6 +31,10 @@
       "category": "USB Device",
       "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
       "relatedEventIds": [2004, 2100, 2101],
+      "mitreAttack": [
+        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
+        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Extract VID and PID from the device instance ID to identify the device class (storage, input, network adapter, etc.)",
@@ -60,6 +64,10 @@
       "category": "USB Device",
       "tags": ["usb", "removable-media", "physical-access"],
       "relatedEventIds": [2003, 2100, 2101],
+      "mitreAttack": [
+        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
+        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 2003 using the device instance ID to confirm successful device recognition",
@@ -87,6 +95,10 @@
       "category": "USB Device",
       "tags": ["usb", "removable-media", "physical-access"],
       "relatedEventIds": [2003, 2004, 2101],
+      "mitreAttack": [
+        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
+        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Use the timestamp alongside EID 2003 and 2004 to establish precise device connection timing",
@@ -114,6 +126,10 @@
       "category": "USB Device",
       "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
       "relatedEventIds": [2003, 2004, 2100],
+      "mitreAttack": [
+        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
+        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "For USB storage, this event marks when the volume became accessible — correlate with file copy events immediately following this timestamp",

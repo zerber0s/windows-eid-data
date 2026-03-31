@@ -31,6 +31,9 @@
       "category": "Application Crash",
       "tags": ["crash", "application-error", "exploit-detection"],
       "relatedEventIds": [1001, 1002],
+      "mitreAttack": [
+        { "techniqueId": "T1203", "techniqueName": "Exploitation for Client Execution" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "FaultingModuleName of UNKNOWN or ntdll.dll with an unusual offset may indicate shellcode execution",
@@ -61,6 +64,9 @@
       "category": "Application Crash",
       "tags": ["crash", "wer", "application-error"],
       "relatedEventIds": [1000, 1002],
+      "mitreAttack": [
+        { "techniqueId": "T1203", "techniqueName": "Exploitation for Client Execution" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "BucketId can correlate the same crash signature across multiple hosts — useful for detecting a weaponized file distributed across the environment",
@@ -118,6 +124,9 @@
       "category": "Application Crash",
       "tags": ["dotnet", "crash", "exception"],
       "relatedEventIds": [1000],
+      "mitreAttack": [
+        { "techniqueId": "T1203", "techniqueName": "Exploitation for Client Execution" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Exception type is the primary pivot: System.Security.SecurityException may indicate AppLocker or WDAC blocking a .NET assembly",
@@ -148,6 +157,9 @@
       "category": "Software Installation",
       "tags": ["msi", "install", "software"],
       "relatedEventIds": [11707, 11708],
+      "mitreAttack": [
+        { "techniqueId": "T1072", "techniqueName": "Software Deployment Tools" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ProductName against an approved software inventory — unexpected products warrant investigation",
@@ -177,6 +189,9 @@
       "category": "Software Installation",
       "tags": ["msi", "uninstall", "software", "defense-evasion"],
       "relatedEventIds": [11724],
+      "mitreAttack": [
+        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "ProductName is the critical field — cross-reference against a list of installed security tools (AV, EDR, logging agents)",
@@ -206,6 +221,9 @@
       "category": "Software Installation",
       "tags": ["msi", "install", "software"],
       "relatedEventIds": [1033, 11708],
+      "mitreAttack": [
+        { "techniqueId": "T1072", "techniqueName": "Software Deployment Tools" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Confirms installation success — pair with EID 1033 to establish the full install timeline",
@@ -263,6 +281,9 @@
       "category": "Software Installation",
       "tags": ["msi", "uninstall", "software", "defense-evasion"],
       "relatedEventIds": [1034],
+      "mitreAttack": [
+        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Cross-reference ProductName against a list of security tools — confirmed removal of defensive software requires immediate escalation",
