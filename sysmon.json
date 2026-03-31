@@ -1,0 +1,918 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Sysmon",
+    "version": "0.1.0",
+    "generatedAt": "2026-03-30T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Process created",
+      "summary": "A new process was created.",
+      "details": "Generated when a new process is created. This is one of the most forensically valuable Sysmon events. Key fields: Image (full path of the new process), CommandLine (full command line including arguments), ParentImage and ParentCommandLine (the parent process that spawned this one), User (account context), Hashes (configurable; SHA256 recommended), CurrentDirectory, and IntegrityLevel. The combination of Image and CommandLine reveals masquerading — e.g., a process named svchost.exe running from a non-system path, or cmd.exe with encoded commands. ParentImage exposes process tree anomalies such as Word spawning PowerShell. Hashes enable threat intelligence lookups. Correlate with EID 5 to track process lifetime.",
+      "category": "Process Execution",
+      "tags": ["process-creation", "execution", "defense-evasion", "masquerading"],
+      "relatedEventIds": [
+        {"id": 5, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1059", "techniqueName": "Command and Scripting Interpreter"},
+        {"techniqueId": "T1036", "techniqueName": "Masquerading"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Compare Image path against expected locations — system binaries should reside in System32 or SysWOW64",
+          "Review CommandLine for encoded payloads (base64, -EncodedCommand), LOLBin flags, or unusual argument patterns",
+          "Examine ParentImage to identify unexpected process parent-child relationships (e.g., Office apps spawning scripting engines)",
+          "Hash lookups against threat intelligence feeds can confirm known-bad binaries",
+          "IntegrityLevel of High or System for unexpected processes may indicate privilege escalation"
+        ],
+        "commonFalsePositives": [
+          "Software installers and update mechanisms frequently spawn child processes",
+          "Administrative scripts and scheduled tasks running legitimate management tools",
+          "Development environments invoking compilers, interpreters, and build tools"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 2,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "File creation time changed",
+      "summary": "A process modified the creation timestamp of a file.",
+      "details": "Generated when a process changes the creation timestamp of a file, a technique known as timestomping. Key fields: Image (the process that modified the timestamp), TargetFilename (the file whose timestamp was changed), CreationUtcTime (the new forged timestamp), and PreviousCreationUtcTime (the original timestamp before modification). Timestomping is used to make malicious files appear to have been present on the system long before they were actually dropped, undermining timeline-based forensics. A PreviousCreationUtcTime that is more recent than CreationUtcTime is the defining indicator. Legitimate software rarely alters file creation times.",
+      "category": "Timestomping",
+      "tags": ["timestomping", "defense-evasion", "anti-forensics", "file-activity"],
+      "mitreAttack": [
+        {"techniqueId": "T1070.006", "techniqueName": "Indicator Removal: Timestomp"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PreviousCreationUtcTime more recent than CreationUtcTime confirms deliberate backdating",
+          "Identify Image — timestomping by scripting engines, tools like touch.exe, or unknown binaries warrants investigation",
+          "Correlate TargetFilename with EID 11 (FileCreate) to establish when the file was actually written to disk",
+          "Check if the forged CreationUtcTime aligns with a date that would make the file appear pre-existing"
+        ],
+        "commonFalsePositives": [
+          "Some archive extraction tools and installers set file timestamps to match the original packaged files",
+          "Build systems and deployment tools may normalize timestamps"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 3,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Network connection",
+      "summary": "A process initiated or received a network connection.",
+      "details": "Generated when a process makes or accepts a TCP/UDP network connection. Key fields: Image (the process), SourceIp, SourcePort, DestinationIp, DestinationPort, Protocol, and User. This event is invaluable for identifying C2 beaconing, lateral movement, and data exfiltration. Processes that do not normally communicate over the network (e.g., notepad.exe, mshta.exe, regsvr32.exe) making outbound connections are strong indicators of malicious activity. DestinationPort context matters — common ports used unusually (e.g., DNS over port 53 for tunneling, HTTP on non-standard ports) should be investigated. Correlate with EID 22 for DNS lookups that preceded the connection.",
+      "category": "Network Activity",
+      "tags": ["network", "c2", "lateral-movement", "exfiltration", "beaconing"],
+      "relatedEventIds": [
+        {"id": 22, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1071", "techniqueName": "Application Layer Protocol"},
+        {"techniqueId": "T1571", "techniqueName": "Non-Standard Port"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Flag processes that do not ordinarily make network connections (e.g., Office applications, LOLBins like regsvr32, mshta, certutil)",
+          "Check DestinationIp against threat intelligence; newly registered domains and dynamic DNS providers are common C2 indicators",
+          "Periodic beaconing patterns (regular intervals to the same IP) suggest C2 heartbeats",
+          "Correlate with EID 22 to link DNS resolution to the subsequent connection"
+        ],
+        "commonFalsePositives": [
+          "Software update checks and telemetry from installed applications",
+          "Browsers, mail clients, and other network-facing applications making routine connections",
+          "Security and endpoint management tools performing check-ins"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 4,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Sysmon service state changed",
+      "summary": "The Sysmon service started or stopped.",
+      "details": "Generated when the Sysmon service itself starts or stops. Key field: State (Running or Stopped). A Stopped state outside of planned maintenance or updates is a significant indicator — adversaries frequently attempt to disable or uninstall Sysmon as part of defense evasion. Correlate with EID 16 to check for configuration tampering that may have preceded a service stop, and with Security log EID 4697 or System log EID 7036 to correlate with service control manager events.",
+      "category": "Service Activity",
+      "tags": ["sysmon", "defense-evasion", "tamper", "service"],
+      "relatedEventIds": [
+        {"id": 16, "log": "Sysmon"},
+        {"id": 7036, "log": "System"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Unexpected State: Stopped outside of maintenance windows warrants immediate investigation",
+          "Correlate with Security EID 4688 to identify what process stopped the Sysmon service",
+          "Check for preceding EID 16 events indicating a configuration change before the stop",
+          "Review for sc.exe, net.exe, or PowerShell Stop-Service invocations in EID 1"
+        ],
+        "commonFalsePositives": [
+          "Planned Sysmon updates or reconfigurations by IT or security teams",
+          "System reboots will produce a Stopped event followed by a Running event on startup"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 5,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Process terminated",
+      "summary": "A process exited.",
+      "details": "Generated when a monitored process terminates. Key fields: Image and ProcessId. Correlate with EID 1 to determine the full process lifetime. Short-lived processes — those that spawn and terminate within seconds — are commonly used to execute payloads while avoiding prolonged visibility. The time delta between EID 1 and EID 5 for the same ProcessId reveals how briefly a process ran. Processes that are killed (rather than exiting naturally) may also be reflected here; correlate with parent process activity to distinguish clean exits from forced termination.",
+      "category": "Process Execution",
+      "tags": ["process-termination", "execution", "defense-evasion"],
+      "relatedEventIds": [
+        {"id": 1, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1059", "techniqueName": "Command and Scripting Interpreter"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Calculate process lifetime by correlating ProcessId across EID 1 and EID 5 — very short-lived processes are a detection signal",
+          "Repeated rapid creation and termination of the same Image may indicate a dropper or loader pattern",
+          "Correlate with EID 3 and EID 11 to see what network connections or files were created during the process lifetime"
+        ],
+        "commonFalsePositives": [
+          "Short-lived system processes (e.g., conhost.exe, WMI providers) are normal",
+          "Scripting engines invoked for single commands terminate quickly by design"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 6,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Driver loaded",
+      "summary": "A driver was loaded into the kernel.",
+      "details": "Generated when a driver is loaded into the kernel. Key fields: ImageLoaded (full path of the driver), Hashes, Signed (whether the driver has a valid digital signature), and SignatureStatus (Valid, Expired, Revoked, etc.). Kernel-mode drivers have unrestricted system access, making malicious driver loading (BYOVD — Bring Your Own Vulnerable Driver) a high-severity technique. Unsigned or invalidly signed drivers are immediately suspicious on modern systems, which enforce Driver Signature Enforcement (DSE). Even signed drivers loaded from unusual paths (user temp directories, non-system folders) warrant scrutiny. Correlate hashes against known vulnerable driver lists (e.g., loldrivers.io).",
+      "category": "Driver Load",
+      "tags": ["driver", "kernel", "byovd", "defense-evasion", "privilege-escalation"],
+      "mitreAttack": [
+        {"techniqueId": "T1014", "techniqueName": "Rootkit"},
+        {"techniqueId": "T1543", "techniqueName": "Create or Modify System Process"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Signed: false or SignatureStatus not Valid on a production system is a critical finding",
+          "Check ImageLoaded path — drivers should load from System32\\drivers or a known vendor path",
+          "Hash the driver and check against known BYOVD databases (e.g., loldrivers.io)",
+          "Correlate with EID 1 to identify what process initiated the driver load"
+        ],
+        "commonFalsePositives": [
+          "Legitimate security software, virtualization platforms, and hardware vendor drivers",
+          "Windows updates loading new or updated drivers"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 7,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Image loaded",
+      "summary": "A DLL or executable image was loaded into a process.",
+      "details": "Generated when a module (DLL or EXE) is loaded into a process. Key fields: Image (the loading process), ImageLoaded (the module path), Hashes, Signed, and SignatureStatus. This event is high-volume and typically requires targeted filtering to be operationally useful. Key detection uses: DLL side-loading (a legitimate process loading a malicious DLL from an unexpected path), reflective DLL injection (DLLs loaded from suspicious locations such as temp directories or with mismatched names), and unsigned modules in signed processes. Signed: false in a process that should only load signed modules (e.g., lsass.exe) is a strong indicator of tampering.",
+      "category": "DLL Load",
+      "tags": ["dll", "dll-sideloading", "injection", "defense-evasion"],
+      "relatedEventIds": [
+        {"id": 1, "log": "Sysmon"},
+        {"id": 10, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1574.002", "techniqueName": "Hijack Execution Flow: DLL Side-Loading"},
+        {"techniqueId": "T1055", "techniqueName": "Process Injection"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Flag unsigned DLLs (Signed: false) loaded by security-sensitive processes like lsass.exe, winlogon.exe",
+          "DLLs loaded from user-writable paths (AppData, Temp, Downloads) by system or trusted processes indicate side-loading",
+          "Compare ImageLoaded name against known DLL hijacking targets (e.g., version.dll, winhttp.dll in application directories)",
+          "Hash lookups can identify known malicious or vulnerable modules"
+        ],
+        "commonFalsePositives": [
+          "High-volume event — most loads are legitimate; effective detection requires tight scoping to sensitive processes",
+          "Legitimate software loading unsigned third-party DLLs for plugins or add-ons"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 8,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "CreateRemoteThread",
+      "summary": "A process created a thread in another process.",
+      "details": "Generated when a process creates a thread in a different process using the CreateRemoteThread API, a primary mechanism for classic code injection. Key fields: SourceImage (the injecting process), TargetImage (the process receiving the thread), NewThreadId, and StartAddress. CreateRemoteThread into sensitive processes such as lsass.exe, winlogon.exe, svchost.exe, or browsers is a high-confidence indicator of process injection. StartAddress pointing outside known module boundaries (i.e., into heap or stack memory rather than mapped DLL space) indicates shellcode execution. Correlate with EID 10 (ProcessAccess) which often precedes injection as the attacker opens a handle to the target.",
+      "category": "Code Injection",
+      "tags": ["injection", "createremotethread", "execution", "defense-evasion"],
+      "relatedEventIds": [
+        {"id": 10, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1055.003", "techniqueName": "Process Injection: Thread Execution Hijacking"},
+        {"techniqueId": "T1055", "techniqueName": "Process Injection"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetImage of lsass.exe, winlogon.exe, or explorer.exe is high-priority — these are common injection targets",
+          "StartAddress outside the address space of known loaded modules indicates shellcode",
+          "Correlate SourceImage with EID 1 to understand the origin of the injecting process",
+          "Correlate with EID 10 on the same TargetImage in the same time window to confirm the full injection sequence"
+        ],
+        "commonFalsePositives": [
+          "Some legitimate security products and debuggers use CreateRemoteThread for inspection or instrumentation",
+          "JIT compilers and some virtualization tools may use cross-process thread creation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 9,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "RawAccessRead",
+      "summary": "A process read from a disk device using raw access.",
+      "details": "Generated when a process reads directly from a disk volume using raw access (bypassing the filesystem), detected via \\\\.\\PhysicalDrive or \\\\.\\HarddiskVolume handles. Key fields: Image (the reading process) and Device. Raw disk access is used by credential harvesting tools (to read the NTDS.dit database directly or read hibernation/page files), disk imaging utilities, rootkits to hide files, and destructive wipers. Legitimate consumers are narrow: backup software, disk management utilities, and forensic tools. Any raw disk access by unexpected processes — especially scripting engines, LOLBins, or unknown executables — is suspicious.",
+      "category": "Disk Access",
+      "tags": ["raw-access", "credential-access", "defense-evasion", "collection"],
+      "relatedEventIds": [
+        {"id": 1, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1003.003", "techniqueName": "OS Credential Dumping: NTDS"},
+        {"techniqueId": "T1561.001", "techniqueName": "Disk Wipe: Disk Content Wipe"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify Image — raw disk access by anything other than known backup or forensic tools is suspicious",
+          "Correlate with EID 1 to inspect the full command line of the accessing process",
+          "Raw access targeting PhysicalDrive0 or the system volume may indicate credential harvesting or disk wiping"
+        ],
+        "commonFalsePositives": [
+          "Enterprise backup agents (e.g., Veeam, Veritas) performing volume-level backups",
+          "Disk diagnostic and defragmentation utilities",
+          "Windows VSS (Volume Shadow Copy Service) during snapshot operations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 10,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "ProcessAccess",
+      "summary": "A process opened a handle to another process.",
+      "details": "Generated when a process opens a handle to another process. Key fields: SourceImage, TargetImage, GrantedAccess (the access rights requested), and CallTrace (the call stack at the time of the access). GrantedAccess values of 0x1010, 0x1410, 0x143A, or 0x1438 on lsass.exe indicate credential dumping access rights (PROCESS_VM_READ + PROCESS_QUERY_INFORMATION). CallTrace revealing calls through unknown modules (not backed by a mapped DLL on disk) indicates reflective injection or direct syscalls used to evade userland hooks. ProcessAccess to lsass.exe by any process other than known security software is a high-fidelity indicator of credential theft.",
+      "category": "Code Injection",
+      "tags": ["credential-dumping", "lsass", "injection", "process-access"],
+      "relatedEventIds": [
+        {"id": 8, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1003.001", "techniqueName": "OS Credential Dumping: LSASS Memory"},
+        {"techniqueId": "T1055", "techniqueName": "Process Injection"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetImage of lsass.exe with GrantedAccess containing VM_READ rights (0x10) is the primary credential dumping signal",
+          "Review CallTrace for entries outside known module ranges (unknown or unbacked memory regions indicate syscall abuse or injection)",
+          "SourceImage that is unexpected (e.g., cmd.exe, PowerShell, a dropped binary) accessing lsass.exe requires immediate triage",
+          "Correlate with EID 8 on the same target to detect combined ProcessAccess + CreateRemoteThread injection patterns"
+        ],
+        "commonFalsePositives": [
+          "AV, EDR, and DLP agents legitimately access lsass.exe for security monitoring",
+          "Windows Error Reporting (WerFault.exe) may open lsass.exe for crash reporting"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 11,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "FileCreate",
+      "summary": "A file was created or overwritten.",
+      "details": "Generated when a file is created or overwritten. Key fields: Image (the creating process), TargetFilename (full path of the file), and CreationUtcTime. This event complements EID 2 — EID 11 records when a file first appears on disk, while EID 2 records subsequent timestamp manipulation. High-value targets: files written to startup folders, Run key paths, scheduled task XML directories, web server roots, user temp/AppData directories, and system binary paths. Malware drops (executables, scripts, DLLs) to non-standard locations are primary detection targets. Correlate with EID 1 to tie the creating process to its full execution context.",
+      "category": "File Activity",
+      "tags": ["file-creation", "persistence", "dropper", "execution"],
+      "relatedEventIds": [
+        {"id": 2, "log": "Sysmon"},
+        {"id": 15, "log": "Sysmon"},
+        {"id": 23, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1105", "techniqueName": "Ingress Tool Transfer"},
+        {"techniqueId": "T1547", "techniqueName": "Boot or Logon Autostart Execution"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Files written to Startup folders, Temp, AppData\\Roaming, or system binary paths by unexpected processes are high-priority",
+          "Executable or script extensions (.exe, .dll, .ps1, .bat, .vbs, .js) created by Office applications or browsers indicate delivery",
+          "Correlate TargetFilename with EID 1 to see if the created file was subsequently executed",
+          "Files created immediately before a suspicious EID 1 process may be the dropped payload"
+        ],
+        "commonFalsePositives": [
+          "Software installers and patch processes create large numbers of files",
+          "Log and temp file creation by legitimate applications is very high volume — filter by extension and path"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 12,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "RegistryEvent — object created or deleted",
+      "summary": "A registry key or value was created or deleted.",
+      "details": "Generated when a registry key or value is created or deleted. Key fields: Image, EventType (CreateKey, DeleteKey, DeleteValue), TargetObject (the full registry path). Registry persistence mechanisms rely on key and value creation under well-known Run keys (HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run, HKCU equivalent), services keys (HKLM\\SYSTEM\\CurrentControlSet\\Services), and scheduled task registry entries. Deletions covering tracks (removing autorun keys after execution) are also captured. Correlate with EID 13 to track value data set under newly created keys.",
+      "category": "Registry Activity",
+      "tags": ["registry", "persistence", "defense-evasion"],
+      "relatedEventIds": [
+        {"id": 13, "log": "Sysmon"},
+        {"id": 14, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1112", "techniqueName": "Modify Registry"},
+        {"techniqueId": "T1547.001", "techniqueName": "Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetObject paths under Run, RunOnce, Services, or Winlogon are the highest-priority persistence locations",
+          "DeleteKey or DeleteValue events covering previously created suspicious keys indicate cleanup activity",
+          "Image performing registry writes should match the expected owner of that key (e.g., scripting engines modifying Run keys are suspicious)",
+          "Correlate with EID 13 to inspect the value data written under a newly created key"
+        ],
+        "commonFalsePositives": [
+          "Software installers and updaters make extensive registry changes",
+          "Group Policy application and Windows configuration management create and delete keys frequently"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 13,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "RegistryEvent — value set",
+      "summary": "A registry value was set.",
+      "details": "Generated when a registry value is written. Key fields: Image, TargetObject (key path and value name), and Details (the data written to the value). This is the most forensically rich registry event because it captures the actual data — meaning you can see exactly what command, path, or payload was written into a persistence key. A Run value whose Details contain a PowerShell command, a path to a dropped executable in Temp, or an obfuscated command line is a high-confidence persistence indicator. Correlate with EID 12 (key creation) and EID 1 (execution of the registered payload).",
+      "category": "Registry Activity",
+      "tags": ["registry", "persistence", "defense-evasion"],
+      "relatedEventIds": [
+        {"id": 12, "log": "Sysmon"},
+        {"id": 14, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1112", "techniqueName": "Modify Registry"},
+        {"techniqueId": "T1547.001", "techniqueName": "Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Review Details field for suspicious values: encoded commands, paths to temp/user-writable directories, LOLBin invocations",
+          "TargetObject pointing to Run, RunOnce, Winlogon, AppInit_DLLs, or services parameters are high-value targets",
+          "Image that is a scripting engine or dropped binary writing to persistence keys is a strong signal",
+          "Correlate TargetObject value path with EID 11 to see if the referenced file was recently dropped"
+        ],
+        "commonFalsePositives": [
+          "Application configuration updates writing to their own registry keys",
+          "Software licensing and activation mechanisms"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 14,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "RegistryEvent — key or value renamed",
+      "summary": "A registry key or value was renamed.",
+      "details": "Generated when a registry key or value is renamed. Key fields: Image, TargetObject (original name), and NewName (new name). Renaming is used to obscure malicious entries — for example, renaming a suspicious Run value to blend in with legitimate entries, or renaming a service key to impersonate a Windows component. Also used during cleanup: renaming to a temporary name before deletion. The combination of TargetObject and NewName reveals the attacker's obfuscation strategy.",
+      "category": "Registry Activity",
+      "tags": ["registry", "defense-evasion", "persistence"],
+      "relatedEventIds": [
+        {"id": 12, "log": "Sysmon"},
+        {"id": 13, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1112", "techniqueName": "Modify Registry"},
+        {"techniqueId": "T1036", "techniqueName": "Masquerading"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "NewName that closely mimics a legitimate Windows key or value (typosquatting) indicates masquerading",
+          "Renaming within Run or Services key paths warrants review of the renamed entry's data via EID 13",
+          "Correlate with preceding EID 12 and EID 13 events on the same TargetObject to understand what was written before renaming"
+        ],
+        "commonFalsePositives": [
+          "Software installers renaming temporary configuration keys during setup",
+          "Windows component updates may rename registry entries"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 15,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "FileCreateStreamHash",
+      "summary": "A file was created with an alternate data stream.",
+      "details": "Generated when a file is created with an Alternate Data Stream (ADS), with the hash of the stream content. Key fields: Image, TargetFilename (includes the stream name, e.g., file.txt:Zone.Identifier), Hash, and Contents (if the stream is small). ADS has two primary security contexts: the Zone.Identifier stream added by Windows to files downloaded from the internet (Mark of the Web / MOTW), and adversarial use of ADS to hide payloads, executables, or scripts within innocent-looking files. MOTW bypass is a common initial access technique — files missing the expected Zone.Identifier stream after being received via email or download may indicate MOTW stripping. Executables or scripts stored in ADS by unexpected processes are high-confidence indicators.",
+      "category": "Alternate Data Stream",
+      "tags": ["ads", "motw", "defense-evasion", "file-activity"],
+      "relatedEventIds": [
+        {"id": 11, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1564.004", "techniqueName": "Hide Artifacts: NTFS File Attributes"},
+        {"techniqueId": "T1553.005", "techniqueName": "Subvert Trust Controls: Mark-of-the-Web Bypass"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Stream names other than Zone.Identifier on executable or script files are suspicious",
+          "Review Contents field for embedded executables (MZ header), scripts, or encoded payloads",
+          "Absence of Zone.Identifier creation after a file arrives via browser or email client may indicate MOTW stripping",
+          "Image that is not a browser or email client writing Zone.Identifier streams is unusual"
+        ],
+        "commonFalsePositives": [
+          "Browsers (Chrome, Edge, Firefox) and email clients routinely write Zone.Identifier ADS to downloaded files",
+          "Some backup and sync tools preserve ADS metadata"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 16,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Sysmon configuration changed",
+      "summary": "The Sysmon configuration was updated.",
+      "details": "Generated when the Sysmon configuration file is updated. Key fields: Configuration (path to the new config file) and ConfigurationFileHash. This event is significant because an attacker with administrative access may update the Sysmon configuration to reduce or eliminate logging coverage before executing their next stage. An unexpected configuration change — especially one not correlated with a known change management window — should be treated as a defense evasion indicator. Correlate with EID 4 (service stop/start) to determine if a reconfiguration preceded a service restart.",
+      "category": "Service Activity",
+      "tags": ["sysmon", "defense-evasion", "tamper", "configuration"],
+      "relatedEventIds": [
+        {"id": 4, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 1 to identify what process (sysmon.exe invocation) applied the configuration change",
+          "Compare ConfigurationFileHash against the known-good hash of the authorized config",
+          "Unexpected reconfiguration followed by reduced event volume is a strong tamper signal",
+          "Review EID 4 in the same time window — reconfiguration often accompanies a service restart"
+        ],
+        "commonFalsePositives": [
+          "Planned configuration updates deployed by the security team or via endpoint management tooling",
+          "Sysmon version upgrades that reload the configuration"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 17,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Pipe created",
+      "summary": "A named pipe was created.",
+      "details": "Generated when a named pipe is created. Key fields: Image (the creating process) and PipeName. Named pipes are a common C2 communication channel and lateral movement mechanism. Well-known malicious pipe names include those created by Cobalt Strike (e.g., \\msagent_*, \\postex_*, \\mojo.*), Metasploit, and other frameworks. Pipes with randomized or GUID-like names created by unexpected processes are suspicious. Correlate with EID 18 to identify what process connected to a pipe shortly after its creation, revealing the two ends of a communication channel.",
+      "category": "Named Pipe",
+      "tags": ["named-pipe", "c2", "lateral-movement", "cobaltstrike"],
+      "relatedEventIds": [
+        {"id": 18, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1559.001", "techniqueName": "Inter-Process Communication: Component Object Model"},
+        {"techniqueId": "T1021.002", "techniqueName": "Remote Services: SMB/Windows Admin Shares"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PipeName matching known C2 framework patterns (Cobalt Strike, Metasploit, Sliver, Brute Ratel) is a high-confidence indicator",
+          "Pipes created by scripting engines, LOLBins, or unsigned executables are suspicious regardless of name",
+          "Correlate with EID 18 to identify the connecting process and map the full IPC channel",
+          "Random or GUID-formatted pipe names are atypical for legitimate software"
+        ],
+        "commonFalsePositives": [
+          "SQL Server, IIS, and other server software use named pipes for inter-process communication",
+          "Chrome and other browsers create numerous pipes for renderer/broker communication"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 18,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Pipe connected",
+      "summary": "A process connected to a named pipe.",
+      "details": "Generated when a process connects to an existing named pipe. Key fields: Image (the connecting process) and PipeName. Correlate with EID 17 to map the full picture of a named pipe channel: which process created the pipe and which process connected to it. In lateral movement scenarios, a pipe may be created on a remote system and connected to locally via SMB. The combination of Image and PipeName — especially when the connecting process is unusual — is the key detection pivot.",
+      "category": "Named Pipe",
+      "tags": ["named-pipe", "c2", "lateral-movement"],
+      "relatedEventIds": [
+        {"id": 17, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1559.001", "techniqueName": "Inter-Process Communication: Component Object Model"},
+        {"techniqueId": "T1021.002", "techniqueName": "Remote Services: SMB/Windows Admin Shares"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 17 to identify the pipe creator and map the full IPC relationship",
+          "Image connecting to a suspicious PipeName (e.g., known C2 pipe names) is a high-fidelity alert",
+          "Connections from unexpected or scripting-engine processes to any named pipe warrants review"
+        ],
+        "commonFalsePositives": [
+          "Same as EID 17 — many legitimate applications use named pipe IPC",
+          "Windows system components and services communicate over named pipes extensively"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 19,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "WMI event filter registered",
+      "summary": "A WMI event filter was registered.",
+      "details": "Generated when a WMI event filter is registered. Key fields: User, EventNamespace, Name (filter name), and Query (the WQL query defining the trigger condition). This is the first of three events that together document a WMI permanent event subscription — the other two are EID 20 (consumer) and EID 21 (binding). The Query field reveals the trigger: common malicious queries target __InstanceCreationEvent on Win32_Process (trigger on process creation), Win32_LoggedOnUser (trigger on logon), or timer events. Correlate EID 19, 20, and 21 together — a complete subscription requires all three. Also correlate with WMI EID 5861.",
+      "category": "WMI Subscription",
+      "tags": ["wmi", "subscription", "persistence", "execution"],
+      "relatedEventIds": [
+        {"id": 20, "log": "Sysmon"},
+        {"id": 21, "log": "Sysmon"},
+        {"id": 5861, "log": "WMI"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Query targeting Win32_Process creation or system startup events is a common persistence trigger pattern",
+          "Correlate Name across EID 19, 20, and 21 to reconstruct the full subscription",
+          "User context reveals whether the subscription was created under a user or system account",
+          "Correlate with WMI EID 5861 for additional subscription detail"
+        ],
+        "commonFalsePositives": [
+          "SCCM, monitoring agents, and some AV products use WMI subscriptions for legitimate purposes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 20,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "WMI event consumer registered",
+      "summary": "A WMI event consumer was registered.",
+      "details": "Generated when a WMI event consumer is registered. Key fields: User, Name (consumer name), Type (consumer type), and Destination (the action to execute). The Type field is the primary forensic indicator: CommandLineEventConsumer (executes a command line) and ActiveScriptEventConsumer (executes VBScript or JScript) are the two types used for code execution. Destination for a CommandLineEventConsumer reveals the actual command or payload to be run. Correlate with EID 19 (filter) and EID 21 (binding) to understand the full subscription.",
+      "category": "WMI Subscription",
+      "tags": ["wmi", "subscription", "persistence", "execution"],
+      "relatedEventIds": [
+        {"id": 19, "log": "Sysmon"},
+        {"id": 21, "log": "Sysmon"},
+        {"id": 5861, "log": "WMI"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Type of CommandLineEventConsumer or ActiveScriptEventConsumer indicates code execution capability — investigate immediately",
+          "Destination reveals the payload: examine for encoded commands, paths to dropped files, or LOLBin invocations",
+          "Correlate Name with EID 19 filter and EID 21 binding to reconstruct the complete subscription"
+        ],
+        "commonFalsePositives": [
+          "SCCM and endpoint management tools may use CommandLineEventConsumers for legitimate tasks"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 21,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "WMI consumer-to-filter binding",
+      "summary": "A WMI consumer was bound to a filter, completing a persistent event subscription.",
+      "details": "Generated when a WMI consumer is bound to an event filter, completing a permanent WMI event subscription. Key fields: User, Consumer (the consumer reference), and Filter (the filter reference). This event is the final piece that activates a WMI subscription — without this binding, the filter and consumer exist independently but do not function. The presence of all three events (EID 19, 20, 21) within a short time window on the same system strongly indicates subscription creation. Enumerate the root\\subscription namespace to verify the subscription persists after reboot.",
+      "category": "WMI Subscription",
+      "tags": ["wmi", "subscription", "persistence", "execution"],
+      "relatedEventIds": [
+        {"id": 19, "log": "Sysmon"},
+        {"id": 20, "log": "Sysmon"},
+        {"id": 5861, "log": "WMI"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Presence of EID 19 + 20 + 21 in a short window is the definitive WMI persistence creation sequence",
+          "Query root\\subscription namespace to confirm the subscription survives reboot",
+          "Correlate Filter and Consumer names with EID 19 and 20 detail to review the full subscription contents"
+        ],
+        "commonFalsePositives": [
+          "SCCM and monitoring products that rely on WMI subscriptions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 22,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "DNS query",
+      "summary": "A process made a DNS query.",
+      "details": "Generated when a process makes a DNS query. Key fields: Image (the querying process), QueryName (the domain queried), QueryStatus (success/failure), and QueryResults (the resolved IP addresses). DNS is the most common C2 discovery channel. This event captures the domain lookup that precedes a network connection — correlating EID 22 with EID 3 on the same Image links a domain name to the subsequent IP-level connection. DNS-based C2 (DNS tunneling) produces high query volumes to unusual subdomains of a single parent domain. Unusual domains queried by system processes or LOLBins are a strong signal.",
+      "category": "DNS Activity",
+      "tags": ["dns", "c2", "exfiltration", "network", "dns-tunneling"],
+      "relatedEventIds": [
+        {"id": 3, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1071.004", "techniqueName": "Application Layer Protocol: DNS"},
+        {"techniqueId": "T1568", "techniqueName": "Dynamic Resolution"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "QueryName with high entropy subdomains (random-looking labels) under a single parent domain indicates DNS tunneling",
+          "Image that does not ordinarily make DNS lookups (e.g., mshta.exe, regsvr32.exe, certutil.exe) querying external domains is suspicious",
+          "Correlate QueryResults (resolved IPs) with EID 3 DestinationIp to link domain names to connection events",
+          "Newly registered domains, dynamic DNS providers, and TLDs unusual for the environment warrant investigation"
+        ],
+        "commonFalsePositives": [
+          "Browsers and applications query thousands of domains during normal browsing and telemetry",
+          "Windows Update, Microsoft telemetry, and CDN lookups generate high DNS query volumes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 23,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "File deleted",
+      "summary": "A file was deleted.",
+      "details": "Generated when a file is deleted. Key fields: Image (the deleting process), TargetFilename, and Hashes. If the Sysmon configuration enables file archiving, deleted files can be preserved in the archive directory. This event is valuable for detecting anti-forensic file deletion (attackers deleting tools or logs after use), ransomware staging (bulk deletion of backup files before encryption), and artifact cleanup. The Hashes field allows retrospective threat intelligence lookups even after the file is gone from disk. Correlate with EID 11 to establish a file's full lifecycle: creation, use, and deletion.",
+      "category": "File Activity",
+      "tags": ["file-deletion", "anti-forensics", "defense-evasion", "ransomware"],
+      "relatedEventIds": [
+        {"id": 11, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1070.004", "techniqueName": "Indicator Removal: File Deletion"},
+        {"techniqueId": "T1485", "techniqueName": "Data Destruction"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Hash the deleted file (if archived) and check against threat intelligence",
+          "Bulk file deletions by a single process in a short window may indicate ransomware or destructive activity",
+          "Deletion of log files, backup catalogs, or Volume Shadow Copies warrants immediate investigation",
+          "Correlate with EID 11 to recover what the file was and when it was created"
+        ],
+        "commonFalsePositives": [
+          "Temp file cleanup by browsers, installers, and system processes is very high volume",
+          "Log rotation and cleanup tasks delete files as part of normal operations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 24,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Clipboard changed",
+      "summary": "New content was placed in the clipboard.",
+      "details": "Generated when the clipboard content changes. Key fields: Image (the process that changed the clipboard), Session, ClientInfo, and Hashes (hash of the clipboard content). This event supports detection of clipboard hijacking — a technique where malware monitors the clipboard and substitutes cryptocurrency wallet addresses or other values when a victim copies sensitive data. It also captures intentional clipboard data collection. The event can be high-volume on busy systems; targeted analysis around suspicious processes is more practical than bulk alerting.",
+      "category": "Clipboard Activity",
+      "tags": ["clipboard", "collection", "credential-access", "clipboard-hijacking"],
+      "relatedEventIds": [
+        {"id": 1, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1115", "techniqueName": "Clipboard Data"},
+        {"techniqueId": "T1414", "techniqueName": "Clipboard Data"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Image that is not a user-facing application (e.g., a background process, scripting engine) accessing the clipboard is suspicious",
+          "Frequent clipboard changes by the same unexpected Image may indicate clipboard monitoring or hijacking",
+          "Correlate with EID 1 to review the full context of the process writing to the clipboard"
+        ],
+        "commonFalsePositives": [
+          "Password managers, productivity apps, and remote desktop tools interact with the clipboard extensively",
+          "Any application with a paste or copy function will generate these events during normal use"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 25,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "Process tampering",
+      "summary": "A process image was tampered with (hollowing or herpaderping detected).",
+      "details": "Generated when Sysmon detects that a process's memory image does not match its on-disk image — indicators of process hollowing or process herpaderping. Key fields: Image (the tampered process), ProcessId, and Type (Hollowing or Herpaderping). Process hollowing replaces the memory of a legitimate process with a malicious payload after creation, allowing malware to masquerade under a trusted process name. Process herpaderping modifies the on-disk executable after mapping it into memory, defeating hash-based detection. Both techniques are used to evade process-based detections and allowlisting. This is a high-fidelity detection event with very low false positive rates.",
+      "category": "Code Injection",
+      "tags": ["process-hollowing", "herpaderping", "defense-evasion", "injection"],
+      "relatedEventIds": [
+        {"id": 1, "log": "Sysmon"},
+        {"id": 8, "log": "Sysmon"}
+      ],
+      "mitreAttack": [
+        {"techniqueId": "T1055.012", "techniqueName": "Process Injection: Process Hollowing"},
+        {"techniqueId": "T1055", "techniqueName": "Process Injection"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any EID 25 alert should be treated as a high-confidence indicator — false positive rates are very low",
+          "Identify Image and ProcessId, then correlate with EID 1 to find what created this process and what command line was used",
+          "Type: Hollowing indicates the memory image was replaced; Type: Herpaderping indicates on-disk file was modified after mapping",
+          "Correlate with EID 3 and EID 11 from the same process to identify C2 communications or file drops during the tampered process lifetime"
+        ],
+        "commonFalsePositives": [
+          "Certain software protection and licensing systems (e.g., Denuvo, some DRM) may trigger hollowing-like detections",
+          "JIT compilation in .NET and Java applications can produce anomalous memory mappings, though typically not flagged by Sysmon's heuristic"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-03-30"
+    }
+  ]
+}
