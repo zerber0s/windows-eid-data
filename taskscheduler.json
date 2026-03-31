@@ -30,7 +30,7 @@
       "details": "Generated when a new scheduled task is registered in the Task Scheduler. Key field: TaskName (full path, e.g., \\Microsoft\\Windows\\TaskName). Complements Security EID 4698 but fires independently and may capture task registrations that do not generate a Security audit event depending on audit policy configuration. Tasks registered under the root folder (\\TaskName with no subfolder) rather than a vendor-specific subfolder are more commonly associated with manual or malicious creation.",
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence"],
-      "relatedEventIds": [140, 141, 200, 201, 4698],
+      "relatedEventIds": [{"id": 140, "log": "TaskScheduler"}, {"id": 141, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 201, "log": "TaskScheduler"}, {"id": 4698, "log": "Security"}],
       "mitreAttack": [
         { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
       ],
@@ -62,7 +62,7 @@
       "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log — correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence"],
-      "relatedEventIds": [106, 141, 200, 4702],
+      "relatedEventIds": [{"id": 106, "log": "TaskScheduler"}, {"id": 141, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 4702, "log": "Security"}],
       "mitreAttack": [
         { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
       ],
@@ -93,7 +93,7 @@
       "details": "Generated when a scheduled task is removed from the Task Scheduler. Key field: TaskName. Deletion of a recently created or recently triggered task may indicate cleanup of a malicious persistence mechanism. Correlate TaskName with EID 106 and EID 200 to determine whether the task was ever executed before deletion.",
       "category": "Task Lifecycle",
       "tags": ["scheduled-task", "persistence", "defense-evasion"],
-      "relatedEventIds": [106, 140, 200, 4699],
+      "relatedEventIds": [{"id": 106, "log": "TaskScheduler"}, {"id": 140, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 4699, "log": "Security"}],
       "mitreAttack": [
         { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" },
         { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
@@ -126,7 +126,7 @@
       "details": "Generated when a scheduled task action starts. Key fields: TaskName and ActionName (the executable or script path that was launched). This is the primary execution evidence event in the Task Scheduler log and is not captured by the Security log EIDs 4698-4702, which only cover task lifecycle (create/modify/delete/enable), not execution. Pivot on ActionName to identify what was run and correlate with Security EID 4688 to find the resulting process creation event.",
       "category": "Task Execution",
       "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [201, 106, 4698, 4688],
+      "relatedEventIds": [{"id": 201, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}, {"id": 4698, "log": "Security"}, {"id": 4688, "log": "Security"}],
       "mitreAttack": [
         { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
       ],
@@ -159,7 +159,7 @@
       "details": "Generated when a scheduled task action finishes. Key fields: TaskName, ActionName, and ResultCode. A ResultCode of 0 indicates successful completion. Non-zero result codes may indicate the action failed or was terminated. Pair with EID 200 using TaskName to measure execution duration. Abnormally short execution times for tasks that should run longer, or consistent non-zero result codes, may indicate detection and termination by a security tool.",
       "category": "Task Execution",
       "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [200, 106],
+      "relatedEventIds": [{"id": 200, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}],
       "mitreAttack": [
         { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
       ],

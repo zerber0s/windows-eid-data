@@ -30,7 +30,7 @@
       "details": "Generated when a WMI provider host (WmiPrvSE.exe) successfully loads a provider. Key fields: ProviderName, ProviderPath (full DLL path), and HostProcess. Most legitimate WMI providers load from System32 or known application directories. A ProviderPath pointing to a temp directory, user profile, or uncommon location is a strong indicator of a malicious WMI provider registered for persistence or lateral movement.",
       "category": "WMI Provider",
       "tags": ["wmi", "provider", "persistence", "lateral-movement"],
-      "relatedEventIds": [5861],
+      "relatedEventIds": [{"id": 5861, "log": "WMI"}],
       "mitreAttack": [
         { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" }
       ],
@@ -62,7 +62,7 @@
       "details": "Generated when a temporary WMI event subscription is created. Temporary subscriptions exist only in memory and do not survive a reboot, unlike permanent subscriptions (EID 5861). Key fields: NamespaceName, Query (the WMI event filter query), and the registering process. While less commonly used for persistence than permanent subscriptions, temporary subscriptions can be used for in-session lateral movement triggers or to respond to specific system conditions during an active intrusion.",
       "category": "WMI Subscription",
       "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
-      "relatedEventIds": [5861],
+      "relatedEventIds": [{"id": 5861, "log": "WMI"}],
       "mitreAttack": [
         { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
         { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
@@ -95,7 +95,7 @@
       "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
       "category": "WMI Subscription",
       "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
-      "relatedEventIds": [5857, 5860],
+      "relatedEventIds": [{"id": 5857, "log": "WMI"}, {"id": 5860, "log": "WMI"}],
       "mitreAttack": [
         { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
         { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }

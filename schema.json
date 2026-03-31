@@ -53,6 +53,10 @@
   },
   "additionalProperties": false,
   "$defs": {
+    "logEnum": {
+      "type": "string",
+      "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Other"]
+    },
     "entry": {
       "type": "object",
       "required": [
@@ -67,10 +71,7 @@
       ],
       "properties": {
         "id": { "type": "integer", "minimum": 0 },
-        "log": {
-          "type": "string",
-          "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Other"]
-        },
+        "log": { "$ref": "#/$defs/logEnum" },
         "provider": { "type": "string" },
         "channel": { "type": "string" },
         "level": {
@@ -95,7 +96,15 @@
         },
         "relatedEventIds": {
           "type": "array",
-          "items": { "type": "integer" }
+          "items": {
+            "type": "object",
+            "required": ["id", "log"],
+            "properties": {
+              "id": { "type": "integer", "minimum": 0 },
+              "log": { "$ref": "#/$defs/logEnum" }
+            },
+            "additionalProperties": false
+          }
         },
         "mitreAttack": {
           "type": "array",

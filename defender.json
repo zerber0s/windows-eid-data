@@ -30,7 +30,7 @@
       "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBins (e.g., powershell.exe, mshta.exe, wscript.exe) are higher priority than detections in temp directories.",
       "category": "Threat Detection",
       "tags": ["defender", "malware", "detection"],
-      "relatedEventIds": [1117],
+      "relatedEventIds": [{"id": 1117, "log": "WindowsDefender"}],
       "notesGuidance": {
         "investigationPivots": [
           "Pivot on Process Name to identify what was executing the detected payload",
@@ -60,7 +60,7 @@
       "details": "Generated when Windows Defender performs a remediation action following a detection (EID 1116). Key fields: Threat Name, Action (Quarantine, Remove, Allow, Block, Clean), Action Status (success or failure), and ThreatID. Action Status of failure means the threat was detected but not successfully remediated — the file or process may still be active. Correlate ThreatID with EID 1116 to link detection and response. An action of 'Allow' or 'No Action Taken' may indicate the threat was excluded or the user overrode the detection.",
       "category": "Threat Detection",
       "tags": ["defender", "malware", "detection", "remediation"],
-      "relatedEventIds": [1116],
+      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}],
       "notesGuidance": {
         "investigationPivots": [
           "Action Status failure means the file or process may still be present — escalate immediately",
@@ -89,7 +89,7 @@
       "details": "Generated when an Attack Surface Reduction (ASR) rule fires in block mode and prevents an operation. Key fields: the rule GUID (identifies which ASR rule triggered), Process Name (the process that attempted the blocked operation), and Path (the target file or object). Each ASR rule GUID maps to a specific rule such as 'Block Office applications from creating executable content' or 'Block credential stealing from Windows LSASS'. An ASR block during an incident is a high-confidence signal that an attacker technique was attempted and stopped.",
       "category": "Attack Surface Reduction",
       "tags": ["defender", "asr", "defense-in-depth", "blocked"],
-      "relatedEventIds": [1122],
+      "relatedEventIds": [{"id": 1122, "log": "WindowsDefender"}],
       "notesGuidance": {
         "investigationPivots": [
           "Map the rule GUID to a specific ASR rule using Microsoft's ASR rule reference to understand what technique was blocked",
@@ -118,7 +118,7 @@
       "details": "Generated when an ASR rule fires in audit mode — the operation was allowed to proceed but would have been blocked in enforcement mode. Key fields are identical to EID 1121: rule GUID, Process Name, and Path. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement. Treat audit events from known-bad processes with the same urgency as block events.",
       "category": "Attack Surface Reduction",
       "tags": ["defender", "asr", "audit"],
-      "relatedEventIds": [1121],
+      "relatedEventIds": [{"id": 1121, "log": "WindowsDefender"}],
       "notesGuidance": {
         "investigationPivots": [
           "Audit mode means the operation succeeded — treat as executed attacker activity, not just an attempt",
@@ -146,7 +146,7 @@
       "details": "Generated when Windows Defender real-time protection is disabled. This is a high-priority alert during an incident — disabling real-time protection is a common attacker technique to prevent detection of subsequent payloads. Correlate the timestamp with process creation and logon events to identify what account or process disabled protection. Legitimate causes include Group Policy-managed AV exclusions, third-party AV coexistence, and IT administrative actions; these should be validated against change management records.",
       "category": "Defender Configuration",
       "tags": ["defender", "defense-evasion", "tamper"],
-      "relatedEventIds": [5007],
+      "relatedEventIds": [{"id": 5007, "log": "WindowsDefender"}],
       "mitreAttack": [
         { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
       ],
@@ -179,7 +179,7 @@
       "details": "Generated when any Windows Defender configuration setting changes. Key field: the old and new configuration values, recorded in the format 'HKLM\\...\\value = old value -> new value'. Configuration changes of particular interest include additions to ExclusionPath, ExclusionProcess, or ExclusionExtension (attackers add exclusions to prevent detection of their tools), and changes to DisableRealtimeMonitoring, DisableBehaviorMonitoring, or DisableIOAVProtection. Exclusion additions should be correlated against known software deployments.",
       "category": "Defender Configuration",
       "tags": ["defender", "defense-evasion", "tamper", "exclusion"],
-      "relatedEventIds": [5001],
+      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}],
       "mitreAttack": [
         { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
       ],
