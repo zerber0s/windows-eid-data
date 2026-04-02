@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -79,9 +79,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4625,
@@ -112,9 +112,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4625"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4634,
@@ -360,9 +360,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4688"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4689,
@@ -419,9 +419,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4697"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4698,
@@ -708,9 +708,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4729,
@@ -739,9 +739,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4732,
@@ -897,9 +897,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4757,
@@ -928,9 +928,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4768,

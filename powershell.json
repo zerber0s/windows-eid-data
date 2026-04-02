@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -47,9 +47,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 403,
@@ -77,9 +77,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 500,
@@ -107,9 +107,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 501,
@@ -137,9 +137,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 600,
@@ -168,9 +168,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 800,
@@ -198,9 +198,9 @@
       },
       "source": {
         "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/"
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4100,
