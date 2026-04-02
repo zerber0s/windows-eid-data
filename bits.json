@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BITS Client",
-    "version": "0.3.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.3.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bits.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,37 @@
       "summary": "A new BITS transfer job was created.",
       "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot — legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBin abuse. Correlate jobId with EID 59 and 60 to track what was transferred.",
       "category": "BITS Transfer",
-      "tags": ["bits", "lolbin", "file-transfer", "persistence"],
-      "relatedEventIds": [{"id": 59, "log": "BITS"}, {"id": 60, "log": "BITS"}],
+      "tags": [
+        "bits",
+        "lolbin",
+        "file-transfer",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 59,
+          "log": "BITS"
+        },
+        {
+          "id": 60,
+          "log": "BITS"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+        {
+          "techniqueId": "T1197",
+          "techniqueName": "BITS Jobs",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,10 +88,37 @@
       "summary": "A BITS job began transferring data; URL recorded.",
       "details": "Generated when a BITS job begins actively transferring data. Key fields: jobTitle, jobId, jobOwner, bytesTotal, fileCount, and url (the remote URL being downloaded from or uploaded to). The url field is the highest-value forensic artifact in the BITS log — it reveals the C2 server, staging server, or exfiltration endpoint. Attackers commonly use bitsadmin.exe or PowerShell's Start-BitsTransfer to download payloads from attacker-controlled infrastructure. Correlate jobId with EID 3 to identify the creating process.",
       "category": "BITS Transfer",
-      "tags": ["bits", "lolbin", "file-transfer", "c2"],
-      "relatedEventIds": [{"id": 3, "log": "BITS"}, {"id": 60, "log": "BITS"}],
+      "tags": [
+        "bits",
+        "lolbin",
+        "file-transfer",
+        "c2"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3,
+          "log": "BITS"
+        },
+        {
+          "id": 60,
+          "log": "BITS"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+        {
+          "techniqueId": "T1197",
+          "techniqueName": "BITS Jobs",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -93,10 +147,36 @@
       "summary": "A BITS job finished transferring data (completed or halted).",
       "details": "Generated when a BITS job stops transferring, either because it completed successfully or was interrupted. Key fields: jobTitle, jobId, jobOwner, bytesTransferred, and url. Correlate bytesTransferred with bytesTotal from EID 59 to determine if the transfer completed fully. A transfer that stopped significantly short of bytesTotal may indicate detection and intervention, network interruption, or a partial exfiltration. Pair with EID 3 using jobId to link the full transfer lifecycle from job creation to completion.",
       "category": "BITS Transfer",
-      "tags": ["bits", "lolbin", "file-transfer"],
-      "relatedEventIds": [{"id": 3, "log": "BITS"}, {"id": 59, "log": "BITS"}],
+      "tags": [
+        "bits",
+        "lolbin",
+        "file-transfer"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3,
+          "log": "BITS"
+        },
+        {
+          "id": 59,
+          "log": "BITS"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1197", "techniqueName": "BITS Jobs" }
+        {
+          "techniqueId": "T1197",
+          "techniqueName": "BITS Jobs",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

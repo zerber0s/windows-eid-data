@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.4.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.4.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,33 @@
       "summary": "A history item was removed from the Windows Defender protection history.",
       "details": "Generated when an item is removed from Windows Defender's protection history. Protection history records past detections, quarantine actions, and remediation events. Deletion of history items — particularly around the timeframe of a compromise — can obscure the record of what was detected and what actions were taken. Correlate with EID 1116 and EID 1117 entries in the same timeframe to determine whether history deletion follows a detection event, which is a strong anti-forensic indicator.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "anti-forensics", "history"],
-      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}, {"id": 1117, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "anti-forensics",
+        "history"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1116,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 1117,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,11 +84,42 @@
       "summary": "Windows Defender detected a potentially suspicious behavior.",
       "details": "Generated when Windows Defender's behavioral monitoring detects a suspicious activity pattern. Unlike EID 1116 (signature-based detection), EID 1015 fires on behavioral heuristics — such as a process performing operations characteristic of credential dumping, code injection, or persistence installation — even if no known malware signature matches. Key fields: Process Name, the behavior type or category, and the affected resource. Behavioral detections that do not result in a subsequent EID 1116/1117 (no signature match) may represent novel or fileless threats.",
       "category": "Threat Detection",
-      "tags": ["defender", "behavioral-detection", "heuristic"],
-      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}, {"id": 1117, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "behavioral-detection",
+        "heuristic"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1116,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 1117,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1055", "techniqueName": "Process Injection" },
-        { "techniqueId": "T1003", "techniqueName": "OS Credential Dumping" }
+        {
+          "techniqueId": "T1055",
+          "techniqueName": "Process Injection",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1003",
+          "techniqueName": "OS Credential Dumping",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -94,8 +148,17 @@
       "summary": "Windows Defender detected a threat.",
       "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBins (e.g., powershell.exe, mshta.exe, wscript.exe) are higher priority than detections in temp directories.",
       "category": "Threat Detection",
-      "tags": ["defender", "malware", "detection"],
-      "relatedEventIds": [{"id": 1117, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "malware",
+        "detection"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1117,
+          "log": "WindowsDefender"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Pivot on Process Name to identify what was executing the detected payload",
@@ -124,8 +187,18 @@
       "summary": "Windows Defender took a remediation action on a detected threat.",
       "details": "Generated when Windows Defender performs a remediation action following a detection (EID 1116). Key fields: Threat Name, Action (Quarantine, Remove, Allow, Block, Clean), Action Status (success or failure), and ThreatID. Action Status of failure means the threat was detected but not successfully remediated — the file or process may still be active. Correlate ThreatID with EID 1116 to link detection and response. An action of 'Allow' or 'No Action Taken' may indicate the threat was excluded or the user overrode the detection.",
       "category": "Threat Detection",
-      "tags": ["defender", "malware", "detection", "remediation"],
-      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "malware",
+        "detection",
+        "remediation"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1116,
+          "log": "WindowsDefender"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Action Status failure means the file or process may still be present — escalate immediately",
@@ -153,8 +226,18 @@
       "summary": "An ASR rule blocked a potentially malicious operation.",
       "details": "Generated when an Attack Surface Reduction (ASR) rule fires in block mode and prevents an operation. Key fields: the rule GUID (identifies which ASR rule triggered), Process Name (the process that attempted the blocked operation), and Path (the target file or object). Each ASR rule GUID maps to a specific rule such as 'Block Office applications from creating executable content' or 'Block credential stealing from Windows LSASS'. An ASR block during an incident is a high-confidence signal that an attacker technique was attempted and stopped.",
       "category": "Attack Surface Reduction",
-      "tags": ["defender", "asr", "defense-in-depth", "blocked"],
-      "relatedEventIds": [{"id": 1122, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "asr",
+        "defense-in-depth",
+        "blocked"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1122,
+          "log": "WindowsDefender"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Map the rule GUID to a specific ASR rule using Microsoft's ASR rule reference to understand what technique was blocked",
@@ -182,8 +265,17 @@
       "summary": "An ASR rule would have blocked an operation but is in audit mode.",
       "details": "Generated when an ASR rule fires in audit mode — the operation was allowed to proceed but would have been blocked in enforcement mode. Key fields are identical to EID 1121: rule GUID, Process Name, and Path. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement. Treat audit events from known-bad processes with the same urgency as block events.",
       "category": "Attack Surface Reduction",
-      "tags": ["defender", "asr", "audit"],
-      "relatedEventIds": [{"id": 1121, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "asr",
+        "audit"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1121,
+          "log": "WindowsDefender"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Audit mode means the operation succeeded — treat as executed attacker activity, not just an attempt",
@@ -210,8 +302,17 @@
       "summary": "Windows Defender security intelligence (signatures) updated successfully.",
       "details": "Generated when Windows Defender successfully updates its security intelligence (antimalware signatures). Key fields: the new signature version and the update source. Monitoring the cadence of EID 2001 events is useful for establishing a baseline — a host that suddenly stops receiving updates (no 2001 events for an extended period) may be isolated from update sources, have update mechanisms disabled, or be experiencing network-level blocking of update traffic consistent with a compromised host trying to avoid signature-based detection of its malware.",
       "category": "Defender Configuration",
-      "tags": ["defender", "signatures", "update"],
-      "relatedEventIds": [{"id": 2002, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "signatures",
+        "update"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2002,
+          "log": "WindowsDefender"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Absence of EID 2001 events over an extended period may indicate update mechanisms have been disabled or blocked",
@@ -239,10 +340,33 @@
       "summary": "Windows Defender failed to update its security intelligence.",
       "details": "Generated when a Windows Defender security intelligence update fails. Key fields: error code and the update source that was attempted. Repeated EID 2002 failures on an otherwise internet-connected host may indicate that the host cannot reach Microsoft update servers — potentially because an attacker has modified the hosts file, DNS, firewall rules, or proxy settings to block updates and prevent new signatures from detecting their tools. Correlate with network log sources to determine whether update traffic is being blocked at the host or network level.",
       "category": "Defender Configuration",
-      "tags": ["defender", "signatures", "update", "defense-evasion"],
-      "relatedEventIds": [{"id": 2001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "signatures",
+        "update",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2001,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -271,10 +395,28 @@
       "summary": "Windows Defender real-time protection was turned off.",
       "details": "Generated when Windows Defender real-time protection is disabled. This is a high-priority alert during an incident — disabling real-time protection is a common attacker technique to prevent detection of subsequent payloads. Correlate the timestamp with process creation and logon events to identify what account or process disabled protection. Legitimate causes include Group Policy-managed AV exclusions, third-party AV coexistence, and IT administrative actions; these should be validated against change management records.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper"],
-      "relatedEventIds": [{"id": 5007, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -304,10 +446,33 @@
       "summary": "A Windows Defender real-time protection setting was modified.",
       "details": "Generated when a real-time protection-specific configuration setting is changed. While EID 5007 captures all configuration changes, EID 5004 specifically flags modifications to real-time protection settings such as monitoring scope, behavior monitoring, network protection, or on-access scanning. These changes are higher priority than generic configuration changes because they directly affect the ability to detect active threats. Key field: the specific real-time protection setting that was changed and its new value.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper", "real-time-protection"],
-      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper",
+        "real-time-protection"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5001,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -336,10 +501,29 @@
       "summary": "A Windows Defender configuration setting was modified.",
       "details": "Generated when any Windows Defender configuration setting changes. Key field: the old and new configuration values, recorded in the format 'HKLM\\...\\value = old value -> new value'. Configuration changes of particular interest include additions to ExclusionPath, ExclusionProcess, or ExclusionExtension (attackers add exclusions to prevent detection of their tools), and changes to DisableRealtimeMonitoring, DisableBehaviorMonitoring, or DisableIOAVProtection. Exclusion additions should be correlated against known software deployments.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper", "exclusion"],
-      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper",
+        "exclusion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5001,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -368,10 +552,33 @@
       "summary": "The Windows Defender antimalware engine encountered an error and failed.",
       "details": "Generated when the Windows Defender antimalware engine encounters a fatal error and fails. While engine failures can be caused by resource constraints or software bugs, they can also result from deliberate interference — an attacker crashing or corrupting the Defender engine to prevent detection of subsequent activity. Key field: the error code. Correlate the engine failure timestamp with nearby process creation events, network connections, or file writes to identify whether the failure coincides with attacker activity.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper", "engine"],
-      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper",
+        "engine"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5001,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -400,10 +607,37 @@
       "summary": "Windows Defender malware and PUP scanning was disabled.",
       "details": "Generated when scanning for malware and potentially unwanted programs (PUP) is disabled. This is distinct from EID 5001 (real-time protection disabled) — scanning can be selectively disabled while real-time protection remains nominally enabled. Disabling malware scanning creates a window during which new files can be written to disk and executed without signature-based detection. Treat this event with the same urgency as EID 5001 during an active incident.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper", "scanning"],
-      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}, {"id": 5012, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper",
+        "scanning"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5001,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5012,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -432,10 +666,37 @@
       "summary": "Windows Defender virus scanning was disabled.",
       "details": "Generated when scanning specifically for viruses is disabled. Related to but distinct from EID 5010 (malware/PUP scanning disabled) — Windows Defender distinguishes between virus scanning and the broader malware/PUP scanning category. Disabling virus scanning leaves the system without signature-based detection for executable threats. Correlate with EID 5007 to identify the configuration change, and with Security EID 4688 to identify what process initiated the change.",
       "category": "Defender Configuration",
-      "tags": ["defender", "defense-evasion", "tamper", "scanning"],
-      "relatedEventIds": [{"id": 5010, "log": "WindowsDefender"}, {"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "tags": [
+        "defender",
+        "defense-evasion",
+        "tamper",
+        "scanning"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5010,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5001,
+          "log": "WindowsDefender"
+        },
+        {
+          "id": 5007,
+          "log": "WindowsDefender"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

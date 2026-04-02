@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.7.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.7.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -33,14 +33,28 @@
         "log-cleared",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 104, "log": "System"}],
+      "relatedEventIds": [
+        {
+          "id": 104,
+          "log": "System"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070.001", "techniqueName": "Indicator Removal: Clear Windows Event Logs" }
+        {
+          "techniqueId": "T1070.001",
+          "techniqueName": "Indicator Removal: Clear Windows Event Logs",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName identifies the account that cleared the log \u2014 flag any non-IT account",
-          "Correlate with System EID 104 \u2014 simultaneous clearing of both Security and System logs is a strong evidence destruction indicator",
+          "SubjectUserName identifies the account that cleared the log — flag any non-IT account",
+          "Correlate with System EID 104 — simultaneous clearing of both Security and System logs is a strong evidence destruction indicator",
           "Review the timestamp and check for any log entries from just before the clear for an attacker timeline"
         ],
         "commonFalsePositives": [
@@ -61,21 +75,35 @@
       "level": "AuditSuccess",
       "title": "The system time was changed",
       "summary": "System clock was modified.",
-      "details": "Generated when the system clock is changed. Key fields: SubjectUserName (who changed the time), PreviousTime, and NewTime. Attackers may modify the system clock to manipulate log timestamps, evade time-based detection rules, or shift the investigative timeline. A time change that moves the clock backward \u2014 especially by hours \u2014 immediately before or after malicious activity is a strong defense evasion indicator. Correlate with Security EID 4688 to identify the process that invoked the time change.",
+      "details": "Generated when the system clock is changed. Key fields: SubjectUserName (who changed the time), PreviousTime, and NewTime. Attackers may modify the system clock to manipulate log timestamps, evade time-based detection rules, or shift the investigative timeline. A time change that moves the clock backward — especially by hours — immediately before or after malicious activity is a strong defense evasion indicator. Correlate with Security EID 4688 to identify the process that invoked the time change.",
       "category": "Defense Evasion",
       "tags": [
         "time-change",
         "defense-evasion",
         "log-tampering"
       ],
-      "relatedEventIds": [{"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070.006", "techniqueName": "Indicator Removal: Timestomp" }
+        {
+          "techniqueId": "T1070.006",
+          "techniqueName": "Indicator Removal: Timestomp",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Compare PreviousTime and NewTime \u2014 large backward shifts immediately before malicious activity suggest deliberate timestamp manipulation",
-          "SubjectUserName identifies who changed the time \u2014 non-admin accounts or unexpected accounts warrant investigation",
+          "Compare PreviousTime and NewTime — large backward shifts immediately before malicious activity suggest deliberate timestamp manipulation",
+          "SubjectUserName identifies who changed the time — non-admin accounts or unexpected accounts warrant investigation",
           "Correlate with Security EID 4688 around the same timestamp to identify what process triggered the time change"
         ],
         "commonFalsePositives": [
@@ -103,14 +131,48 @@
         "logon",
         "authentication"
       ],
-      "relatedEventIds": [{"id": 4625, "log": "Security"}, {"id": 4634, "log": "Security"}, {"id": 4672, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 4634,
+          "log": "Security"
+        },
+        {
+          "id": 4672,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1078", "techniqueName": "Valid Accounts" }
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "LogonType is the primary pivot: 2=interactive (console), 3=network (SMB/WMI), 10=RemoteInteractive (RDP), 4=batch, 5=service",
-          "IpAddress/WorkstationName identifies the source \u2014 flag logons from unexpected hosts or external IPs",
+          "IpAddress/WorkstationName identifies the source — flag logons from unexpected hosts or external IPs",
           "TargetUserName combined with LogonType 3 from an admin account outside business hours is a common lateral movement pattern",
           "Correlate LogonID with EID 4634/4647 to track session duration"
         ],
@@ -139,15 +201,33 @@
         "failure",
         "bruteforce"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4740, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4740,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1110", "techniqueName": "Brute Force" }
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "SubStatus 0xC000006A (wrong password) vs 0xC0000064 (bad username) distinguishes valid-user brute force from username enumeration",
           "Many failures against many accounts from one source = password spray; many failures against one account = brute force",
-          "IpAddress/WorkstationName identifies the source \u2014 external IPs or unfamiliar workstations are high priority",
+          "IpAddress/WorkstationName identifies the source — external IPs or unfamiliar workstations are high priority",
           "Correlate with EID 4740 to identify accounts that were locked out as a result"
         ],
         "commonFalsePositives": [
@@ -175,10 +255,19 @@
         "logoff",
         "authentication"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4647, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4647,
+          "log": "Security"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
-          "LogonID links this event back to EID 4624 \u2014 use it to calculate full session duration",
+          "LogonID links this event back to EID 4624 — use it to calculate full session duration",
           "Long-lived sessions (hours to days) for network logon types may indicate persistent attacker access or a long-running tool"
         ],
         "commonFalsePositives": [
@@ -205,7 +294,16 @@
         "logoff",
         "authentication"
       ],
-      "relatedEventIds": [{"id": 4634, "log": "Security"}, {"id": 4624, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4634,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate LogonID with EID 4624 to identify the originating logon and calculate session duration",
@@ -236,15 +334,54 @@
         "explicit-credentials",
         "runas"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4769, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4769,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1550.002", "techniqueName": "Use Alternate Authentication Material: Pass the Hash" },
-        { "techniqueId": "T1078", "techniqueName": "Valid Accounts" }
+        {
+          "techniqueId": "T1550.002",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName vs TargetUserName mismatch indicates credential substitution \u2014 flag when TargetUserName is a more privileged account",
-          "TargetServerName identifies the remote target \u2014 flag connections to domain controllers, servers, or internal infrastructure",
+          "SubjectUserName vs TargetUserName mismatch indicates credential substitution — flag when TargetUserName is a more privileged account",
+          "TargetServerName identifies the remote target — flag connections to domain controllers, servers, or internal infrastructure",
           "ProcessName of unexpected executables (e.g., cmd.exe, wmic.exe, PowerShell) using explicit credentials is a lateral movement indicator"
         ],
         "commonFalsePositives": [
@@ -266,26 +403,53 @@
       "level": "AuditSuccess",
       "title": "A handle to an object was requested",
       "summary": "Object handle request recorded.",
-      "details": "Generated when access to a file, registry key, or kernel object is requested. Records the requested access rights but not whether the operation was performed \u2014 correlate with 4663 to confirm execution. Requires SACL configuration on monitored objects.",
+      "details": "Generated when access to a file, registry key, or kernel object is requested. Records the requested access rights but not whether the operation was performed — correlate with 4663 to confirm execution. Requires SACL configuration on monitored objects.",
       "category": "Object Access",
       "tags": [
         "file-access",
         "registry-access",
         "object-access"
       ],
-      "relatedEventIds": [{"id": 4663, "log": "Security"}, {"id": 4670, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4663,
+          "log": "Security"
+        },
+        {
+          "id": 4670,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1083", "techniqueName": "File and Directory Discovery" },
-        { "techniqueId": "T1112", "techniqueName": "Modify Registry" }
+        {
+          "techniqueId": "T1083",
+          "techniqueName": "File and Directory Discovery",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1112",
+          "techniqueName": "Modify Registry",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "AccessMask field records what access was requested \u2014 flag WriteData, DELETE, or WRITE_DAC on sensitive objects",
-          "ObjectName identifies the file or registry key \u2014 correlate against a list of sensitive paths (SAM, NTDS, LSASS, credential stores)",
+          "AccessMask field records what access was requested — flag WriteData, DELETE, or WRITE_DAC on sensitive objects",
+          "ObjectName identifies the file or registry key — correlate against a list of sensitive paths (SAM, NTDS, LSASS, credential stores)",
           "Correlate with EID 4663 to confirm whether the handle was used for actual access"
         ],
         "commonFalsePositives": [
-          "Normal file and registry access by legitimate applications \u2014 high volume on systems without targeted SACLs"
+          "Normal file and registry access by legitimate applications — high volume on systems without targeted SACLs"
         ]
       },
       "source": {
@@ -309,19 +473,46 @@
         "persistence",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4688, "log": "Security"}, {"id": 4663, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1112", "techniqueName": "Modify Registry" },
-        { "techniqueId": "T1543.003", "techniqueName": "Create or Modify System Process: Windows Service" }
+        {
+          "techniqueId": "T1112",
+          "techniqueName": "Modify Registry",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1543.003",
+          "techniqueName": "Create or Modify System Process: Windows Service",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ObjectName is the key pivot \u2014 filter on Run/RunOnce, service ImagePath, Defender exclusion paths, and security tool configuration keys",
-          "OldValue vs NewValue reveals what changed \u2014 value deletions (OldValue present, NewValue absent) can also indicate cleanup",
+          "ObjectName is the key pivot — filter on Run/RunOnce, service ImagePath, Defender exclusion paths, and security tool configuration keys",
+          "OldValue vs NewValue reveals what changed — value deletions (OldValue present, NewValue absent) can also indicate cleanup",
           "Correlate with Security EID 4688 to identify the process that made the change"
         ],
         "commonFalsePositives": [
-          "High-volume legitimate registry activity \u2014 this event requires targeted filtering on sensitive key paths to be actionable",
+          "High-volume legitimate registry activity — this event requires targeted filtering on sensitive key paths to be actionable",
           "Software installations and updates modifying their own registry keys"
         ]
       },
@@ -347,18 +538,36 @@
         "credential-access",
         "replication"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1003.006", "techniqueName": "OS Credential Dumping: DCSync" }
+        {
+          "techniqueId": "T1003.006",
+          "techniqueName": "OS Credential Dumping: DCSync",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "DCSync detection: filter for ObjectType GUIDs 1131f6aa-9c07-11d1-f79f-00c04fc2dcd2 (DS-Replication-Get-Changes) and 1131f6ad-9c07-11d1-f79f-00c04fc2dcd2 (DS-Replication-Get-Changes-All) from a non-DC account",
-          "SubjectUserName should be a domain controller machine account for legitimate replication \u2014 any other account is suspicious",
+          "SubjectUserName should be a domain controller machine account for legitimate replication — any other account is suspicious",
           "Correlate with Security EID 4624 to identify how the attacker authenticated before performing the replication request"
         ],
         "commonFalsePositives": [
-          "Legitimate AD replication between domain controllers \u2014 SubjectUserName will be a DC machine account",
+          "Legitimate AD replication between domain controllers — SubjectUserName will be a DC machine account",
           "Azure AD Connect and other directory synchronization tools with replication permissions"
         ]
       },
@@ -383,19 +592,46 @@
         "registry-access",
         "object-access"
       ],
-      "relatedEventIds": [{"id": 4656, "log": "Security"}, {"id": 4670, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4670,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1083", "techniqueName": "File and Directory Discovery" },
-        { "techniqueId": "T1005", "techniqueName": "Data from Local System" }
+        {
+          "techniqueId": "T1083",
+          "techniqueName": "File and Directory Discovery",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1005",
+          "techniqueName": "Data from Local System",
+          "tactics": [
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Accesses field shows what operation was performed \u2014 WriteData/AddFile or DELETE on sensitive paths are high priority",
-          "ObjectName identifies the specific file or registry key accessed \u2014 flag sensitive paths such as SAM, NTDS.dit, credential manager stores",
+          "Accesses field shows what operation was performed — WriteData/AddFile or DELETE on sensitive paths are high priority",
+          "ObjectName identifies the specific file or registry key accessed — flag sensitive paths such as SAM, NTDS.dit, credential manager stores",
           "SubjectUserName combined with ProcessName reveals what account and process performed the access"
         ],
         "commonFalsePositives": [
-          "Legitimate application access to monitored files \u2014 high volume without targeted SACL scoping"
+          "Legitimate application access to monitored files — high volume without targeted SACL scoping"
         ]
       },
       "source": {
@@ -419,13 +655,31 @@
         "acl-change",
         "object-access"
       ],
-      "relatedEventIds": [{"id": 4663, "log": "Security"}, {"id": 4656, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4663,
+          "log": "Security"
+        },
+        {
+          "id": 4656,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1222", "techniqueName": "File and Directory Permissions Modification" }
+        {
+          "techniqueId": "T1222",
+          "techniqueName": "File and Directory Permissions Modification",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "OldSd and NewSd are SDDL strings \u2014 diff them to determine what permissions were added or removed",
+          "OldSd and NewSd are SDDL strings — diff them to determine what permissions were added or removed",
           "Permission changes on security tool directories, log directories, or credential stores may indicate defense evasion or pre-staging",
           "SubjectUserName combined with ObjectName identifies who changed permissions on what"
         ],
@@ -454,19 +708,54 @@
         "privilege",
         "authentication"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1078", "techniqueName": "Valid Accounts" },
-        { "techniqueId": "T1134", "techniqueName": "Access Token Manipulation" }
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1134",
+          "techniqueName": "Access Token Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "PrivilegeList is the key field \u2014 SeDebugPrivilege enables memory access to other processes (used by credential dumpers), SeBackupPrivilege enables reading any file",
+          "PrivilegeList is the key field — SeDebugPrivilege enables memory access to other processes (used by credential dumpers), SeBackupPrivilege enables reading any file",
           "Correlate LogonID with EID 4624 to identify the logon session that received the privileges",
           "Unexpected non-admin accounts assigned SeDebugPrivilege or SeTcbPrivilege are high-confidence escalation indicators"
         ],
         "commonFalsePositives": [
-          "SYSTEM logons are very high volume and routinely receive sensitive privileges \u2014 baseline and filter these",
+          "SYSTEM logons are very high volume and routinely receive sensitive privileges — baseline and filter these",
           "Administrator logons receiving their normal assigned privileges"
         ]
       },
@@ -490,19 +779,33 @@
         "process",
         "execution"
       ],
-      "relatedEventIds": [{"id": 4689, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4689,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059", "techniqueName": "Command and Scripting Interpreter" }
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CommandLine (requires audit policy: Include command line in process creation events) is the highest-value field \u2014 search for encoded commands, download cradles, and LOLBin abuse",
-          "ParentProcessName establishes the process chain \u2014 unexpected parents (e.g., Office spawning cmd.exe, or wscript.exe spawning PowerShell) are strong malicious indicators",
-          "SubjectUserName identifies the account context \u2014 SYSTEM or service account spawning interactive shells is suspicious",
+          "CommandLine (requires audit policy: Include command line in process creation events) is the highest-value field — search for encoded commands, download cradles, and LOLBin abuse",
+          "ParentProcessName establishes the process chain — unexpected parents (e.g., Office spawning cmd.exe, or wscript.exe spawning PowerShell) are strong malicious indicators",
+          "SubjectUserName identifies the account context — SYSTEM or service account spawning interactive shells is suspicious",
           "Correlate NewProcessId with EID 4689 to track process lifetime"
         ],
         "commonFalsePositives": [
-          "Any legitimate process creation \u2014 very high volume; effective use requires focused filtering on suspicious parent-child relationships or command patterns"
+          "Any legitimate process creation — very high volume; effective use requires focused filtering on suspicious parent-child relationships or command patterns"
         ]
       },
       "source": {
@@ -525,11 +828,16 @@
         "process",
         "execution"
       ],
-      "relatedEventIds": [{"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
-          "Pair with EID 4688 using ProcessId to calculate process lifetime \u2014 sub-second or very short-lived processes are characteristic of one-liner or stager execution",
-          "ExitStatus of non-zero may indicate the process failed or was killed \u2014 correlate with Defender or EDR telemetry"
+          "Pair with EID 4688 using ProcessId to calculate process lifetime — sub-second or very short-lived processes are characteristic of one-liner or stager execution",
+          "ExitStatus of non-zero may indicate the process failed or was killed — correlate with Defender or EDR telemetry"
         ],
         "commonFalsePositives": [
           "Normal process termination for any application"
@@ -555,13 +863,27 @@
         "service",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 7045, "log": "System"}],
+      "relatedEventIds": [
+        {
+          "id": 7045,
+          "log": "System"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1543.003", "techniqueName": "Create or Modify System Process: Windows Service" }
+        {
+          "techniqueId": "T1543.003",
+          "techniqueName": "Create or Modify System Process: Windows Service",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName identifies the account that installed the service \u2014 flag non-admin or unexpected accounts",
+          "SubjectUserName identifies the account that installed the service — flag non-admin or unexpected accounts",
           "Correlate with System EID 7045 for the ServiceFileName (executable path) to assess the binary location",
           "ServiceType and ServiceStartType reveal whether the service runs as a kernel driver or user-mode process, and whether it starts at boot"
         ],
@@ -590,13 +912,39 @@
         "scheduled-task",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 4699, "log": "Security"}, {"id": 4700, "log": "Security"}, {"id": 4702, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4699,
+          "log": "Security"
+        },
+        {
+          "id": 4700,
+          "log": "Security"
+        },
+        {
+          "id": 4702,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TaskContent XML contains the full task definition \u2014 inspect the Action element for the executable path and arguments",
+          "TaskContent XML contains the full task definition — inspect the Action element for the executable path and arguments",
           "LogonType of Password in the TaskContent stores credentials in Credential Manager; S4U or InteractiveToken are also worth noting",
           "Tasks created in the root scheduler namespace (no subfolder) are more commonly malicious than vendor-subfoldered tasks",
           "SubjectUserName identifies who created the task"
@@ -626,15 +974,50 @@
         "scheduled-task",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 4698, "log": "Security"}, {"id": 4700, "log": "Security"}, {"id": 4702, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4700,
+          "log": "Security"
+        },
+        {
+          "id": 4702,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" },
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate TaskName with EID 4698 to determine when the task was created and whether it ran before deletion",
-          "Cross-reference with Task Scheduler EID 200 to confirm whether the task executed before being deleted \u2014 execution followed by deletion is a strong cleanup indicator",
+          "Cross-reference with Task Scheduler EID 200 to confirm whether the task executed before being deleted — execution followed by deletion is a strong cleanup indicator",
           "SubjectUserName identifies who deleted the task"
         ],
         "commonFalsePositives": [
@@ -662,15 +1045,41 @@
         "scheduled-task",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 4698, "log": "Security"}, {"id": 4699, "log": "Security"}, {"id": 4702, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4699,
+          "log": "Security"
+        },
+        {
+          "id": 4702,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "Re-enabling a previously disabled task may indicate repurposing of a dormant persistence mechanism",
           "Correlate TaskName with EID 4698 to review the original task definition and action",
-          "SubjectUserName combined with timing \u2014 enablement outside business hours or during an active incident is suspicious"
+          "SubjectUserName combined with timing — enablement outside business hours or during an active incident is suspicious"
         ],
         "commonFalsePositives": [
           "Group Policy or software re-enabling tasks that were disabled during maintenance",
@@ -697,13 +1106,39 @@
         "scheduled-task",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 4698, "log": "Security"}, {"id": 4699, "log": "Security"}, {"id": 4700, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4699,
+          "log": "Security"
+        },
+        {
+          "id": 4700,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TaskContentNew XML shows the updated definition \u2014 diff the Action element against EID 4698 TaskContent to identify what changed",
+          "TaskContentNew XML shows the updated definition — diff the Action element against EID 4698 TaskContent to identify what changed",
           "Changes to the executable path or arguments of an existing task are a high-fidelity persistence modification indicator",
           "SubjectUserName and timing of the update relative to other suspicious activity helps establish attacker presence"
         ],
@@ -733,18 +1168,36 @@
         "token",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4688, "log": "Security"}, {"id": 4672, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 4672,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1134", "techniqueName": "Access Token Manipulation" }
+        {
+          "techniqueId": "T1134",
+          "techniqueName": "Access Token Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "EnabledPrivilegeList is the key field \u2014 SeDebugPrivilege, SeTakeOwnershipPrivilege, SeLoadDriverPrivilege, and SeTcbPrivilege are the highest-risk privileges to monitor",
+          "EnabledPrivilegeList is the key field — SeDebugPrivilege, SeTakeOwnershipPrivilege, SeLoadDriverPrivilege, and SeTcbPrivilege are the highest-risk privileges to monitor",
           "Correlate TargetProcessName with Security EID 4688 to verify the process is legitimate",
           "SeDebugPrivilege enabled on a non-system process accessing LSASS may precede credential dumping"
         ],
         "commonFalsePositives": [
-          "High volume from OS processes \u2014 filtering on specific high-risk privilege names is required to reduce noise",
+          "High volume from OS processes — filtering on specific high-risk privilege names is required to reduce noise",
           "Debuggers and profiling tools legitimately enabling SeDebugPrivilege"
         ]
       },
@@ -762,22 +1215,61 @@
       "level": "AuditSuccess",
       "title": "A user right was assigned",
       "summary": "A privilege or user right was assigned to an account.",
-      "details": "Generated when a user right (privilege) is assigned to an account. Key fields: SubjectUserName (who made the change), TargetSid (the account receiving the right), and PrivilegeList (the specific privilege assigned). Assigning powerful privileges \u2014 such as SeDebugPrivilege, SeTcbPrivilege, SeCreateTokenPrivilege, or SeImpersonatePrivilege \u2014 to accounts that should not have them is a privilege escalation technique. Changes to privilege assignments outside of normal change windows warrant investigation.",
+      "details": "Generated when a user right (privilege) is assigned to an account. Key fields: SubjectUserName (who made the change), TargetSid (the account receiving the right), and PrivilegeList (the specific privilege assigned). Assigning powerful privileges — such as SeDebugPrivilege, SeTcbPrivilege, SeCreateTokenPrivilege, or SeImpersonatePrivilege — to accounts that should not have them is a privilege escalation technique. Changes to privilege assignments outside of normal change windows warrant investigation.",
       "category": "Privilege Escalation",
       "tags": [
         "privilege",
         "user-right",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4705, "log": "Security"}, {"id": 4672, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4705,
+          "log": "Security"
+        },
+        {
+          "id": 4672,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1078", "techniqueName": "Valid Accounts" },
-        { "techniqueId": "T1134", "techniqueName": "Access Token Manipulation" }
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1134",
+          "techniqueName": "Access Token Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "PrivilegeList is the key field \u2014 SeDebugPrivilege, SeTcbPrivilege, SeCreateTokenPrivilege, and SeImpersonatePrivilege on non-admin accounts are high risk",
-          "SubjectUserName identifies who assigned the right \u2014 changes made by unexpected accounts are suspicious",
+          "PrivilegeList is the key field — SeDebugPrivilege, SeTcbPrivilege, SeCreateTokenPrivilege, and SeImpersonatePrivilege on non-admin accounts are high risk",
+          "SubjectUserName identifies who assigned the right — changes made by unexpected accounts are suspicious",
           "Correlate with EID 4672 for the account that subsequently uses the elevated privileges"
         ],
         "commonFalsePositives": [
@@ -799,20 +1291,34 @@
       "level": "AuditSuccess",
       "title": "A user right was removed",
       "summary": "A privilege or user right was removed from an account.",
-      "details": "Generated when a user right is removed from an account. Key fields: SubjectUserName, TargetSid, and PrivilegeList. While adding privileges (EID 4704) is more commonly malicious, removing privileges from security-sensitive accounts or service accounts can be a defense evasion technique \u2014 for example, removing SeAuditPrivilege from an account to prevent it from generating audit events, or removing privileges from a security tool's service account to impair its function.",
+      "details": "Generated when a user right is removed from an account. Key fields: SubjectUserName, TargetSid, and PrivilegeList. While adding privileges (EID 4704) is more commonly malicious, removing privileges from security-sensitive accounts or service accounts can be a defense evasion technique — for example, removing SeAuditPrivilege from an account to prevent it from generating audit events, or removing privileges from a security tool's service account to impair its function.",
       "category": "Defense Evasion",
       "tags": [
         "privilege",
         "user-right",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4704, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4704,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562", "techniqueName": "Impair Defenses" }
+        {
+          "techniqueId": "T1562",
+          "techniqueName": "Impair Defenses",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetSid identifies whose privileges were removed \u2014 changes to security tool service accounts or admin accounts warrant investigation",
+          "TargetSid identifies whose privileges were removed — changes to security tool service accounts or admin accounts warrant investigation",
           "SeAuditPrivilege removal from a service account may be an attempt to suppress event logging by that service",
           "Correlate with EID 4704 to find privilege assignments/removals in close succession, which may indicate privilege manipulation"
         ],
@@ -835,22 +1341,40 @@
       "level": "AuditSuccess",
       "title": "System audit policy was changed",
       "summary": "The security audit policy was modified.",
-      "details": "Generated when the system-level audit policy is changed. Key fields: SubjectUserName and the specific audit category and subcategory changes (AuditPolicyChanges). Attackers frequently disable auditing before performing malicious actions \u2014 for example, disabling account logon auditing before credential attacks, or disabling object access auditing before registry or file modifications. A change that reduces audit coverage (Success/Failure \u2192 No Auditing) on any critical category is a defense evasion indicator. This event itself is only generated if 'Audit Policy Change' auditing is enabled.",
+      "details": "Generated when the system-level audit policy is changed. Key fields: SubjectUserName and the specific audit category and subcategory changes (AuditPolicyChanges). Attackers frequently disable auditing before performing malicious actions — for example, disabling account logon auditing before credential attacks, or disabling object access auditing before registry or file modifications. A change that reduces audit coverage (Success/Failure → No Auditing) on any critical category is a defense evasion indicator. This event itself is only generated if 'Audit Policy Change' auditing is enabled.",
       "category": "Defense Evasion",
       "tags": [
         "audit-policy",
         "defense-evasion",
         "tamper"
       ],
-      "relatedEventIds": [{"id": 4688, "log": "Security"}, {"id": 1102, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 1102,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.002", "techniqueName": "Impair Defenses: Disable Windows Event Logging" }
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "AuditPolicyChanges field shows which subcategory was changed and from/to what level \u2014 changes reducing coverage to 'No Auditing' are the most critical",
-          "SubjectUserName identifies the account that made the change \u2014 non-admin accounts or unexpected accounts warrant immediate investigation",
-          "Correlate with Security EID 1102 (log cleared) and EID 4688 \u2014 audit policy changes followed by a log clear is a strong evidence destruction pattern"
+          "AuditPolicyChanges field shows which subcategory was changed and from/to what level — changes reducing coverage to 'No Auditing' are the most critical",
+          "SubjectUserName identifies the account that made the change — non-admin accounts or unexpected accounts warrant immediate investigation",
+          "Correlate with Security EID 1102 (log cleared) and EID 4688 — audit policy changes followed by a log clear is a strong evidence destruction pattern"
         ],
         "commonFalsePositives": [
           "Group Policy audit policy enforcement during gpupdate cycles",
@@ -877,14 +1401,36 @@
         "account-created",
         "user-management"
       ],
-      "relatedEventIds": [{"id": 4722, "log": "Security"}, {"id": 4726, "log": "Security"}, {"id": 4738, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4722,
+          "log": "Security"
+        },
+        {
+          "id": 4726,
+          "log": "Security"
+        },
+        {
+          "id": 4738,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1136.001", "techniqueName": "Create Account: Local Account" }
+        {
+          "techniqueId": "T1136.001",
+          "techniqueName": "Create Account: Local Account",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName identifies who created the account \u2014 flag creation by non-IT accounts or automated processes",
-          "TargetUserName (the new account name) \u2014 generic, numeric, or system-like names (e.g., svc_, admin$) created unexpectedly are suspicious",
+          "SubjectUserName identifies who created the account — flag creation by non-IT accounts or automated processes",
+          "TargetUserName (the new account name) — generic, numeric, or system-like names (e.g., svc_, admin$) created unexpectedly are suspicious",
           "Correlate with EID 4732 to see if the new account was immediately added to a privileged group"
         ],
         "commonFalsePositives": [
@@ -912,13 +1458,31 @@
         "account-enabled",
         "user-management"
       ],
-      "relatedEventIds": [{"id": 4720, "log": "Security"}, {"id": 4725, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4720,
+          "log": "Security"
+        },
+        {
+          "id": 4725,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetUserName identifies the re-enabled account \u2014 check whether it is a dormant, terminated employee, or service account",
+          "TargetUserName identifies the re-enabled account — check whether it is a dormant, terminated employee, or service account",
           "SubjectUserName identifies who enabled the account",
           "Re-enabling an account immediately followed by a logon event (EID 4624) from an unexpected source is a strong compromise indicator"
         ],
@@ -947,9 +1511,27 @@
         "password-change",
         "account-management"
       ],
-      "relatedEventIds": [{"id": 4724, "log": "Security"}, {"id": 4720, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4724,
+          "log": "Security"
+        },
+        {
+          "id": 4720,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -976,21 +1558,39 @@
       "level": "AuditSuccess",
       "title": "An attempt was made to reset an account's password",
       "summary": "Admin or privileged account reset another account's password.",
-      "details": "Generated when an account's password is reset by another account (administrative reset), as opposed to EID 4723 (user self-service change). Key fields: SubjectUserName (the account performing the reset) and TargetUserName (the account being reset). Password resets on privileged accounts \u2014 domain admin, service accounts, or accounts with elevated permissions \u2014 are a common account takeover indicator. Resets performed outside of IT helpdesk hours, or by accounts not typically involved in password management, warrant investigation.",
+      "details": "Generated when an account's password is reset by another account (administrative reset), as opposed to EID 4723 (user self-service change). Key fields: SubjectUserName (the account performing the reset) and TargetUserName (the account being reset). Password resets on privileged accounts — domain admin, service accounts, or accounts with elevated permissions — are a common account takeover indicator. Resets performed outside of IT helpdesk hours, or by accounts not typically involved in password management, warrant investigation.",
       "category": "Account Management",
       "tags": [
         "password-reset",
         "account-management",
         "account-takeover"
       ],
-      "relatedEventIds": [{"id": 4723, "log": "Security"}, {"id": 4738, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4723,
+          "log": "Security"
+        },
+        {
+          "id": 4738,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName is the key pivot \u2014 resets performed by unexpected accounts (non-IT, non-admin) are suspicious",
-          "TargetUserName identifies the victim account \u2014 resets targeting admin, service, or break-glass accounts are highest priority",
+          "SubjectUserName is the key pivot — resets performed by unexpected accounts (non-IT, non-admin) are suspicious",
+          "TargetUserName identifies the victim account — resets targeting admin, service, or break-glass accounts are highest priority",
           "Correlate with EID 4624 to determine if the target account was subsequently used to log on"
         ],
         "commonFalsePositives": [
@@ -1018,14 +1618,32 @@
         "account-disabled",
         "user-management"
       ],
-      "relatedEventIds": [{"id": 4722, "log": "Security"}, {"id": 4720, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4722,
+          "log": "Security"
+        },
+        {
+          "id": 4720,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1531", "techniqueName": "Account Access Removal" }
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "Disabling of a security service account (e.g., an EDR or logging service account) may indicate defense evasion",
-          "SubjectUserName identifies who disabled the account \u2014 flag unexpected actors",
+          "SubjectUserName identifies who disabled the account — flag unexpected actors",
           "Correlate with EID 7036 (service stopped) if the disabled account is associated with a service"
         ],
         "commonFalsePositives": [
@@ -1053,13 +1671,27 @@
         "account-deleted",
         "user-management"
       ],
-      "relatedEventIds": [{"id": 4720, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4720,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1531", "techniqueName": "Account Access Removal" }
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate TargetUserName with EID 4720 \u2014 deletion of a recently created account may indicate attacker cleanup",
+          "Correlate TargetUserName with EID 4720 — deletion of a recently created account may indicate attacker cleanup",
           "Deletion of a service or admin account that was never supposed to be removed warrants investigation",
           "SubjectUserName identifies who deleted the account"
         ],
@@ -1088,15 +1720,37 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4729, "log": "Security"}, {"id": 4732, "log": "Security"}, {"id": 4756, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4729,
+          "log": "Security"
+        },
+        {
+          "id": 4732,
+          "log": "Security"
+        },
+        {
+          "id": 4756,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetUserName is the group name \u2014 additions to Domain Admins, Enterprise Admins, or Schema Admins are critical priority",
-          "MemberSid identifies the added account \u2014 resolve the SID to determine whether it is a known account",
-          "SubjectUserName identifies who made the change \u2014 flag non-IT accounts or automated processes"
+          "TargetUserName is the group name — additions to Domain Admins, Enterprise Admins, or Schema Admins are critical priority",
+          "MemberSid identifies the added account — resolve the SID to determine whether it is a known account",
+          "SubjectUserName identifies who made the change — flag non-IT accounts or automated processes"
         ],
         "commonFalsePositives": [
           "IT adding users to groups as part of role-based access provisioning"
@@ -1122,14 +1776,36 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4728, "log": "Security"}, {"id": 4733, "log": "Security"}, {"id": 4757, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4733,
+          "log": "Security"
+        },
+        {
+          "id": 4757,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1531", "techniqueName": "Account Access Removal" }
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Removal from Domain Admins or other privileged groups \u2014 correlate with EID 4728 to determine if this is part of an add/remove pattern (attacker covering tracks)",
-          "MemberSid identifies the removed account \u2014 check whether removal was expected or authorized",
+          "Removal from Domain Admins or other privileged groups — correlate with EID 4728 to determine if this is part of an add/remove pattern (attacker covering tracks)",
+          "MemberSid identifies the removed account — check whether removal was expected or authorized",
           "Removal of a security service account from a group may impair its function"
         ],
         "commonFalsePositives": [
@@ -1150,21 +1826,43 @@
       "level": "AuditSuccess",
       "title": "A security-enabled local group was created",
       "summary": "A local security group was created.",
-      "details": "Generated when a new security-enabled local group is created. Key fields: SubjectUserName and the new group name. Attackers create local groups to facilitate lateral movement or persistence \u2014 for example, adding a backdoor account to a newly created local group with specific permissions. Local group creation outside of standard IT provisioning processes warrants investigation, particularly if followed by member additions (EID 4732).",
+      "details": "Generated when a new security-enabled local group is created. Key fields: SubjectUserName and the new group name. Attackers create local groups to facilitate lateral movement or persistence — for example, adding a backdoor account to a newly created local group with specific permissions. Local group creation outside of standard IT provisioning processes warrants investigation, particularly if followed by member additions (EID 4732).",
       "category": "Account Management",
       "tags": [
         "group-management",
         "persistence",
         "account-management"
       ],
-      "relatedEventIds": [{"id": 4732, "log": "Security"}, {"id": 4734, "log": "Security"}, {"id": 4735, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4732,
+          "log": "Security"
+        },
+        {
+          "id": 4734,
+          "log": "Security"
+        },
+        {
+          "id": 4735,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1136.001", "techniqueName": "Create Account: Local Account" }
+        {
+          "techniqueId": "T1136.001",
+          "techniqueName": "Create Account: Local Account",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with EID 4732 to see which accounts were immediately added to the new group",
-          "SubjectUserName identifies who created the group \u2014 non-IT or non-admin accounts creating groups warrant investigation",
+          "SubjectUserName identifies who created the group — non-IT or non-admin accounts creating groups warrant investigation",
           "New groups with names mimicking system groups (e.g., 'Administratores' with a typo) are a masquerading indicator"
         ],
         "commonFalsePositives": [
@@ -1192,15 +1890,37 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4733, "log": "Security"}, {"id": 4728, "log": "Security"}, {"id": 4756, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4733,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4756,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetUserName of Administrators is the highest priority \u2014 local admin access enables full control of the system",
+          "TargetUserName of Administrators is the highest priority — local admin access enables full control of the system",
           "MemberSid of a domain account added to local Administrators is a common post-exploitation privilege escalation step",
-          "SubjectUserName identifies who added the member \u2014 flag unexpected actors"
+          "SubjectUserName identifies who added the member — flag unexpected actors"
         ],
         "commonFalsePositives": [
           "IT adding service accounts or admin users to local groups as part of deployment",
@@ -1227,13 +1947,35 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4732, "log": "Security"}, {"id": 4729, "log": "Security"}, {"id": 4757, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4732,
+          "log": "Security"
+        },
+        {
+          "id": 4729,
+          "log": "Security"
+        },
+        {
+          "id": 4757,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1531", "techniqueName": "Account Access Removal" }
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Removal from Administrators group \u2014 may indicate cleanup after temporary privilege escalation",
+          "Removal from Administrators group — may indicate cleanup after temporary privilege escalation",
           "Correlate with EID 4732 to identify an add/remove pattern on the same account (attacker adding and then removing themselves)",
           "MemberSid of a service or security account unexpectedly removed may impair system defenses"
         ],
@@ -1255,20 +1997,38 @@
       "level": "AuditSuccess",
       "title": "A security-enabled local group was deleted",
       "summary": "A local security group was deleted.",
-      "details": "Generated when a security-enabled local group is deleted. Key fields: SubjectUserName and the deleted group name. Group deletion as part of attack cleanup \u2014 removing a backdoor group created during the attack \u2014 is a defense evasion technique. Correlate EID 4734 with EID 4731 to identify groups that were created and then deleted within a short window, which is a strong indicator of malicious group manipulation.",
+      "details": "Generated when a security-enabled local group is deleted. Key fields: SubjectUserName and the deleted group name. Group deletion as part of attack cleanup — removing a backdoor group created during the attack — is a defense evasion technique. Correlate EID 4734 with EID 4731 to identify groups that were created and then deleted within a short window, which is a strong indicator of malicious group manipulation.",
       "category": "Defense Evasion",
       "tags": [
         "group-management",
         "defense-evasion",
         "account-management"
       ],
-      "relatedEventIds": [{"id": 4731, "log": "Security"}, {"id": 4735, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4731,
+          "log": "Security"
+        },
+        {
+          "id": 4735,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate with EID 4731 \u2014 group deleted shortly after creation is a strong cleanup indicator",
+          "Correlate with EID 4731 — group deleted shortly after creation is a strong cleanup indicator",
           "Check EID 4732/4733 between the creation and deletion to identify what members were added and removed",
           "SubjectUserName performing unexpected group deletions warrants investigation"
         ],
@@ -1291,21 +2051,43 @@
       "level": "AuditSuccess",
       "title": "A security-enabled local group was changed",
       "summary": "A local security group's attributes were modified.",
-      "details": "Generated when a security-enabled local group's attributes (such as description or SAM account name) are changed. Key fields: SubjectUserName and the changed group name. Note that member additions and removals generate EID 4732/4733 rather than this event \u2014 EID 4735 captures changes to the group object itself. Renaming a group to mimic a legitimate system group is a masquerading technique.",
+      "details": "Generated when a security-enabled local group's attributes (such as description or SAM account name) are changed. Key fields: SubjectUserName and the changed group name. Note that member additions and removals generate EID 4732/4733 rather than this event — EID 4735 captures changes to the group object itself. Renaming a group to mimic a legitimate system group is a masquerading technique.",
       "category": "Account Management",
       "tags": [
         "group-management",
         "account-management",
         "persistence"
       ],
-      "relatedEventIds": [{"id": 4731, "log": "Security"}, {"id": 4732, "log": "Security"}, {"id": 4733, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4731,
+          "log": "Security"
+        },
+        {
+          "id": 4732,
+          "log": "Security"
+        },
+        {
+          "id": 4733,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Group name changes (SAM name) may indicate masquerading \u2014 compare the old and new names",
-          "SubjectUserName identifies who modified the group \u2014 unexpected accounts making group changes warrant investigation",
+          "Group name changes (SAM name) may indicate masquerading — compare the old and new names",
+          "SubjectUserName identifies who modified the group — unexpected accounts making group changes warrant investigation",
           "Correlate with EID 4732 to see if member additions followed the group modification"
         ],
         "commonFalsePositives": [
@@ -1333,15 +2115,37 @@
         "account-changed",
         "user-management"
       ],
-      "relatedEventIds": [{"id": 4720, "log": "Security"}, {"id": 4722, "log": "Security"}, {"id": 4725, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4720,
+          "log": "Security"
+        },
+        {
+          "id": 4722,
+          "log": "Security"
+        },
+        {
+          "id": 4725,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "UserAccountControl flag changes are the highest priority \u2014 enabling Trusted For Delegation or DONT_REQUIRE_PREAUTH are delegation/AS-REP roasting setup indicators",
+          "UserAccountControl flag changes are the highest priority — enabling Trusted For Delegation or DONT_REQUIRE_PREAUTH are delegation/AS-REP roasting setup indicators",
           "AllowedToDelegateTo modifications set up constrained delegation and can be used for privilege escalation",
-          "TargetUserName combined with SubjectUserName \u2014 changes made by an account to a different account's properties are suspicious"
+          "TargetUserName combined with SubjectUserName — changes made by an account to a different account's properties are suspicious"
         ],
         "commonFalsePositives": [
           "IT managing user account attributes as part of normal AD administration",
@@ -1368,13 +2172,31 @@
         "lockout",
         "bruteforce"
       ],
-      "relatedEventIds": [{"id": 4625, "log": "Security"}, {"id": 4776, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 4776,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1110", "techniqueName": "Brute Force" }
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CallerComputerName identifies the source machine \u2014 investigate that host for the authentication activity that caused lockouts",
+          "CallerComputerName identifies the source machine — investigate that host for the authentication activity that caused lockouts",
           "Multiple accounts locked out around the same time from the same source indicates a password spray",
           "Correlate with EID 4625 on the CallerComputerName to identify the failing authentication attempts"
         ],
@@ -1405,14 +2227,45 @@
         "persistence",
         "lateral-movement"
       ],
-      "relatedEventIds": [{"id": 4742, "log": "Security"}, {"id": 4743, "log": "Security"}, {"id": 4624, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4742,
+          "log": "Security"
+        },
+        {
+          "id": 4743,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1136.002", "techniqueName": "Create Account: Domain Account" },
-        { "techniqueId": "T1187", "techniqueName": "Forced Authentication" }
+        {
+          "techniqueId": "T1136.002",
+          "techniqueName": "Create Account: Domain Account",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1187",
+          "techniqueName": "Forced Authentication",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "SubjectUserName creating a computer account is the key pivot \u2014 non-admin users creating machine accounts is a Kerberos abuse precursor",
+          "SubjectUserName creating a computer account is the key pivot — non-admin users creating machine accounts is a Kerberos abuse precursor",
           "Computer account names with random strings or suspicious patterns (e.g., 'EVILPC$') are suspicious",
           "Correlate with Kerberos EID 4768/4769 to see if the new computer account is immediately used for authentication"
         ],
@@ -1435,7 +2288,7 @@
       "level": "AuditSuccess",
       "title": "A computer account was changed",
       "summary": "A computer account's attributes were modified.",
-      "details": "Generated when a computer account's attributes are modified. Key fields: SubjectUserName, TargetComputerName, and the changed attributes. From a DFIR perspective, the most critical changes are modifications to msDS-AllowedToActOnBehalfOfOtherIdentity (enabling Resource-Based Constrained Delegation on the target account \u2014 a key step in RBCD abuse) and changes to the computer account's SPN list. These changes facilitate Kerberos delegation attacks that can lead to full machine compromise.",
+      "details": "Generated when a computer account's attributes are modified. Key fields: SubjectUserName, TargetComputerName, and the changed attributes. From a DFIR perspective, the most critical changes are modifications to msDS-AllowedToActOnBehalfOfOtherIdentity (enabling Resource-Based Constrained Delegation on the target account — a key step in RBCD abuse) and changes to the computer account's SPN list. These changes facilitate Kerberos delegation attacks that can lead to full machine compromise.",
       "category": "Privilege Escalation",
       "tags": [
         "computer-account",
@@ -1443,14 +2296,41 @@
         "kerberos",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4741, "log": "Security"}, {"id": 4768, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4741,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" },
-        { "techniqueId": "T1134.001", "techniqueName": "Access Token Manipulation: Token Impersonation/Theft" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1134.001",
+          "techniqueName": "Access Token Manipulation: Token Impersonation/Theft",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Changes to msDS-AllowedToActOnBehalfOfOtherIdentity attribute enable RBCD \u2014 this is a high-priority indicator when modified by unexpected accounts",
+          "Changes to msDS-AllowedToActOnBehalfOfOtherIdentity attribute enable RBCD — this is a high-priority indicator when modified by unexpected accounts",
           "SPN additions or removals may indicate Kerberoasting setup or Silver Ticket preparation",
           "SubjectUserName making modifications to DC or high-value server computer accounts warrants immediate investigation"
         ],
@@ -1480,13 +2360,31 @@
         "active-directory",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4741, "log": "Security"}, {"id": 4742, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4741,
+          "log": "Security"
+        },
+        {
+          "id": 4742,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate with EID 4741 \u2014 computer account deleted shortly after creation indicates cleanup of a Kerberos abuse artifact",
+          "Correlate with EID 4741 — computer account deleted shortly after creation indicates cleanup of a Kerberos abuse artifact",
           "SubjectUserName performing unexpected computer account deletions, especially for active machines, warrants investigation",
           "Check EID 4742 between creation and deletion to identify what attributes were modified"
         ],
@@ -1515,14 +2413,36 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4757, "log": "Security"}, {"id": 4728, "log": "Security"}, {"id": 4732, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4757,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4732,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Universal group membership affects all domains in the forest \u2014 additions to Enterprise Admins or universal privileged groups have the broadest impact",
-          "MemberSid identifies the added account \u2014 resolve the SID and check whether the account is known and authorized",
+          "Universal group membership affects all domains in the forest — additions to Enterprise Admins or universal privileged groups have the broadest impact",
+          "MemberSid identifies the added account — resolve the SID and check whether the account is known and authorized",
           "SubjectUserName identifies who made the change"
         ],
         "commonFalsePositives": [
@@ -1549,13 +2469,35 @@
         "group-membership",
         "privilege-escalation"
       ],
-      "relatedEventIds": [{"id": 4756, "log": "Security"}, {"id": 4729, "log": "Security"}, {"id": 4733, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4756,
+          "log": "Security"
+        },
+        {
+          "id": 4729,
+          "log": "Security"
+        },
+        {
+          "id": 4733,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1531", "techniqueName": "Account Access Removal" }
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate with EID 4756 to detect add/remove patterns \u2014 an account added and then removed may indicate temporary privilege use",
+          "Correlate with EID 4756 to detect add/remove patterns — an account added and then removed may indicate temporary privilege use",
           "Removal from Enterprise Admins or equivalent universal groups is unusual and warrants validation",
           "MemberSid identifies the removed account"
         ],
@@ -1577,26 +2519,53 @@
       "level": "AuditSuccess",
       "title": "A Kerberos authentication ticket (TGT) was requested",
       "summary": "Kerberos TGT request recorded.",
-      "details": "Generated on domain controllers when a TGT is issued or the request fails. Monitor for RC4 encryption type (0x17) which may indicate AS-REP roasting or downgrade attacks. Failure result codes 0x10 and 0x18 do not generate this event \u2014 those are captured by 4771. Pivot on TargetUserName, TicketEncryptionType, and IpAddress.",
+      "details": "Generated on domain controllers when a TGT is issued or the request fails. Monitor for RC4 encryption type (0x17) which may indicate AS-REP roasting or downgrade attacks. Failure result codes 0x10 and 0x18 do not generate this event — those are captured by 4771. Pivot on TargetUserName, TicketEncryptionType, and IpAddress.",
       "category": "Kerberos",
       "tags": [
         "kerberos",
         "authentication",
         "ticket"
       ],
-      "relatedEventIds": [{"id": 4769, "log": "Security"}, {"id": 4771, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1558.001", "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket" },
-        { "techniqueId": "T1558.004", "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting" }
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.004",
+          "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "TicketEncryptionType 0x17 (RC4-HMAC) when AES is expected may indicate a downgrade attack or AS-REP roasting targeting an account with pre-auth disabled",
-          "IpAddress identifies the source of the TGT request \u2014 unexpected hosts or IP ranges are a pivot point",
+          "IpAddress identifies the source of the TGT request — unexpected hosts or IP ranges are a pivot point",
           "TargetUserName for service or admin accounts requesting TGTs from unusual hosts warrants investigation"
         ],
         "commonFalsePositives": [
-          "Normal Kerberos authentication for all domain users \u2014 very high volume on domain controllers",
+          "Normal Kerberos authentication for all domain users — very high volume on domain controllers",
           "Legacy systems that do not support AES and genuinely require RC4"
         ]
       },
@@ -1621,18 +2590,36 @@
         "authentication",
         "ticket"
       ],
-      "relatedEventIds": [{"id": 4768, "log": "Security"}, {"id": 4771, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1558.003", "techniqueName": "Steal or Forge Kerberos Tickets: Kerberoasting" }
+        {
+          "techniqueId": "T1558.003",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Kerberoasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TicketEncryptionType 0x17 (RC4) for a service account is the primary Kerberoasting indicator \u2014 especially when requested from an unusual host",
-          "ServiceName identifies the target SPN \u2014 requests for SPNs associated with high-privilege service accounts (MSSQLSvc, HTTP/admin) are high priority",
+          "TicketEncryptionType 0x17 (RC4) for a service account is the primary Kerberoasting indicator — especially when requested from an unusual host",
+          "ServiceName identifies the target SPN — requests for SPNs associated with high-privilege service accounts (MSSQLSvc, HTTP/admin) are high priority",
           "Bulk TGS requests (many EID 4769 events in a short time from one source) indicate automated Kerberoasting"
         ],
         "commonFalsePositives": [
-          "Normal service ticket requests for any service accessed by domain users \u2014 high volume",
+          "Normal service ticket requests for any service accessed by domain users — high volume",
           "Failure code 0x20 (expired ticket) is routine and not indicative of attack"
         ]
       },
@@ -1657,15 +2644,42 @@
         "authentication",
         "failure"
       ],
-      "relatedEventIds": [{"id": 4769, "log": "Security"}, {"id": 4768, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1558.004", "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting" },
-        { "techniqueId": "T1110", "techniqueName": "Brute Force" }
+        {
+          "techniqueId": "T1558.004",
+          "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "Failure code 0x18 (KRB_AP_ERR_BAD_INTEGRITY / wrong password) in volume against one account = brute force; across many accounts = password spray",
-          "IpAddress identifies the attacking source \u2014 correlate with network logs to trace origin",
+          "IpAddress identifies the attacking source — correlate with network logs to trace origin",
           "TargetUserName combined with high failure volume is the key detection signal"
         ],
         "commonFalsePositives": [
@@ -1694,15 +2708,42 @@
         "authentication",
         "credential-validation"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4625, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1550.002", "techniqueName": "Use Alternate Authentication Material: Pass the Hash" },
-        { "techniqueId": "T1110", "techniqueName": "Brute Force" }
+        {
+          "techniqueId": "T1550.002",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
           "ErrorCode 0xC000006A (wrong password) in volume indicates brute force or pass-the-hash failure",
-          "Workstation field identifies the source machine \u2014 flag sources that are not domain-joined or are unexpected for the target account",
+          "Workstation field identifies the source machine — flag sources that are not domain-joined or are unexpected for the target account",
           "NTLM authentication in an environment that should use Kerberos may indicate pass-the-hash or a non-domain-joined attacker host"
         ],
         "commonFalsePositives": [
@@ -1724,7 +2765,7 @@
       "level": "AuditSuccess",
       "title": "A session was reconnected to a Window Station",
       "summary": "A session was reconnected to a Windows desktop session.",
-      "details": "Generated when a user reconnects to an existing Windows session (e.g., reconnecting to an RDP session or unlocking a workstation). Key fields: AccountName, ClientName (source hostname), ClientAddress (source IP), and SessionName. This event is useful for detecting RDP session hijacking \u2014 an attacker may reconnect to a legitimate user's disconnected RDP session (using tscon.exe or similar) without needing credentials. Unexpected reconnections from different source IPs than the original session, or reconnections to sessions belonging to other users, are strong lateral movement indicators.",
+      "details": "Generated when a user reconnects to an existing Windows session (e.g., reconnecting to an RDP session or unlocking a workstation). Key fields: AccountName, ClientName (source hostname), ClientAddress (source IP), and SessionName. This event is useful for detecting RDP session hijacking — an attacker may reconnect to a legitimate user's disconnected RDP session (using tscon.exe or similar) without needing credentials. Unexpected reconnections from different source IPs than the original session, or reconnections to sessions belonging to other users, are strong lateral movement indicators.",
       "category": "Logon/Authentication",
       "tags": [
         "session",
@@ -1732,9 +2773,27 @@
         "lateral-movement",
         "session-hijack"
       ],
-      "relatedEventIds": [{"id": 4779, "log": "Security"}, {"id": 4624, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4779,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1563.002", "techniqueName": "Remote Service Session Hijacking: RDP Hijacking" }
+        {
+          "techniqueId": "T1563.002",
+          "techniqueName": "Remote Service Session Hijacking: RDP Hijacking",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -1768,9 +2827,27 @@
         "rdp",
         "lateral-movement"
       ],
-      "relatedEventIds": [{"id": 4778, "log": "Security"}, {"id": 4634, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4778,
+          "log": "Security"
+        },
+        {
+          "id": 4634,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1563.002", "techniqueName": "Remote Service Session Hijacking: RDP Hijacking" }
+        {
+          "techniqueId": "T1563.002",
+          "techniqueName": "Remote Service Session Hijacking: RDP Hijacking",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -1804,14 +2881,41 @@
         "defense-evasion",
         "masquerading"
       ],
-      "relatedEventIds": [{"id": 4720, "log": "Security"}, {"id": 4738, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4720,
+          "log": "Security"
+        },
+        {
+          "id": 4738,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1036", "techniqueName": "Masquerading" },
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1036",
+          "techniqueName": "Masquerading",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "OldTargetUserName to NewTargetUserName is the key pivot \u2014 renaming the default Administrator or Guest account is a classic evasion technique",
+          "OldTargetUserName to NewTargetUserName is the key pivot — renaming the default Administrator or Guest account is a classic evasion technique",
           "NewTargetUserName mimicking system accounts or services (e.g., 'svchost', 'SYSTEM') is masquerading",
           "Correlate with EID 4624 to see if the renamed account is subsequently used for logon"
         ],
@@ -1834,7 +2938,7 @@
       "level": "AuditSuccess",
       "title": "An attempt was made to set the Directory Services Restore Mode administrator password",
       "summary": "DSRM password change attempt on a domain controller.",
-      "details": "Generated when an attempt is made to change the Directory Services Restore Mode (DSRM) administrator password. The DSRM account is a local administrator account on domain controllers that is only active when the DC boots into Directory Services Restore Mode. Setting or changing the DSRM password is an advanced AD persistence technique \u2014 an attacker with DA privileges may configure DSRM to allow logon in normal mode, providing a persistent backdoor that survives domain admin password changes and does not appear in standard AD accounts.",
+      "details": "Generated when an attempt is made to change the Directory Services Restore Mode (DSRM) administrator password. The DSRM account is a local administrator account on domain controllers that is only active when the DC boots into Directory Services Restore Mode. Setting or changing the DSRM password is an advanced AD persistence technique — an attacker with DA privileges may configure DSRM to allow logon in normal mode, providing a persistent backdoor that survives domain admin password changes and does not appear in standard AD accounts.",
       "category": "Persistence",
       "tags": [
         "dsrm",
@@ -1842,15 +2946,29 @@
         "persistence",
         "domain-controller"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "This event should almost never occur in a normal environment \u2014 any instance warrants immediate investigation",
-          "SubjectUserName identifies who set the DSRM password \u2014 only domain admins performing intentional DR preparation should appear here",
-          "Correlate with registry key changes to HKLM\\System\\CurrentControlSet\\Control\\Lsa\\DsrmAdminLogonBehavior \u2014 a value of 2 enables DSRM logon in normal mode, which is a backdoor"
+          "This event should almost never occur in a normal environment — any instance warrants immediate investigation",
+          "SubjectUserName identifies who set the DSRM password — only domain admins performing intentional DR preparation should appear here",
+          "Correlate with registry key changes to HKLM\\System\\CurrentControlSet\\Control\\Lsa\\DsrmAdminLogonBehavior — a value of 2 enables DSRM logon in normal mode, which is a backdoor"
         ],
         "commonFalsePositives": [
           "IT security team setting DSRM passwords during initial DC provisioning as part of DR planning (should be documented)"
@@ -1878,14 +2996,41 @@
         "reconnaissance",
         "bloodhound"
       ],
-      "relatedEventIds": [{"id": 4799, "log": "Security"}, {"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4799,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1069.001", "techniqueName": "Permission Groups Discovery: Local Groups" },
-        { "techniqueId": "T1087.001", "techniqueName": "Account Discovery: Local Account" }
+        {
+          "techniqueId": "T1069.001",
+          "techniqueName": "Permission Groups Discovery: Local Groups",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1087.001",
+          "techniqueName": "Account Discovery: Local Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CallerProcessName is the key field \u2014 net.exe, PowerShell, SharpHound.exe, or unusual binaries performing bulk enumeration are suspicious",
+          "CallerProcessName is the key field — net.exe, PowerShell, SharpHound.exe, or unusual binaries performing bulk enumeration are suspicious",
           "High-volume queries across many TargetUserName values in a short window is a BloodHound/AD recon indicator",
           "Correlate CallerProcessName with EID 4688 to review the process ancestry and command line"
         ],
@@ -1916,16 +3061,43 @@
         "reconnaissance",
         "bloodhound"
       ],
-      "relatedEventIds": [{"id": 4798, "log": "Security"}, {"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4798,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1069.001", "techniqueName": "Permission Groups Discovery: Local Groups" },
-        { "techniqueId": "T1087.001", "techniqueName": "Account Discovery: Local Account" }
+        {
+          "techniqueId": "T1069.001",
+          "techniqueName": "Permission Groups Discovery: Local Groups",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1087.001",
+          "techniqueName": "Account Discovery: Local Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CallerProcessName is the key field \u2014 look for AD recon tools, net.exe, or PowerShell performing bulk group enumeration",
+          "CallerProcessName is the key field — look for AD recon tools, net.exe, or PowerShell performing bulk group enumeration",
           "GroupName of 'Administrators', 'Remote Desktop Users', or 'Remote Management Users' being enumerated by unexpected processes is a lateral movement planning indicator",
-          "Pair with EID 4798 \u2014 tools like BloodHound generate both events together in high volume"
+          "Pair with EID 4798 — tools like BloodHound generate both events together in high volume"
         ],
         "commonFalsePositives": [
           "Endpoint security agents auditing local group membership",
@@ -1946,7 +3118,7 @@
       "level": "AuditSuccess",
       "title": "Certificate Services received a certificate request",
       "summary": "A certificate request was submitted to a Certificate Authority.",
-      "details": "Generated on Active Directory Certificate Services (ADCS) servers when a certificate request is received. Key fields: RequesterName (who submitted the request), the certificate template used, and the Subject Alternative Name (SAN). Monitoring certificate requests is critical for detecting ADCS-based privilege escalation (ESC1\u2013ESC8). ESC1 attacks involve requesting a certificate with an arbitrary SAN (e.g., a domain admin UPN), which can be used for Kerberos authentication as that user. Requests using templates with Client Authentication EKU from unexpected accounts warrant investigation.",
+      "details": "Generated on Active Directory Certificate Services (ADCS) servers when a certificate request is received. Key fields: RequesterName (who submitted the request), the certificate template used, and the Subject Alternative Name (SAN). Monitoring certificate requests is critical for detecting ADCS-based privilege escalation (ESC1–ESC8). ESC1 attacks involve requesting a certificate with an arbitrary SAN (e.g., a domain admin UPN), which can be used for Kerberos authentication as that user. Requests using templates with Client Authentication EKU from unexpected accounts warrant investigation.",
       "category": "Credential Access",
       "tags": [
         "adcs",
@@ -1954,14 +3126,32 @@
         "privilege-escalation",
         "credential-access"
       ],
-      "relatedEventIds": [{"id": 4887, "log": "Security"}, {"id": 4888, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1649", "techniqueName": "Steal or Forge Authentication Certificates" }
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "RequesterName is the key pivot \u2014 unexpected accounts requesting certificates (especially with admin or DC UPNs as SANs) are ESC1 indicators",
-          "The certificate template used matters \u2014 enrollment-agent or vulnerable templates (those that allow requester-specified SANs with Client Authentication EKU) are high risk",
+          "RequesterName is the key pivot — unexpected accounts requesting certificates (especially with admin or DC UPNs as SANs) are ESC1 indicators",
+          "The certificate template used matters — enrollment-agent or vulnerable templates (those that allow requester-specified SANs with Client Authentication EKU) are high risk",
           "Correlate with EID 4887 to confirm whether the certificate was issued, and then with Kerberos EID 4768 to detect if it was used for authentication"
         ],
         "commonFalsePositives": [
@@ -1983,7 +3173,7 @@
       "level": "AuditSuccess",
       "title": "Certificate Services approved a certificate request and issued a certificate",
       "summary": "A Certificate Authority issued a certificate.",
-      "details": "Generated when the Certificate Authority approves and issues a certificate. Key fields: RequesterName, the certificate template, and the issued Subject Alternative Names. This event confirms a certificate was successfully issued \u2014 correlate with EID 4886 (request received) to track the full request-to-issuance lifecycle. In ESC attacks, this event confirms the attacker obtained a certificate that can be used for authentication, privilege escalation, or persistence.",
+      "details": "Generated when the Certificate Authority approves and issues a certificate. Key fields: RequesterName, the certificate template, and the issued Subject Alternative Names. This event confirms a certificate was successfully issued — correlate with EID 4886 (request received) to track the full request-to-issuance lifecycle. In ESC attacks, this event confirms the attacker obtained a certificate that can be used for authentication, privilege escalation, or persistence.",
       "category": "Credential Access",
       "tags": [
         "adcs",
@@ -1991,9 +3181,31 @@
         "privilege-escalation",
         "credential-access"
       ],
-      "relatedEventIds": [{"id": 4886, "log": "Security"}, {"id": 4888, "log": "Security"}, {"id": 4768, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1649", "techniqueName": "Steal or Forge Authentication Certificates" }
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -2020,22 +3232,40 @@
       "level": "AuditFailure",
       "title": "Certificate Services denied a certificate request",
       "summary": "A Certificate Authority rejected a certificate request.",
-      "details": "Generated when the Certificate Authority denies a certificate request. Key fields: RequesterName, the certificate template attempted, and the denial reason. Certificate request denials from unexpected accounts \u2014 particularly with suspicious SANs \u2014 may indicate a failed ESC attack where the CA is properly configured to deny the request. Multiple denials from the same requester targeting the same template may indicate an attacker probing for a misconfigured template.",
+      "details": "Generated when the Certificate Authority denies a certificate request. Key fields: RequesterName, the certificate template attempted, and the denial reason. Certificate request denials from unexpected accounts — particularly with suspicious SANs — may indicate a failed ESC attack where the CA is properly configured to deny the request. Multiple denials from the same requester targeting the same template may indicate an attacker probing for a misconfigured template.",
       "category": "Credential Access",
       "tags": [
         "adcs",
         "certificate",
         "credential-access"
       ],
-      "relatedEventIds": [{"id": 4886, "log": "Security"}, {"id": 4887, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1649", "techniqueName": "Steal or Forge Authentication Certificates" }
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate denied requests (EID 4888) with approved requests (EID 4887) from the same requester \u2014 a denial followed by an approval may indicate template switching to find a vulnerable one",
+          "Correlate denied requests (EID 4888) with approved requests (EID 4887) from the same requester — a denial followed by an approval may indicate template switching to find a vulnerable one",
           "Multiple denials from the same account across different templates is a template enumeration pattern",
-          "Denial reason may reveal the specific control that blocked the request \u2014 'denied by policy module' is the normal block"
+          "Denial reason may reveal the specific control that blocked the request — 'denied by policy module' is the normal block"
         ],
         "commonFalsePositives": [
           "Auto-enrollment failures on hosts without valid certificate templates or enrollment permissions",
@@ -2063,14 +3293,32 @@
         "policy-change",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4947, "log": "Security"}, {"id": 4948, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4947,
+          "log": "Security"
+        },
+        {
+          "id": 4948,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.004", "techniqueName": "Impair Defenses: Disable or Modify System Firewall" }
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Rule direction is key \u2014 inbound rules that allow traffic on non-standard ports or from any source are high priority",
-          "RuleName field may provide context but can be set to anything by the creator \u2014 do not rely on it alone",
+          "Rule direction is key — inbound rules that allow traffic on non-standard ports or from any source are high priority",
+          "RuleName field may provide context but can be set to anything by the creator — do not rely on it alone",
           "Correlate timestamp with Security EID 4688 to identify the process that added the rule"
         ],
         "commonFalsePositives": [
@@ -2099,13 +3347,31 @@
         "policy-change",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4946, "log": "Security"}, {"id": 4948, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4946,
+          "log": "Security"
+        },
+        {
+          "id": 4948,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.004", "techniqueName": "Impair Defenses: Disable or Modify System Firewall" }
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "RuleId links to the original rule \u2014 determine what the rule controlled before modification",
+          "RuleId links to the original rule — determine what the rule controlled before modification",
           "Modifications that change an action from Block to Allow or expand scope to Any are high priority",
           "Correlate with Security EID 4688 to identify the process that modified the rule"
         ],
@@ -2135,14 +3401,32 @@
         "policy-change",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 4946, "log": "Security"}, {"id": 4947, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4946,
+          "log": "Security"
+        },
+        {
+          "id": 4947,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1562.004", "techniqueName": "Impair Defenses: Disable or Modify System Firewall" }
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Deletion of a blocking rule is higher priority than deletion of an allow rule \u2014 determine what traffic the deleted rule was blocking",
-          "RuleId links back to EID 4946 if the rule was originally added locally \u2014 trace the rule's history",
+          "Deletion of a blocking rule is higher priority than deletion of an allow rule — determine what traffic the deleted rule was blocking",
+          "RuleId links back to EID 4946 if the rule was originally added locally — trace the rule's history",
           "Correlate with network activity following the deletion to determine if the removed rule was blocking attacker C2 or lateral movement traffic"
         ],
         "commonFalsePositives": [
@@ -2172,19 +3456,50 @@
         "persistence",
         "acl-abuse"
       ],
-      "relatedEventIds": [{"id": 5137, "log": "Security"}, {"id": 5141, "log": "Security"}, {"id": 4662, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 5137,
+          "log": "Security"
+        },
+        {
+          "id": 5141,
+          "log": "Security"
+        },
+        {
+          "id": 4662,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1484.001", "techniqueName": "Domain Policy Modification: Group Policy Object Modification" },
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" }
+        {
+          "techniqueId": "T1484.001",
+          "techniqueName": "Domain Policy Modification: Group Policy Object Modification",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "AttributeLDAPDisplayName is the primary pivot \u2014 monitor adminSDHolder, ntSecurityDescriptor, msDS-AllowedToActOnBehalfOfOtherIdentity, and member",
+          "AttributeLDAPDisplayName is the primary pivot — monitor adminSDHolder, ntSecurityDescriptor, msDS-AllowedToActOnBehalfOfOtherIdentity, and member",
           "SubjectUserName making AD object modifications outside of normal IT processes (change management windows) warrants investigation",
           "ntSecurityDescriptor changes on privileged groups (Domain Admins, Enterprise Admins) or high-value OUs may indicate ACL backdoor installation"
         ],
         "commonFalsePositives": [
-          "Normal AD administrative operations \u2014 filtering to specific high-value attributes is required to reduce noise",
+          "Normal AD administrative operations — filtering to specific high-value attributes is required to reduce noise",
           "Group Policy applying attribute changes during policy refresh"
         ]
       },
@@ -2202,26 +3517,53 @@
       "level": "AuditSuccess",
       "title": "A directory service object was created",
       "summary": "A new Active Directory object was created.",
-      "details": "Generated when a new Active Directory object is created, provided DS Access auditing is configured. Key fields: SubjectUserName, ObjectDN (the full DN of the new object), and ObjectClass. New AD objects created outside of standard provisioning processes \u2014 particularly user accounts, computer accounts, group policy objects, or certificate templates \u2014 may represent attacker persistence. New GPOs or certificate templates are particularly impactful as they can affect large numbers of systems.",
+      "details": "Generated when a new Active Directory object is created, provided DS Access auditing is configured. Key fields: SubjectUserName, ObjectDN (the full DN of the new object), and ObjectClass. New AD objects created outside of standard provisioning processes — particularly user accounts, computer accounts, group policy objects, or certificate templates — may represent attacker persistence. New GPOs or certificate templates are particularly impactful as they can affect large numbers of systems.",
       "category": "Persistence",
       "tags": [
         "active-directory",
         "persistence",
         "account-management"
       ],
-      "relatedEventIds": [{"id": 5136, "log": "Security"}, {"id": 5141, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 5136,
+          "log": "Security"
+        },
+        {
+          "id": 5141,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1098", "techniqueName": "Account Manipulation" },
-        { "techniqueId": "T1484", "techniqueName": "Domain Policy Modification" }
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1484",
+          "techniqueName": "Domain Policy Modification",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ObjectClass identifies the type of object created \u2014 new groupPolicyContainer or pKICertificateTemplate objects are highest priority",
-          "ObjectDN placement reveals where the object was created \u2014 objects in high-privilege OUs or unexpected containers warrant investigation",
+          "ObjectClass identifies the type of object created — new groupPolicyContainer or pKICertificateTemplate objects are highest priority",
+          "ObjectDN placement reveals where the object was created — objects in high-privilege OUs or unexpected containers warrant investigation",
           "Correlate with EID 5136 for subsequent attribute modifications to the newly created object"
         ],
         "commonFalsePositives": [
-          "Normal AD provisioning operations \u2014 IT creating user accounts, groups, GPOs, or service objects",
+          "Normal AD provisioning operations — IT creating user accounts, groups, GPOs, or service objects",
           "AD Recycle Bin restoring deleted objects"
         ]
       },
@@ -2246,15 +3588,38 @@
         "lateral-movement",
         "network"
       ],
-      "relatedEventIds": [{"id": 5145, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 5145,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1021.002", "techniqueName": "Remote Services: SMB/Windows Admin Shares" },
-        { "techniqueId": "T1039", "techniqueName": "Data from Network Shared Drive" }
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1039",
+          "techniqueName": "Data from Network Shared Drive",
+          "tactics": [
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ShareName of C$, ADMIN$, or IPC$ from an unexpected source is a lateral movement indicator \u2014 these shares are used by tools like PsExec, Impacket, and CrackMapExec",
-          "IpAddress identifies the connecting host \u2014 flag sources outside expected management IP ranges",
+          "ShareName of C$, ADMIN$, or IPC$ from an unexpected source is a lateral movement indicator — these shares are used by tools like PsExec, Impacket, and CrackMapExec",
+          "IpAddress identifies the connecting host — flag sources outside expected management IP ranges",
           "Correlate with EID 5145 for file-level detail on what was accessed within the share"
         ],
         "commonFalsePositives": [
@@ -2276,24 +3641,42 @@
       "level": "AuditSuccess",
       "title": "A directory service object was deleted",
       "summary": "An Active Directory object was deleted.",
-      "details": "Generated when an Active Directory object is deleted. Key fields: SubjectUserName and ObjectDN (the deleted object's distinguished name). Deletion of AD objects as part of attack cleanup \u2014 for example, removing a rogue computer account (created for RBCD abuse), a backdoor user account, or a malicious GPO \u2014 is a defense evasion technique. Correlate EID 5141 with EID 5137 to identify objects created and then deleted within a short timeframe.",
+      "details": "Generated when an Active Directory object is deleted. Key fields: SubjectUserName and ObjectDN (the deleted object's distinguished name). Deletion of AD objects as part of attack cleanup — for example, removing a rogue computer account (created for RBCD abuse), a backdoor user account, or a malicious GPO — is a defense evasion technique. Correlate EID 5141 with EID 5137 to identify objects created and then deleted within a short timeframe.",
       "category": "Defense Evasion",
       "tags": [
         "active-directory",
         "defense-evasion"
       ],
-      "relatedEventIds": [{"id": 5136, "log": "Security"}, {"id": 5137, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 5136,
+          "log": "Security"
+        },
+        {
+          "id": 5137,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate with EID 5137 \u2014 AD object deleted shortly after creation indicates cleanup of a persistence or abuse artifact",
-          "ObjectDN class is important \u2014 deletion of groupPolicyContainer, pKICertificateTemplate, or computer objects are higher priority",
+          "Correlate with EID 5137 — AD object deleted shortly after creation indicates cleanup of a persistence or abuse artifact",
+          "ObjectDN class is important — deletion of groupPolicyContainer, pKICertificateTemplate, or computer objects are higher priority",
           "SubjectUserName performing unexpected deletions of privileged objects warrants immediate investigation"
         ],
         "commonFalsePositives": [
-          "Normal AD housekeeping \u2014 IT deleting stale accounts, groups, or GPOs",
+          "Normal AD housekeeping — IT deleting stale accounts, groups, or GPOs",
           "AD Recycle Bin enabled environments where deleted objects are moved rather than immediately removed"
         ]
       },
@@ -2311,26 +3694,49 @@
       "level": "AuditSuccess",
       "title": "A network share object was checked to see whether client can be granted desired access",
       "summary": "Detailed network share file/folder access check.",
-      "details": "More granular than 5140; generated per-file or per-folder on network share access. Failure events indicate share-level access denials. High-volume event \u2014 filter on RelativeTargetName and Accesses for suspicious write, delete, or execute patterns.",
+      "details": "More granular than 5140; generated per-file or per-folder on network share access. Failure events indicate share-level access denials. High-volume event — filter on RelativeTargetName and Accesses for suspicious write, delete, or execute patterns.",
       "category": "Network Share Access",
       "tags": [
         "file-share",
         "lateral-movement",
         "network"
       ],
-      "relatedEventIds": [{"id": 5140, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 5140,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1021.002", "techniqueName": "Remote Services: SMB/Windows Admin Shares" },
-        { "techniqueId": "T1039", "techniqueName": "Data from Network Shared Drive" }
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1039",
+          "techniqueName": "Data from Network Shared Drive",
+          "tactics": [
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "RelativeTargetName shows the specific file or folder path within the share \u2014 flag access to executables, scripts, or sensitive configuration files",
+          "RelativeTargetName shows the specific file or folder path within the share — flag access to executables, scripts, or sensitive configuration files",
           "Accesses field showing WriteData, AppendData, or DELETE on share paths is a data staging or destructive access indicator",
-          "Failure events indicate access was denied \u2014 repeated failures from one source may indicate reconnaissance or an unauthorized access attempt"
+          "Failure events indicate access was denied — repeated failures from one source may indicate reconnaissance or an unauthorized access attempt"
         ],
         "commonFalsePositives": [
-          "Normal file server access by users \u2014 very high volume; effective use requires targeted filtering",
+          "Normal file server access by users — very high volume; effective use requires targeted filtering",
           "Backup operations accessing large numbers of files across shares"
         ]
       },
@@ -2348,21 +3754,39 @@
       "level": "AuditSuccess",
       "title": "Credential Manager credentials were read",
       "summary": "A process read credentials from the Credential Manager vault.",
-      "details": "Generated when credentials stored in the Windows Credential Manager vault are read. Key fields: SubjectUserName, TargetName (the credential entry accessed), and CallerProcessName (the process that read the credential). Credential Manager stores domain credentials, Windows credentials, and certificate-based credentials. Attackers use tools that enumerate and extract Credential Manager vault contents for lateral movement. Unexpected CallerProcessName values \u2014 particularly non-system processes, command-line tools, or scripting engines \u2014 accessing stored credentials warrant investigation.",
+      "details": "Generated when credentials stored in the Windows Credential Manager vault are read. Key fields: SubjectUserName, TargetName (the credential entry accessed), and CallerProcessName (the process that read the credential). Credential Manager stores domain credentials, Windows credentials, and certificate-based credentials. Attackers use tools that enumerate and extract Credential Manager vault contents for lateral movement. Unexpected CallerProcessName values — particularly non-system processes, command-line tools, or scripting engines — accessing stored credentials warrant investigation.",
       "category": "Credential Access",
       "tags": [
         "credential-manager",
         "credential-access",
         "credential-theft"
       ],
-      "relatedEventIds": [{"id": 4624, "log": "Security"}, {"id": 4688, "log": "Security"}],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1555.004", "techniqueName": "Credentials from Password Stores: Windows Credential Manager" }
+        {
+          "techniqueId": "T1555.004",
+          "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CallerProcessName is the primary pivot \u2014 flag non-standard processes, scripting engines, and known credential dumping tools accessing the vault",
-          "TargetName reveals which stored credential was accessed \u2014 domain credentials, RDP shortcuts, or application passwords are high value to attackers",
+          "CallerProcessName is the primary pivot — flag non-standard processes, scripting engines, and known credential dumping tools accessing the vault",
+          "TargetName reveals which stored credential was accessed — domain credentials, RDP shortcuts, or application passwords are high value to attackers",
           "Correlate with Security EID 4624 and EID 4688 to identify concurrent authentication and process activity"
         ],
         "commonFalsePositives": [

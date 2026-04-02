@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Task Scheduler",
-    "version": "0.4.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.4.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,44 @@
       "summary": "Task Scheduler launched an instance of a task.",
       "details": "Generated when Task Scheduler starts a task instance. This is the task-level start event, distinct from EID 200 (action started), which fires when the specific executable or script within the task begins. Key fields: TaskName and the user context under which the task was launched. EID 100 precedes EID 200 in the execution sequence: 100 → 200 → 201 → 102. Unexpected tasks launching — especially outside of normal business hours or for tasks not registered via standard software installers — warrant investigation.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [{"id": 101, "log": "TaskScheduler"}, {"id": 102, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 101,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 102,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,10 +95,36 @@
       "summary": "Task Scheduler failed to launch a task instance.",
       "details": "Generated when Task Scheduler fails to start a task instance. Key fields: TaskName, the user context, and the error code (ResultCode). Common failure causes include missing executables, insufficient privileges, or a corrupted task definition. From an attacker perspective, a task that fails to start may indicate a partially deployed persistence mechanism — the task was registered (EID 106) but the payload is absent or blocked. Correlate EID 101 with EID 106 using TaskName to determine when the task was created and whether the failure aligns with a security tool removing the payload.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [{"id": 100, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 100,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -93,10 +153,40 @@
       "summary": "Task Scheduler finished running a task instance.",
       "details": "Generated when a task instance finishes, complementing EID 100 (instance started). Key fields: TaskName, ResultCode, and the instance GUID. ResultCode 0 indicates clean completion; non-zero values indicate failure or abnormal termination. Pair EID 102 with EID 100 using TaskName and the instance GUID to measure execution duration. Very short durations for tasks that should run longer, or consistent non-zero result codes after recent task creation, may indicate detection and termination by a security tool.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [{"id": 100, "log": "TaskScheduler"}, {"id": 201, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 100,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 201,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -124,10 +214,47 @@
       "summary": "A new scheduled task was registered.",
       "details": "Generated when a new scheduled task is registered in the Task Scheduler. Key field: TaskName (full path, e.g., \\Microsoft\\Windows\\TaskName). Complements Security EID 4698 but fires independently and may capture task registrations that do not generate a Security audit event depending on audit policy configuration. Tasks registered under the root folder (\\TaskName with no subfolder) rather than a vendor-specific subfolder are more commonly associated with manual or malicious creation.",
       "category": "Task Lifecycle",
-      "tags": ["scheduled-task", "persistence"],
-      "relatedEventIds": [{"id": 140, "log": "TaskScheduler"}, {"id": 141, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 201, "log": "TaskScheduler"}, {"id": 4698, "log": "Security"}],
+      "tags": [
+        "scheduled-task",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 140,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 141,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 201,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4698,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -156,10 +283,40 @@
       "summary": "A running task instance was terminated.",
       "details": "Generated when a task instance is terminated — either forcibly by Task Scheduler (e.g., execution time limit exceeded), by a user, or due to an error condition. Key fields: TaskName and the instance GUID. From a DFIR perspective, a malicious task that was caught and terminated by a security tool will produce this event. Correlate with EID 100 using TaskName and the instance GUID to determine how long the task ran before termination and whether any follow-on activity (EID 200) occurred during that window.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "defense-evasion"],
-      "relatedEventIds": [{"id": 100, "log": "TaskScheduler"}, {"id": 102, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 100,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 102,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -188,10 +345,41 @@
       "summary": "A scheduled task was triggered by a system event.",
       "details": "Generated when a task is triggered by an event-based trigger (as opposed to a time-based schedule). Event-triggered tasks execute in response to specific Windows event log entries, making them a stealthier persistence mechanism than time-based tasks. Key fields: TaskName and the triggering event. Attackers commonly configure event-triggered tasks to fire on logon (Security EID 4624), on process creation, or on system startup, allowing execution without an obvious time-based trigger that might stand out in scheduling reviews.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence", "event-triggered"],
-      "relatedEventIds": [{"id": 100, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence",
+        "event-triggered"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 100,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -220,10 +408,43 @@
       "summary": "An existing scheduled task was updated.",
       "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log — correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
       "category": "Task Lifecycle",
-      "tags": ["scheduled-task", "persistence"],
-      "relatedEventIds": [{"id": 106, "log": "TaskScheduler"}, {"id": 141, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 4702, "log": "Security"}],
+      "tags": [
+        "scheduled-task",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 141,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4702,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -251,11 +472,54 @@
       "summary": "A scheduled task was deleted.",
       "details": "Generated when a scheduled task is removed from the Task Scheduler. Key field: TaskName. Deletion of a recently created or recently triggered task may indicate cleanup of a malicious persistence mechanism. Correlate TaskName with EID 106 and EID 200 to determine whether the task was ever executed before deletion.",
       "category": "Task Lifecycle",
-      "tags": ["scheduled-task", "persistence", "defense-evasion"],
-      "relatedEventIds": [{"id": 106, "log": "TaskScheduler"}, {"id": 140, "log": "TaskScheduler"}, {"id": 200, "log": "TaskScheduler"}, {"id": 4699, "log": "Security"}],
+      "tags": [
+        "scheduled-task",
+        "persistence",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 140,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4699,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" },
-        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -284,10 +548,44 @@
       "summary": "A scheduled task action (executable) began executing.",
       "details": "Generated when a scheduled task action starts. Key fields: TaskName and ActionName (the executable or script path that was launched). This is the primary execution evidence event in the Task Scheduler log and is not captured by the Security log EIDs 4698-4702, which only cover task lifecycle (create/modify/delete/enable), not execution. Pivot on ActionName to identify what was run and correlate with Security EID 4688 to find the resulting process creation event.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [{"id": 201, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}, {"id": 4698, "log": "Security"}, {"id": 4688, "log": "Security"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 201,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -317,10 +615,36 @@
       "summary": "A scheduled task action finished executing.",
       "details": "Generated when a scheduled task action finishes. Key fields: TaskName, ActionName, and ResultCode. A ResultCode of 0 indicates successful completion. Non-zero result codes may indicate the action failed or was terminated. Pair with EID 200 using TaskName to measure execution duration. Abnormally short execution times for tasks that should run longer, or consistent non-zero result codes, may indicate detection and termination by a security tool.",
       "category": "Task Execution",
-      "tags": ["scheduled-task", "execution", "persistence"],
-      "relatedEventIds": [{"id": 200, "log": "TaskScheduler"}, {"id": 106, "log": "TaskScheduler"}],
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1053.005", "techniqueName": "Scheduled Task/Job: Scheduled Task" }
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

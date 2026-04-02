@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WMI Activity",
-    "version": "0.4.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.4.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,29 @@
       "summary": "WMI provider DLL loaded into a provider host process.",
       "details": "Generated when a WMI provider host (WmiPrvSE.exe) successfully loads a provider. Key fields: ProviderName, ProviderPath (full DLL path), and HostProcess. Most legitimate WMI providers load from System32 or known application directories. A ProviderPath pointing to a temp directory, user profile, or uncommon location is a strong indicator of a malicious WMI provider registered for persistence or lateral movement.",
       "category": "WMI Provider",
-      "tags": ["wmi", "provider", "persistence", "lateral-movement"],
-      "relatedEventIds": [{"id": 5861, "log": "WMI"}],
+      "tags": [
+        "wmi",
+        "provider",
+        "persistence",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5861,
+          "log": "WMI"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" }
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,11 +80,42 @@
       "summary": "A WMI provider or client operation returned an error.",
       "details": "Generated when a WMI operation fails, including provider load errors, query execution failures, and access denied results. Key fields: ClientMachine, ClientProcessId, User, and the HRESULT error code. Isolated errors are common in legitimate management software, but clusters of errors from a single process — especially access denied results on sensitive WMI classes (Win32_Process, Win32_NetworkAdapter, Win32_ShadowCopy) — may indicate failed WMI-based enumeration or exploitation. Correlate ClientProcessId with Security EID 4688 to identify the responsible process.",
       "category": "WMI Error",
-      "tags": ["wmi", "error", "reconnaissance"],
-      "relatedEventIds": [{"id": 5857, "log": "WMI"}, {"id": 5861, "log": "WMI"}],
+      "tags": [
+        "wmi",
+        "error",
+        "reconnaissance"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5857,
+          "log": "WMI"
+        },
+        {
+          "id": 5861,
+          "log": "WMI"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
-        { "techniqueId": "T1592", "techniqueName": "Gather Victim Host Information" }
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1592",
+          "techniqueName": "Gather Victim Host Information",
+          "tactics": [
+            {
+              "tacticId": "TA0043",
+              "tacticName": "Reconnaissance"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -94,11 +144,44 @@
       "summary": "A WMI Event Subscription System (ESS) notification was triggered.",
       "details": "Generated when a WMI ESS (Eventing Sub-System) subscription fires — that is, when an event filter condition is met and a bound event consumer is invoked. This event confirms that a WMI subscription has actively triggered, as opposed to EID 5860 (temporary registration) and EID 5861 (permanent registration) which only record creation. Key fields: the triggering query and the consumer that was invoked. A 5859 on a system where the corresponding 5861 registration appeared recently, or where the subscription references an unexpected executable, is a strong lateral movement or persistence-execution indicator.",
       "category": "WMI Subscription",
-      "tags": ["wmi", "subscription", "persistence", "lateral-movement", "execution"],
-      "relatedEventIds": [{"id": 5860, "log": "WMI"}, {"id": 5861, "log": "WMI"}],
+      "tags": [
+        "wmi",
+        "subscription",
+        "persistence",
+        "lateral-movement",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5860,
+          "log": "WMI"
+        },
+        {
+          "id": 5861,
+          "log": "WMI"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
-        { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1546.003",
+          "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -126,11 +209,39 @@
       "summary": "A temporary (non-persistent) WMI event subscription was registered.",
       "details": "Generated when a temporary WMI event subscription is created. Temporary subscriptions exist only in memory and do not survive a reboot, unlike permanent subscriptions (EID 5861). Key fields: NamespaceName, Query (the WMI event filter query), and the registering process. While less commonly used for persistence than permanent subscriptions, temporary subscriptions can be used for in-session lateral movement triggers or to respond to specific system conditions during an active intrusion.",
       "category": "WMI Subscription",
-      "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
-      "relatedEventIds": [{"id": 5861, "log": "WMI"}],
+      "tags": [
+        "wmi",
+        "subscription",
+        "persistence",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5861,
+          "log": "WMI"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
-        { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1546.003",
+          "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -159,11 +270,43 @@
       "summary": "A persistent WMI event subscription was registered.",
       "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
       "category": "WMI Subscription",
-      "tags": ["wmi", "subscription", "persistence", "lateral-movement"],
-      "relatedEventIds": [{"id": 5857, "log": "WMI"}, {"id": 5860, "log": "WMI"}],
+      "tags": [
+        "wmi",
+        "subscription",
+        "persistence",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5857,
+          "log": "WMI"
+        },
+        {
+          "id": 5860,
+          "log": "WMI"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1047", "techniqueName": "Windows Management Instrumentation" },
-        { "techniqueId": "T1546.003", "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription" }
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1546.003",
+          "techniqueName": "Event Triggered Execution: Windows Management Instrumentation Event Subscription",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - RDP Client",
-    "version": "0.3.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.3.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/rdp-client.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,32 @@
       "summary": "Outbound RDP connection attempt initiated from this host.",
       "details": "Generated on the source (client) machine when an outbound RDP connection attempt is initiated. Key field: server (the target hostname or IP address). This is a source-side artifact — it records where this machine connected to, making it critical for tracing lateral movement chains. During an investigation of a compromised host, EID 1024 entries reveal which other systems were targeted for RDP from this machine. Correlate the target value with LocalSessionManager EID 21 on the destination host to confirm the connection was successful.",
       "category": "RDP Client",
-      "tags": ["rdp", "lateral-movement", "remote-access"],
-      "relatedEventIds": [{"id": 1025, "log": "TerminalServices"}, {"id": 1102, "log": "TerminalServices"}],
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1025,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1102,
+          "log": "TerminalServices"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,10 +83,32 @@
       "summary": "Outbound RDP session ended or was disconnected.",
       "details": "Generated on the source (client) machine when an RDP session is disconnected. Key fields: server (the target host) and the disconnect reason code. Common reason codes: 0 (local disconnect/user closed), 1 (remote disconnection by server), 2 (transport-level error), 3 (connection lost/network issue), 260 (DNS name lookup failed). Correlate with EID 1024 to calculate the session duration and determine whether the disconnect was user-initiated or unexpected.",
       "category": "RDP Client",
-      "tags": ["rdp", "lateral-movement", "remote-access"],
-      "relatedEventIds": [{"id": 1024, "log": "TerminalServices"}, {"id": 1102, "log": "TerminalServices"}],
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1024,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1102,
+          "log": "TerminalServices"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -92,10 +136,33 @@
       "summary": "RDP multi-transport connection established; target IP recorded.",
       "details": "Generated on the source (client) machine when an RDP multi-transport connection is initiated. Key field: server (IP address of the target). Unlike EID 1024 which may contain a hostname, EID 1102 typically records the resolved IP address, making it useful for cases where EID 1024 only logged a hostname. Not generated for all RDP connections — depends on whether multi-transport (UDP or additional TCP channels) is negotiated. Correlate with EID 1024 to link hostname to IP when both events are present.",
       "category": "RDP Client",
-      "tags": ["rdp", "lateral-movement", "remote-access", "network"],
-      "relatedEventIds": [{"id": 1024, "log": "TerminalServices"}, {"id": 1025, "log": "TerminalServices"}],
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access",
+        "network"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1024,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1025,
+          "log": "TerminalServices"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1021.001", "techniqueName": "Remote Services: Remote Desktop Protocol" }
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

@@ -113,7 +113,19 @@
             "required": ["techniqueId"],
             "properties": {
               "techniqueId": { "type": "string" },
-              "techniqueName": { "type": "string" }
+              "techniqueName": { "type": "string" },
+              "tactics": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["tacticId", "tacticName"],
+                  "properties": {
+                    "tacticId": { "type": "string" },
+                    "tacticName": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              }
             },
             "additionalProperties": false
           }

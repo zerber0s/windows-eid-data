@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - USB / DriverFrameworks",
-    "version": "0.3.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.3.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/usb.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,11 +29,51 @@
       "summary": "A USB device was connected and detected by Windows.",
       "details": "Generated when Windows detects a new device instance, typically when a USB device is physically connected. Key field: the device instance ID, which encodes the device class, vendor ID (VID), product ID (PID), and serial number (if the device has one). The VID and PID can be used to identify the device type and manufacturer. Devices without a serial number will share an instance ID across connections, making per-connection attribution harder. Correlate with EID 2004 to confirm the device was successfully initialized, and with System log EID 20001 for driver installation events.",
       "category": "USB Device",
-      "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
-      "relatedEventIds": [{"id": 2004, "log": "DriverFrameworks"}, {"id": 2100, "log": "DriverFrameworks"}, {"id": 2101, "log": "DriverFrameworks"}],
+      "tags": [
+        "usb",
+        "removable-media",
+        "physical-access",
+        "insider-threat"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2004,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2100,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2101,
+          "log": "DriverFrameworks"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
-        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+        {
+          "techniqueId": "T1091",
+          "techniqueName": "Replication Through Removable Media",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1052.001",
+          "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB",
+          "tactics": [
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -62,11 +102,50 @@
       "summary": "A detected USB device was successfully enumerated by Windows.",
       "details": "Generated when Windows successfully enumerates a device instance following detection (EID 2003). Enumeration confirms the device was recognized and its properties read by the driver framework. Correlate with EID 2003 using the device instance ID to confirm the full connection sequence. A device that generates EID 2003 but not EID 2004 may indicate a driver failure or an unsupported device class.",
       "category": "USB Device",
-      "tags": ["usb", "removable-media", "physical-access"],
-      "relatedEventIds": [{"id": 2003, "log": "DriverFrameworks"}, {"id": 2100, "log": "DriverFrameworks"}, {"id": 2101, "log": "DriverFrameworks"}],
+      "tags": [
+        "usb",
+        "removable-media",
+        "physical-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2003,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2100,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2101,
+          "log": "DriverFrameworks"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
-        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+        {
+          "techniqueId": "T1091",
+          "techniqueName": "Replication Through Removable Media",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1052.001",
+          "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB",
+          "tactics": [
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -93,11 +172,50 @@
       "summary": "The driver framework is initiating a connection with a device instance.",
       "details": "Generated when the user-mode driver framework (UMDF) begins establishing a connection to a device instance. This event is part of the same connection sequence as EID 2003 and 2004, providing an additional timestamp reference for when driver-level communication with the device began. Key field: the device instance ID. Useful for establishing precise connection timing when correlating USB events with other log sources such as file system activity or user logon events.",
       "category": "USB Device",
-      "tags": ["usb", "removable-media", "physical-access"],
-      "relatedEventIds": [{"id": 2003, "log": "DriverFrameworks"}, {"id": 2004, "log": "DriverFrameworks"}, {"id": 2101, "log": "DriverFrameworks"}],
+      "tags": [
+        "usb",
+        "removable-media",
+        "physical-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2003,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2004,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2101,
+          "log": "DriverFrameworks"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
-        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+        {
+          "techniqueId": "T1091",
+          "techniqueName": "Replication Through Removable Media",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1052.001",
+          "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB",
+          "tactics": [
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -124,11 +242,51 @@
       "summary": "The driver framework successfully established a connection with the device.",
       "details": "Generated when the user-mode driver framework (UMDF) successfully completes connection to a device instance. This confirms the device is fully operational and ready for use — for USB storage devices, this is the point at which the volume becomes accessible to the file system. Correlate with EID 2100 to measure driver initialization time. For insider threat and data exfiltration investigations, EID 2101 combined with subsequent file system events provides the clearest evidence that a storage device was connected and used.",
       "category": "USB Device",
-      "tags": ["usb", "removable-media", "physical-access", "insider-threat"],
-      "relatedEventIds": [{"id": 2003, "log": "DriverFrameworks"}, {"id": 2004, "log": "DriverFrameworks"}, {"id": 2100, "log": "DriverFrameworks"}],
+      "tags": [
+        "usb",
+        "removable-media",
+        "physical-access",
+        "insider-threat"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2003,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2004,
+          "log": "DriverFrameworks"
+        },
+        {
+          "id": 2100,
+          "log": "DriverFrameworks"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1091", "techniqueName": "Replication Through Removable Media" },
-        { "techniqueId": "T1052.001", "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB" }
+        {
+          "techniqueId": "T1091",
+          "techniqueName": "Replication Through Removable Media",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1052.001",
+          "techniqueName": "Exfiltration Over Physical Medium: Exfiltration over USB",
+          "tactics": [
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "0.5.0",
-    "generatedAt": "2026-03-29T00:00:00Z",
+    "version": "0.5.1",
+    "generatedAt": "2026-04-02T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,10 +29,28 @@
       "summary": "PowerShell engine started.",
       "details": "Generated when a PowerShell engine session starts. The HostApplication field is the most valuable field — it records the full command line used to invoke PowerShell, including any encoded arguments. Suspicious values include base64-encoded -EncodedCommand strings, unusual host processes (not powershell.exe or powershell_ise.exe), or invocation from scripting engines. Correlate with 403 to track session duration.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "engine-lifecycle", "execution"],
-      "relatedEventIds": [{"id": 403, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "engine-lifecycle",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 403,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -61,10 +79,27 @@
       "summary": "PowerShell engine stopped.",
       "details": "Generated when a PowerShell engine session ends. Pair with event 400 to calculate session duration. Abnormally short sessions may indicate one-liner or fileless execution. Absence of a matching 403 after 400 may indicate a crash or forceful termination.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "engine-lifecycle"],
-      "relatedEventIds": [{"id": 400, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "engine-lifecycle"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 400,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -91,10 +126,32 @@
       "summary": "PowerShell command execution started.",
       "details": "Generated at the start of each command execution in the classic Windows PowerShell log. Records the command name in the CommandLine field. High volume in normal operation — most useful when correlated with 4103 or 4104 for context on specific command invocations. Pairs with 501 to track command duration.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "command", "execution"],
-      "relatedEventIds": [{"id": 501, "log": "PowerShell"}, {"id": 4103, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "command",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 501,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4103,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -121,10 +178,28 @@
       "summary": "PowerShell command execution completed.",
       "details": "Generated when a command execution ends in the classic Windows PowerShell log. Pairs with 500 to track command lifecycle. On its own, limited investigative value — use in conjunction with 4103 or 4104 to reconstruct full execution context.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "command", "execution"],
-      "relatedEventIds": [{"id": 500, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "command",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 500,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -151,10 +226,27 @@
       "summary": "PowerShell provider started.",
       "details": "Generated when a PowerShell provider is loaded into the session. The ProviderName field identifies the provider. Monitor for WSMan provider (indicates PowerShell remoting), Registry provider (registry manipulation), Certificate provider (certificate store access), and FileSystem provider. Unexpected providers in non-interactive sessions may indicate attacker tradecraft.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "provider"],
-      "relatedEventIds": [{"id": 400, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "provider"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 400,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -182,10 +274,28 @@
       "summary": "Classic-log pipeline execution details recorded.",
       "details": "Generated in the classic Windows PowerShell log with pipeline execution details including command name and pipeline ID. Lower fidelity than the operational log event 4103 — does not capture full parameters or script content. Present on older systems where the operational log or module logging is not configured. Superseded by 4103 on modern, properly configured systems.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "pipeline", "execution"],
-      "relatedEventIds": [{"id": 4103, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "pipeline",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4103,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -212,10 +322,28 @@
       "summary": "Error during PowerShell pipeline execution.",
       "details": "Generated when an error occurs during pipeline execution in the operational log. Error messages in the ErrorRecord field may reveal attack artifacts — failed execution attempts, blocked cmdlets, missing modules, or access denied errors. Clusters of 4100 events targeting specific commands (e.g., Invoke-Mimikatz, Add-MpPreference) can indicate active attack or defense evasion failure. Correlate with 4104 for the script that triggered the error.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "error", "execution"],
-      "relatedEventIds": [{"id": 4104, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "error",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -244,10 +372,36 @@
       "summary": "Module logging captured full pipeline execution with parameters.",
       "details": "Generated when module logging is enabled via GPO (Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell > Turn on Module Logging). Records the full command with all parameter values, pipeline input/output, and the user context. Higher fidelity than classic log event 800. Required GPO setting per module or wildcard (*). Correlate with 4104 for script block content.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "module-logging", "execution"],
-      "relatedEventIds": [{"id": 4104, "log": "PowerShell"}, {"id": 4105, "log": "PowerShell"}, {"id": 4106, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "module-logging",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4105,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4106,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -276,11 +430,51 @@
       "summary": "Full script block content captured.",
       "details": "The highest-value PowerShell event. Generated when script block logging is enabled (GPO: Turn on PowerShell Script Block Logging). Captures the full text of every compiled script block after deobfuscation — meaning even obfuscated or encoded scripts appear in cleartext here. Level 3 (Warning) is generated automatically without any GPO requirement when AMSI flags a script block as suspicious. Large scripts are split across multiple sequential events sharing a MessageNumber/MessageTotal field. Pivot on ScriptBlockText for IOC matching, SubjectUserName, and HostApplication.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "script-block-logging", "execution", "defense-evasion"],
-      "relatedEventIds": [{"id": 4103, "log": "PowerShell"}, {"id": 4105, "log": "PowerShell"}, {"id": 4106, "log": "PowerShell"}, {"id": 4100, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "script-block-logging",
+        "execution",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4103,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4105,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4106,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4100,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" },
-        { "techniqueId": "T1027", "techniqueName": "Obfuscated Files or Information" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1027",
+          "techniqueName": "Obfuscated Files or Information",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -310,10 +504,32 @@
       "summary": "Script block invocation started.",
       "details": "Generated at the start of a script block invocation. Pairs with 4106 to bracket execution time. The ScriptBlockId field links back to the 4104 event that captured the script content. Useful for correlating execution timing with other log sources (e.g., network, process creation).",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "script-block-logging", "execution"],
-      "relatedEventIds": [{"id": 4106, "log": "PowerShell"}, {"id": 4104, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "script-block-logging",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4106,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -340,10 +556,32 @@
       "summary": "Script block invocation completed.",
       "details": "Generated when a script block invocation ends. Pairs with 4105 to track execution duration. The ScriptBlockId field links back to the 4104 event that captured the script content. Absence of a matching 4106 after 4105 may indicate a crash, forced termination, or runspace hijack.",
       "category": "PowerShell Execution",
-      "tags": ["powershell", "script-block-logging", "execution"],
-      "relatedEventIds": [{"id": 4105, "log": "PowerShell"}, {"id": 4104, "log": "PowerShell"}],
+      "tags": [
+        "powershell",
+        "script-block-logging",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4105,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        }
+      ],
       "mitreAttack": [
-        { "techniqueId": "T1059.001", "techniqueName": "Command and Scripting Interpreter: PowerShell" }
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
