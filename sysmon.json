@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "generatedAt": "2026-03-30T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -913,6 +913,40 @@
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
       "lastReviewed": "2026-03-30"
+    },
+    {
+      "id": 26,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "File delete detected",
+      "summary": "A file deletion was detected (Sysmon v13+; monitoring only, no archive).",
+      "details": "Generated when a file is deleted, introduced in Sysmon v13. Unlike EID 23 (which archives the deleted file), EID 26 only records the deletion event without saving a copy, making it lower-cost for high-volume environments. Key fields: Image (the process that deleted the file), TargetFilename (deleted file path), and IsExecutable. High-frequency file deletions by a single process — especially targeting document files (.docx, .xlsx, .pdf) — is a strong ransomware indicator. Deletions targeting log files, forensic tools, or security software indicate anti-forensic activity.",
+      "category": "File System",
+      "tags": ["file-delete", "defense-evasion", "ransomware", "anti-forensics"],
+      "relatedEventIds": [{"id": 23, "log": "Sysmon"}, {"id": 1, "log": "Sysmon"}, {"id": 11, "log": "Sysmon"}],
+      "mitreAttack": [
+        { "techniqueId": "T1485", "techniqueName": "Data Destruction" },
+        { "techniqueId": "T1070.004", "techniqueName": "Indicator Removal: File Deletion" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High-volume deletions of document files by an unexpected process is a ransomware indicator — correlate with EID 11 to check for concurrent encrypted file creation",
+          "Deletions targeting event log files, VSS snapshots, backup tools, or EDR components indicate anti-forensic behavior",
+          "IsExecutable: true combined with a non-uninstaller process warrants immediate investigation",
+          "Correlate Image with EID 1 to review full process ancestry and ParentCommandLine"
+        ],
+        "commonFalsePositives": [
+          "File cleanup by backup software, temporary file managers, or application uninstallers",
+          "IDEs and build systems deleting intermediate build artifacts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-04-02"
     }
   ]
 }

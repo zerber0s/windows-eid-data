@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WinRM",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/winrm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -112,6 +112,71 @@
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 132,
+      "log": "WinRM",
+      "provider": "Microsoft-Windows-WinRM",
+      "channel": "Microsoft-Windows-WinRM/Operational",
+      "level": "Error",
+      "title": "WSMan authentication failed",
+      "summary": "WinRM authentication attempt failed on this host.",
+      "details": "Generated on the destination host when a WinRM authentication attempt fails. Key fields: the username that failed, the authentication mechanism attempted (Kerberos, NTLM, Basic, CredSSP), and the source. Multiple EID 132 events from the same source indicate credential spraying or brute-force attempts over WinRM. NTLM authentication failures may indicate a pass-the-hash attempt where the supplied hash did not match. Correlate with EID 168 (successful authentication) to determine whether a subsequent attempt succeeded — a 132 followed closely by a 168 from the same source may indicate a successful brute-force.",
+      "category": "WinRM Authentication",
+      "tags": ["winrm", "authentication", "brute-force", "lateral-movement", "credential-access"],
+      "relatedEventIds": [{"id": 168, "log": "WinRM"}, {"id": 6, "log": "WinRM"}, {"id": 4625, "log": "Security"}],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" },
+        { "techniqueId": "T1110", "techniqueName": "Brute Force" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Multiple EID 132 events from a single source in a short timeframe indicate brute-force or credential spraying over WinRM",
+          "Correlate with Security EID 4625 using the same timestamp and username to find the matching logon failure record",
+          "A 132 followed quickly by a 168 from the same source may indicate a successful brute-force — confirm with Security EID 4624"
+        ],
+        "commonFalsePositives": [
+          "Misconfigured automation tools with stale credentials",
+          "Service accounts with expired passwords triggering auth failures"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 142,
+      "log": "WinRM",
+      "provider": "Microsoft-Windows-WinRM",
+      "channel": "Microsoft-Windows-WinRM/Operational",
+      "level": "Error",
+      "title": "WSMan operation failed",
+      "summary": "A WinRM/WSMan operation failed on this host.",
+      "details": "Generated when a WSMan operation fails, such as a shell creation failure, a command execution error, or a transport-level problem. This event is distinct from authentication failures (EID 132) and records operational errors after a session may already be established. Key fields: the operation type and error code. Frequent EID 142 events from a single source may indicate a tool attempting to interact with WinRM using an incorrect configuration, or a network-level issue affecting an active lateral movement session.",
+      "category": "WinRM Session",
+      "tags": ["winrm", "error", "lateral-movement", "remote-access"],
+      "relatedEventIds": [{"id": 6, "log": "WinRM"}, {"id": 91, "log": "WinRM"}, {"id": 132, "log": "WinRM"}],
+      "mitreAttack": [
+        { "techniqueId": "T1021.006", "techniqueName": "Remote Services: Windows Remote Management" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 6 to determine whether an active session existed at the time of the failure",
+          "Repeated failures from the same source combined with EID 6 session events may indicate in-progress lateral movement with partial success",
+          "Check error codes — access denied errors on an established session may indicate a privilege issue or security tool intervention"
+        ],
+        "commonFalsePositives": [
+          "Network instability causing transient WinRM connection failures",
+          "Misconfigured WinRM listeners or firewall rules on the target host"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
+      },
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 168,

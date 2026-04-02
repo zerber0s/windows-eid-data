@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "generatedAt": "2026-03-29T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -19,6 +19,71 @@
     ]
   },
   "entries": [
+    {
+      "id": 1013,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Information",
+      "title": "Windows Defender protection history deleted",
+      "summary": "A history item was removed from the Windows Defender protection history.",
+      "details": "Generated when an item is removed from Windows Defender's protection history. Protection history records past detections, quarantine actions, and remediation events. Deletion of history items — particularly around the timeframe of a compromise — can obscure the record of what was detected and what actions were taken. Correlate with EID 1116 and EID 1117 entries in the same timeframe to determine whether history deletion follows a detection event, which is a strong anti-forensic indicator.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "anti-forensics", "history"],
+      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}, {"id": 1117, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1070", "techniqueName": "Indicator Removal" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate the deletion timestamp with nearby EID 1116/1117 events — deletion shortly after a detection is a strong cleanup indicator",
+          "Identify what process or user account triggered the history deletion via Security EID 4688/4624 correlation",
+          "Consider retrieving Defender history from alternate sources (MDE portal, SIEM) if local history was deleted"
+        ],
+        "commonFalsePositives": [
+          "Users or IT manually clearing Defender history via the Windows Security app",
+          "Automated cleanup policies removing old history entries"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 1015,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Suspicious behavior detected",
+      "summary": "Windows Defender detected a potentially suspicious behavior.",
+      "details": "Generated when Windows Defender's behavioral monitoring detects a suspicious activity pattern. Unlike EID 1116 (signature-based detection), EID 1015 fires on behavioral heuristics — such as a process performing operations characteristic of credential dumping, code injection, or persistence installation — even if no known malware signature matches. Key fields: Process Name, the behavior type or category, and the affected resource. Behavioral detections that do not result in a subsequent EID 1116/1117 (no signature match) may represent novel or fileless threats.",
+      "category": "Threat Detection",
+      "tags": ["defender", "behavioral-detection", "heuristic"],
+      "relatedEventIds": [{"id": 1116, "log": "WindowsDefender"}, {"id": 1117, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1055", "techniqueName": "Process Injection" },
+        { "techniqueId": "T1003", "techniqueName": "OS Credential Dumping" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Process Name is the primary pivot — behavioral detections in LOLBins (powershell.exe, wscript.exe, mshta.exe) or Office applications are high priority",
+          "Correlate with Security EID 4688 to review the full process ancestry and command line",
+          "A 1015 with no subsequent 1117 may mean Defender flagged but did not remediate — the activity may still be active"
+        ],
+        "commonFalsePositives": [
+          "Security testing and red team tools triggering behavioral heuristics",
+          "Legitimate software performing unusual but benign operations (e.g., custom backup tools, scripting automation)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
     {
       "id": 1116,
       "log": "WindowsDefender",
@@ -136,6 +201,67 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 2001,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Information",
+      "title": "Security intelligence update succeeded",
+      "summary": "Windows Defender security intelligence (signatures) updated successfully.",
+      "details": "Generated when Windows Defender successfully updates its security intelligence (antimalware signatures). Key fields: the new signature version and the update source. Monitoring the cadence of EID 2001 events is useful for establishing a baseline — a host that suddenly stops receiving updates (no 2001 events for an extended period) may be isolated from update sources, have update mechanisms disabled, or be experiencing network-level blocking of update traffic consistent with a compromised host trying to avoid signature-based detection of its malware.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "signatures", "update"],
+      "relatedEventIds": [{"id": 2002, "log": "WindowsDefender"}],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Absence of EID 2001 events over an extended period may indicate update mechanisms have been disabled or blocked",
+          "Correlate last successful update timestamp with the timing of a compromise to determine whether signatures were outdated when the attack occurred",
+          "Hosts with significantly outdated signature versions are higher-risk targets"
+        ],
+        "commonFalsePositives": [
+          "Air-gapped or isolated hosts that rely on manual signature updates",
+          "Hosts on metered connections with update scheduling configured to minimize bandwidth"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2002,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Security intelligence update failed",
+      "summary": "Windows Defender failed to update its security intelligence.",
+      "details": "Generated when a Windows Defender security intelligence update fails. Key fields: error code and the update source that was attempted. Repeated EID 2002 failures on an otherwise internet-connected host may indicate that the host cannot reach Microsoft update servers — potentially because an attacker has modified the hosts file, DNS, firewall rules, or proxy settings to block updates and prevent new signatures from detecting their tools. Correlate with network log sources to determine whether update traffic is being blocked at the host or network level.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "signatures", "update", "defense-evasion"],
+      "relatedEventIds": [{"id": 2001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Persistent update failures on an internet-connected host may indicate blocked update traffic — investigate hosts file, DNS, and firewall rules",
+          "Correlate with EID 5007 to check whether proxy or update server configuration was recently changed",
+          "An update failure immediately preceding a malware execution event indicates the host may have been left intentionally unprotected"
+        ],
+        "commonFalsePositives": [
+          "Transient network connectivity issues causing temporary update failures",
+          "Proxy or firewall misconfiguration blocking Windows Update traffic"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
       "id": 5001,
       "log": "WindowsDefender",
       "provider": "Microsoft-Windows-Windows Defender",
@@ -169,6 +295,38 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 5004,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Real-time protection configuration changed",
+      "summary": "A Windows Defender real-time protection setting was modified.",
+      "details": "Generated when a real-time protection-specific configuration setting is changed. While EID 5007 captures all configuration changes, EID 5004 specifically flags modifications to real-time protection settings such as monitoring scope, behavior monitoring, network protection, or on-access scanning. These changes are higher priority than generic configuration changes because they directly affect the ability to detect active threats. Key field: the specific real-time protection setting that was changed and its new value.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper", "real-time-protection"],
+      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The changed setting and its new value are the key pivot — changes reducing scan coverage or disabling behavioral monitoring are high priority",
+          "Correlate with Security EID 4688 and 4624 to identify the process and account that made the change",
+          "EID 5004 paired with EID 5001 in close succession confirms real-time protection was both reconfigured and disabled"
+        ],
+        "commonFalsePositives": [
+          "Group Policy or MDM applying real-time protection policy changes",
+          "Third-party AV management tools modifying Defender real-time settings for coexistence"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
       "id": 5007,
       "log": "WindowsDefender",
       "provider": "Microsoft-Windows-Windows Defender",
@@ -199,6 +357,102 @@
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 5008,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Error",
+      "title": "Antimalware engine failure",
+      "summary": "The Windows Defender antimalware engine encountered an error and failed.",
+      "details": "Generated when the Windows Defender antimalware engine encounters a fatal error and fails. While engine failures can be caused by resource constraints or software bugs, they can also result from deliberate interference — an attacker crashing or corrupting the Defender engine to prevent detection of subsequent activity. Key field: the error code. Correlate the engine failure timestamp with nearby process creation events, network connections, or file writes to identify whether the failure coincides with attacker activity.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper", "engine"],
+      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate the engine failure timestamp with Security EID 4688 to identify process activity occurring immediately before or after the failure",
+          "Engine failures that cannot be explained by known software issues or resource constraints warrant investigation into potential tampering",
+          "Check whether the engine failure was followed by a recovery (EID 5001 state change) or left the system unprotected"
+        ],
+        "commonFalsePositives": [
+          "Engine crashes due to bugs in specific Defender versions — check for pending updates",
+          "Resource exhaustion on underpowered systems causing engine failures"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 5010,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Scanning for malware and unwanted software is disabled",
+      "summary": "Windows Defender malware and PUP scanning was disabled.",
+      "details": "Generated when scanning for malware and potentially unwanted programs (PUP) is disabled. This is distinct from EID 5001 (real-time protection disabled) — scanning can be selectively disabled while real-time protection remains nominally enabled. Disabling malware scanning creates a window during which new files can be written to disk and executed without signature-based detection. Treat this event with the same urgency as EID 5001 during an active incident.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper", "scanning"],
+      "relatedEventIds": [{"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}, {"id": 5012, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with Security EID 4688 and 4624 to identify what process/account made the change",
+          "Files written to disk after scanning was disabled should be treated as potentially unscanned and uninspected",
+          "Correlate with EID 5007 to identify the specific registry key or configuration value changed"
+        ],
+        "commonFalsePositives": [
+          "Group Policy-managed configurations that selectively disable certain scanning features",
+          "Temporary administrative disablement for performance testing or software compatibility troubleshooting"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 5012,
+      "log": "WindowsDefender",
+      "provider": "Microsoft-Windows-Windows Defender",
+      "channel": "Microsoft-Windows-Windows Defender/Operational",
+      "level": "Warning",
+      "title": "Scanning for viruses is disabled",
+      "summary": "Windows Defender virus scanning was disabled.",
+      "details": "Generated when scanning specifically for viruses is disabled. Related to but distinct from EID 5010 (malware/PUP scanning disabled) — Windows Defender distinguishes between virus scanning and the broader malware/PUP scanning category. Disabling virus scanning leaves the system without signature-based detection for executable threats. Correlate with EID 5007 to identify the configuration change, and with Security EID 4688 to identify what process initiated the change.",
+      "category": "Defender Configuration",
+      "tags": ["defender", "defense-evasion", "tamper", "scanning"],
+      "relatedEventIds": [{"id": 5010, "log": "WindowsDefender"}, {"id": 5001, "log": "WindowsDefender"}, {"id": 5007, "log": "WindowsDefender"}],
+      "mitreAttack": [
+        { "techniqueId": "T1562.001", "techniqueName": "Impair Defenses: Disable or Modify Tools" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with Security EID 4688 to identify the process that disabled virus scanning",
+          "Pair with EID 5010 — if both fire around the same time, most active threat detection has been disabled",
+          "Check whether any files were written or processes executed in the window between EID 5012 and scanning being re-enabled"
+        ],
+        "commonFalsePositives": [
+          "Managed configurations that disable specific scan types on servers to reduce I/O overhead",
+          "Coexistence configurations where a third-party AV manages virus scanning"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "lastReviewed": "2026-04-02"
     }
   ]
 }
