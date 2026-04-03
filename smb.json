@@ -1,0 +1,313 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - SMB Client and Server",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-02T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/smb.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1009,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBServer",
+      "channel": "Microsoft-Windows-SMBServer/Operational",
+      "level": "Warning",
+      "title": "SMB server signing not required",
+      "summary": "The SMB server is configured to not require packet signing.",
+      "details": "Generated when the SMB server has SMB signing disabled or not required. Without signing, SMB packets in transit are not authenticated and can be modified by an adversary performing a machine-in-the-middle attack. This configuration enables SMB relay attacks, where NTLM credentials captured from one host are relayed to this server to authenticate without knowing the password. Signing should be enforced via Group Policy (Microsoft network server: Digitally sign communications always). This event indicates a configuration posture that makes the environment vulnerable to relay attacks (T1557.001).",
+      "category": "SMB Security Configuration",
+      "tags": [
+        "smb",
+        "signing",
+        "relay",
+        "credential-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        { "id": 31010, "log": "SMB" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" },
+            { "tacticId": "TA0009", "tacticName": "Collection" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Verify current Group Policy for 'Microsoft network server: Digitally sign communications always'",
+          "Identify all endpoints with signing not required to scope the relay attack surface",
+          "Correlate with NTLM authentication events in the Security log to detect potential relay activity"
+        ],
+        "commonFalsePositives": [
+          "Legacy environments where older SMB clients cannot support signing",
+          "Misconfigured baseline policy — common in environments that have not hardened SMB"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 3000,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBServer",
+      "channel": "Microsoft-Windows-SMBServer/Operational",
+      "level": "Warning",
+      "title": "SMB1 protocol negotiated",
+      "summary": "A client negotiated the legacy SMB1 protocol with this server.",
+      "details": "Generated when a client connects to this server using the legacy SMBv1 protocol. SMB1 lacks the security features of SMB2/3 (encryption, pre-authentication integrity, secure negotiation) and is the protocol exploited by EternalBlue (MS17-010) and related NSA tool derivatives (WannaCry, NotPetya). SMB1 should be disabled on all modern Windows endpoints via 'Set-SmbServerConfiguration -EnableSMB1Protocol $false'. The presence of this event indicates either a legacy client in the environment or a forced protocol downgrade. The client IP recorded in this event is the primary pivot for identifying the downgrading endpoint.",
+      "category": "SMB Protocol Downgrade",
+      "tags": [
+        "smb",
+        "smb1",
+        "legacy-protocol",
+        "eternalblue",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        { "id": 1009, "log": "SMB" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1210",
+          "techniqueName": "Exploitation of Remote Services",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the client IP to determine which endpoint is using or forcing SMB1",
+          "Check whether SMB1 is intentionally enabled on the server via Set-SmbServerConfiguration",
+          "Correlate with Security log EID 5140 (network share access) to see what shares were accessed over SMB1"
+        ],
+        "commonFalsePositives": [
+          "Legacy devices such as older NAS appliances, printers, or scanners that only support SMB1",
+          "Older Windows versions (Windows XP, Server 2003) still present in the environment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 30803,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBClient",
+      "channel": "Microsoft-Windows-SMBClient/Operational",
+      "level": "Warning",
+      "title": "SMB client failed to connect to server",
+      "summary": "The SMB client could not establish a session with a remote server.",
+      "details": "Generated on the client when an SMB connection attempt to a remote server fails. Key fields: ServerName, ShareName, Status (NTSTATUS error code), and the calling process. This event is significant for lateral movement detection because adversaries attempting to access remote shares, deploy tools via admin shares (C$, ADMIN$, IPC$), or use SMB-based execution (e.g., PsExec, SCM) will generate failed connection events when targeting unavailable or hardened hosts. High volumes of this event from a single source targeting multiple destinations is a strong indicator of network reconnaissance or lateral movement attempts.",
+      "category": "SMB Connection Failure",
+      "tags": [
+        "smb",
+        "connection-failure",
+        "lateral-movement",
+        "reconnaissance"
+      ],
+      "relatedEventIds": [
+        { "id": 30804, "log": "SMB" },
+        { "id": 31001, "log": "SMB" },
+        { "id": 5140, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High counts of this event targeting different ServerName values from one host indicate a scanning or lateral movement pattern",
+          "Admin share targets (C$, ADMIN$, IPC$) are higher fidelity than general share names",
+          "Correlate with Security log EID 4625 (failed logon) on the destination host to confirm authentication attempts"
+        ],
+        "commonFalsePositives": [
+          "Network drive mappings to temporarily unavailable servers",
+          "Application startup routines attempting to connect to expected shares before they are available",
+          "Group Policy processing during startup when a DC is temporarily unreachable"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 30804,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBClient",
+      "channel": "Microsoft-Windows-SMBClient/Operational",
+      "level": "Warning",
+      "title": "SMB client lost connection to server",
+      "summary": "An established SMB session was unexpectedly terminated.",
+      "details": "Generated when an active SMB client connection to a remote server is lost unexpectedly. Key fields: ServerName and Status code. Unexpected disconnections during active operations can indicate network disruption, server-side session termination, or adversarial interference. In incident response contexts, sudden session drops following suspicious activity may indicate defensive action (firewall block, host isolation) or attacker-side cleanup. Correlate with Security log EID 4634 (logoff) or EID 4779 (session disconnect) on the remote host.",
+      "category": "SMB Connection Failure",
+      "tags": [
+        "smb",
+        "disconnection",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        { "id": 30803, "log": "SMB" },
+        { "id": 4634, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Determine whether the disconnect follows a successful authentication and file access (use EID 5140 on the server)",
+          "Correlate with Security log EID 4634 or 4779 on the server to understand the session lifecycle",
+          "A pattern of connect → brief activity → disconnect across multiple hosts suggests tool staging"
+        ],
+        "commonFalsePositives": [
+          "Network instability or brief server unavailability",
+          "Server-side session timeouts for idle connections",
+          "Load balancer or failover events disconnecting sessions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 31001,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBClient",
+      "channel": "Microsoft-Windows-SMBClient/Operational",
+      "level": "Warning",
+      "title": "SMB client authentication failure",
+      "summary": "The SMB client failed to authenticate to a remote server.",
+      "details": "Generated when the SMB client fails to authenticate to a remote SMB server. Key fields: ServerName, UserName, and Status (NTSTATUS error code). Authentication failures in SMB context are significant for detecting pass-the-hash (T1550.002) attempts, credential spraying, and brute-force attacks against SMB shares. Multiple failures to the same server with different usernames indicate a spray attack; repeated failures with the same username suggest a targeted brute-force or failed PTH attempt. Correlate with Security log EID 4625 on the destination host for the corresponding server-side view.",
+      "category": "SMB Authentication Failure",
+      "tags": [
+        "smb",
+        "authentication-failure",
+        "credential-access",
+        "lateral-movement",
+        "pass-the-hash"
+      ],
+      "relatedEventIds": [
+        { "id": 30803, "log": "SMB" },
+        { "id": 4625, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.002",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        },
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Multiple failures to different ServerName values from one source host indicate lateral movement scanning",
+          "STATUS_LOGON_FAILURE vs STATUS_ACCOUNT_LOCKED_OUT help differentiate failed attempts from lockout conditions",
+          "Correlate UserName with known privileged accounts — failures with admin accounts are highest priority",
+          "Compare with successful SMB authentications (EID 4624 on server) to identify eventual success after failures"
+        ],
+        "commonFalsePositives": [
+          "Stale mapped drive credentials after a password change",
+          "Service accounts with cached old passwords",
+          "Backup software or monitoring tools using stored credentials that have expired"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 31010,
+      "log": "SMB",
+      "provider": "Microsoft-Windows-SMBClient",
+      "channel": "Microsoft-Windows-SMBClient/Operational",
+      "level": "Warning",
+      "title": "SMB client found server does not support signing",
+      "summary": "The SMB client connected to a server that does not require or support SMB signing.",
+      "details": "Generated on the SMB client when it connects to a server that does not enforce SMB packet signing. This event identifies the client-side observation of an unsigned SMB session, complementing server-side EID 1009. Unsigned SMB sessions are vulnerable to relay attacks where an attacker positioned between client and server can modify packets or relay captured NTLM authentication. In an environment with SMB signing enforced via Group Policy, the presence of this event indicates a server that is not compliant with the signing policy.",
+      "category": "SMB Security Configuration",
+      "tags": [
+        "smb",
+        "signing",
+        "relay",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        { "id": 1009, "log": "SMB" },
+        { "id": 31001, "log": "SMB" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" },
+            { "tacticId": "TA0009", "tacticName": "Collection" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the ServerName to determine which server is not enforcing signing",
+          "Correlate with EID 1009 on the destination server to confirm its signing configuration",
+          "Check Group Policy for 'Microsoft network server: Digitally sign communications always' compliance"
+        ],
+        "commonFalsePositives": [
+          "Third-party NAS devices or appliances that implement SMB but do not support signing",
+          "Non-Windows SMB servers (Samba) not configured to require signing"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "lastReviewed": "2026-04-02"
+    }
+  ]
+}

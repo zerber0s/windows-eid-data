@@ -1,0 +1,352 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Firewall",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-02T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/windows-firewall.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 2003,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "Windows Firewall setting changed",
+      "summary": "A Windows Defender Firewall profile-level setting was modified.",
+      "details": "Generated when a Windows Defender Firewall profile setting is changed (e.g., default inbound/outbound action, notifications, unicast responses to multicast/broadcast). Key fields: ProfileChanged (Public, Private, or Domain), NewSettingValue, and ModifiedBy (the process or policy source). Changes delivered by Group Policy are expected; changes originating from interactive sessions or unexpected processes warrant investigation. Correlate with Security log EID 4950 for individual setting changes and EID 4954 for Group Policy-driven changes.",
+      "category": "Firewall Configuration",
+      "tags": [
+        "firewall",
+        "configuration-change",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 4950, "log": "Security" },
+        { "id": 4954, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify ProfileChanged to determine which network profile was affected (Domain vs. Private/Public)",
+          "Correlate timestamp with process creation events (EID 4688 or Sysmon EID 1) to identify the responsible process",
+          "Verify whether the change aligns with a scheduled Group Policy update (EID 4954)"
+        ],
+        "commonFalsePositives": [
+          "Group Policy pushing standard firewall profile configurations",
+          "IT administration tools managing firewall settings centrally",
+          "OS installation or major feature updates resetting profile defaults"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2004,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "Firewall rule added",
+      "summary": "A new inbound or outbound firewall rule was added to the exception list.",
+      "details": "Generated when a rule is added to the Windows Defender Firewall exception list. Key fields: RuleName, RuleId, ApplicationPath, Protocol, LocalPorts, RemotePorts, Direction (inbound/outbound), Action (allow/block), and ModifiedBy. Adversaries commonly add allow rules to permit C2 traffic, enable remote access, or expose backdoor services. High-fidelity indicators include inbound allow rules on uncommon ports, rules with a wildcard ApplicationPath, and rules added by unexpected processes (cmd.exe, powershell.exe, mshta.exe). Correlate with Security log EID 4946.",
+      "category": "Firewall Rule Change",
+      "tags": [
+        "firewall",
+        "rule-add",
+        "defense-evasion",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        { "id": 2005, "log": "Firewall" },
+        { "id": 2006, "log": "Firewall" },
+        { "id": 4946, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ApplicationPath reveals the binary being allowed — flag paths in user-writable directories (AppData, Temp, Downloads)",
+          "Rules with Direction=Inbound and Action=Allow are highest priority for review",
+          "ModifiedBy identifies the process or policy source that added the rule",
+          "Cross-reference RuleName with known software — generic, randomized, or blank names are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Software installers adding rules for legitimate applications (e.g., game clients, VoIP, videoconferencing)",
+          "Enterprise endpoint management platforms pushing approved firewall policy",
+          "Windows components and services adding rules during initial setup or update"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2005,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "Firewall rule modified",
+      "summary": "An existing firewall rule was modified.",
+      "details": "Generated when an existing Windows Defender Firewall rule is changed. Key fields: RuleName, RuleId, ApplicationPath, Protocol, LocalPorts, RemotePorts, and ModifiedBy. Adversaries may modify existing legitimate-looking rules rather than creating new ones to avoid detection heuristics that alert only on rule creation. Modifications that broaden scope (e.g., changing a specific-port allow to any-port, removing application path restrictions, switching Action from block to allow) are indicators of firewall tampering. Correlate with Security log EID 4947.",
+      "category": "Firewall Rule Change",
+      "tags": [
+        "firewall",
+        "rule-modify",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 2004, "log": "Firewall" },
+        { "id": 2006, "log": "Firewall" },
+        { "id": 4947, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Review preceding EID 2004 for the same RuleId to compare before/after state",
+          "Flag modifications that broaden port ranges or remove ApplicationPath restrictions",
+          "ModifiedBy should be a trusted management process or SYSTEM — user-mode processes modifying rules are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Software updates modifying their own pre-existing firewall rules",
+          "Group Policy applying updated rule configurations from a new baseline",
+          "Administrative tools adjusting rules during maintenance windows"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2006,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "Firewall rule deleted",
+      "summary": "A firewall rule was removed from the exception list.",
+      "details": "Generated when a Windows Defender Firewall rule is deleted. Key fields: RuleName, RuleId, Direction, and ModifiedBy. Deletion of inbound block rules on high-risk services (RDP port 3389, SMB port 445, WMI port 135) is a strong indicator of adversarial preparation before lateral movement or remote access. Adversaries may also delete rules to clean up previously added attacker-created allow rules after completing an objective (anti-forensics). Correlate with Security log EID 4948 and review prior EID 2004 to determine if the deleted rule was originally attacker-created.",
+      "category": "Firewall Rule Change",
+      "tags": [
+        "firewall",
+        "rule-delete",
+        "defense-evasion",
+        "anti-forensics"
+      ],
+      "relatedEventIds": [
+        { "id": 2004, "log": "Firewall" },
+        { "id": 2005, "log": "Firewall" },
+        { "id": 4948, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify whether the deleted rule was an allow or block rule — deletion of block rules is higher severity",
+          "Deletion of rules for services on ports 3389, 445, or 135 warrants immediate escalation",
+          "Correlate ModifiedBy with process creation events to identify the responsible binary",
+          "Check if EID 2004 shows a matching RuleId was added shortly before deletion (indicates attacker cleanup)"
+        ],
+        "commonFalsePositives": [
+          "Software uninstallers removing their own registered firewall rules",
+          "IT policy cleanup removing stale or expired rules",
+          "Group Policy removing rules superseded by a newer baseline"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2009,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Error",
+      "title": "Firewall rules failed to load",
+      "summary": "Windows Defender Firewall could not load rules from the local policy store.",
+      "details": "Generated when the Windows Firewall service fails to load rules from the local Group Policy store or registry, leaving the system operating without expected policy constraints. This may follow GPO corruption, registry manipulation, or malicious tampering with firewall policy storage (typically under HKLM\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy). While often a benign configuration error, this event occurring in proximity to other firewall or defense-evasion events should be treated as potential policy tamper until ruled out.",
+      "category": "Firewall Service Error",
+      "tags": [
+        "firewall",
+        "error",
+        "tamper",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 2033, "log": "Firewall" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Inspect HKLM\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy for unexpected modifications",
+          "Review System log for GPO processing errors (EID 1085) around the same timestamp",
+          "Verify the effective firewall policy and running service state after this event fires"
+        ],
+        "commonFalsePositives": [
+          "Policy store corruption after an abrupt shutdown or failed OS update",
+          "First-boot configuration issues in newly provisioned or cloned environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2033,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "All firewall rules deleted",
+      "summary": "All rules in the Windows Defender Firewall exception list were deleted.",
+      "details": "Generated when all rules are removed from the Windows Defender Firewall exception list for a profile. Bulk rule deletion effectively removes all traffic filtering for the affected profile, leaving the system exposed. This can be achieved via netsh advfirewall reset, PowerShell Remove-NetFirewallRule -All, or direct registry manipulation. Adversaries use this technique to open all ports and remove blocking rules before deploying backdoors, reverse shells, or ransomware. Treat this event as critical unless it can be tied to an authorized, documented administrative action. Correlate with Security log EID 4949.",
+      "category": "Firewall Configuration",
+      "tags": [
+        "firewall",
+        "rules-cleared",
+        "defense-evasion",
+        "critical"
+      ],
+      "relatedEventIds": [
+        { "id": 2004, "log": "Firewall" },
+        { "id": 2006, "log": "Firewall" },
+        { "id": 4949, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with process creation logs to identify the process that invoked the bulk deletion",
+          "Look for netsh.exe, powershell.exe, or wmic.exe in EID 4688 or Sysmon EID 1 near the event timestamp",
+          "Review network connection events immediately after — an open firewall is often followed by C2 or lateral movement activity",
+          "Confirm whether this was authorized via a change management record"
+        ],
+        "commonFalsePositives": [
+          "Authorized firewall policy reset during system reimaging or reprovisioning",
+          "Enterprise security tools performing a controlled policy reset before applying a new baseline"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 2052,
+      "log": "Firewall",
+      "provider": "Microsoft-Windows-Windows Firewall With Advanced Security",
+      "channel": "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall",
+      "level": "Information",
+      "title": "Windows Firewall active profile changed",
+      "summary": "The active Windows Defender Firewall network profile has switched.",
+      "details": "Generated when the active firewall profile switches between Domain, Private, and Public. The active profile determines which rule set is enforced, and profiles typically differ significantly in their permissiveness. Adversaries may exploit profile switching to bypass stricter Domain profile rules — for example, by disconnecting the endpoint from the domain network to force a switch to the Public or Private profile, where rules may permit broader inbound access. Unexpected Domain-to-Public switches on domain-joined endpoints are anomalous and should be correlated with network adapter or DHCP events.",
+      "category": "Firewall Configuration",
+      "tags": [
+        "firewall",
+        "profile-change",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 2003, "log": "Firewall" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Determine if the new profile (NewProfile) is less restrictive than the previous profile",
+          "Correlate with network adapter and DHCP events in the System log to understand the trigger",
+          "On domain-joined endpoints, a switch away from Domain profile during active business hours is anomalous"
+        ],
+        "commonFalsePositives": [
+          "Laptops switching between office (Domain) and home/remote (Private) networks",
+          "VPN connections and disconnections triggering profile changes",
+          "Virtual machines with dynamic or bridged network adapters"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "lastReviewed": "2026-04-02"
+    }
+  ]
+}
