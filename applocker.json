@@ -1,0 +1,321 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - AppLocker",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/applocker.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 8003,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/EXE and DLL",
+      "level": "Warning",
+      "title": "AppLocker allowed executable (audit mode)",
+      "summary": "An executable or DLL was allowed to run, but would have been blocked if AppLocker were in enforcement mode.",
+      "details": "Generated when AppLocker is in audit mode and an executable (EXE) or DLL would have been blocked by the active rule set but was allowed to run. Key fields: FileName (the full path of the allowed file), UserName (the account that ran it), PolicyName, and RuleId. This event is the primary source for baselining and policy tuning — it reveals what would break if enforcement were enabled. In incident response, EID 8003 entries on a system where AppLocker is in audit mode confirm that unsigned or unapproved binaries executed successfully. FileName paths in user-writable directories (AppData, Temp, Downloads, Desktop) are high priority. Correlate with Security log EID 4688 or Sysmon EID 1 for process creation context.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "audit-mode",
+        "application-control",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 8004, "log": "AppLocker" },
+        { "id": 4688, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FileName in user-writable directories (AppData, Temp, Downloads) is high priority — legitimate software rarely runs from these paths",
+          "Correlate UserName with expected users — service accounts running executables interactively is anomalous",
+          "Use PolicyName and RuleId to understand which AppLocker rule the file violated — 'No rules match' means the file fell outside all defined allow rules"
+        ],
+        "commonFalsePositives": [
+          "All software not yet added to the AppLocker allow policy during initial policy development",
+          "Portable applications that run from non-standard directories by design"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8004,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/EXE and DLL",
+      "level": "Error",
+      "title": "AppLocker blocked executable (enforcement mode)",
+      "summary": "An executable or DLL was blocked from running by AppLocker policy.",
+      "details": "Generated when AppLocker actively blocks an EXE or DLL from executing in enforcement mode. Key fields: FileName, UserName, PolicyName, and RuleId. This is the highest-value AppLocker event in enforcement environments — it directly records blocked execution attempts. Adversaries who reach a well-configured endpoint and attempt to run tools, droppers, or lateral movement payloads will generate this event. FileName in unexpected paths (Temp, AppData, Downloads, or shares) combined with a privileged UserName is a critical indicator. Note that DLL enforcement is often disabled by default even when EXE enforcement is active, as it has a higher performance impact. Correlate with Security log EID 4625 or 4688 for additional context.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "enforcement",
+        "blocked",
+        "application-control",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 8003, "log": "AppLocker" },
+        { "id": 4688, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        },
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            { "tacticId": "TA0002", "tacticName": "Execution" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FileName is the primary artifact — hash it and submit to threat intel / VirusTotal",
+          "Repeated blocks against different filenames from the same UserName may indicate an adversary probing the policy",
+          "Blocks of known attacker tools (mimikatz, cobalt strike stagers, common RATs) should trigger immediate incident response",
+          "FileName in network paths (\\\\server\\share\\...) indicates attempted remote execution"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software deployed to machines before being added to the AppLocker allow policy",
+          "IT tools run by administrators from non-standard paths"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8005,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/MSI and Script",
+      "level": "Warning",
+      "title": "AppLocker allowed script or MSI (audit mode)",
+      "summary": "A script or MSI installer was allowed to run but would have been blocked in enforcement mode.",
+      "details": "Generated when AppLocker is in audit mode and a script (PowerShell, VBScript, JScript, batch file) or MSI installer would have been blocked by the active rule set but was permitted to run. Key fields: FileName, UserName, PolicyName, and RuleId. Script-based execution is one of the most common attacker vectors — this channel captures PowerShell scripts, WScript/CScript execution, and MSI-based installers that are not covered by EXE allow rules. Particular interest should be paid to FileName values in user-writable directories or network paths, and to scripts with randomized or obfuscated filenames. Correlate with PowerShell log EID 4104 (script block logging) for the actual script content.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "audit-mode",
+        "script",
+        "msi",
+        "application-control",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 8006, "log": "AppLocker" },
+        { "id": 4104, "log": "PowerShell" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            { "tacticId": "TA0002", "tacticName": "Execution" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Combine FileName with PowerShell log EID 4104 to retrieve the actual script content",
+          "Scripts in TEMP, AppData, or network shares are higher priority than scripts in Program Files",
+          "MSI files outside of standard software distribution paths (SCCM, WSUS, vendor shares) are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Administrative scripts run by IT staff from non-standard locations",
+          "Software installers (MSI) from vendors not yet added to the allow policy"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8006,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/MSI and Script",
+      "level": "Error",
+      "title": "AppLocker blocked script or MSI (enforcement mode)",
+      "summary": "A script or MSI installer was blocked from running by AppLocker policy.",
+      "details": "Generated when AppLocker actively blocks a script or MSI from executing in enforcement mode. Key fields: FileName, UserName, PolicyName, and RuleId. Script execution blocks are high-value detection signals because adversaries frequently use scripts (PowerShell, VBScript, JScript, batch files) as initial execution vehicles. An attacker who gains code execution via a document macro or web download and then attempts to run a PowerShell payload will generate this event before potentially pivoting to an AppLocker bypass technique (T1218 — signed binary proxy execution via mshta.exe, regsvr32.exe, etc.). Correlate with subsequent execution events to detect bypass attempts.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "enforcement",
+        "blocked",
+        "script",
+        "msi",
+        "application-control"
+      ],
+      "relatedEventIds": [
+        { "id": 8005, "log": "AppLocker" },
+        { "id": 4104, "log": "PowerShell" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            { "tacticId": "TA0002", "tacticName": "Execution" }
+          ]
+        },
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Look for follow-on execution events using LOLBins (mshta.exe, regsvr32.exe, wscript.exe with /b flag, rundll32.exe) that may indicate an AppLocker bypass attempt",
+          "FileName with a .ps1 extension being blocked, followed by PowerShell execution via encodedcommand, is a common evasion pivot",
+          "Correlate UserName with logon events to understand attacker access level at time of block"
+        ],
+        "commonFalsePositives": [
+          "Legitimate scripts deployed by IT before being whitelisted",
+          "Software installers triggered by users outside of managed deployment channels"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8020,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/Packaged app-Execution",
+      "level": "Warning",
+      "title": "AppLocker allowed packaged app (audit mode)",
+      "summary": "A packaged (UWP/MSIX) app was allowed to run but would have been blocked in enforcement mode.",
+      "details": "Generated when AppLocker is in audit mode and a Universal Windows Platform (UWP) or MSIX packaged application would have been blocked by the active rule set but was permitted to run. Key fields: FileName (the package name or path), UserName, and RuleId. Packaged app rules are often overlooked in AppLocker policy configurations. Malicious MSIX packages have been used as delivery vehicles in phishing campaigns (MSIX AppInstaller abuse, CVE-2021-43890). This event captures packaged app execution that falls outside the allow policy.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "audit-mode",
+        "packaged-app",
+        "uwp",
+        "msix",
+        "application-control"
+      ],
+      "relatedEventIds": [
+        { "id": 8021, "log": "AppLocker" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            { "tacticId": "TA0002", "tacticName": "Execution" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FileName (package name) should be compared against known legitimate UWP apps from the Microsoft Store",
+          "Sideloaded packages from unsigned or unknown publishers are high priority",
+          "Correlate with EID 8022/8023 to see if the package was also installed (not just executed) recently"
+        ],
+        "commonFalsePositives": [
+          "Legitimate Store apps not yet added to the AppLocker packaged app allow policy",
+          "Enterprise LOB packaged apps deployed via MDM"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8021,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/Packaged app-Execution",
+      "level": "Error",
+      "title": "AppLocker blocked packaged app (enforcement mode)",
+      "summary": "A packaged (UWP/MSIX) app was blocked from running by AppLocker policy.",
+      "details": "Generated when AppLocker actively blocks a UWP or MSIX packaged application from executing in enforcement mode. Key fields: FileName (package name or path), UserName, and RuleId. Malicious MSIX packages have been used as a phishing delivery mechanism and as a bypass for certain application whitelisting controls. A packaged app block on a known-malicious package name or an unsigned sideloaded package is a high-confidence indicator. This event should be investigated alongside the package installation log (EID 8023) to determine how the package arrived on the system.",
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "enforcement",
+        "blocked",
+        "packaged-app",
+        "msix",
+        "application-control"
+      ],
+      "relatedEventIds": [
+        { "id": 8020, "log": "AppLocker" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            { "tacticId": "TA0002", "tacticName": "Execution" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify how the package was installed — check recent file creation in AppX staging directories and browser download history",
+          "Look for AppInstaller URI handler activity if the block follows a web redirect",
+          "Verify the publisher certificate on the blocked package — self-signed or unknown publishers are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Enterprise LOB packaged apps deployed before being added to the allow policy",
+          "Developer machines with sideloaded apps under development"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "lastReviewed": "2026-04-03"
+    }
+  ]
+}

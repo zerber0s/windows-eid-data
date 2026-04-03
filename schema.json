@@ -55,7 +55,7 @@
   "$defs": {
     "logEnum": {
       "type": "string",
-      "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Sysmon", "Firewall", "SMB", "NTLM", "CodeIntegrity", "Other"]
+      "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Sysmon", "Firewall", "SMB", "NTLM", "CodeIntegrity", "AppLocker", "PrintSpooler", "GroupPolicy", "CAPI2", "DNSClient", "ActiveDirectoryDS", "Other"]
     },
     "entry": {
       "type": "object",

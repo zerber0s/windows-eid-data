@@ -1,0 +1,226 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - DNS Client",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-client.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 3006,
+      "log": "DNSClient",
+      "provider": "Microsoft-Windows-DNS-Client",
+      "channel": "Microsoft-Windows-DNS-Client/Operational",
+      "level": "Information",
+      "title": "DNS query initiated",
+      "summary": "The DNS client sent a query to resolve a name.",
+      "details": "Generated when the Windows DNS client initiates a query to resolve a hostname or other DNS record type. Key fields: QueryName (the name being resolved), QueryType (record type: A, AAAA, TXT, MX, etc.), and ServerList (the DNS server the query was sent to). This event provides full DNS query visibility at the host level, making it the primary data source for DNS-based C2 and tunneling detection (T1071.004). Indicators of compromise in DNS queries include: excessively long subdomains (>50 characters) indicating DNS tunneling, high-frequency queries to a single parent domain, queries for domains with high entropy names (DGA patterns — T1568.002), and TXT or NULL record queries from non-mail applications. Note: this channel is disabled by default and must be enabled via wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true or Group Policy. Volume can be extremely high on active endpoints.",
+      "category": "DNS",
+      "tags": [
+        "dns",
+        "c2",
+        "dns-tunneling",
+        "exfiltration",
+        "dga"
+      ],
+      "relatedEventIds": [
+        { "id": 3008, "log": "DNSClient" },
+        { "id": 3010, "log": "DNSClient" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1071.004",
+          "techniqueName": "Application Layer Protocol: DNS",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        },
+        {
+          "techniqueId": "T1568.002",
+          "techniqueName": "Dynamic Resolution: Domain Generation Algorithms",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Flag QueryName values with subdomains longer than 50 characters — this is a strong DNS tunneling indicator",
+          "High-frequency queries (>100/min) to a single parent domain from a single process indicate beaconing or tunneling",
+          "TXT or NULL record queries (QueryType) from non-mail, non-internal processes are anomalous",
+          "Calculate entropy of QueryName — high entropy base domains with many unique subdomains indicate DGA activity"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate DNS resolution — this event fires for all name lookups and must be filtered by anomaly patterns",
+          "CDN and cloud services that use long subdomain-encoded parameters in their hostnames",
+          "Security tools that perform DNS lookups for threat intelligence enrichment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 3008,
+      "log": "DNSClient",
+      "provider": "Microsoft-Windows-DNS-Client",
+      "channel": "Microsoft-Windows-DNS-Client/Operational",
+      "level": "Warning",
+      "title": "DNS query failed",
+      "summary": "The DNS client failed to resolve a name (NXDOMAIN, timeout, or server error).",
+      "details": "Generated when the Windows DNS client receives a failure response or times out when resolving a name. Key fields: QueryName, QueryType, QueryStatus (error code — NXDOMAIN, SERVFAIL, timeout, etc.), and ServerList. Failed DNS queries are significant for two detection scenarios: (1) DGA-based C2 malware generates large volumes of NXDOMAIN failures as it cycles through generated domain names looking for a live C2 domain — a high rate of NXDOMAIN failures from a single process is a strong DGA indicator; (2) DNS tunneling failures may indicate an endpoint attempting to reach a tunneling server that has been taken down. The QueryName field on failed queries retains the full lookup target, preserving the name even when no answer was returned. Note: requires DNS Client operational log to be enabled.",
+      "category": "DNS",
+      "tags": [
+        "dns",
+        "nxdomain",
+        "dga",
+        "c2",
+        "dns-tunneling"
+      ],
+      "relatedEventIds": [
+        { "id": 3006, "log": "DNSClient" },
+        { "id": 3010, "log": "DNSClient" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1568.002",
+          "techniqueName": "Dynamic Resolution: Domain Generation Algorithms",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        },
+        {
+          "techniqueId": "T1071.004",
+          "techniqueName": "Application Layer Protocol: DNS",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume NXDOMAIN failures from a single process over a short period is the primary DGA indicator",
+          "Collect all failed QueryName values and calculate n-gram frequency — DGA names have low n-gram frequency compared to legitimate English names",
+          "A sudden spike in NXDOMAIN failures followed by a successful resolution (EID 3010) to an unusual domain indicates DGA C2 check-in"
+        ],
+        "commonFalsePositives": [
+          "Mistyped hostnames or stale DNS entries in application configurations",
+          "Browsers pre-fetching link targets that are no longer valid",
+          "Software that attempts to resolve internal hostnames when off-network (laptop disconnected from VPN)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 3010,
+      "log": "DNSClient",
+      "provider": "Microsoft-Windows-DNS-Client",
+      "channel": "Microsoft-Windows-DNS-Client/Operational",
+      "level": "Information",
+      "title": "DNS query completed",
+      "summary": "The DNS client received a successful response for a query.",
+      "details": "Generated when the DNS client successfully resolves a name. Key fields: QueryName, QueryType, QueryResults (the resolved IP address or record value), and ServerList. Successful DNS resolutions are the companion to EID 3006 (query initiated) and provide the final resolved IP address, which is critical for correlating DNS-based C2 with subsequent network connections. In C2 scenarios, the QueryResults IP in this event combined with subsequent outbound connections to that IP completes the DNS-to-network chain. For DNS tunneling detection, TXT record responses with high-entropy base64 or hex payloads in QueryResults are indicators of data being transferred via DNS. Note: requires DNS Client operational log to be enabled.",
+      "category": "DNS",
+      "tags": [
+        "dns",
+        "resolution",
+        "c2",
+        "dns-tunneling"
+      ],
+      "relatedEventIds": [
+        { "id": 3006, "log": "DNSClient" },
+        { "id": 3008, "log": "DNSClient" },
+        { "id": 3020, "log": "DNSClient" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1071.004",
+          "techniqueName": "Application Layer Protocol: DNS",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "QueryResults (resolved IP) is the pivot to network connection logs — look for outbound connections to the IP immediately after this event",
+          "Repeated successful resolutions of the same domain to different IPs may indicate fast-flux C2 infrastructure",
+          "TXT record QueryResults containing high-entropy data are a DNS tunneling indicator"
+        ],
+        "commonFalsePositives": [
+          "All successful DNS lookups generate this event — filter by anomalous QueryName patterns to reduce noise"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 3020,
+      "log": "DNSClient",
+      "provider": "Microsoft-Windows-DNS-Client",
+      "channel": "Microsoft-Windows-DNS-Client/Operational",
+      "level": "Information",
+      "title": "DNS query answered from cache",
+      "summary": "A DNS name was resolved from the local DNS client cache rather than queried to a server.",
+      "details": "Generated when the DNS client resolves a name using a cached entry rather than sending a new query to a DNS server. Key fields: QueryName, QueryType, and QueryResults (cached IP). Cache hits are significant in two contexts: (1) they indicate a name was recently resolved (and therefore a fresh EID 3010 event should exist nearby), and (2) DNS cache poisoning attacks (T1557) may cause this event to return attacker-controlled IPs for legitimate domains without generating a corresponding upstream query. If EID 3020 returns an unexpected IP for a known-good domain and no matching EID 3006/3010 exists, the cache entry may be poisoned. Note: requires DNS Client operational log to be enabled.",
+      "category": "DNS",
+      "tags": [
+        "dns",
+        "cache",
+        "dns-poisoning",
+        "c2"
+      ],
+      "relatedEventIds": [
+        { "id": 3006, "log": "DNSClient" },
+        { "id": 3010, "log": "DNSClient" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" },
+            { "tacticId": "TA0009", "tacticName": "Collection" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Compare QueryResults IP against the expected IP for the domain — unexpected IPs indicate cache poisoning",
+          "A cache hit with no preceding EID 3010 in the relevant time window is anomalous and may indicate injected cache entries",
+          "Run ipconfig /displaydns to inspect the full cache state if poisoning is suspected"
+        ],
+        "commonFalsePositives": [
+          "Any repeated DNS resolution within the cache TTL — the vast majority of cache hits are legitimate"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "lastReviewed": "2026-04-03"
+    }
+  ]
+}

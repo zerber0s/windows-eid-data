@@ -1,0 +1,223 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Print Spooler",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/print-spooler.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4,
+      "log": "PrintSpooler",
+      "provider": "Microsoft-Windows-PrintSpooler",
+      "channel": "Microsoft-Windows-PrintSpooler/Operational",
+      "level": "Information",
+      "title": "Print spooler service stopped",
+      "summary": "The Windows Print Spooler service was stopped.",
+      "details": "Generated when the Windows Print Spooler service (spoolsv.exe) stops. The spooler is a SYSTEM-level service, and stopping it is a common attacker action in two contexts: (1) as a defensive measure before attempting a PrintNightmare exploit that requires the service to be in a specific state, or (2) as a disruption tactic in ransomware attacks where halting the spooler prevents detection via printer-based canaries and removes persistence mechanisms that may rely on print processor DLLs. Unexpected stops of the spooler outside of maintenance windows should be investigated. Correlate with System log EID 7036 (service stopped) for additional process context and with Security log EID 4688 to identify what process stopped the service.",
+      "category": "Print Spooler",
+      "tags": [
+        "print-spooler",
+        "service-stop",
+        "defense-evasion",
+        "ransomware"
+      ],
+      "relatedEventIds": [
+        { "id": 316, "log": "PrintSpooler" },
+        { "id": 7036, "log": "System" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1489",
+          "techniqueName": "Service Stop",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        },
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with Security log EID 4688 or Sysmon EID 1 to identify what process stopped the spooler",
+          "Check System log EID 7036 for the service control manager record of the stop",
+          "A spooler stop immediately followed by a start and EID 316 (driver install) is a strong PrintNightmare sequence indicator"
+        ],
+        "commonFalsePositives": [
+          "Authorized maintenance stopping the spooler on servers where printing is not required",
+          "Group Policy applying 'Disable print spooler' on non-printing servers as a hardening measure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 307,
+      "log": "PrintSpooler",
+      "provider": "Microsoft-Windows-PrintSpooler",
+      "channel": "Microsoft-Windows-PrintSpooler/Operational",
+      "level": "Information",
+      "title": "Document printed",
+      "summary": "A document was sent to a printer and spooled.",
+      "details": "Generated when a document is submitted to the print spooler. Key fields: Param1 (document name), Param2 (UserName who printed), Param3 (ClientMachine — the machine that sent the job), Param4 (printer name), and Param5 (printer port/path). In DFIR contexts this event is useful for detecting data staging and exfiltration via printing: an unusual document name printed by an unexpected user to a network printer or virtual printer (PDF/XPS) immediately before an incident may indicate deliberate data extraction. The ClientMachine field reveals whether the job was submitted locally or from a remote host, which is significant when investigating unauthorized access to shared printers.",
+      "category": "Print Spooler",
+      "tags": [
+        "print-spooler",
+        "document",
+        "exfiltration",
+        "audit"
+      ],
+      "relatedEventIds": [
+        { "id": 316, "log": "PrintSpooler" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1048",
+          "techniqueName": "Exfiltration Over Alternative Protocol",
+          "tactics": [
+            { "tacticId": "TA0010", "tacticName": "Exfiltration" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Document names containing sensitive terms (financials, HR, confidential, passwords) warrant review",
+          "Param4 (printer name) pointing to a PDF, XPS, or network-redirected printer can indicate digital document copying",
+          "ClientMachine different from the local hostname indicates a remote print job — verify authorization"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate document printing — this event fires for all print jobs and must be contextualized",
+          "Automated reporting systems that print or PDF-export documents on a schedule"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 316,
+      "log": "PrintSpooler",
+      "provider": "Microsoft-Windows-PrintSpooler",
+      "channel": "Microsoft-Windows-PrintSpooler/Operational",
+      "level": "Information",
+      "title": "New printer driver installed",
+      "summary": "A printer driver was installed or loaded by the Print Spooler.",
+      "details": "Generated when a printer driver is installed or loaded by the spooler service. Key fields: DriverName, Environment (processor architecture), and Version. This is the primary detection event for PrintNightmare (CVE-2021-1675 / CVE-2021-34527) and related Print Spooler exploitation techniques. The exploit works by calling AddPrinterDriverEx() to load a malicious DLL as a printer driver, executing it in the context of SYSTEM. High-fidelity indicators: DriverName that is not a known printer vendor, driver loaded from a user-writable path (C:\\Windows\\System32\\spool\\drivers\\x64\\3\\... followed by a newly dropped DLL), or driver installation on a server with no printing role. Correlate with Sysmon EID 7 (image load) at the same timestamp to observe the DLL load event.",
+      "category": "Print Spooler",
+      "tags": [
+        "print-spooler",
+        "driver-install",
+        "printnightmare",
+        "privilege-escalation",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        { "id": 808, "log": "PrintSpooler" },
+        { "id": 4, "log": "PrintSpooler" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+          ]
+        },
+        {
+          "techniqueId": "T1547.012",
+          "techniqueName": "Boot or Logon Autostart Execution: Print Processors",
+          "tactics": [
+            { "tacticId": "TA0003", "tacticName": "Persistence" },
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "DriverName should match a known printer vendor (HP, Canon, Lexmark, etc.) — generic or randomized names are critical indicators",
+          "Correlate with Sysmon EID 7 (image load) to capture the DLL path and hash at the exact same timestamp",
+          "Check the spool drivers directory for recently dropped DLLs: C:\\Windows\\System32\\spool\\drivers\\",
+          "On servers with no printers or no printing role, any driver installation is anomalous"
+        ],
+        "commonFalsePositives": [
+          "Legitimate printer driver deployment via Group Policy or print server push",
+          "Users installing printer drivers for personal or network printers"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 808,
+      "log": "PrintSpooler",
+      "provider": "Microsoft-Windows-PrintSpooler",
+      "channel": "Microsoft-Windows-PrintSpooler/Operational",
+      "level": "Error",
+      "title": "Print spooler failed to install printer driver",
+      "summary": "The Print Spooler failed to install a printer driver from a driver package.",
+      "details": "Generated when the Print Spooler service fails to install or load a printer driver from a package. Key fields: PrinterDriverName, Status (HRESULT error code), and the path being referenced. This event may appear during a failed or partially successful PrintNightmare exploit attempt where the driver payload could not be loaded (e.g., the target DLL did not exist, was blocked by AV, or the exploit path was invalid). The absence of a paired EID 316 (successful driver install) when EID 808 appears can confirm the attempt failed. Repeated EID 808 events targeting unusual paths or with non-standard driver names indicate exploit activity even when the attack did not succeed.",
+      "category": "Print Spooler",
+      "tags": [
+        "print-spooler",
+        "driver-install",
+        "error",
+        "printnightmare",
+        "privilege-escalation"
+      ],
+      "relatedEventIds": [
+        { "id": 316, "log": "PrintSpooler" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "A cluster of EID 808 events followed by a successful EID 316 indicates a PrintNightmare exploit sequence",
+          "Check the driver path referenced in the failure — attacker-controlled UNC paths (\\\\attacker\\share\\malicious.dll) are high fidelity",
+          "Correlate with network connection events to detect outbound SMB connections to unusual hosts around the same time"
+        ],
+        "commonFalsePositives": [
+          "Failed driver installation due to missing or incompatible driver files during legitimate printer setup",
+          "Group Policy-pushed printer drivers that fail to deploy due to version mismatches"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "lastReviewed": "2026-04-03"
+    }
+  ]
+}

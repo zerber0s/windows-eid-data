@@ -1,0 +1,257 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - CAPI2",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/capi2.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 11,
+      "log": "CAPI2",
+      "provider": "Microsoft-Windows-CAPI2",
+      "channel": "Microsoft-Windows-CAPI2/Operational",
+      "level": "Information",
+      "title": "Certificate chain built",
+      "summary": "A certificate chain was constructed for validation.",
+      "details": "Generated when the Windows Cryptographic API (CAPI2) constructs a certificate chain for validation. Key fields: SubjectCert (the leaf certificate being validated), IssuerCert, ChainContext, and Result (success or failure with error code). This event fires for every certificate validation the operating system performs — TLS connections, code signing verification, document signing, etc. At baseline volume it is extremely noisy. Its forensic value lies in failures: a chain build failure indicates a certificate that cannot be verified against a trusted root, which may indicate use of a self-signed cert, a private CA not installed in the trust store, or a revoked/expired certificate. Note: this channel is disabled by default and must be enabled via wevtutil or Event Viewer before events are collected.",
+      "category": "Certificate Validation",
+      "tags": [
+        "capi2",
+        "certificate",
+        "chain-build",
+        "tls",
+        "code-signing"
+      ],
+      "relatedEventIds": [
+        { "id": 13, "log": "CAPI2" },
+        { "id": 40, "log": "CAPI2" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1553",
+          "techniqueName": "Subvert Trust Controls",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Filter for Result=failure — successful chain builds are expected and high volume",
+          "SubjectCert issuer from an unknown or private CA may indicate an attacker-controlled certificate authority",
+          "Chain build failures for code signing certificates on newly executed binaries are high priority"
+        ],
+        "commonFalsePositives": [
+          "Any TLS connection or code signing validation generates this event — baseline volume is very high",
+          "Self-signed certificates used by internal tools or development environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/enable-capi2-event-logging"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 13,
+      "log": "CAPI2",
+      "provider": "Microsoft-Windows-CAPI2",
+      "channel": "Microsoft-Windows-CAPI2/Operational",
+      "level": "Information",
+      "title": "Certificate chain policy verified",
+      "summary": "A certificate chain was evaluated against a chain policy (e.g., SSL, authenticode).",
+      "details": "Generated when a constructed certificate chain is evaluated against a specific chain policy — for example, the SSL policy (for TLS), the authenticode policy (for code signing), or the base policy. Key fields: ChainContext, PolicyOID (the policy being checked), Result, and the specific policy error flags. This event reveals why a certificate was accepted or rejected at the policy level, beyond just chain construction. From a security standpoint, a chain policy verification failure on an authenticode policy for a recently executed binary indicates unsigned or improperly signed code. In TLS inspection and proxy detection scenarios, a chain policy failure may indicate a root CA mismatch caused by SSL interception. Note: requires CAPI2 operational log to be enabled.",
+      "category": "Certificate Validation",
+      "tags": [
+        "capi2",
+        "certificate",
+        "chain-policy",
+        "code-signing",
+        "tls"
+      ],
+      "relatedEventIds": [
+        { "id": 11, "log": "CAPI2" },
+        { "id": 70, "log": "CAPI2" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1553.002",
+          "techniqueName": "Subvert Trust Controls: Code Signing",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PolicyOID identifies the context — Authenticode policy failures (1.3.6.1.4.1.311.2.1.29) on recently executed binaries are highest priority",
+          "Result error codes (CERT_E_REVOKED, CERT_E_EXPIRED, CERT_E_UNTRUSTEDROOT) indicate specific failure types",
+          "CERT_E_UNTRUSTEDROOT on a TLS connection may indicate SSL interception by a proxy not in the machine trust store"
+        ],
+        "commonFalsePositives": [
+          "Internal TLS services using private CA certificates not in the Windows root store",
+          "Expired certificates on older internal systems that have not been renewed"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/enable-capi2-event-logging"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 30,
+      "log": "CAPI2",
+      "provider": "Microsoft-Windows-CAPI2",
+      "channel": "Microsoft-Windows-CAPI2/Operational",
+      "level": "Information",
+      "title": "CRL or OCSP object retrieved",
+      "summary": "The crypto subsystem fetched a Certificate Revocation List (CRL) or OCSP response from a URL.",
+      "details": "Generated when CryptRetrieveObjectByUrl is called to fetch a CRL, OCSP staple, or certificate from a remote URL as part of revocation checking. Key fields: URL (the CRL Distribution Point or OCSP responder URL being contacted) and Result. This event is useful for detecting adversarial certificate infrastructure: if a binary's signing certificate references a CRL Distribution Point (CDP) at an attacker-controlled domain, this event will record the URL fetch when the binary is executed or verified. An unusual CDP or OCSP URL (non-Microsoft, non-major-CA) correlated with execution of a newly dropped binary may indicate use of an attacker-signed certificate. Also useful for detecting environments where certificate revocation checking is failing (Result=failure) because CRL endpoints are unreachable.",
+      "category": "Certificate Validation",
+      "tags": [
+        "capi2",
+        "crl",
+        "ocsp",
+        "revocation",
+        "certificate"
+      ],
+      "relatedEventIds": [
+        { "id": 40, "log": "CAPI2" },
+        { "id": 11, "log": "CAPI2" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1553.002",
+          "techniqueName": "Subvert Trust Controls: Code Signing",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "URL field is the primary pivot — CRL Distribution Points at unknown or attacker-controlled domains indicate a malicious signing certificate",
+          "Correlate the URL's domain with threat intel to identify known attacker certificate infrastructure",
+          "Result=failure for all CRL fetches indicates the endpoint cannot perform revocation checking — a gap that attackers may exploit"
+        ],
+        "commonFalsePositives": [
+          "Routine CRL and OCSP fetches for all TLS connections and code signing verifications — very high volume",
+          "CRL fetch failures when endpoints are offline or when firewall rules block access to CRL Distribution Points"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/enable-capi2-event-logging"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 40,
+      "log": "CAPI2",
+      "provider": "Microsoft-Windows-CAPI2",
+      "channel": "Microsoft-Windows-CAPI2/Operational",
+      "level": "Information",
+      "title": "Certificate revocation check performed",
+      "summary": "A revocation check was performed against a certificate in a chain.",
+      "details": "Generated when Windows performs a revocation check (CRL or OCSP) against a specific certificate. Key fields: CertificateThumbprint, CertificateIssuer, RevocationCheckResult, and the CRL/OCSP endpoint used. A result of CERT_E_REVOKED indicates the certificate is on a revocation list — this is a critical finding when correlated with recently executed code, as it means a revoked signing certificate was used to sign a binary. Adversaries occasionally use certificates that were valid at signing time but have since been revoked, or certificates revoked due to compromise. CERT_E_REVOKED combined with an execution event for the corresponding binary is a strong indicator of malicious signed code. Note: requires CAPI2 operational log to be enabled.",
+      "category": "Certificate Validation",
+      "tags": [
+        "capi2",
+        "revocation",
+        "certificate",
+        "code-signing"
+      ],
+      "relatedEventIds": [
+        { "id": 30, "log": "CAPI2" },
+        { "id": 13, "log": "CAPI2" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1553.002",
+          "techniqueName": "Subvert Trust Controls: Code Signing",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CERT_E_REVOKED on a code signing certificate is critical — identify what binary triggered the check and retrieve its hash",
+          "CertificateThumbprint links this event to a specific certificate — search for the thumbprint across threat intel databases",
+          "Correlate with EID 30 to identify the CRL endpoint that confirmed revocation"
+        ],
+        "commonFalsePositives": [
+          "Revocation checks against expired or decommissioned internal CA certificates",
+          "Applications that embed old signing certificates for legacy compatibility and trigger revocation events on startup"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/enable-capi2-event-logging"
+      },
+      "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 70,
+      "log": "CAPI2",
+      "provider": "Microsoft-Windows-CAPI2",
+      "channel": "Microsoft-Windows-CAPI2/Operational",
+      "level": "Information",
+      "title": "X.509 chain policy verified",
+      "summary": "An X.509 certificate chain was evaluated against a trust or application policy.",
+      "details": "Generated when an X.509 certificate chain is evaluated against a configured trust or application policy, such as the Basic Constraints policy, Enhanced Key Usage (EKU) policy, or a custom application policy. Key fields: CertificateThumbprint, PolicyOID, and Result. Failures indicate a certificate is being used outside its intended scope — for example, a certificate with an EKU of 'Client Authentication' being used for 'Code Signing', which is a common indicator of certificate misuse. In attacks involving stolen or forged certificates, EKU mismatches may be present if the attacker used a certificate not intended for the context in which they're deploying it. Note: requires CAPI2 operational log to be enabled.",
+      "category": "Certificate Validation",
+      "tags": [
+        "capi2",
+        "certificate",
+        "policy",
+        "eku",
+        "trust"
+      ],
+      "relatedEventIds": [
+        { "id": 13, "log": "CAPI2" },
+        { "id": 11, "log": "CAPI2" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1553.004",
+          "techniqueName": "Subvert Trust Controls: Install Root Certificate",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PolicyOID failures indicating EKU mismatch suggest a certificate being used outside its intended purpose",
+          "Combine CertificateThumbprint with EID 11 and EID 13 events for the same certificate to build the full validation picture",
+          "A new trusted root CA certificate being installed (visible via EID 70 for basic constraints) warrants immediate investigation"
+        ],
+        "commonFalsePositives": [
+          "Internal PKI certificates with custom EKUs not matching expected Windows policy checks",
+          "Test certificates in development environments with non-standard policy settings"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/enable-capi2-event-logging"
+      },
+      "lastReviewed": "2026-04-03"
+    }
+  ]
+}
