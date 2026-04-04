@@ -130,6 +130,22 @@
             "additionalProperties": false
           }
         },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["log-enablement", "policy", "registry"]
+              },
+              "description": { "type": "string", "minLength": 1 },
+              "command": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
         "notesGuidance": {
           "type": "object",
           "properties": {

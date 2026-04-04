@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Code Integrity",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/code-integrity.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -231,6 +231,12 @@
       "title": "Code Integrity audit: file would have been blocked",
       "summary": "In audit mode, Code Integrity detected a file that would have been blocked under enforcement.",
       "details": "Generated in audit mode (WDAC policy set to Audit Only) when Code Integrity detects a file that would have been blocked if enforcement were active. Key fields: FileName and ProcessNameBuffer. This event is used during WDAC policy deployment to identify what would break before switching to enforcement mode. In an incident response context, the presence of EID 3034 entries for suspicious files reveals that Code Integrity was in audit mode when an attacker loaded unsigned code — the load was not blocked. This event is critical for understanding WDAC posture gaps.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "A Windows Defender Application Control (WDAC) policy must be deployed and active in audit mode for this event to be generated."
+        }
+      ],
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -268,7 +274,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-03"
     },
     {
       "id": 3036,
@@ -326,6 +332,12 @@
       "title": "WDAC policy audit event",
       "summary": "Windows Defender Application Control detected a file that would be blocked by the active policy (audit mode).",
       "details": "Generated when a Windows Defender Application Control (WDAC) policy in audit mode detects a file that would be blocked if enforcement were active. Key fields: FileName, ProcessNameBuffer, PolicyName, and PolicyId. EID 3076 is the WDAC-specific audit event, whereas EID 3034 is the general Code Integrity audit event. In environments with named WDAC policies, PolicyName helps attribute the detection to the relevant rule set. This event is commonly used for WDAC policy tuning but in IR contexts reveals unsigned or untrusted code that executed while WDAC was not enforcing.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "A Windows Defender Application Control (WDAC) policy must be deployed and active in audit mode for this event to be generated."
+        }
+      ],
       "category": "WDAC Policy",
       "tags": [
         "code-integrity",
@@ -363,7 +375,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-03"
     },
     {
       "id": 3077,
@@ -374,6 +386,12 @@
       "title": "WDAC policy enforcement block",
       "summary": "Windows Defender Application Control blocked a file from executing under the active enforcement policy.",
       "details": "Generated when a Windows Defender Application Control (WDAC) policy in enforcement mode blocks a file from loading or executing. Key fields: FileName, ProcessNameBuffer, PolicyName, and PolicyId. This is the enforcement-mode counterpart to EID 3076. EID 3077 indicates the file was actually blocked — unlike audit mode, the load did not succeed. In an attacker context, repeated EID 3077 events for the same file indicate the attacker is hitting WDAC policy repeatedly — they may subsequently attempt T1553.006 (Code Signing Policy Modification) to disable or bypass the active policy. Correlate with EID 3089 for full event correlation.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "A Windows Defender Application Control (WDAC) policy must be deployed and active in enforcement mode for this event to be generated."
+        }
+      ],
       "category": "WDAC Policy",
       "tags": [
         "code-integrity",
@@ -418,7 +436,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-03"
     },
     {
       "id": 3089,

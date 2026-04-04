@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "0.5.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.6.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -429,6 +429,12 @@
       "title": "Script Block Logging",
       "summary": "Full script block content captured.",
       "details": "The highest-value PowerShell event. Generated when script block logging is enabled (GPO: Turn on PowerShell Script Block Logging). Captures the full text of every compiled script block after deobfuscation — meaning even obfuscated or encoded scripts appear in cleartext here. Level 3 (Warning) is generated automatically without any GPO requirement when AMSI flags a script block as suspicious. Large scripts are split across multiple sequential events sharing a MessageNumber/MessageTotal field. Pivot on ScriptBlockText for IOC matching, SubjectUserName, and HostApplication.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Script Block Logging must be enabled via Group Policy ('Turn on PowerShell Script Block Logging'). Exception: Level 3 (Warning) events for AMSI-flagged suspicious scripts are generated automatically without GPO configuration."
+        }
+      ],
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -492,7 +498,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-03"
     },
     {
       "id": 4105,

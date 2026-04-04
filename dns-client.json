@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DNS Client",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-client.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -28,6 +28,13 @@
       "title": "DNS query initiated",
       "summary": "The DNS client sent a query to resolve a name.",
       "details": "Generated when the Windows DNS client initiates a query to resolve a hostname or other DNS record type. Key fields: QueryName (the name being resolved), QueryType (record type: A, AAAA, TXT, MX, etc.), and ServerList (the DNS server the query was sent to). This event provides full DNS query visibility at the host level, making it the primary data source for DNS-based C2 and tunneling detection (T1071.004). Indicators of compromise in DNS queries include: excessively long subdomains (>50 characters) indicating DNS tunneling, high-frequency queries to a single parent domain, queries for domains with high entropy names (DGA patterns — T1568.002), and TXT or NULL record queries from non-mail applications. Note: this channel is disabled by default and must be enabled via wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true or Group Policy. Volume can be extremely high on active endpoints.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The DNS Client operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true"
+        }
+      ],
       "category": "DNS",
       "tags": [
         "dns",
@@ -84,6 +91,13 @@
       "title": "DNS query failed",
       "summary": "The DNS client failed to resolve a name (NXDOMAIN, timeout, or server error).",
       "details": "Generated when the Windows DNS client receives a failure response or times out when resolving a name. Key fields: QueryName, QueryType, QueryStatus (error code — NXDOMAIN, SERVFAIL, timeout, etc.), and ServerList. Failed DNS queries are significant for two detection scenarios: (1) DGA-based C2 malware generates large volumes of NXDOMAIN failures as it cycles through generated domain names looking for a live C2 domain — a high rate of NXDOMAIN failures from a single process is a strong DGA indicator; (2) DNS tunneling failures may indicate an endpoint attempting to reach a tunneling server that has been taken down. The QueryName field on failed queries retains the full lookup target, preserving the name even when no answer was returned. Note: requires DNS Client operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The DNS Client operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true"
+        }
+      ],
       "category": "DNS",
       "tags": [
         "dns",
@@ -139,6 +153,13 @@
       "title": "DNS query completed",
       "summary": "The DNS client received a successful response for a query.",
       "details": "Generated when the DNS client successfully resolves a name. Key fields: QueryName, QueryType, QueryResults (the resolved IP address or record value), and ServerList. Successful DNS resolutions are the companion to EID 3006 (query initiated) and provide the final resolved IP address, which is critical for correlating DNS-based C2 with subsequent network connections. In C2 scenarios, the QueryResults IP in this event combined with subsequent outbound connections to that IP completes the DNS-to-network chain. For DNS tunneling detection, TXT record responses with high-entropy base64 or hex payloads in QueryResults are indicators of data being transferred via DNS. Note: requires DNS Client operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The DNS Client operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true"
+        }
+      ],
       "category": "DNS",
       "tags": [
         "dns",
@@ -185,6 +206,13 @@
       "title": "DNS query answered from cache",
       "summary": "A DNS name was resolved from the local DNS client cache rather than queried to a server.",
       "details": "Generated when the DNS client resolves a name using a cached entry rather than sending a new query to a DNS server. Key fields: QueryName, QueryType, and QueryResults (cached IP). Cache hits are significant in two contexts: (1) they indicate a name was recently resolved (and therefore a fresh EID 3010 event should exist nearby), and (2) DNS cache poisoning attacks (T1557) may cause this event to return attacker-controlled IPs for legitimate domains without generating a corresponding upstream query. If EID 3020 returns an unexpected IP for a known-good domain and no matching EID 3006/3010 exists, the cache entry may be poisoned. Note: requires DNS Client operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The DNS Client operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true"
+        }
+      ],
       "category": "DNS",
       "tags": [
         "dns",

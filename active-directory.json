@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Domain Services",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/active-directory.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -28,6 +28,12 @@
       "title": "LDAP search statistics — expensive query threshold exceeded",
       "summary": "A domain controller recorded statistics for an LDAP search that exceeded configured thresholds.",
       "details": "Generated on domain controllers when an LDAP search exceeds configured thresholds for visited entries, returned entries, or elapsed time. Key fields: IPAddress (client performing the search), AccountName, SearchFilter, StartingNode (the base DN), and statistics for VisitedEntries, ReturnedEntries, and TimeElapsed. This event is the primary detection mechanism for LDAP-based Active Directory enumeration by tools such as BloodHound, SharpHound, ADFind, and ldapsearch. Adversaries conducting reconnaissance (T1018, T1069) perform broad LDAP queries to enumerate users, groups, computers, GPOs, trusts, and ACLs. A single IP issuing many EID 1644 events with large VisitedEntries counts within a short window is a high-confidence indicator of AD recon. Requires enabling via registry: HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics\\15 Field Engineering = 5. DC-only event.",
+      "prerequisites": [
+        {
+          "type": "registry",
+          "description": "Enable LDAP expensive query logging by setting HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics\\15 Field Engineering = 5. Optionally configure search time and result thresholds in HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters."
+        }
+      ],
       "category": "LDAP / Active Directory",
       "tags": [
         "active-directory",
@@ -189,6 +195,12 @@
       "title": "Client performed an unsigned LDAP bind",
       "summary": "A client made an LDAP Simple Bind or unsigned SASL bind to this domain controller.",
       "details": "Generated per occurrence when a client performs an LDAP bind without signing or sealing — either a Simple Bind (credentials sent in plaintext or over an unprotected channel) or an unsigned SASL bind. Key fields: IPAddress (the client making the unsigned bind) and AccountName (the account used). LDAP Simple Binds transmit credentials without encryption or integrity protection, making them susceptible to interception. Adversaries performing LDAP relay attacks will appear here if they are forwarding captured LDAP authentication to the DC. A new, unknown IPAddress making Simple Binds with privileged AccountName values is a high-confidence relay indicator. Requires that the NTDS 'LDAP Interface Events' diagnostic key be set to 2 or higher. DC-only event.",
+      "prerequisites": [
+        {
+          "type": "registry",
+          "description": "Enable LDAP Interface Events logging by setting HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics\\16 LDAP Interface Events = 2 (or higher)."
+        }
+      ],
       "category": "LDAP / Active Directory",
       "tags": [
         "active-directory",

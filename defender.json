@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.4.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.5.0",
+    "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -264,6 +264,12 @@
       "title": "Attack Surface Reduction rule triggered in audit mode",
       "summary": "An ASR rule would have blocked an operation but is in audit mode.",
       "details": "Generated when an ASR rule fires in audit mode — the operation was allowed to proceed but would have been blocked in enforcement mode. Key fields are identical to EID 1121: rule GUID, Process Name, and Path. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement. Treat audit events from known-bad processes with the same urgency as block events.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Attack Surface Reduction (ASR) rules must be enabled and configured in audit mode via Microsoft Defender, Intune, or Group Policy."
+        }
+      ],
       "category": "Attack Surface Reduction",
       "tags": [
         "defender",
@@ -290,7 +296,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-03"
     },
     {
       "id": 2001,

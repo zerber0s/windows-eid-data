@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - CAPI2",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "generatedAt": "2026-04-03T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/capi2.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -28,6 +28,13 @@
       "title": "Certificate chain built",
       "summary": "A certificate chain was constructed for validation.",
       "details": "Generated when the Windows Cryptographic API (CAPI2) constructs a certificate chain for validation. Key fields: SubjectCert (the leaf certificate being validated), IssuerCert, ChainContext, and Result (success or failure with error code). This event fires for every certificate validation the operating system performs — TLS connections, code signing verification, document signing, etc. At baseline volume it is extremely noisy. Its forensic value lies in failures: a chain build failure indicates a certificate that cannot be verified against a trusted root, which may indicate use of a self-signed cert, a private CA not installed in the trust store, or a revoked/expired certificate. Note: this channel is disabled by default and must be enabled via wevtutil or Event Viewer before events are collected.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CAPI2 operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-CAPI2/Operational /e:true"
+        }
+      ],
       "category": "Certificate Validation",
       "tags": [
         "capi2",
@@ -75,6 +82,13 @@
       "title": "Certificate chain policy verified",
       "summary": "A certificate chain was evaluated against a chain policy (e.g., SSL, authenticode).",
       "details": "Generated when a constructed certificate chain is evaluated against a specific chain policy — for example, the SSL policy (for TLS), the authenticode policy (for code signing), or the base policy. Key fields: ChainContext, PolicyOID (the policy being checked), Result, and the specific policy error flags. This event reveals why a certificate was accepted or rejected at the policy level, beyond just chain construction. From a security standpoint, a chain policy verification failure on an authenticode policy for a recently executed binary indicates unsigned or improperly signed code. In TLS inspection and proxy detection scenarios, a chain policy failure may indicate a root CA mismatch caused by SSL interception. Note: requires CAPI2 operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CAPI2 operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-CAPI2/Operational /e:true"
+        }
+      ],
       "category": "Certificate Validation",
       "tags": [
         "capi2",
@@ -169,6 +183,13 @@
       "title": "Certificate revocation check performed",
       "summary": "A revocation check was performed against a certificate in a chain.",
       "details": "Generated when Windows performs a revocation check (CRL or OCSP) against a specific certificate. Key fields: CertificateThumbprint, CertificateIssuer, RevocationCheckResult, and the CRL/OCSP endpoint used. A result of CERT_E_REVOKED indicates the certificate is on a revocation list — this is a critical finding when correlated with recently executed code, as it means a revoked signing certificate was used to sign a binary. Adversaries occasionally use certificates that were valid at signing time but have since been revoked, or certificates revoked due to compromise. CERT_E_REVOKED combined with an execution event for the corresponding binary is a strong indicator of malicious signed code. Note: requires CAPI2 operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CAPI2 operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-CAPI2/Operational /e:true"
+        }
+      ],
       "category": "Certificate Validation",
       "tags": [
         "capi2",
@@ -215,6 +236,13 @@
       "title": "X.509 chain policy verified",
       "summary": "An X.509 certificate chain was evaluated against a trust or application policy.",
       "details": "Generated when an X.509 certificate chain is evaluated against a configured trust or application policy, such as the Basic Constraints policy, Enhanced Key Usage (EKU) policy, or a custom application policy. Key fields: CertificateThumbprint, PolicyOID, and Result. Failures indicate a certificate is being used outside its intended scope — for example, a certificate with an EKU of 'Client Authentication' being used for 'Code Signing', which is a common indicator of certificate misuse. In attacks involving stolen or forged certificates, EKU mismatches may be present if the attacker used a certificate not intended for the context in which they're deploying it. Note: requires CAPI2 operational log to be enabled.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CAPI2 operational log channel is disabled by default and must be enabled before events are collected.",
+          "command": "wevtutil sl Microsoft-Windows-CAPI2/Operational /e:true"
+        }
+      ],
       "category": "Certificate Validation",
       "tags": [
         "capi2",
