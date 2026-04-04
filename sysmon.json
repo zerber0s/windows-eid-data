@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "0.2.2",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.3.0",
+    "generatedAt": "2026-04-04T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -1604,6 +1604,214 @@
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 27,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Warning",
+      "title": "FileBlockExecutable",
+      "summary": "Sysmon blocked the creation of an executable file by a monitored process.",
+      "details": "Generated (Sysmon 14.0+) when a process that matches a configured FileBlockExecutable rule attempts to create an executable file (PE with MZ header) and Sysmon's blocking rule prevents the write. This event is generated instead of the file being created — the file creation is blocked. Key fields: RuleName, UtcTime, ProcessGuid, ProcessId, Image (the process that attempted to create the executable), TargetFilename, and Hashes. This provides enforcement capability beyond detection: processes like Word, Excel, or browsers can be blocked from writing executable files to disk, directly preventing the dropper stage of many malware infection chains.",
+      "category": "File Block",
+      "tags": [
+        "sysmon",
+        "file-block",
+        "executable",
+        "dropper",
+        "defense"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11,
+          "log": "Sysmon"
+        },
+        {
+          "id": 29,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1105",
+          "techniqueName": "Ingress Tool Transfer",
+          "tactics": [
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1204.002",
+          "techniqueName": "User Execution: Malicious File",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "Requires Sysmon 14.0 or later and a FileBlockExecutable rule configured in the Sysmon configuration XML.",
+          "command": "sysmon64.exe -c sysmon-config.xml"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Image field identifies which process attempted to drop the executable — Office apps, browsers, script interpreters are highest priority",
+          "TargetFilename reveals the intended drop location — temp directories, startup folders, and AppData are most significant",
+          "Unlike EID 11 (FileCreate), EID 27 means the file was NOT written — but the attempt itself is the indicator"
+        ],
+        "commonFalsePositives": [
+          "Legitimate software updaters or package managers that write executables and were not excluded in the Sysmon config",
+          "Development tools compiling and writing output binaries"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 28,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Warning",
+      "title": "FileBlockShredding",
+      "summary": "Sysmon blocked a file shredding (secure deletion) attempt by a monitored process.",
+      "details": "Generated (Sysmon 14.0+) when a process matching a FileBlockShredding rule attempts to securely delete (shred) a file — overwriting its content before deletion to prevent forensic recovery — and Sysmon blocks the operation. Key fields: RuleName, ProcessId, Image, TargetFilename. File shredding is used by attackers to destroy forensic evidence (log files, malware binaries, exfiltration staging files) after an operation. Blocking shredding preserves evidence that would otherwise be irrecoverably destroyed. This event type is most valuable for protecting evidence integrity during an active incident.",
+      "category": "File Block",
+      "tags": [
+        "sysmon",
+        "file-block",
+        "shredding",
+        "anti-forensic",
+        "evidence-preservation"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 23,
+          "log": "Sysmon"
+        },
+        {
+          "id": 27,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1485",
+          "techniqueName": "Data Destruction",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1070.004",
+          "techniqueName": "Indicator Removal: File Deletion",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "Requires Sysmon 14.0 or later and a FileBlockShredding rule configured in the Sysmon configuration XML.",
+          "command": "sysmon64.exe -c sysmon-config.xml"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the process attempting shredding (Image) — dedicated shredding tools (sdelete.exe, cipher.exe /w) in attacker context are high-confidence indicators",
+          "TargetFilename reveals what the attacker was trying to destroy — log files, malware binaries, and credential stores are highest priority targets",
+          "Correlate with EID 23 (FileDelete) for the same process to see what was successfully deleted before the block"
+        ],
+        "commonFalsePositives": [
+          "Legitimate secure deletion tools used by data-at-rest compliance processes",
+          "Enterprise DLP or device management software performing secure wipe operations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 29,
+      "log": "Sysmon",
+      "provider": "Microsoft-Windows-Sysmon",
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "level": "Information",
+      "title": "FileExecutableDetected",
+      "summary": "Sysmon detected the creation of an executable file in a monitored directory.",
+      "details": "Generated (Sysmon 14.0+) when an executable file (detected by MZ header, not just file extension) is created in a directory monitored by a FileExecutableDetected rule. Key fields: RuleName, ProcessId, Image (the creating process), TargetFilename, and Hashes. Unlike EID 11 (FileCreate), which triggers on any file write matching a path filter, EID 29 specifically detects PE executables by content — catching renamed executables regardless of extension. This is the detection-only complement to EID 27 (FileBlockExecutable): use EID 29 to alert on executable drops in sensitive directories without blocking, and EID 27 to enforce blocking.",
+      "category": "File Detection",
+      "tags": [
+        "sysmon",
+        "executable-detection",
+        "dropper",
+        "staging"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11,
+          "log": "Sysmon"
+        },
+        {
+          "id": 27,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1105",
+          "techniqueName": "Ingress Tool Transfer",
+          "tactics": [
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "Requires Sysmon 14.0 or later and a FileExecutableDetected rule in the Sysmon configuration XML specifying the directories to monitor.",
+          "command": "sysmon64.exe -c sysmon-config.xml"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EID 29 detects by MZ/PE header content, not extension — catches executables renamed to .txt, .jpg, or other extensions to evade EID 11 extension filters",
+          "Monitor high-value staging paths: %TEMP%, %APPDATA%, user Download folders, and web server document roots",
+          "Correlate Hashes with threat intelligence immediately — the executable was already written to disk when this event fires"
+        ],
+        "commonFalsePositives": [
+          "Software installers and update mechanisms writing executables to monitored directories",
+          "Broad directory monitoring rules that include application installation paths"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Sysinternals - Sysmon",
+        "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
+      },
+      "lastReviewed": "2026-04-04"
     }
   ]
 }

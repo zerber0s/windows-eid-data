@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - System",
-    "version": "0.7.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.9.1",
+    "generatedAt": "2026-04-04T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/system.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -197,6 +197,72 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 219,
+      "log": "System",
+      "provider": "Microsoft-Windows-Kernel-PnP",
+      "channel": "System",
+      "level": "Warning",
+      "title": "Driver failed to load for device",
+      "summary": "A driver was blocked from loading for a device.",
+      "details": "Generated when the Windows kernel Plug and Play manager fails to load a driver for a device. Most commonly fires when Code Integrity or Windows Defender Device Guard blocks an unsigned or revoked driver from loading. Key fields: DriverName (the .sys file path) and DeviceId. From a security perspective this event is significant in two directions: (1) it records blocked rootkit or malicious kernel driver load attempts when Device Guard/HVCI is enforced, making it a detection event; (2) it can also fire for legitimate but unsigned drivers that were blocked, which adversaries may attempt to exploit by replacing a blocked driver with a malicious one that circumvents policy. Correlate with Security log Code Integrity events (EID 3001–3004) and the CodeIntegrity channel for the full driver block picture.",
+      "category": "Driver Load Failure",
+      "tags": [
+        "driver",
+        "code-integrity",
+        "kernel",
+        "device-guard",
+        "rootkit"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 7045,
+          "log": "System"
+        },
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1014",
+          "techniqueName": "Rootkit",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1215",
+          "techniqueName": "Kernel Modules and Extensions",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Review DriverName — unexpected .sys files in temp directories, user profile paths, or with random names are high-risk",
+          "Correlate with EID 7045 (service installed) for the same driver to see if installation was also logged",
+          "Check driver file hash against threat intelligence and verify Authenticode signature status"
+        ],
+        "commonFalsePositives": [
+          "Legitimate unsigned or older drivers for hardware peripherals blocked after enabling HVCI",
+          "Development/test drivers not submitted for WHQL signing"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/driver-signing"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 1074,
       "log": "System",
       "provider": "User32",
@@ -248,6 +314,120 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 5827,
+      "log": "System",
+      "provider": "NETLOGON",
+      "channel": "System",
+      "level": "Error",
+      "title": "The Netlogon service denied a vulnerable Netlogon secure channel connection",
+      "summary": "ZeroLogon exploit attempt blocked by Netlogon enforcement mode.",
+      "details": "Generated (System log, source NETLOGON) when the Netlogon service denies a connection from a machine account using a vulnerable, non-compliant Netlogon secure channel after the patch for CVE-2020-1472 (ZeroLogon) is applied in enforcement mode. ZeroLogon exploits a cryptographic flaw in the Netlogon authentication protocol (MS-NRPC) to allow an unauthenticated attacker to establish a session as a domain controller, reset the DC machine account password, and take over the domain. The patch adds enforcement mode that denies connections not using secure RPC. Key fields: the machine account name attempting the vulnerable connection. This event indicates either a ZeroLogon exploit attempt or a legacy device using an older Netlogon client that has not been patched.",
+      "category": "Domain Controller/Authentication",
+      "tags": [
+        "zerologon",
+        "cve-2020-1472",
+        "netlogon",
+        "domain-controller"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5828,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1210",
+          "techniqueName": "Exploitation of Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Requires the August 2020 or later security update (KB4557222) for CVE-2020-1472 (ZeroLogon). Must be in enforcement mode (FullSecureChannelProtection=1). Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The machine account name in the event identifies the device attempting the vulnerable channel — verify whether it is a known asset or a rogue attacker-controlled account",
+          "Correlate with network traffic to the DC on port 49152+ (RPC dynamic ports) and port 135 from the source IP at the event timestamp",
+          "If the account is a legitimate device that has not yet been patched, apply MS-NRPC updates — if it is unknown, treat as an active ZeroLogon attempt"
+        ],
+        "commonFalsePositives": [
+          "Legitimate but unpatched Windows devices using an older Netlogon client (very old OS versions)",
+          "Third-party devices (VPN appliances, Linux Samba DCs) not updated for ZeroLogon that use older Netlogon channels"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Security Advisory ADV200009 — CVE-2020-1472",
+        "url": "https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d35-a3d3-a827264e1571"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 5828,
+      "log": "System",
+      "provider": "NETLOGON",
+      "channel": "System",
+      "level": "Error",
+      "title": "The Netlogon service denied a vulnerable Netlogon secure channel connection from a trust account",
+      "summary": "ZeroLogon exploit attempt via a trust account blocked.",
+      "details": "Generated when the Netlogon service denies a vulnerable secure channel connection from a trust account — as opposed to EID 5827 which fires for machine accounts. ZeroLogon (CVE-2020-1472) attacks via trust accounts target the secure channel established between a child domain DC and a parent domain DC, or between trusting domains. An attacker who can impersonate a trust account and exploit the ZeroLogon flaw can compromise a parent domain DC without directly attacking it, gaining access to the entire forest. Key fields: the trust account name attempting the vulnerable channel. This event is rarer than EID 5827 and its presence should be treated as a high-severity incident.",
+      "category": "Domain Controller/Authentication",
+      "tags": [
+        "zerologon",
+        "cve-2020-1472",
+        "netlogon",
+        "domain-trust",
+        "domain-controller"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5827,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1210",
+          "techniqueName": "Exploitation of Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Requires the August 2020 or later security update (KB4557222) for CVE-2020-1472 (ZeroLogon). Must be in enforcement mode. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The trust account name identifies which domain trust is being abused — verify the trust relationship is still valid and authorized",
+          "Correlate with EID 4706 and EID 4707 in security.json to check for any recent trust modifications that may have been attacker-established",
+          "This event on a forest root DC targeting a child domain trust account indicates an attacker attempting cross-domain forest compromise"
+        ],
+        "commonFalsePositives": [
+          "Unpatched partner or child domain DCs using older Netlogon implementations across a trust boundary"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Security Advisory ADV200009 — CVE-2020-1472",
+        "url": "https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d35-a3d3-a827264e1571"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 6005,
@@ -497,6 +677,65 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 7009,
+      "log": "System",
+      "provider": "Service Control Manager",
+      "channel": "System",
+      "level": "Error",
+      "title": "Service startup timeout",
+      "summary": "The Service Control Manager timed out waiting for a service to connect during startup.",
+      "details": "Generated when the Service Control Manager waits longer than the configured timeout (default 30 seconds) for a service to complete its startup initialization and call StartServiceCtrlDispatcher. Key fields: ServiceName and the timeout duration. From a DFIR perspective, this event is valuable as a persistence indicator: malware-installed services that hang, crash, or are intentionally slow-starting generate this event. A sequence of EID 7045 (service installed) → EID 7000/7001 (service failed to start) → EID 7009 (timeout) for an unfamiliar service name is a strong persistence detection pattern. Also useful for incident timeline reconstruction when an attacker service was installed but failed to execute correctly.",
+      "category": "Service Control",
+      "tags": [
+        "service",
+        "startup",
+        "timeout",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 7000,
+          "log": "System"
+        },
+        {
+          "id": 7045,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1543.003",
+          "techniqueName": "Create or Modify System Process: Windows Service",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate ServiceName with EID 7045 to find when the service was installed and by which process",
+          "Check the service binary path for the timed-out service — unexpected paths or random filenames warrant investigation",
+          "Repeated timeout events for the same service across multiple hosts suggest a lateral movement payload that fails to initialize"
+        ],
+        "commonFalsePositives": [
+          "Legitimate services with long initialization times (database engines, AV products) on slow or resource-constrained systems",
+          "Services that depend on network resources unavailable during startup (e.g., mapped drive paths)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/services/service-control-manager"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 7023,
@@ -765,6 +1004,128 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 10010,
+      "log": "System",
+      "provider": "DistributedCOM",
+      "channel": "System",
+      "level": "Error",
+      "title": "DCOM server did not register within timeout",
+      "summary": "A DCOM server process was activated but failed to register with the DCOM service within the required timeout period.",
+      "details": "Generated when the DCOM Service Control Manager activates (launches) a COM server process but that process fails to call back and register with DCOM before the timeout expires (default: 60 seconds). Key fields: the COM AppId/CLSID of the server that failed to register, and the process that was launched. This differs from EID 10016 (permission denied before activation) — EID 10010 means activation was permitted but the server process crashed, hung, or was terminated before registering. Security context: DCOM-based lateral movement techniques that activate COM servers on remote hosts (via T1021.003) can generate this event when the targeted COM component fails to start on the victim host. Also relevant when malware replaces or disrupts a legitimate COM server binary, causing the activation to fail.",
+      "category": "DCOM / COM Security",
+      "tags": [
+        "dcom",
+        "com",
+        "lateral-movement",
+        "rpc",
+        "activation-failure"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 10016,
+          "log": "System"
+        },
+        {
+          "id": 7000,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.003",
+          "techniqueName": "Remote Services: Distributed Component Object Model",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate the AppId/CLSID with known high-value COM servers (MMC, WMI, shell objects) — failures on these may indicate tampering with COM server binaries",
+          "Check the process that was launched for the COM server — unexpected executable paths for a known AppId indicate COM hijacking",
+          "Pair with EID 10016 from the same time window: 10016 (denied) followed by 10010 (activated but failed) may indicate a race condition or privilege escalation attempt"
+        ],
+        "commonFalsePositives": [
+          "COM servers that crash during initialization due to application bugs or missing dependencies",
+          "COM servers whose dependencies (e.g., specific DLLs or registry keys) were modified by a failed software update"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/com/dcom-security-enhancements-in-windows-xp-service-pack-2-and-windows-server-2003-service-pack-1"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 10016,
+      "log": "System",
+      "provider": "DistributedCOM",
+      "channel": "System",
+      "level": "Error",
+      "title": "DCOM application permission denied",
+      "summary": "DCOM denied a process permission to activate or call a COM server due to insufficient permissions.",
+      "details": "Generated when a process is denied Local Activation, Local Launch, Remote Activation, or Remote Launch permission for a COM application due to application-specific or machine-wide DCOM security settings. Key fields: the COM AppId (CLSID/AppID), the requesting user/SID, the requesting process, and the permission type denied (Local Activation, Remote Activation, etc.). DCOM is used extensively in lateral movement via WMI (T1047), MMC snap-ins, and various RPC-based execution techniques. EID 10016 fires when these access attempts are denied, making it a visibility event for blocked COM-based lateral movement and privilege escalation attempts. Remote Activation denials from non-administrative accounts are particularly significant.",
+      "category": "DCOM / COM Security",
+      "tags": [
+        "dcom",
+        "com",
+        "lateral-movement",
+        "privilege-escalation",
+        "rpc"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5857,
+          "log": "WMI"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.003",
+          "techniqueName": "Remote Services: Distributed Component Object Model",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1047",
+          "techniqueName": "Windows Management Instrumentation",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Remote Activation denials originating from another host (non-local process) are highest priority — indicates lateral movement attempt",
+          "Identify the COM AppId/CLSID to determine which component was targeted — WMI, MMC, or shell extension CLSIDs are common attack targets",
+          "Correlate with Security EID 4624/4625 on this host from the same remote source to understand the authentication context"
+        ],
+        "commonFalsePositives": [
+          "Services running under low-privilege accounts that attempt to access COM components requiring higher privileges — very common and largely benign",
+          "Windows Update and software management agents accessing COM objects during system maintenance"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/com/dcom-security-enhancements-in-windows-xp-service-pack-2-and-windows-server-2003-service-pack-1"
+      },
+      "lastReviewed": "2026-04-04"
     }
   ]
 }

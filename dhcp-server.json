@@ -1,0 +1,505 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - DHCP Server",
+    "version": "0.1.0",
+    "generatedAt": "2026-04-04T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dhcp-server.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1020,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Warning",
+      "title": "DHCP scope address pool low",
+      "summary": "A DHCP scope is running low on available IP addresses.",
+      "details": "Generated when the available addresses in a DHCP scope fall below a configured warning threshold. Key field: the scope address and the remaining count. This event serves as an early warning for both operational and security purposes. The primary security use case is DHCP starvation attack detection (T1498 / network DoS): an attacker using a tool such as Gobbler or Yersinia sends rapid DHCPDISCOVER packets with randomized MAC addresses to exhaust the address pool, preventing legitimate clients from obtaining leases. EID 1020 precedes scope exhaustion (EID 1063) and provides an early detection window before the attack completes. Rapid progression from normal to warning to exhaustion in a short time window is the primary starvation indicator. Correlate with network traffic volume on the DHCP port (UDP 67/68) at the same time.",
+      "category": "DHCP Scope Health",
+      "tags": ["dhcp", "scope-exhaustion", "starvation-attack", "dos"],
+      "relatedEventIds": [
+        {"id": 1063, "log": "DHCPServer"},
+        {"id": 1338, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1498",
+          "techniqueName": "Network Denial of Service",
+          "tactics": [
+            {"tacticId": "TA0040", "tacticName": "Impact"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Check the rate of change: scope going from 50% to 5% in minutes indicates starvation, not organic growth",
+          "Correlate with network capture or flow data on UDP 67/68 — starvation produces high-volume DHCPDISCOVER traffic with varied MAC addresses",
+          "Check whether the low address count corresponds to legitimate new device onboarding (verify with asset inventory)"
+        ],
+        "commonFalsePositives": [
+          "Organic network growth — new devices deployed without corresponding scope size increase",
+          "IP address leaks from devices that request leases but never release them (long lease times)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1042,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Warning",
+      "title": "Rogue DHCP server detected on network",
+      "summary": "The DHCP service detected another DHCP server on the network.",
+      "details": "Generated when the DHCP service detects another DHCP server IP address on the network during its periodic authorization check. Key field: the IP address of the detected server. A rogue DHCP server is one of the most effective network-layer attack primitives: by responding to DHCPDISCOVER before the legitimate server, an attacker can assign clients a malicious default gateway (redirecting all traffic through an attacker-controlled host), a malicious DNS server (enabling DNS hijacking), or simply an invalid configuration (network DoS). This event fires on the legitimate DHCP server when it discovers the competitor. The detected server IP is the primary pivot for identifying the rogue host. In Active Directory environments, DHCP servers must be authorized in AD — EID 1042 may indicate a non-AD-authorized server or a workstation running rogue DHCP server software.",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "rogue-server", "mitm", "dns-hijacking", "lateral-movement"],
+      "relatedEventIds": [
+        {"id": 1045, "log": "DHCPServer"},
+        {"id": 1046, "log": "DHCPServer"},
+        {"id": 1052, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The IP address of the detected server is the primary pivot — identify the host and determine if it is authorized DHCP infrastructure",
+          "Check whether the detected server is actively assigning leases by reviewing client ARP tables and DHCP leases on endpoints",
+          "Correlate with switch port security logs and MAC address tables to locate the physical or virtual port hosting the rogue server"
+        ],
+        "commonFalsePositives": [
+          "A secondary or failover DHCP server that was recently added but not yet authorized in Active Directory",
+          "Test/lab environments with unmanaged DHCP servers on the same network segment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1045,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP server not authorized — stopped servicing clients (workgroup)",
+      "summary": "The DHCP service determined it is not authorized to serve clients and stopped.",
+      "details": "Generated on a workgroup (non-domain) DHCP server when it detects another DHCP server on the network or detects a network error during its authorization check, causing it to stop serving clients. This event is the legitimate server's self-shutdown indicator when it detects an authorization conflict. Crucially, this event can also be generated on a legitimate server that encounters a rogue server — meaning the legitimate server stops while the rogue continues. If EID 1045 appears on your production DHCP server and clients begin reporting IP assignment failures, a rogue DHCP server may have caused the legitimate server to yield. Correlate with EID 1042 (rogue detected) to understand the sequence.",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "authorization", "rogue-server", "service-disruption"],
+      "relatedEventIds": [
+        {"id": 1042, "log": "DHCPServer"},
+        {"id": 1046, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "If clients are reporting IP assignment failures simultaneously with this event, the DHCP service has stopped — investigate immediately",
+          "Check for preceding EID 1042 to identify the rogue server IP that triggered the self-shutdown",
+          "In AD environments, EID 1046 is more relevant — EID 1045 primarily affects workgroup or non-domain DHCP servers"
+        ],
+        "commonFalsePositives": [
+          "Network configuration errors or switch issues that cause the DHCP server to lose its network path during authorization check",
+          "DHCP server virtual machine paused and resumed (appears as a new network detection event)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1046,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP server not authorized in domain — stopped servicing clients",
+      "summary": "The DHCP service in an Active Directory domain determined it is not authorized and stopped serving clients.",
+      "details": "Generated on a domain-joined DHCP server when Active Directory authorization check fails — either because the server is not in the DHCP Authorized Servers list in AD, it cannot reach a domain controller to verify authorization, or it detects an unauthorized server competing on the network. The DHCP service stops serving clients until authorization is confirmed. Key field: the domain name that was checked. This is the AD-integrated equivalent of EID 1045. Security context: this event can be triggered by an attacker who removes the DHCP server's AD authorization (requiring Domain Admins access) to create a DHCP denial of service, or by the DHCP server losing DC connectivity (potentially during a DCSync or network segmentation attack).",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "authorization", "active-directory", "service-disruption"],
+      "relatedEventIds": [
+        {"id": 1045, "log": "DHCPServer"},
+        {"id": 1051, "log": "DHCPServer"},
+        {"id": 1059, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1489",
+          "techniqueName": "Service Stop",
+          "tactics": [
+            {"tacticId": "TA0040", "tacticName": "Impact"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Verify whether the DHCP server is still listed as authorized in DHCP Server AD properties — removal requires Domain Admin privileges",
+          "Check DC reachability from the DHCP server — loss of DC contact during an attack may cause this event",
+          "Correlate with AD security events for modification of the DHCP Authorized Servers list (Security EID 5136 on the domain)"
+        ],
+        "commonFalsePositives": [
+          "DC reachability issues during network maintenance causing authorization check failure",
+          "DHCP server moved to a new subnet before its AD authorization was updated"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1051,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP server not authorized for domain",
+      "summary": "The DHCP service is not authorized to service clients in the Active Directory domain.",
+      "details": "Generated when the DHCP service explicitly determines that it is not authorized in Active Directory to serve DHCP clients for the domain. Unlike EID 1046 (which may fire due to connectivity issues), EID 1051 is a definitive authorization failure — AD was reached and the server was confirmed as not authorized. Key field: the domain name. This event fires on a rogue DHCP server that was joined to the domain but not explicitly authorized, making it a detection event for unauthorized DHCP servers in AD environments. If this event appears on a server that was previously serving clients, an authorized server may have been de-authorized via AD.",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "authorization", "active-directory", "rogue-server"],
+      "relatedEventIds": [
+        {"id": 1046, "log": "DHCPServer"},
+        {"id": 1042, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify which server generated this event — if it is not a known DHCP server, it is a rogue and should be isolated immediately",
+          "Check whether this server is serving any clients by querying its DHCP lease table",
+          "Correlate with AD changes: was a server recently added to the domain without being authorized?"
+        ],
+        "commonFalsePositives": [
+          "DHCP server reinstalled or rebuilt without being re-authorized in AD",
+          "Migration scenario where a new server is online before the AD authorization is completed"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1052,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "Conflicting DHCP server detected (workgroup)",
+      "summary": "A workgroup DHCP server detected a competing DHCP server in a domain.",
+      "details": "Generated on a workgroup (non-domain) DHCP server when it detects another DHCP server operating within a domain on the same network segment. Key field: the IP address of the domain DHCP server and the domain name. This event is a strong indicator of a rogue workgroup DHCP server operating alongside legitimate domain DHCP infrastructure. An attacker deploying a rogue DHCP server from a non-domain machine will generate this event on their rogue server — meaning this event, if found in logs of an unexpected host, reveals the rogue server itself. Correlate with EID 1053 (domain variant) to build the full picture.",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "rogue-server", "conflicting-server", "mitm"],
+      "relatedEventIds": [
+        {"id": 1053, "log": "DHCPServer"},
+        {"id": 1042, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "If this event is found on an unexpected host, that host is a rogue DHCP server — identify and isolate it",
+          "The domain server IP in the event field helps identify which legitimate DHCP server detected the conflict from the other direction"
+        ],
+        "commonFalsePositives": [
+          "Lab or test environments with both domain and non-domain DHCP servers on the same network",
+          "DHCP server being migrated from workgroup to domain configuration"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1053,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "Conflicting DHCP server detected (domain)",
+      "summary": "A domain DHCP server detected another DHCP server competing on the network.",
+      "details": "Generated on a domain-joined DHCP server when it detects a competing DHCP server (which may be rogue or unauthorized) on the same network segment. Key fields: the IP of the competing server. This is the domain-side complement to EID 1052. Together, EIDs 1042, 1045/1046, 1051, 1052, and 1053 form the complete rogue DHCP detection event cluster in Windows DHCP Server. The appearance of any of these events in a production environment without a known authorized explanation (server migration, failover setup) warrants investigation.",
+      "category": "Rogue DHCP Detection",
+      "tags": ["dhcp", "rogue-server", "conflicting-server", "mitm"],
+      "relatedEventIds": [
+        {"id": 1052, "log": "DHCPServer"},
+        {"id": 1042, "log": "DHCPServer"},
+        {"id": 1046, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the competing server IP — if not a known authorized DHCP server, treat as rogue",
+          "Check whether the competing server is assigning leases with different gateway or DNS options (check client ipconfig /all outputs)",
+          "Use ARP tables and switch MAC address tables to find the physical location of the competing server"
+        ],
+        "commonFalsePositives": [
+          "Authorized DHCP failover partner that was misconfigured or not fully removed during decommission",
+          "Cloud/VM DHCP infrastructure visible on a bridged network segment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1059,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP server cannot contact directory service for authorization",
+      "summary": "The DHCP service failed to contact Active Directory to verify server authorization.",
+      "details": "Generated when the DHCP service cannot reach a domain controller to verify that this server is authorized to serve DHCP clients. The service will stop serving clients if it cannot confirm authorization. This event is an operational indicator that the DHCP server has lost connectivity to domain controllers — which may be caused by network disruption, a DCSync attack that caused the DC to restart, or an attacker segmenting the network. It is also relevant when an attacker compromises the DHCP server itself and attempts to prevent it from re-authorizing. Correlate with system-wide DC reachability (Kerberos events, netlogon events) to determine whether the DC connectivity loss is isolated to DHCP or broader.",
+      "category": "DHCP Authorization",
+      "tags": ["dhcp", "authorization", "active-directory", "dc-reachability"],
+      "relatedEventIds": [
+        {"id": 1046, "log": "DHCPServer"},
+        {"id": 1051, "log": "DHCPServer"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Test DC reachability from the DHCP server (nltest /dsgetdc:domain, ping DC by name)",
+          "Check if other domain-joined hosts on the same subnet have DC connectivity issues — widespread issues suggest network attack, not DHCP-specific compromise",
+          "Review Security log on the DHCP server for Kerberos failures (EID 4771) that would indicate authentication issues beyond DHCP"
+        ],
+        "commonFalsePositives": [
+          "Planned DC maintenance causing temporary DHCP authorization failures",
+          "Network segmentation changes that temporarily break DHCP-to-DC connectivity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1063,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP scope address pool exhausted",
+      "summary": "No IP addresses are available for lease in a DHCP scope — the address pool is fully exhausted.",
+      "details": "Generated when all IP addresses in a DHCP scope have been leased and no addresses are available to assign to new clients. This is the completion of a DHCP starvation attack: the attacker has consumed all available leases using tools like Gobbler or Yersinia, preventing any new legitimate client from obtaining an IP address on the affected segment. EID 1063 is preceded by EID 1020 (low address warning) as the pool depletes. Key field: the scope address/superscope name. The impact is a network-layer denial of service for new device connections on the affected subnet. Machines that already hold leases will continue to work until their lease expires, at which point they also become unable to renew.",
+      "category": "DHCP Scope Health",
+      "tags": ["dhcp", "scope-exhaustion", "starvation-attack", "dos", "impact"],
+      "relatedEventIds": [
+        {"id": 1020, "log": "DHCPServer"},
+        {"id": 1338, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1498",
+          "techniqueName": "Network Denial of Service",
+          "tactics": [
+            {"tacticId": "TA0040", "tacticName": "Impact"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Query the DHCP server lease table immediately: Get-DhcpServerv4Lease -ScopeId <scope> — look for large numbers of leases to sequential or random MAC addresses",
+          "Starvation attack signature: hundreds/thousands of leases with 02:xx or random MAC addresses assigned in a short time window",
+          "Check switch port that has the highest number of new DHCP requests — the starvation source will have anomalously high DHCPDISCOVER traffic"
+        ],
+        "commonFalsePositives": [
+          "Organic network growth — a subnet genuinely ran out of addresses due to device proliferation",
+          "DHCP scope configured with unnecessarily long lease times causing address hoarding by clients that have left the network"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1338,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Admin",
+      "level": "Error",
+      "title": "DHCP offer queue full — dropping DISCOVER packets",
+      "summary": "The DHCP server's pending offer queue exceeded 1,000 messages and is dropping subsequent DHCPDISCOVER packets.",
+      "details": "Generated when the DHCP server's internal queue of pending DHCPOFFER messages exceeds 1,000 entries, at which point the server begins dropping incoming DHCPDISCOVER packets. This is a high-fidelity indicator of a DHCP starvation attack in progress: the attack tool floods the server with DHCPDISCOVER packets faster than the server can process and send OFFERs, filling the queue. Under normal load, this queue should never reach 1,000. EID 1338 fires at the peak of the attack and is followed by EID 1339 when the queue drains back below 1,000 (attack stopped or paused). The time window between 1338 and 1339 represents the attack duration. Correlate with EID 1020 and 1063 to see the full impact on scope address availability.",
+      "category": "DHCP Scope Health",
+      "tags": ["dhcp", "starvation-attack", "queue-flood", "dos", "impact"],
+      "relatedEventIds": [
+        {"id": 1020, "log": "DHCPServer"},
+        {"id": 1063, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1498",
+          "techniqueName": "Network Denial of Service",
+          "tactics": [
+            {"tacticId": "TA0040", "tacticName": "Impact"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EID 1338 is near-definitive evidence of a starvation attack — begin network-level investigation immediately",
+          "Use network flow data or a packet capture to identify the source port/MAC flooding DHCPDISCOVER packets",
+          "Check the time gap between EID 1338 and 1339 to determine attack duration; multiple 1338/1339 cycles indicate a sustained or repeated attack"
+        ],
+        "commonFalsePositives": [
+          "Extremely rare in normal operation — this queue should not fill under any legitimate workload"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Server Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 20255,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Audit",
+      "level": "Error",
+      "title": "DHCP failover partner lost contact",
+      "summary": "The DHCP server lost communication with its failover partner.",
+      "details": "Generated when a DHCP server configured for failover loses network contact with its failover partner server. Key fields: the partner server identity and the relationship name. DHCP failover ensures continuity of address assignment if one server fails. Loss of contact triggers a state transition that may place the surviving server in PARTNER-DOWN mode after the MCLT (Maximum Client Lead Time) expires, at which point it takes over the full address pool. Security relevance: unexpected failover partner loss can indicate network segmentation by an attacker, compromise of the partner server, or DoS. A rogue DHCP attack that targets the failover partner can leave the primary server operating in a degraded failover state. Correlate with System log connectivity events on the partner server.",
+      "category": "DHCP Failover",
+      "tags": ["dhcp", "failover", "availability", "partner-down"],
+      "relatedEventIds": [
+        {"id": 1046, "log": "DHCPServer"},
+        {"id": 1059, "log": "DHCPServer"}
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Verify whether the failover partner is reachable and operational — an unresponsive partner warrants direct investigation of that host",
+          "Check whether other services between the same two hosts are also losing connectivity (indicates network path issue, not DHCP-specific)",
+          "Review DHCP failover state: if the surviving server has entered PARTNER-DOWN mode, clients may receive addresses from the full pool including partner-reserved ranges"
+        ],
+        "commonFalsePositives": [
+          "Planned maintenance or patching of the failover partner server",
+          "Network outages or firewall rule changes blocking the DHCP failover port (TCP 647)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Failover Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-failover-events"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 20256,
+      "log": "DHCPServer",
+      "provider": "Microsoft-Windows-Dhcp-Server",
+      "channel": "Microsoft-Windows-Dhcp-Server/Audit",
+      "level": "Error",
+      "title": "DHCP failover BINDING-UPDATE authentication failed — digest mismatch",
+      "summary": "A DHCP failover BINDING-UPDATE message from the partner was rejected because the message authentication digest did not match.",
+      "details": "Generated when a DHCP failover BINDING-UPDATE message is received from the failover partner but rejected because the HMAC-MD5 message authentication digest in the message does not match what the receiving server computes. Key fields: the partner server IP and the failover relationship name. This event is a network-level security indicator: an unexpected digest mismatch may indicate a man-in-the-middle attack modifying failover replication traffic between DHCP servers, or an attacker attempting to inject forged BINDING-UPDATE messages to manipulate the DHCP lease database (e.g., removing leases for specific hosts to cause them to lose network access, or adding rogue lease entries). Legitimate causes are limited to shared secret misconfiguration.",
+      "category": "DHCP Failover Security",
+      "tags": ["dhcp", "failover", "authentication-failure", "mitm", "message-integrity"],
+      "relatedEventIds": [
+        {"id": 20255, "log": "DHCPServer"},
+        {"id": 20257, "log": "DHCPServer"},
+        {"id": 20258, "log": "DHCPServer"}
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {"tacticId": "TA0006", "tacticName": "Credential Access"},
+            {"tacticId": "TA0009", "tacticName": "Collection"}
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "A single digest mismatch may indicate transient corruption; repeated mismatches suggest active MITM or injection",
+          "Verify the failover shared secret is correctly configured on both servers (Set-DhcpServerv4Failover)",
+          "Check network path between the two DHCP servers for any device that may be intercepting TCP 647 traffic"
+        ],
+        "commonFalsePositives": [
+          "Shared secret mismatch after one server was reconfigured without updating the other",
+          "Clock skew between failover partners causing HMAC timestamp validation failure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn - DHCP Failover Events",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-failover-events"
+      },
+      "lastReviewed": "2026-04-04"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.7.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.8.0",
+    "generatedAt": "2026-04-04T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -396,6 +396,57 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 4649,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "A Kerberos service ticket was requested with a replayed authentication",
+      "summary": "Kerberos replay attack detected.",
+      "details": "Generated when the Kerberos Key Distribution Center detects a replayed authenticator — an authenticator previously used in a valid ticket request being resubmitted. This event fires when an attacker captures a valid Kerberos authenticator via network interception and re-uses it before it expires. Because Kerberos authenticators have a timestamp-based window (default 5 minutes), this event is only generated when replay detection succeeds. Key fields: TargetUserName and ClientAddress identify the requesting account and source. The presence of this event indicates either an active replay attack or a significant time skew issue that is triggering false replay detection.",
+      "category": "Kerberos/Authentication",
+      "tags": [
+        "kerberos",
+        "replay-attack",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        { "id": 4768, "log": "Security" },
+        { "id": 4769, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558",
+          "techniqueName": "Steal or Forge Kerberos Tickets",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Logon > Audit Kerberos Service Ticket Operations must be enabled (Success and Failure)"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ClientAddress identifies the source of the replay — pivot to this host for further investigation",
+          "TargetUserName reveals which account's ticket was replayed — correlate with recent 4768/4769 requests from the same account",
+          "A cluster of this event from different sources targeting the same account indicates a credential relay or ticket sharing attack"
+        ],
+        "commonFalsePositives": [
+          "Severe clock skew (more than 5 minutes) between client and KDC causing authenticators to appear replayed",
+          "Network packet retransmissions in lossy environments can sometimes trigger replay detection"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4649"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 4656,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -766,6 +817,119 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 4673,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A privileged service was called",
+      "summary": "Sensitive privilege used by a process.",
+      "details": "Generated when a process uses a sensitive Windows privilege such as SeDebugPrivilege, SeTcbPrivilege, SeLoadDriverPrivilege, SeCreateTokenPrivilege, SeTakeOwnershipPrivilege, or SeAssignPrimaryTokenPrivilege. Key fields: SubjectUserName, ProcessName, and PrivilegeList. SeDebugPrivilege is the most significant DFIR indicator — it is required for direct LSASS memory access (Mimikatz sekurlsa::logonpasswords, Invoke-Mimikatz, ProcDump -ma lsass.exe). SeLoadDriverPrivilege is used to load unauthorized kernel drivers. SeTcbPrivilege grants the process 'act as part of the operating system' rights. Unexpected processes holding or using these privileges outside of security software, system processes, and known admin tools warrant immediate investigation.",
+      "category": "Privilege Abuse",
+      "tags": [
+        "privilege",
+        "credential-access",
+        "SeDebugPrivilege",
+        "mimikatz"
+      ],
+      "relatedEventIds": [
+        { "id": 4674, "log": "Security" },
+        { "id": 4688, "log": "Security" },
+        { "id": 4672, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.001",
+          "techniqueName": "OS Credential Dumping: LSASS Memory",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        },
+        {
+          "techniqueId": "T1134",
+          "techniqueName": "Access Token Manipulation",
+          "tactics": [
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Privilege Use > Audit Sensitive Privilege Use must be enabled (Success and Failure)"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PrivilegeList is the key field — filter for SeDebugPrivilege, SeTcbPrivilege, SeLoadDriverPrivilege, and SeCreateTokenPrivilege",
+          "ProcessName identifies the binary claiming the privilege — any process outside System32 or known security software using SeDebugPrivilege is high priority",
+          "Correlate SubjectUserName with EID 4688 to build the process ancestry chain — unexpected parent processes are a strong indicator"
+        ],
+        "commonFalsePositives": [
+          "Security software (AV, EDR, vulnerability scanners) legitimately using SeDebugPrivilege for memory inspection",
+          "Task Manager and Process Explorer using SeDebugPrivilege for process inspection by administrators"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4673"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4674,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An operation was attempted on a privileged object",
+      "summary": "An operation was attempted using a sensitive privilege.",
+      "details": "Generated when an operation is attempted on a privileged object such as a security-sensitive API call or token operation that uses a sensitive privilege. Closely related to EID 4673, which records privilege use — EID 4674 is more specific to the object-level operation. Key fields: SubjectUserName, ObjectServer, ObjectType, ObjectName, and PrivilegeList. This event fires for operations on objects requiring elevated privileges like LSASS handles, token duplication, or security descriptor changes on privileged objects. Combined with EID 4673, a cluster of these events from an unexpected process is strong evidence of credential dumping or privilege escalation.",
+      "category": "Privilege Abuse",
+      "tags": [
+        "privilege",
+        "object-access",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        { "id": 4673, "log": "Security" },
+        { "id": 4688, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1134",
+          "techniqueName": "Access Token Manipulation",
+          "tactics": [
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Privilege Use > Audit Sensitive Privilege Use must be enabled (Success and Failure)"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate ObjectName and PrivilegeList — LSASS as object with SeDebugPrivilege is the highest fidelity credential dumping indicator",
+          "Combine with EID 4673 from the same SubjectUserName and ProcessName for a complete privilege use chain",
+          "Correlate with Sysmon EID 10 (ProcessAccess) for a cross-source view of the same operation"
+        ],
+        "commonFalsePositives": [
+          "Security software performing legitimate process inspection or memory scanning",
+          "System processes and services performing normal privileged operations at boot and during updates"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4674"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 4688,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -848,6 +1012,228 @@
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4689"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 4692,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Backup of data protection master key was attempted",
+      "summary": "DPAPI master key backup attempted.",
+      "details": "Generated when a backup of the Data Protection API (DPAPI) master key is attempted. DPAPI master keys are used to encrypt secrets stored on disk — including browser saved passwords, Windows credential vault entries, private keys, and application secrets. A master key backup copies the key material to a domain controller (via MS-BKRP) or to a user-controlled location. Key fields: SubjectUserName and MasterKeyId. Unexpected master key backup attempts outside of normal domain join, user profile creation, or known backup software should be investigated. Attackers who obtain the DPAPI backup key from a domain controller can decrypt all domain user DPAPI-protected secrets offline.",
+      "category": "Credential Access",
+      "tags": [
+        "dpapi",
+        "credential-access",
+        "master-key",
+        "backup"
+      ],
+      "relatedEventIds": [
+        { "id": 4693, "log": "Security" },
+        { "id": 4695, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555.004",
+          "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit DPAPI Activity must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName identifies the account triggering the backup — unexpected accounts or non-interactive sessions are suspicious",
+          "MasterKeyId can be correlated with subsequent DPAPI decryption activity (EID 4695) to trace the full credential access chain",
+          "Correlate with Security EID 4624 (logon type) to determine whether the session was interactive or network-based"
+        ],
+        "commonFalsePositives": [
+          "Domain-joined machines automatically backing up master keys to the DC during normal user profile initialization",
+          "Enterprise backup software performing DPAPI key backup as part of authorized credential archival"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4692"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4693,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Recovery of data protection master key was attempted",
+      "summary": "DPAPI master key recovery attempted.",
+      "details": "Generated when recovery of a DPAPI master key is attempted. Recovery occurs when a master key is not available locally and must be retrieved from the domain controller backup (MS-BKRP) or from a user's roaming profile. Key fields: SubjectUserName and MasterKeyId. This event is directly linked to DPAPI-based credential theft tools such as Mimikatz's dpapi::masterkey /rpc command, which forces master key recovery from the domain controller. An attacker who can authenticate as the target user (or as a domain admin) can recover master keys for all users and then decrypt any DPAPI-protected secret. High-priority when fired by unexpected processes or outside of normal user logon activity.",
+      "category": "Credential Access",
+      "tags": [
+        "dpapi",
+        "credential-access",
+        "master-key",
+        "mimikatz"
+      ],
+      "relatedEventIds": [
+        { "id": 4692, "log": "Security" },
+        { "id": 4695, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555.004",
+          "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        },
+        {
+          "techniqueId": "T1552.004",
+          "techniqueName": "Unsecured Credentials: Private Keys",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit DPAPI Activity must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate ProcessName with EID 4688 — Mimikatz, PowerShell, or unknown executables triggering master key recovery are high priority",
+          "SubjectUserName recovering a MasterKeyId associated with a different user account indicates impersonation or domain admin abuse",
+          "Correlate with EID 4624 logon type — recovery during a network logon (Type 3) is unusual and warrants investigation"
+        ],
+        "commonFalsePositives": [
+          "Users logging on to a new machine or after a master key rotation triggers automatic recovery from the domain backup",
+          "Profile synchronization in roaming profile environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4693"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4694,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Protection of auditable protected data was attempted",
+      "summary": "DPAPI encryption of auditable data was attempted.",
+      "details": "Generated when the CryptProtectData API is called to encrypt auditable protected data. This event tracks the encryption (wrapping) side of the DPAPI lifecycle. It is generated less frequently than EID 4695 and is most relevant when tracking applications storing new secrets under DPAPI — for example, a malicious implant storing its C2 configuration or exfiltrated credentials in DPAPI-encrypted blobs for later recovery. Key fields: SubjectUserName, ProcessName, and DataDescription. Correlate with EID 4695 to identify encryption-then-decryption patterns from non-standard applications.",
+      "category": "Credential Access",
+      "tags": [
+        "dpapi",
+        "credential-access",
+        "encryption"
+      ],
+      "relatedEventIds": [
+        { "id": 4695, "log": "Security" },
+        { "id": 4693, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555.004",
+          "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit DPAPI Activity must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ProcessName is the primary pivot — applications outside of known browsers, credential managers, and system components encrypting auditable data warrant review",
+          "DataDescription field (when populated) identifies the type of secret being protected",
+          "Pair EID 4694 (encryption) with EID 4695 (decryption) from the same application to understand the full credential store lifecycle"
+        ],
+        "commonFalsePositives": [
+          "Browsers and email clients storing credentials or session tokens under DPAPI as part of normal operation",
+          "Windows systems encrypting user profile data, private keys, and stored passwords during normal activity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4694"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4695,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Unprotection of auditable protected data was attempted",
+      "summary": "DPAPI decryption of auditable data was attempted.",
+      "details": "Generated when the CryptUnprotectData API is called to decrypt auditable DPAPI-protected data. This is the decryption (unwrapping) side of the DPAPI lifecycle and is the most forensically significant DPAPI event — it fires when a process reads DPAPI-encrypted secrets such as browser saved passwords, Windows Credential Manager vault entries, or application secrets. Key fields: SubjectUserName, ProcessName, and DataDescription. Mimikatz's dpapi::cred and dpapi::chrome commands trigger this event. An unexpected process or a process running under a different user context decrypting DPAPI blobs is a strong credential theft indicator.",
+      "category": "Credential Access",
+      "tags": [
+        "dpapi",
+        "credential-access",
+        "decryption",
+        "mimikatz"
+      ],
+      "relatedEventIds": [
+        { "id": 4694, "log": "Security" },
+        { "id": 4693, "log": "Security" },
+        { "id": 5379, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555.003",
+          "techniqueName": "Credentials from Password Stores: Credentials from Web Browsers",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        },
+        {
+          "techniqueId": "T1555.004",
+          "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit DPAPI Activity must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ProcessName is the highest-value pivot — any non-browser, non-credential-manager process decrypting auditable DPAPI data warrants investigation",
+          "SubjectUserName decrypting data owned by a different user indicates impersonation or SYSTEM-level credential harvesting",
+          "Correlate with EID 4693 (master key recovery) and EID 5379 (Credential Manager read) to build a complete credential theft event chain"
+        ],
+        "commonFalsePositives": [
+          "Browsers decrypting stored passwords during normal autofill and form filling operations",
+          "Windows components decrypting user secrets during session initialization and service startup"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4695"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 4697,
@@ -1332,6 +1718,163 @@
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4705"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 4706,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A new trust was created to a domain",
+      "summary": "A new domain trust relationship was established.",
+      "details": "Generated when a new trust relationship is created between domains or forests. Key fields: SubjectUserName (who created the trust), TdoName (the trusted domain), TdoType (trust type: forest, external, realm, shortcut, cross-organizational), and TdoDirection (inbound, outbound, bidirectional). Domain trusts are a significant persistence and lateral movement vector — an attacker with Domain Admin rights can establish a rogue trust to an attacker-controlled domain to maintain persistent access even after credential rotation. Forest trusts grant extensive access across all domains in both forests. New trusts created outside of planned domain consolidation or partner federation activities should be treated as incidents.",
+      "category": "Persistence/Domain Trust",
+      "tags": [
+        "domain-trust",
+        "persistence",
+        "active-directory"
+      ],
+      "relatedEventIds": [
+        { "id": 4707, "log": "Security" },
+        { "id": 4719, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1484.002",
+          "techniqueName": "Domain or Tenant Policy Modification: Trust Modification",
+          "tactics": [
+            { "tacticId": "TA0003", "tacticName": "Persistence" },
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit Authentication Policy Change must be enabled. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TdoName identifies the trusted domain — verify it is a known partner domain or internal forest",
+          "TdoType of 'Forest' or 'External' with an unexpected domain name is the highest fidelity persistence indicator",
+          "TdoDirection of 'Inbound' means the remote domain trusts this domain; 'Outbound' or 'Bidirectional' grants access to the remote domain",
+          "Correlate SubjectUserName with EID 4688 and EID 4624 to determine how the attacker obtained Domain Admin rights"
+        ],
+        "commonFalsePositives": [
+          "Planned trust creation during domain migrations, mergers, or partner federation projects",
+          "IT administrators setting up test or lab domain trusts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4706"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4707,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A trust to a domain was removed",
+      "summary": "A domain trust relationship was removed.",
+      "details": "Generated when a trust relationship between domains is removed. Key fields: SubjectUserName and TdoName. While less common than trust creation as a malicious action, trust removal can be used as a destructive action (disabling legitimate partner access) or as a cleanup step after an attack. An attacker who established a rogue trust (EID 4706) may later remove it during cleanup to eliminate persistence artifacts. Unexpected removal of production trusts can also cause authentication failures for users in the trusted domain, effectively denying access.",
+      "category": "Persistence/Domain Trust",
+      "tags": [
+        "domain-trust",
+        "active-directory",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 4706, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1484.002",
+          "techniqueName": "Domain or Tenant Policy Modification: Trust Modification",
+          "tactics": [
+            { "tacticId": "TA0003", "tacticName": "Persistence" },
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit Authentication Policy Change must be enabled. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Check whether this follows a recent EID 4706 from the same TdoName — removal of a recently created trust indicates cleanup after rogue trust persistence",
+          "Verify that SubjectUserName had authorized change management approval for the trust removal",
+          "Removal of a legitimate production trust causes cross-domain authentication failures — correlate with EID 4625 or Kerberos errors from affected users"
+        ],
+        "commonFalsePositives": [
+          "Planned removal of obsolete trusts during domain consolidation or decommissioning",
+          "IT project cleanup after completed partner federation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4707"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4713,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Kerberos policy was changed",
+      "summary": "Kerberos domain policy setting was modified.",
+      "details": "Generated when a Kerberos policy setting is changed in the domain. Key fields: SubjectUserName and the old/new policy values. Critical Kerberos policy settings include: MaxTicketAge (maximum Kerberos TGT lifetime, default 10 hours), MaxRenewAge (maximum TGT renewal period, default 7 days), MaxServiceAge (maximum service ticket lifetime, default 600 minutes), and MaxClockSkew (maximum clock skew tolerance, default 5 minutes). Attackers who forge Golden Tickets may modify MaxRenewAge and MaxTicketAge to extend the forged ticket's validity window, or may change MaxClockSkew to accommodate replay attacks. Any change to these settings outside of documented security policy changes warrants immediate review.",
+      "category": "Kerberos/Authentication",
+      "tags": [
+        "kerberos",
+        "policy",
+        "active-directory",
+        "golden-ticket"
+      ],
+      "relatedEventIds": [
+        { "id": 4768, "log": "Security" },
+        { "id": 4769, "log": "Security" },
+        { "id": 4719, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit Authentication Policy Change must be enabled. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "MaxRenewAge or MaxTicketAge changes are the highest priority — extending these values enables longer-lived Golden Tickets",
+          "MaxClockSkew reduction can indicate preparation for a replay attack (EID 4649)",
+          "SubjectUserName performing this change should be a domain admin account with documented change approval — flag any unexpected accounts"
+        ],
+        "commonFalsePositives": [
+          "Planned security policy changes as part of hardening initiatives (e.g., reducing MaxTicketAge)",
+          "Domain administrator testing Kerberos settings in a lab or staging environment that was inadvertently applied to production"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4713"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 4719,
@@ -2512,6 +3055,162 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 4765,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "SID History was added to an account",
+      "summary": "SID History attribute was added to a user or computer account.",
+      "details": "Generated when a SID (Security Identifier) is added to the SidHistory attribute of an Active Directory account. SID History is a legitimate feature used during domain migrations to preserve access rights for migrated users — it allows an account in a new domain to retain access to resources in the old domain by carrying the old SID. However, it is also a well-known persistence technique: an attacker with Domain Admin rights can add the SID of any privileged group (including Domain Admins or Enterprise Admins) to an arbitrary account's SID History, granting that account the same access rights as the target SID without modifying group membership. This technique is difficult to detect through group membership queries alone and survives credential resets. Key fields: SubjectUserName, TargetUserName, and SidList.",
+      "category": "Persistence/Privilege Escalation",
+      "tags": [
+        "sid-history",
+        "persistence",
+        "privilege-escalation",
+        "active-directory"
+      ],
+      "relatedEventIds": [
+        { "id": 4766, "log": "Security" },
+        { "id": 4728, "log": "Security" },
+        { "id": 4768, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1134.005",
+          "techniqueName": "Access Token Manipulation: SID-History Injection",
+          "tactics": [
+            { "tacticId": "TA0003", "tacticName": "Persistence" },
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit User Account Management must be enabled. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SidList reveals the SID(s) added — resolve the SID to identify whether it belongs to a privileged group such as Domain Admins (S-1-5-21-...-512)",
+          "TargetUserName is the account receiving the backdoor privilege — audit all access by this account since the SID History modification",
+          "SubjectUserName must have had Domain Admin rights to perform this operation — trace how this account was compromised"
+        ],
+        "commonFalsePositives": [
+          "Legitimate domain migration operations using tools such as ADMT (Active Directory Migration Tool)",
+          "Automated migration scripts with proper change management approval"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4765"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4766,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "An attempt to add SID History to an account failed",
+      "summary": "Failed attempt to add SID History to an account.",
+      "details": "Generated when an attempt to add a SID to an account's SID History attribute fails. Key fields: SubjectUserName, TargetUserName, and the failure status. The failure may indicate insufficient privileges, auditing controls blocking SID History modification, or the operation being denied by a domain policy. While the attack was blocked, the event confirms an attempt was made — any unauthorized attempt to modify SID History should be treated as a high-severity incident indicating an attacker has or is attempting to gain domain-level persistence. Correlate with EID 4765 to determine whether other SID History modifications succeeded.",
+      "category": "Persistence/Privilege Escalation",
+      "tags": [
+        "sid-history",
+        "persistence",
+        "active-directory"
+      ],
+      "relatedEventIds": [
+        { "id": 4765, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1134.005",
+          "techniqueName": "Access Token Manipulation: SID-History Injection",
+          "tactics": [
+            { "tacticId": "TA0003", "tacticName": "Persistence" },
+            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit User Account Management must be enabled. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName attempted the operation — investigate how this account was compromised and what privilege level it held",
+          "Correlate with EID 4765 on all DCs — a failure on one DC may have succeeded on another",
+          "Check the failure reason — access denied failures confirm the account lacked privilege; other errors may indicate a partial attack"
+        ],
+        "commonFalsePositives": [
+          "Failed migration tool operations with misconfigured permissions during legitimate domain migrations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4766"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4767,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A user account was unlocked",
+      "summary": "A locked-out user account was unlocked.",
+      "details": "Generated when a locked-out user account is unlocked by an administrator or automatically by the account lockout policy. Key fields: SubjectUserName (who unlocked it) and TargetUserName (the account that was unlocked). In attack contexts, this event is primarily useful for timeline reconstruction after a brute-force or password spray campaign: EID 4625 (repeated failures) → EID 4740 (account locked) → EID 4767 (admin unlocks) → EID 4624 (next successful logon). Automated unlock tools or scripts unlocking accounts in rapid succession across multiple accounts may indicate an attacker managing a spray campaign or attempting to bypass lockout policies.",
+      "category": "Account Management",
+      "tags": [
+        "account-unlock",
+        "lockout",
+        "authentication"
+      ],
+      "relatedEventIds": [
+        { "id": 4740, "log": "Security" },
+        { "id": 4625, "log": "Security" },
+        { "id": 4624, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit User Account Management must be enabled. Collected from domain controllers for domain accounts."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName unlocking multiple accounts in rapid succession is suspicious — legitimate help desk unlocks are typically one at a time with a ticket",
+          "Correlate with EID 4740 to determine the caller computer name that triggered the lockout",
+          "A pattern of EID 4740 → EID 4767 → EID 4740 (repeat) may indicate an attacker repeatedly triggering lockouts and an admin repeatedly unlocking"
+        ],
+        "commonFalsePositives": [
+          "Help desk or IT administrators unlocking accounts as part of normal support operations",
+          "Automated account management tools with scheduled unlock windows"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4767"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 4768,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -2931,6 +3630,110 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 4782,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The password hash of an account was accessed",
+      "summary": "Password hash was read from Active Directory.",
+      "details": "Generated when the password hash of an account is accessed in Active Directory. Key fields: SubjectUserName, SubjectLogonId, and TargetUserName (whose hash was accessed). This event is a primary indicator of DCSync attacks, where an attacker uses the MS-DRSR (Directory Replication Service Remote Protocol) to impersonate a domain controller and request password hash replication. Tools like Mimikatz's lsadump::dcsync, Impacket's secretsdump.py, and the PowerShell Empire DCSync module all trigger this event. The SubjectUserName should be a domain controller computer account (e.g., DC01$) or a user explicitly granted Replicating Directory Changes permissions — any other account accessing password hashes is a critical incident indicator. Note: this event is only generated for accounts with auditing configured.",
+      "category": "Credential Access",
+      "tags": [
+        "dcsync",
+        "credential-access",
+        "password-hash",
+        "active-directory",
+        "mimikatz"
+      ],
+      "relatedEventIds": [
+        { "id": 4662, "log": "Security" },
+        { "id": 4624, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.006",
+          "techniqueName": "OS Credential Dumping: DCSync",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit User Account Management must be enabled. Object-level auditing must be configured on the target AD objects. Must be collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectUserName should only ever be a DC computer account (e.g., DC01$) — any user account accessing hashes is a DCSync attack",
+          "TargetUserName of krbtgt, Administrator, or other high-value accounts is the highest priority — these hashes enable Golden Ticket and Silver Ticket attacks",
+          "Correlate with EID 4662 (object access with DS-Replication-Get-Changes-All right) and network traffic to identify DCSync replication requests"
+        ],
+        "commonFalsePositives": [
+          "Legitimate domain controller replication via DRSR between real DCs (SubjectUserName will be a DC computer account)",
+          "Authorized third-party identity management solutions with Replicating Directory Changes All permissions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4782"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4793,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The Password Policy Checking API was called",
+      "summary": "A process queried the password policy checking API.",
+      "details": "Generated when a process calls the Password Policy Checking API (NetValidatePasswordPolicy) to validate a password against the current domain password policy. Key fields: SubjectUserName, CallerWorkstation, and Status. This event is primarily used for recon — an attacker enumerating the minimum password length, complexity requirements, and lockout thresholds to craft an effective password spray campaign without triggering account lockouts. Scripting languages (PowerShell, Python via Impacket), custom tools, and off-the-shelf password spray tools may call this API. The CallerWorkstation and SubjectUserName pivot is key: unexpected workstations or accounts querying password policy outside of normal IT tooling activity should be investigated.",
+      "category": "Reconnaissance",
+      "tags": [
+        "password-policy",
+        "reconnaissance",
+        "password-spray"
+      ],
+      "relatedEventIds": [
+        { "id": 4625, "log": "Security" },
+        { "id": 4740, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1201",
+          "techniqueName": "Password Policy Discovery",
+          "tactics": [
+            { "tacticId": "TA0007", "tacticName": "Discovery" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Account Management > Audit User Account Management must be enabled. Most useful when collected from domain controllers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CallerWorkstation identifies the machine querying the policy — correlate with other reconnaissance events from the same host",
+          "SubjectUserName performing the query from a non-admin account on a non-IT workstation is suspicious",
+          "Correlate with subsequent EID 4625 events from the same workstation — policy query followed by a wave of failed logons is a spray attack pattern"
+        ],
+        "commonFalsePositives": [
+          "Identity management software and provisioning tools that validate passwords against policy before submission",
+          "Password change utilities that check the new password against policy before applying the change"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4793"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 4794,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -3111,6 +3914,77 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 4800,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The workstation was locked",
+      "summary": "Workstation screen locked.",
+      "details": "Generated when a user locks their workstation (Win+L, Ctrl+Alt+Del → Lock, or idle lock policy). Key fields: SubjectUserName and SubjectLogonId. Used for timeline reconstruction: lock and unlock events (EID 4800/4801) combined with logon/logoff events (EID 4624/4634) build a complete picture of user presence at the keyboard. In an attack scenario, the absence of lock/unlock events during a period of active attacker-initiated activity (e.g., lateral movement, data staging) indicates the attacker was using a remote session while the legitimate user was away. The SubjectLogonId links to EID 4624 to identify the session.",
+      "category": "Logon/Authentication",
+      "tags": [
+        "workstation-lock",
+        "session",
+        "timeline"
+      ],
+      "relatedEventIds": [
+        { "id": 4801, "log": "Security" },
+        { "id": 4624, "log": "Security" },
+        { "id": 4634, "log": "Security" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Combine EID 4800 and 4801 with EID 4624/4634 to establish when a physical user was present at the keyboard vs. using the machine remotely",
+          "A long gap between EID 4800 (locked) and EID 4801 (unlocked) with active network logon events (EID 4624 Type 3) in between indicates remote activity while the user was away",
+          "Missing EID 4800 events on an interactive session despite long inactivity may indicate an always-unlocked workstation (misconfigured lockout policy)"
+        ],
+        "commonFalsePositives": [
+          "Normal user behavior — locking workstations when stepping away from the desk"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4800"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4801,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The workstation was unlocked",
+      "summary": "Workstation screen unlocked.",
+      "details": "Generated when a locked workstation is unlocked by the user entering their password. Key fields: SubjectUserName and SubjectLogonId. Paired with EID 4800 (lock), these two events provide precise windows of physical user presence at the keyboard. In DFIR investigations, unlock events help differentiate between interactive user activity and remote attacker activity during the same session. An unlock at an unusual time (e.g., 2 AM) may indicate a user returning to find their screen locked after an inactivity period, or may indicate an attacker unlocking the screen — correlate with EID 4624 logon type to determine whether authentication was local or credential-based.",
+      "category": "Logon/Authentication",
+      "tags": [
+        "workstation-unlock",
+        "session",
+        "timeline"
+      ],
+      "relatedEventIds": [
+        { "id": 4800, "log": "Security" },
+        { "id": 4624, "log": "Security" }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate SubjectLogonId with EID 4800 to calculate how long the workstation was locked",
+          "An EID 4801 at an unusual hour (outside working hours, weekend) immediately followed by suspicious process creation (EID 4688) is a high-priority pivot",
+          "Failed unlock attempts generate EID 4625 — a cluster of EID 4625 followed by EID 4801 may indicate the attacker cracked or obtained the user's session password"
+        ],
+        "commonFalsePositives": [
+          "Normal user behavior — returning to desk and unlocking workstation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4801"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 4886,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -3277,6 +4151,58 @@
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4888"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 4889,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Certificate Services set the status of a certificate request to pending",
+      "summary": "A Certificate Authority placed a certificate request in pending state.",
+      "details": "Generated when a Certificate Authority moves a certificate request to pending status, typically because the template requires CA manager approval (the 'CA certificate manager approval' issuance requirement). Key fields: RequesterName, the certificate template name, and the request attributes. From a DFIR perspective, a pending request for a sensitive certificate template — especially one with a Subject Alternative Name (SAN) for another user's UPN — may indicate an ADCS ESC attack attempt on a template requiring approval. Pair with EID 4886 (request received) and EID 4887 (approved) or EID 4888 (denied) to track the full lifecycle of suspicious certificate requests.",
+      "category": "Credential Access",
+      "tags": [
+        "certificate-services",
+        "adcs",
+        "pki"
+      ],
+      "relatedEventIds": [
+        { "id": 4886, "log": "Security" },
+        { "id": 4887, "log": "Security" },
+        { "id": 4888, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Certificate Services must be enabled under Advanced Audit Policy. Must be collected from CA servers."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Template name pivot: requests for templates like UserAuthentication, SmartcardLogon, or custom domain auth templates from unexpected accounts warrant review",
+          "Correlate RequesterName with the certificate request attributes — a SAN containing a different user's UPN than the requester is a strong ESC1 attack indicator",
+          "Track requests that sit in pending status and are later approved (EID 4887) by reviewing the approval timestamp and the approving CA manager account"
+        ],
+        "commonFalsePositives": [
+          "Legitimate certificate requests for templates requiring manager approval (by design)",
+          "Automated certificate enrollment from service accounts awaiting approval in multi-tier PKI environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4889"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 4946,
@@ -3687,6 +4613,162 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 5142,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A network share object was added",
+      "summary": "A new network share was created.",
+      "details": "Generated when a new file share is created on the system. Key fields: SubjectUserName, ShareName, and SharePath. Attackers may create rogue network shares to stage tools, exfiltrate data, or facilitate lateral movement — for example, creating an administrative-style share (ending in $) pointing to a sensitive directory, or sharing a temp directory used for tooling. A share created at an unexpected time by an unexpected user account, especially one pointing to a system directory (C:\\Windows, C:\\Users\\), should be investigated immediately. Correlate with EID 4697 (service installation) and EID 7045 if the share is associated with a new service.",
+      "category": "Lateral Movement/Persistence",
+      "tags": [
+        "file-share",
+        "lateral-movement",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        { "id": 5143, "log": "Security" },
+        { "id": 5144, "log": "Security" },
+        { "id": 5140, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit File Share must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SharePath is the most important field — shares pointing to system directories, user profile directories, or temp paths are suspicious",
+          "ShareName ending in $ creates a hidden share — correlate with other admin share activity (EID 5140 on C$, ADMIN$, IPC$)",
+          "Correlate SubjectUserName with EID 4624 to identify how the account accessed the system and whether the session was interactive or remote"
+        ],
+        "commonFalsePositives": [
+          "IT administrators creating shares for software deployment, backup agents, or file server provisioning",
+          "Application installers creating administrative shares as part of their setup process"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5142"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 5143,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A network share object was modified",
+      "summary": "An existing network share's configuration was changed.",
+      "details": "Generated when the configuration of an existing network share is modified — including changes to permissions, the share path, share description, or maximum connection count. Key fields: SubjectUserName, ShareName, OldRemark/NewRemark, and the changed permission fields. Attackers may modify existing share permissions to grant Everyone full access, enabling broader lateral movement or data access. Changes to default administrative shares (ADMIN$, C$, IPC$) are particularly suspicious and should always be investigated. Correlate with EID 5145 to identify what data was accessed through the share after its permissions were changed.",
+      "category": "Lateral Movement/Persistence",
+      "tags": [
+        "file-share",
+        "lateral-movement",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 5142, "log": "Security" },
+        { "id": 5140, "log": "Security" },
+        { "id": 5145, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.002",
+          "techniqueName": "Remote Services: SMB/Windows Admin Shares",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit File Share must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Permission changes granting Everyone or unauthenticated users access are the highest priority finding",
+          "Changes to default admin shares (ADMIN$, C$, IPC$) are almost always significant — these shares are typically read-only and not modified by normal software",
+          "Correlate SubjectUserName and modification time with EID 4624 logon events to understand what session was used for the modification"
+        ],
+        "commonFalsePositives": [
+          "File server administrators adjusting share permissions as part of authorized access control changes",
+          "Software deployment tools that temporarily modify share permissions during patch deployment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5143"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 5144,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A network share object was deleted",
+      "summary": "A network share was removed.",
+      "details": "Generated when a network share is deleted. Key fields: SubjectUserName and ShareName. Share deletion can represent attacker cleanup — removing a temporary share that was used for tool staging or data collection. A share created shortly before (EID 5142) and deleted shortly after with activity in between (EID 5140/5145) is a strong indicator of deliberate temporary share creation for attacker use. Also relevant for availability attacks — deleting production shares can disrupt business operations. Correlate with EID 5142 to identify the full create-use-delete lifecycle.",
+      "category": "Defense Evasion",
+      "tags": [
+        "file-share",
+        "defense-evasion",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        { "id": 5142, "log": "Security" },
+        { "id": 5143, "log": "Security" },
+        { "id": 5140, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit File Share must be enabled under Advanced Audit Policy > Object Access"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 5142 — a share created and deleted within minutes or hours is a strong indicator of temporary attacker staging",
+          "Check for EID 5140 or EID 5145 events against the deleted share between its creation and deletion timestamps",
+          "SubjectUserName performing the deletion — if different from the creator (EID 5142 SubjectUserName) it may indicate a second attacker phase or cleanup script"
+        ],
+        "commonFalsePositives": [
+          "Administrators removing obsolete shares during file server housekeeping",
+          "Software uninstallers removing shares created during installation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5144"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 5145,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -3747,6 +4829,162 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 5152,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "The Windows Filtering Platform blocked a packet",
+      "summary": "WFP dropped a network packet.",
+      "details": "Generated when the Windows Filtering Platform (WFP) drops a network packet, typically because no WFP filter permits the packet. Key fields: Application (the process), SourceAddress, DestAddress, SourcePort, DestPort, Protocol, and FilterRTID (the filter that blocked it). This event fires at the packet level and is extremely high-volume in most environments — useful when filtered to specific sensitive processes, destination ports, or IP ranges. In attack contexts, blocked outbound connections from unexpected processes indicate a C2 beacon or exfiltration attempt that was stopped by the host firewall. Correlate with Windows Firewall EID 2004 (rule added) to check whether an attacker subsequently added a rule to permit the blocked connection.",
+      "category": "Network/Filtering Platform",
+      "tags": [
+        "network",
+        "firewall",
+        "wfp",
+        "packet-drop"
+      ],
+      "relatedEventIds": [
+        { "id": 5157, "log": "Security" },
+        { "id": 5156, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1071",
+          "techniqueName": "Application Layer Protocol",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Filtering Platform Packet Drop must be enabled under Advanced Audit Policy > Object Access. Note: extremely high-volume; filter aggressively in production."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Filter on Application — blocked packets from non-standard binaries, scripting engines, or processes in user-writable directories are highest priority",
+          "DestAddress and DestPort: outbound blocks to external IPs on unusual ports (4444, 8080, 443 from non-browser processes) indicate C2 attempts",
+          "Correlate with Firewall EID 2004 (rule added) shortly after — attackers may add a permitting rule to bypass the block"
+        ],
+        "commonFalsePositives": [
+          "High volume of normal traffic blocked by default deny firewall rules — must be filtered to reduce noise",
+          "Applications attempting network connections before the network adapter is fully initialized at boot"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5152"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 5156,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The Windows Filtering Platform has allowed a connection",
+      "summary": "WFP permitted a network connection.",
+      "details": "Generated when the Windows Filtering Platform allows a network connection. Key fields: Application (the process), Direction (inbound/outbound), SourceAddress, DestAddress, SourcePort, DestPort, and Protocol. This event is extremely high-volume and should only be enabled with aggressive filtering. Primary use cases in security operations: detecting unusual outbound connections from processes that should not be making network connections (e.g., calc.exe, notepad.exe, unusual system binaries), identifying C2 communications by unexpected processes, or detecting lateral movement via SMB/WMI/RPC from processes like cmd.exe or powershell.exe. Correlate with Sysmon EID 3 (NetworkConnect) for a less noisy alternative that provides process context.",
+      "category": "Network/Filtering Platform",
+      "tags": [
+        "network",
+        "firewall",
+        "wfp",
+        "connection"
+      ],
+      "relatedEventIds": [
+        { "id": 5157, "log": "Security" },
+        { "id": 5152, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1071",
+          "techniqueName": "Application Layer Protocol",
+          "tactics": [
+            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Filtering Platform Connection must be enabled under Advanced Audit Policy > Object Access. Extremely high-volume; consider using Sysmon EID 3 as a targeted alternative."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Application field is the highest-value pivot — connections from scripting engines, living-off-the-land binaries, or unexpected system processes indicate attacker activity",
+          "Outbound connections on port 445 (SMB) or port 135 (RPC) from process names like cmd.exe, powershell.exe, or wmic.exe indicate lateral movement tool execution",
+          "Compare DestAddress against known-bad threat intelligence feeds for C2 IP detection"
+        ],
+        "commonFalsePositives": [
+          "Extremely high volume of normal connections from legitimate applications — requires aggressive per-application filtering",
+          "Security and monitoring tools making frequent connections to management infrastructure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5156"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 5157,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "The Windows Filtering Platform has blocked a connection",
+      "summary": "WFP blocked a network connection attempt.",
+      "details": "Generated when the Windows Filtering Platform blocks a network connection (as opposed to EID 5152 which is a packet drop). Key fields: Application, Direction, SourceAddress, DestAddress, SourcePort, DestPort, and Protocol. Unlike EID 5152 (packet-level block), EID 5157 is generated at the connection level when a WFP filter explicitly blocks a connection request. This event is most useful for detecting outbound C2 connection attempts that were blocked by the host firewall, inbound lateral movement attempts blocked by Windows Firewall on the target host, and blocked RDP brute-force attempts (inbound port 3389 blocks from external IPs). Filter on Application and DestPort for actionable signals.",
+      "category": "Network/Filtering Platform",
+      "tags": [
+        "network",
+        "firewall",
+        "wfp",
+        "connection-blocked"
+      ],
+      "relatedEventIds": [
+        { "id": 5156, "log": "Security" },
+        { "id": 5152, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Filtering Platform Connection must be enabled under Advanced Audit Policy > Object Access. High-volume; filter to specific applications and ports."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Inbound blocks on port 3389 from multiple external source IPs indicate RDP brute-force scanning — correlate with EID 4625 for any that got through",
+          "Outbound blocks from scripting engines or unusual processes indicate blocked C2 traffic — investigate the Application and check for persistence",
+          "Repeated blocks to a specific DestAddress may indicate an attacker repeatedly attempting to reach a C2 that is being blocked by network or host firewall rules"
+        ],
+        "commonFalsePositives": [
+          "Applications attempting network connections to services that are not running or not accessible in the current network segment",
+          "Host-based firewall blocking legitimate but unexpected connections from newly installed software"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5157"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
       "id": 5379,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -3799,6 +5037,301 @@
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5379"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 6272,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Network Policy Server granted access to a user",
+      "summary": "NPS (RADIUS) authentication succeeded.",
+      "details": "Generated when a Network Policy Server (NPS) grants network access to a user through RADIUS authentication. NPS is used for VPN, 802.1x wireless/wired, RD Gateway, and DirectAccess authentication. Key fields: SubjectUserName, FullyQualifiedSubjectUserName, CalledStationID (identifies the network access device — VPN concentrator, wireless AP, switch), CallingStationID (client identifier — MAC address for 802.1x or client IP for VPN), and the policy name that granted access. Unusual access grants from unexpected geographies, outside business hours, or from known threat actor IP ranges indicate potential credential compromise for VPN/remote access.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "authentication"
+      ],
+      "relatedEventIds": [
+        { "id": 6273, "log": "Security" },
+        { "id": 4624, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            { "tacticId": "TA0001", "tacticName": "Initial Access" },
+            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS must be installed and configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CalledStationID identifies which VPN/network device the user connected through — flag connections through unusual or unrecognized access devices",
+          "CallingStationID for VPN is the client's public IP — geolocation against expected user locations identifies impossible travel scenarios",
+          "Correlate with subsequent EID 4624 Type 3 logon events to trace what the user accessed after VPN authentication"
+        ],
+        "commonFalsePositives": [
+          "Normal remote worker VPN authentication events — very high volume in environments with large remote workforces",
+          "Automated VPN clients reconnecting after network drops"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 6273,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "Network Policy Server denied access to a user",
+      "summary": "NPS (RADIUS) authentication failed.",
+      "details": "Generated when a Network Policy Server denies network access to a user. Key fields: SubjectUserName, ReasonCode (the denial reason — e.g., invalid credentials, certificate error, network policy mismatch), CalledStationID, and CallingStationID. Denial reason codes are the primary investigative pivot: 16 (Authentication failed) indicates bad credentials; 23 (Expired password) indicates a valid account with an expired password; 65 (Certificate error) may indicate an MFA or certificate issue. Multiple EID 6273 events with ReasonCode 16 from the same CallingStationID against multiple usernames is a classic VPN password spray attack pattern. Correlate with EID 4625 on domain controllers for the corresponding Active Directory authentication failure.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "authentication-failure",
+        "password-spray"
+      ],
+      "relatedEventIds": [
+        { "id": 6272, "log": "Security" },
+        { "id": 4625, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110.003",
+          "techniqueName": "Brute Force: Password Spraying",
+          "tactics": [
+            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS must be installed and configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ReasonCode 16 (Authentication failed) from one CallingStationID targeting many SubjectUserName values is a VPN spray attack",
+          "CallingStationID (source IP) clustering — many failures from the same external IP indicates a single-source attack; distributed IPs suggest botnet spray",
+          "Correlate with EID 6272 — a single successful auth after many 6273 failures indicates the spray succeeded"
+        ],
+        "commonFalsePositives": [
+          "Users with expired passwords or misconfigured VPN clients generating repeated failures",
+          "Device certificate renewal failures during 802.1x reauthentication"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 6274,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Network Policy Server discarded the request for a user",
+      "summary": "NPS discarded a network access request.",
+      "details": "Generated when a Network Policy Server discards a network access request without granting or denying access. This typically occurs when a request is received that does not match any configured network policy, when the request is malformed, or when the RADIUS client is not authorized. Key fields: SubjectUserName, CalledStationID, CallingStationID, and ReasonCode. A large volume of discarded requests from an unexpected source IP may indicate RADIUS reconnaissance — an attacker probing the NPS with crafted RADIUS packets to enumerate policies or find weaknesses. Correlate with network-level logs for the source IP to understand the context.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "reconnaissance"
+      ],
+      "relatedEventIds": [
+        { "id": 6273, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1046",
+          "techniqueName": "Network Service Discovery",
+          "tactics": [
+            { "tacticId": "TA0007", "tacticName": "Discovery" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS must be installed and configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CallingStationID of an unknown or unexpected source IP generating discarded requests indicates unauthorized RADIUS client activity",
+          "High volume of discarded requests against known NPS servers may indicate RADIUS protocol scanning or fuzzing",
+          "Correlate with firewall logs to identify whether the source IP has other suspicious connections to internal infrastructure"
+        ],
+        "commonFalsePositives": [
+          "Misconfigured RADIUS clients (switches, APs, VPN concentrators) sending requests not matching any policy",
+          "Legacy network access devices sending requests in a format not recognized by the NPS"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 6276,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Network Policy Server quarantined a user",
+      "summary": "NPS placed a user connection into quarantine.",
+      "details": "Generated when a Network Policy Server grants network access but places the user in quarantine due to a Network Access Protection (NAP) posture check failure. The user receives limited network access (access to remediation resources only) until their device meets the health policy. Key fields: SubjectUserName, CalledStationID, CallingStationID, and QuarantineSysHRS (the health requirement server). From a security operations perspective, a high volume of quarantine events from endpoints that should be compliant may indicate configuration issues or an attacker attempting to gain limited network access. The quarantine VLAN scope can sometimes be leveraged for lateral movement if not properly isolated.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "nap",
+        "quarantine"
+      ],
+      "relatedEventIds": [
+        { "id": 6272, "log": "Security" },
+        { "id": 6278, "log": "Security" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            { "tacticId": "TA0001", "tacticName": "Initial Access" }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS with Network Access Protection (NAP) must be configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate QuarantineSysHRS to identify which health requirement failed — failure details may reveal the specific compliance gap",
+          "An endpoint consistently placed in quarantine despite remediation attempts may indicate a managed device being used by an unauthorized party",
+          "Correlate with EID 6278 (full access granted) to determine if the quarantine was eventually bypassed"
+        ],
+        "commonFalsePositives": [
+          "Endpoints temporarily out of compliance due to delayed patch application or AV signature updates",
+          "New devices connecting to the network for the first time before health agent installation completes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 6277,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Network Policy Server granted access to a user but put it on probation",
+      "summary": "NPS granted access but placed the connection on probation due to a health policy issue.",
+      "details": "Generated when a Network Policy Server grants full network access but logs a probationary status because the connecting device has a minor health policy violation that does not trigger full quarantine. The user receives full access while the health issue is noted. This is a transitional state in Network Access Protection environments. Key fields: SubjectUserName, CalledStationID, and the health status details. From an operations perspective, persistent probationary access for the same endpoint may indicate an unresolved compliance gap that should be remediated.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "nap"
+      ],
+      "relatedEventIds": [
+        { "id": 6272, "log": "Security" },
+        { "id": 6276, "log": "Security" }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS with Network Access Protection (NAP) must be configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the specific health requirement that triggered probationary status and remediate the endpoint",
+          "Persistent probationary access for the same SubjectUserName over multiple sessions indicates an unresolved compliance gap",
+          "Correlate with the endpoint's patch and AV status to identify the root health policy violation"
+        ],
+        "commonFalsePositives": [
+          "Endpoints in transitional compliance states during software updates or policy rollout",
+          "Newly enrolled devices connecting before all management agents are fully configured"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 6278,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Network Policy Server granted full access to a user because the host met the defined health policy",
+      "summary": "NPS granted full access after health policy compliance was verified.",
+      "details": "Generated when a Network Policy Server grants a user full network access after confirming that the connecting device meets all defined health policy requirements. This is the successful outcome of a NAP evaluation — the device passed posture assessment and received unrestricted network access. Key fields: SubjectUserName, CalledStationID, and CallingStationID. In a forensic context, this event can be used to verify that a compromised endpoint with manipulated health posture data (e.g., a rogue health agent) was able to bypass NAP and gain full access — correlate with the endpoint's actual health state versus reported state.",
+      "category": "VPN/Network Access Authentication",
+      "tags": [
+        "nps",
+        "radius",
+        "vpn",
+        "nap"
+      ],
+      "relatedEventIds": [
+        { "id": 6272, "log": "Security" },
+        { "id": 6276, "log": "Security" }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "NPS with Network Access Protection (NAP) must be configured. Audit logon/logoff events must be enabled on the NPS server."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "An endpoint that previously generated EID 6276 (quarantine) or EID 6277 (probation) then receiving EID 6278 may indicate successful remediation — or manipulation of the health agent",
+          "Correlate the endpoint's reported health state with independent endpoint management data (SCCM, Intune, EDR) to verify compliance was genuine",
+          "CalledStationID identifies the access device the user connected through — verify it matches an authorized NAP-enforced access point"
+        ],
+        "commonFalsePositives": [
+          "Normal compliant endpoint authentication in any NAP-enforced environment — high volume expected"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "lastReviewed": "2026-04-04"
     }
   ]
 }

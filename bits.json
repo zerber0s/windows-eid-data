@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BITS Client",
-    "version": "0.3.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.4.0",
+    "generatedAt": "2026-04-04T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bits.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -77,6 +77,123 @@
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 4,
+      "log": "BITS",
+      "provider": "Microsoft-Windows-Bits-Client",
+      "channel": "Microsoft-Windows-Bits-Client/Operational",
+      "level": "Information",
+      "title": "BITS job modified",
+      "summary": "An existing BITS transfer job was modified.",
+      "details": "Generated when an existing BITS job is modified — for example, when a file is added to or removed from the job, the priority changes, or the transfer URL is updated. Key fields: jobId, jobName, jobOwner, and the type of modification. Adversaries using BITS for persistence or staged downloads often modify existing jobs to update C2 URLs, change destination paths, or re-add files after completion. A sequence of EID 3 (job created) followed by multiple EID 4 (modifications) for the same jobId — especially modifications that change the remote URL to an external address — warrants investigation.",
+      "category": "BITS Job Lifecycle",
+      "tags": [
+        "bits",
+        "job-modification",
+        "persistence",
+        "c2"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3,
+          "log": "BITS"
+        },
+        {
+          "id": 59,
+          "log": "BITS"
+        },
+        {
+          "id": 60,
+          "log": "BITS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1197",
+          "techniqueName": "BITS Jobs",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Repeated URL modifications to a single jobId suggest a rotating C2 infrastructure",
+          "Correlate jobOwner with expected service accounts — BITS job modifications by SYSTEM or a user-context process are both valid but serve different attack patterns",
+          "Check if the modified destination path points to a startup folder, scheduled task directory, or script location"
+        ],
+        "commonFalsePositives": [
+          "Windows Update modifying its own transfer jobs as updates are staged",
+          "Legitimate software installers adding files to an existing BITS job during download"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 16,
+      "log": "BITS",
+      "provider": "Microsoft-Windows-Bits-Client",
+      "channel": "Microsoft-Windows-Bits-Client/Operational",
+      "level": "Information",
+      "title": "BITS service stopped",
+      "summary": "The Background Intelligent Transfer Service stopped.",
+      "details": "Generated when the BITS service (Background Intelligent Transfer Service) stops. The BITS service stopping unexpectedly or being explicitly stopped is a potential defense evasion or anti-forensic indicator — some malware stops BITS after using it for staging to remove the transfer evidence, or stops it to prevent legitimate Windows Update transfers while maintaining persistence. Key fields: the reason for the service stop. Unexpected BITS service stops outside of Windows maintenance windows warrant investigation, particularly when correlated with BITS job creation events earlier in the timeline.",
+      "category": "BITS Service Lifecycle",
+      "tags": [
+        "bits",
+        "service-stop",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3,
+          "log": "BITS"
+        },
+        {
+          "id": 60,
+          "log": "BITS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1489",
+          "techniqueName": "Service Stop",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 3/60 from earlier in the same session to determine if BITS was used before stopping",
+          "Check if the stop was triggered by an sc.exe, net.exe, or PowerShell Stop-Service command — use process creation logs",
+          "Repeated BITS start/stop cycles correlated with file staging events suggest automated malware cleanup"
+        ],
+        "commonFalsePositives": [
+          "Normal Windows service lifecycle — BITS stops when idle and restarts when needed",
+          "Scheduled system maintenance or Windows Update completion stopping BITS"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
+      },
+      "lastReviewed": "2026-04-04"
     },
     {
       "id": 59,
@@ -193,6 +310,69 @@
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 61,
+      "log": "BITS",
+      "provider": "Microsoft-Windows-Bits-Client",
+      "channel": "Microsoft-Windows-Bits-Client/Operational",
+      "level": "Warning",
+      "title": "BITS job error",
+      "summary": "A BITS transfer job encountered an error.",
+      "details": "Generated when a BITS job fails or is cancelled due to an error. Key fields: jobId, jobName, jobOwner, the file URL that failed, the destination path, and the error code (HRESULT or HTTP status). This event is forensically valuable even when the transfer ultimately fails — it records the remote URL and local destination that were attempted, revealing C2 infrastructure or staging paths. Repeated BITS errors against the same external host from multiple endpoints is a lateral movement or beaconing indicator. HTTP 403/404/401 error codes indicate the attacker's infrastructure was reachable but the specific resource was unavailable or access-controlled.",
+      "category": "BITS Job Lifecycle",
+      "tags": [
+        "bits",
+        "job-error",
+        "c2",
+        "exfiltration"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3,
+          "log": "BITS"
+        },
+        {
+          "id": 59,
+          "log": "BITS"
+        },
+        {
+          "id": 60,
+          "log": "BITS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1197",
+          "techniqueName": "BITS Jobs",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The URL in the error event is the primary pivot — extract the domain/IP and check against threat intelligence",
+          "Destination path reveals where the payload would have landed — check if it is a persistence location",
+          "Multiple hosts failing to reach the same external URL in the same time window suggests a coordinated staged download campaign"
+        ],
+        "commonFalsePositives": [
+          "Windows Update transfer failures during connectivity interruptions",
+          "Legitimate software updaters using BITS that encounter server-side errors"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
+      },
+      "lastReviewed": "2026-04-04"
     }
   ]
 }
