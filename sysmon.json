@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "0.3.0",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "0.4.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -81,7 +81,20 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Suspicious Office Application Spawning Scripting Engine",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 1\n| parse EventData with * '<Data Name=\"ParentImage\">' ParentImage '</Data>' *\n| parse EventData with * '<Data Name=\"Image\">' Image '</Data>' *\n| where ParentImage has_any (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"OUTLOOK.EXE\", \"MSPUB.EXE\")\n| where Image has_any (\"cmd.exe\", \"powershell.exe\", \"wscript.exe\", \"cscript.exe\", \"mshta.exe\", \"rundll32.exe\")\n| project TimeGenerated, Computer, Image, ParentImage\n| order by TimeGenerated desc",
+          "notes": "Adapt field parsing to your Sysmon ingestion method (Event table MMA, WindowsEvent AMA, or SysmonEvent custom table). Add CommandLine parsing for richer context."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Suspicious Parent-Child Process Relationship",
+          "rule": "title: Suspicious Process Created by Office Application\nstatus: stable\nlogsource:\n  category: process_creation\n  product: windows\ndetection:\n  selection:\n    ParentImage|endswith:\n      - '\\WINWORD.EXE'\n      - '\\EXCEL.EXE'\n      - '\\POWERPNT.EXE'\n      - '\\OUTLOOK.EXE'\n    Image|endswith:\n      - '\\cmd.exe'\n      - '\\powershell.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n      - '\\mshta.exe'\n  condition: selection\nfalsepositives:\n  - Macros legitimately invoking scripts for business automation\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 2,
@@ -191,7 +204,20 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Unexpected Process Making Outbound Connection",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 3\n| parse EventData with * '<Data Name=\"Image\">' Image '</Data>' *\n| parse EventData with * '<Data Name=\"DestinationIp\">' DestinationIp '</Data>' *\n| parse EventData with * '<Data Name=\"DestinationPort\">' DestinationPort '</Data>' *\n| where Image has_any (\"notepad.exe\", \"mshta.exe\", \"regsvr32.exe\", \"wscript.exe\", \"cscript.exe\", \"certutil.exe\", \"bitsadmin.exe\")\n| project TimeGenerated, Computer, Image, DestinationIp, DestinationPort\n| order by TimeGenerated desc",
+          "notes": "Expand the process list based on your environment's baseline. LOLBins making outbound connections on unusual ports are high-fidelity C2 indicators."
+        },
+        {
+          "platform": "Sigma",
+          "title": "LOLBin Making Network Connection",
+          "rule": "title: LOLBin Network Connection\nstatus: stable\nlogsource:\n  category: network_connection\n  product: windows\ndetection:\n  selection:\n    Initiated: 'true'\n    Image|endswith:\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\certutil.exe'\n      - '\\bitsadmin.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n  condition: selection\nfalsepositives:\n  - certutil performing legitimate CRL checks\n  - bitsadmin performing authorized downloads\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4,
@@ -420,7 +446,20 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Unsigned DLL Loaded by Sensitive Process",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 7\n| parse EventData with * '<Data Name=\"Image\">' Image '</Data>' *\n| parse EventData with * '<Data Name=\"ImageLoaded\">' ImageLoaded '</Data>' *\n| parse EventData with * '<Data Name=\"Signed\">' Signed '</Data>' *\n| where Signed == \"false\"\n| where Image has_any (\"lsass.exe\", \"winlogon.exe\", \"csrss.exe\", \"svchost.exe\")\n| project TimeGenerated, Computer, Image, ImageLoaded, Signed\n| order by TimeGenerated desc",
+          "notes": "This event is very high-volume. Scope tightly to sensitive processes. For DLL side-loading, additionally filter ImageLoaded for paths outside System32."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Unsigned DLL Loaded from User-Writable Path",
+          "rule": "title: Unsigned DLL Loaded from Suspicious Path\nstatus: experimental\nlogsource:\n  category: image_load\n  product: windows\ndetection:\n  selection:\n    Signed: 'false'\n    ImageLoaded|contains:\n      - '\\AppData\\'\n      - '\\Temp\\'\n      - '\\Users\\'\n  condition: selection\nfalsepositives:\n  - Development builds and unsigned test DLLs\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 8,
@@ -482,7 +521,19 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "CreateRemoteThread into Sensitive Process",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 8\n| parse EventData with * '<Data Name=\"SourceImage\">' SourceImage '</Data>' *\n| parse EventData with * '<Data Name=\"TargetImage\">' TargetImage '</Data>' *\n| where TargetImage has_any (\"lsass.exe\", \"winlogon.exe\", \"explorer.exe\", \"svchost.exe\", \"csrss.exe\")\n| where SourceImage !has \"\\\\Windows\\\\\"\n| project TimeGenerated, Computer, SourceImage, TargetImage\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "CreateRemoteThread into lsass.exe",
+          "rule": "title: CreateRemoteThread into lsass.exe\nstatus: stable\nlogsource:\n  category: create_remote_thread\n  product: windows\ndetection:\n  selection:\n    TargetImage|endswith: '\\lsass.exe'\n  filter:\n    SourceImage|startswith: 'C:\\Windows\\'\n  condition: selection and not filter\nfalsepositives:\n  - Security products using thread injection for monitoring\nlevel: critical"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 9,
@@ -606,7 +657,20 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "LSASS Memory Access — Credential Dumping GrantedAccess",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 10\n| parse EventData with * '<Data Name=\"TargetImage\">' TargetImage '</Data>' *\n| parse EventData with * '<Data Name=\"SourceImage\">' SourceImage '</Data>' *\n| parse EventData with * '<Data Name=\"GrantedAccess\">' GrantedAccess '</Data>' *\n| where TargetImage has \"lsass.exe\"\n| where GrantedAccess in (\"0x1010\", \"0x1410\", \"0x143A\", \"0x1438\", \"0x1FFFFF\")\n| where SourceImage !has_any (\"WerFault.exe\", \"MsMpEng.exe\")\n| project TimeGenerated, Computer, SourceImage, TargetImage, GrantedAccess\n| order by TimeGenerated desc",
+          "notes": "GrantedAccess values 0x1010 and 0x1410 are the most common credential dumping access patterns. Allowlist your EDR/AV process. 0x1FFFFF (full access) is always suspicious."
+        },
+        {
+          "platform": "Sigma",
+          "title": "LSASS Memory Access with Credential Dumping Rights",
+          "rule": "title: LSASS Memory Access with Credential Dumping Rights\nstatus: stable\nlogsource:\n  category: process_access\n  product: windows\ndetection:\n  selection:\n    TargetImage|endswith: '\\lsass.exe'\n    GrantedAccess:\n      - '0x1010'\n      - '0x1410'\n      - '0x143A'\n      - '0x1438'\n      - '0x1FFFFF'\n  filter:\n    SourceImage|endswith:\n      - '\\WerFault.exe'\n      - '\\MsMpEng.exe'\n  condition: selection and not filter\nfalsepositives:\n  - EDR and AV products performing memory inspection\nlevel: critical"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 11,
@@ -676,7 +740,20 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Executable Dropped to Suspicious Path",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 11\n| parse EventData with * '<Data Name=\"Image\">' Image '</Data>' *\n| parse EventData with * '<Data Name=\"TargetFilename\">' TargetFilename '</Data>' *\n| where TargetFilename matches regex @'(?i)\\.(exe|dll|ps1|bat|vbs|js|hta|msi)$'\n| where TargetFilename has_any (\"\\\\AppData\\\\\", \"\\\\Temp\\\\\", \"\\\\Downloads\\\\\", \"\\\\Public\\\\\")\n| project TimeGenerated, Computer, Image, TargetFilename\n| order by TimeGenerated desc",
+          "notes": "Focus on executable/script file extensions in user-writable directories. Pair with Sysmon EID 1 to see if the dropped file was subsequently executed."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Executable Dropped in User-Writable Directory",
+          "rule": "title: Executable Dropped in User-Writable Directory\nstatus: stable\nlogsource:\n  category: file_creation\n  product: windows\ndetection:\n  selection:\n    TargetFilename|contains:\n      - '\\AppData\\'\n      - '\\Temp\\'\n      - '\\Downloads\\'\n    TargetFilename|endswith:\n      - '.exe'\n      - '.dll'\n      - '.ps1'\n      - '.bat'\n      - '.vbs'\n  condition: selection\nfalsepositives:\n  - Software installers unpacking to temp directories\n  - Browser download of legitimate executables\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 12,

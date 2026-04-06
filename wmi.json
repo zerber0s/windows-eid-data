@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WMI Activity",
-    "version": "0.4.1",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.5.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -197,7 +197,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "WMI Permanent Subscription Triggered",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-WMI-Activity\"\n| where EventID == 5859\n| project TimeGenerated, Computer, EventData\n| order by TimeGenerated desc",
+          "notes": "Correlate with EID 5861 to find when the subscription was registered. A 5859 firing shortly after a suspicious 5861 confirms active execution of a malicious subscription."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 5860,
@@ -324,7 +332,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "WMI Permanent Event Subscription Registered",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-WMI-Activity\"\n| where EventID == 5861\n| parse EventData with * 'Consumer=\"' Consumer '\"' *\n| where Consumer has_any (\"CommandLineEventConsumer\", \"ActiveScriptEventConsumer\")\n| project TimeGenerated, Computer, Consumer, EventData\n| order by TimeGenerated desc",
+          "notes": "CommandLineEventConsumer and ActiveScriptEventConsumer are code execution consumers. Enumerate all active subscriptions via WMI query: SELECT * FROM __EventFilter WHERE Name != '__TimerNextFiring'"
+        },
+        {
+          "platform": "Sigma",
+          "title": "WMI Permanent Event Subscription Created",
+          "rule": "title: WMI Permanent Event Subscription Registered\nstatus: stable\nlogsource:\n  product: windows\n  service: wmi\ndetection:\n  selection:\n    EventID: 5861\n    Consumer|contains:\n      - 'CommandLineEventConsumer'\n      - 'ActiveScriptEventConsumer'\n  condition: selection\nfalsepositives:\n  - Legitimate AV/EDR or SCCM subscriptions\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     }
   ]
 }

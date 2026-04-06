@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - SMB Client and Server",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/smb.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -110,7 +110,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "SMB1 Protocol Negotiation Detected",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-SMBServer\"\n| where EventID == 3000\n| parse EventData with * '<Data Name=\"ClientIpAddress\">' ClientIpAddress '</Data>' *\n| project TimeGenerated, Computer, ClientIpAddress\n| order by TimeGenerated desc",
+          "notes": "Any SMB1 usage should be investigated unless legacy devices are known and documented. EternalBlue exploits via SMB1 are still active threats."
+        },
+        {
+          "platform": "Sigma",
+          "title": "SMB1 Protocol Used",
+          "rule": "title: SMB1 Protocol Negotiated\nstatus: stable\nlogsource:\n  product: windows\n  service: smb\ndetection:\n  selection:\n    EventID: 3000\n  condition: selection\nfalsepositives:\n  - Legacy NAS/printer devices using SMB1\n  - Old OS versions not yet upgraded\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 30803,
@@ -260,7 +273,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "SMB Authentication Failures Targeting Multiple Servers",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-SMBClient\"\n| where EventID == 31001\n| parse EventData with * '<Data Name=\"ServerName\">' ServerName '</Data>' *\n| parse EventData with * '<Data Name=\"UserName\">' UserName '</Data>' *\n| summarize FailCount = count(), DistinctServers = dcount(ServerName) by Computer, UserName, bin(TimeGenerated, 10m)\n| where DistinctServers >= 3\n| project TimeGenerated, Computer, UserName, FailCount, DistinctServers\n| order by DistinctServers desc",
+          "notes": "Multiple target servers is a stronger lateral movement signal than single-target failures. Correlate with EID 4625 on target hosts."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 31010,

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.5.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "0.6.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -175,7 +175,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Malware Detected by Windows Defender",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Defender\"\n| where EventID == 1116\n| parse EventData with * '<Data Name=\"Threat Name\">' ThreatName '</Data>' *\n| parse EventData with * '<Data Name=\"Process Name\">' ProcessName '</Data>' *\n| parse EventData with * '<Data Name=\"Severity Name\">' Severity '</Data>' *\n| project TimeGenerated, Computer, ThreatName, ProcessName, Severity\n| order by TimeGenerated desc",
+          "notes": "Adapt field parsing to your ingestion method. In MDE-integrated environments, use the DeviceAlertEvents or SecurityAlert table for richer context."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Windows Defender Malware Detection",
+          "rule": "title: Windows Defender Malware Detection\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 1116\n  condition: selection\nfalsepositives:\n  - Security research tools\n  - Packed legitimate software\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 1117,
@@ -214,7 +227,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Defender Remediation Action Failed",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Defender\"\n| where EventID == 1117\n| parse EventData with * '<Data Name=\"Action Name\">' ActionName '</Data>' *\n| parse EventData with * '<Data Name=\"Action Status\">' ActionStatus '</Data>' *\n| where ActionStatus !has \"Successfully\"\n| project TimeGenerated, Computer, ActionName, ActionStatus\n| order by TimeGenerated desc",
+          "notes": "A failed remediation means the threat may still be active. Escalate immediately and investigate with EID 1116 context."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Windows Defender Remediation Action",
+          "rule": "title: Windows Defender Remediation Action\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 1117\n  condition: selection\nfalsepositives:\n  - Legitimate software quarantined due to false positive\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 1121,
@@ -440,7 +466,19 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Windows Defender Real-Time Protection Disabled",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Defender\"\n| where EventID == 5001\n| project TimeGenerated, Computer\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Windows Defender Real-Time Protection Disabled",
+          "rule": "title: Windows Defender Real-Time Protection Disabled\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 5001\n  condition: selection\nfalsepositives:\n  - IT administrators temporarily disabling for maintenance\n  - Third-party AV managing Defender coexistence\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 5004,
@@ -546,7 +584,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Defender Exclusion Added via Configuration Change",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Defender\"\n| where EventID == 5007\n| parse EventData with * '<Data Name=\"New Value\">' NewValue '</Data>' *\n| where NewValue has_any (\"ExclusionPath\", \"ExclusionProcess\", \"ExclusionExtension\")\n| project TimeGenerated, Computer, NewValue\n| order by TimeGenerated desc",
+          "notes": "Exclusion changes are the highest-priority 5007 variant. The NewValue field shows the registry path and new value in 'key = value' format."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Windows Defender Exclusion Added",
+          "rule": "title: Windows Defender Exclusion Added\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 5007\n    NewValue|contains:\n      - 'Exclusion'\n  condition: selection\nfalsepositives:\n  - Legitimate software adding exclusions during installation\n  - Group Policy managing exclusion policies\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 5008,

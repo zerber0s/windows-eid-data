@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.8.0",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "0.9.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -65,7 +65,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-1102"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Security Log Cleared",
+          "rule": "SecurityEvent\n| where EventID == 1102\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName\n| order by TimeGenerated desc",
+          "notes": "Every occurrence is high priority — there is no legitimate automated reason to clear the Security log outside of approved change windows."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Security Log Cleared",
+          "rule": "title: Security Log Cleared\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 1102\n  condition: selection\nfalsepositives:\n  - Legitimate administrator log management\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4616,
@@ -185,7 +198,25 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Suspicious Network Logon Outside Business Hours",
+          "rule": "SecurityEvent\n| where EventID == 4624\n| where LogonType == 3\n| where AccountType != \"Machine\"\n| where TargetUserName !endswith \"$\"\n| where hourofday(TimeGenerated) !between (7 .. 18)\n| project TimeGenerated, Computer, TargetUserName, TargetDomainName, IpAddress, WorkstationName, LogonType\n| order by TimeGenerated desc",
+          "notes": "Tune business hours window and exclude known service accounts and backup systems to reduce volume."
+        },
+        {
+          "platform": "KQL",
+          "title": "RDP Logon (LogonType 10) from External IP",
+          "rule": "SecurityEvent\n| where EventID == 4624\n| where LogonType == 10\n| where IpAddress !startswith \"10.\" and IpAddress !startswith \"192.168.\" and IpAddress !startswith \"172.\"\n| where IpAddress != \"-\" and IpAddress != \"127.0.0.1\"\n| project TimeGenerated, Computer, TargetUserName, TargetDomainName, IpAddress, LogonType\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Logon with Explicit Credentials from Unusual Source",
+          "rule": "title: Suspicious Interactive Logon\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4624\n    LogonType:\n      - 2\n      - 10\n  condition: selection\nfalsepositives:\n  - Normal user desktop logons\nlevel: informational"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4625,
@@ -239,7 +270,25 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4625"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Password Spray Detection — Many Accounts from One Source",
+          "rule": "SecurityEvent\n| where EventID == 4625\n| where LogonType in (3, 10)\n| summarize FailureCount = count(), DistinctAccounts = dcount(TargetUserName) by IpAddress, bin(TimeGenerated, 10m)\n| where DistinctAccounts >= 5 and FailureCount >= 10\n| project TimeGenerated, IpAddress, FailureCount, DistinctAccounts\n| order by FailureCount desc",
+          "notes": "Thresholds should be tuned per environment. Set DistinctAccounts lower (e.g., 3) in smaller environments."
+        },
+        {
+          "platform": "KQL",
+          "title": "Brute Force Detection — Many Failures Against One Account",
+          "rule": "SecurityEvent\n| where EventID == 4625\n| summarize FailureCount = count() by TargetUserName, IpAddress, bin(TimeGenerated, 5m)\n| where FailureCount >= 20\n| project TimeGenerated, TargetUserName, IpAddress, FailureCount\n| order by FailureCount desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Multiple Failed Logon Attempts",
+          "rule": "title: Multiple Failed Logon Attempts (Brute Force)\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4625\n  condition: selection | count() by IpAddress > 20\n  timeframe: 5m\nfalsepositives:\n  - Misconfigured service accounts with stale credentials\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4634,
@@ -393,7 +442,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4648"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Explicit Credential Use by Non-Admin Process",
+          "rule": "SecurityEvent\n| where EventID == 4648\n| where SubjectUserName != TargetUserName\n| where ProcessName !in (\"C:\\\\Windows\\\\System32\\\\lsass.exe\", \"C:\\\\Windows\\\\System32\\\\svchost.exe\", \"C:\\\\Windows\\\\System32\\\\services.exe\")\n| project TimeGenerated, Computer, SubjectUserName, TargetUserName, TargetServerName, ProcessName\n| order by TimeGenerated desc",
+          "notes": "Filter known scheduled task and service manager processes. Focus on ProcessName values outside System32 or unusual locations."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Explicit Credential Logon",
+          "rule": "title: Explicit Credential Logon Attempt\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4648\n  filter:\n    SubjectUserName|endswith: '$'\n  condition: selection and not filter\nfalsepositives:\n  - Administrators using runas\n  - Scheduled tasks using explicit credentials\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4649,
@@ -814,7 +876,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Sensitive Privilege Assigned to Non-Admin Account",
+          "rule": "SecurityEvent\n| where EventID == 4672\n| where AccountName !endswith \"$\"\n| where AccountName !in (\"SYSTEM\", \"LOCAL SERVICE\", \"NETWORK SERVICE\")\n| where PrivilegeList has_any (\"SeDebugPrivilege\", \"SeLoadDriverPrivilege\", \"SeTcbPrivilege\", \"SeCreateTokenPrivilege\", \"SeTakeOwnershipPrivilege\")\n| project TimeGenerated, Computer, AccountName, AccountDomain, PrivilegeList\n| order by TimeGenerated desc",
+          "notes": "SYSTEM logons are extremely high-volume and routinely receive these privileges — exclude AccountName == 'SYSTEM' or baseline those first."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4673,
@@ -875,7 +945,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4673"
       },
-      "lastReviewed": "2026-04-04"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "SeDebugPrivilege Used by Non-System Process",
+          "rule": "SecurityEvent\n| where EventID == 4673\n| where PrivilegeList has \"SeDebugPrivilege\"\n| where ProcessName !has \"\\\\Windows\\\\\"\n| project TimeGenerated, Computer, SubjectUserName, ProcessName, PrivilegeList\n| order by TimeGenerated desc",
+          "notes": "Requires Audit Sensitive Privilege Use enabled. SeDebugPrivilege is the primary Mimikatz/credential dumper indicator. Tune by allowlisting known security tools."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Sensitive Privilege Use — SeDebugPrivilege",
+          "rule": "title: Sensitive Privilege Use — SeDebugPrivilege\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4673\n    PrivilegeList|contains: 'SeDebugPrivilege'\n  filter:\n    ProcessName|startswith:\n      - 'C:\\Windows\\'\n      - 'C:\\Program Files\\'\n  condition: selection and not filter\nfalsepositives:\n  - Security software performing memory inspection\n  - Task Manager or Process Explorer run by administrators\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4674,
@@ -976,7 +1059,25 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4688"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Suspicious Parent-Child Process Relationship",
+          "rule": "SecurityEvent\n| where EventID == 4688\n| where ParentProcessName has_any (\"winword.exe\", \"excel.exe\", \"powerpnt.exe\", \"outlook.exe\", \"mshta.exe\", \"wscript.exe\", \"cscript.exe\")\n| where NewProcessName has_any (\"cmd.exe\", \"powershell.exe\", \"wmic.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"certutil.exe\")\n| project TimeGenerated, Computer, SubjectUserName, NewProcessName, ParentProcessName, CommandLine\n| order by TimeGenerated desc",
+          "notes": "Requires 'Include command line in process creation events' audit policy for CommandLine field. Adjust parent/child lists to environment."
+        },
+        {
+          "platform": "KQL",
+          "title": "Encoded PowerShell Command Execution",
+          "rule": "SecurityEvent\n| where EventID == 4688\n| where NewProcessName endswith \"\\\\powershell.exe\" or NewProcessName endswith \"\\\\pwsh.exe\"\n| where CommandLine has_any (\"-enc\", \"-EncodedCommand\", \"-e \", \"FromBase64String\")\n| project TimeGenerated, Computer, SubjectUserName, CommandLine, ParentProcessName\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Living Off the Land Binary (LOLBin) Execution",
+          "rule": "title: LOLBin Execution via Process Creation\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4688\n    NewProcessName|endswith:\n      - '\\certutil.exe'\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\rundll32.exe'\n      - '\\bitsadmin.exe'\n  condition: selection\nfalsepositives:\n  - Legitimate administrative use of these binaries\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4689,
@@ -1282,7 +1383,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4697"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Service Installed with Suspicious Binary Path",
+          "rule": "SecurityEvent\n| where EventID == 4697\n| where ServiceFileName !startswith \"C:\\\\Windows\\\\\"\n| where ServiceFileName !startswith \"C:\\\\Program Files\\\\\"\n| project TimeGenerated, Computer, SubjectUserName, ServiceName, ServiceFileName, ServiceType, ServiceStartType\n| order by TimeGenerated desc",
+          "notes": "Services installed outside Windows and Program Files directories are common indicators of malware persistence or lateral movement tools."
+        },
+        {
+          "platform": "Sigma",
+          "title": "New Service Installed Outside Standard Paths",
+          "rule": "title: New Service Installed Outside Standard Paths\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4697\n  filter:\n    ServiceFileName|startswith:\n      - 'C:\\Windows\\'\n      - 'C:\\Program Files\\'\n      - 'C:\\Program Files (x86)\\'\n  condition: selection and not filter\nfalsepositives:\n  - Third-party software installing services in non-standard locations\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4698,
@@ -1344,7 +1458,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4698"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Scheduled Task Created in Root Namespace",
+          "rule": "SecurityEvent\n| where EventID == 4698\n| where TaskName !startswith \"\\\\Microsoft\\\\\"\n| project TimeGenerated, Computer, SubjectUserName, TaskName, TaskContent\n| order by TimeGenerated desc",
+          "notes": "Tasks in \\Microsoft\\ subfolder are typically Microsoft/vendor-managed. Tasks at the root level (e.g., \\TaskName) are more commonly attacker-created."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Created",
+          "rule": "title: Scheduled Task Created\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4698\n  filter:\n    TaskName|startswith: '\\Microsoft\\'\n  condition: selection and not filter\nfalsepositives:\n  - Legitimate software installers creating scheduled tasks\n  - Group Policy deploying tasks\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4699,
@@ -1537,7 +1664,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4702"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Scheduled Task Modified — Executable Path Changed",
+          "rule": "SecurityEvent\n| where EventID == 4702\n| where TaskName !startswith \"\\\\Microsoft\\\\\"\n| project TimeGenerated, Computer, SubjectUserName, TaskName, TaskContent\n| order by TimeGenerated desc",
+          "notes": "Inspect TaskContent XML for changes to the Action/Command element. Correlate with EID 4698 for the original task definition to identify what changed."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4703,
@@ -1928,7 +2063,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4719"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Audit Policy Disabled on Critical Category",
+          "rule": "SecurityEvent\n| where EventID == 4719\n| where AuditPolicyChanges has \"No Auditing\"\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, AuditPolicyChanges\n| order by TimeGenerated desc",
+          "notes": "Changes reducing coverage to 'No Auditing' are the highest priority. Correlate with EID 1102 (log cleared) in the same time window for an evidence destruction pattern."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Audit Policy Disabled",
+          "rule": "title: Audit Policy Disabled\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4719\n    AuditPolicyChanges|contains: 'No Auditing'\n  condition: selection\nfalsepositives:\n  - Group Policy audit enforcement during gpupdate cycles\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4720,
@@ -1985,7 +2133,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4720"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "User Account Created by Non-IT Account",
+          "rule": "SecurityEvent\n| where EventID == 4720\n| where SubjectUserName !endswith \"$\"\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, TargetUserName, TargetDomainName\n| order by TimeGenerated desc",
+          "notes": "Any account creation by a non-IT account or outside a provisioning window is suspicious. Correlate with EID 4732 to check if the new account was immediately added to a privileged group."
+        },
+        {
+          "platform": "Sigma",
+          "title": "New User Account Created",
+          "rule": "title: New User Account Created\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4720\n  condition: selection\nfalsepositives:\n  - IT provisioning during onboarding\n  - Automated provisioning systems\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4722,
@@ -2303,7 +2464,19 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Member Added to Privileged Global Group",
+          "rule": "SecurityEvent\n| where EventID == 4728\n| where TargetUserName in (\"Domain Admins\", \"Enterprise Admins\", \"Schema Admins\", \"Group Policy Creator Owners\")\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, TargetUserName, MemberSid\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Member Added to Privileged Domain Group",
+          "rule": "title: Member Added to Privileged Domain Group\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4728\n    TargetUserName:\n      - 'Domain Admins'\n      - 'Enterprise Admins'\n      - 'Schema Admins'\n  condition: selection\nfalsepositives:\n  - Authorized IT provisioning\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4729,
@@ -2474,7 +2647,19 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4732"
       },
-      "lastReviewed": "2026-03-29"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Member Added to Local Administrators Group",
+          "rule": "SecurityEvent\n| where EventID == 4732\n| where TargetUserName == \"Administrators\"\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, MemberSid\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Member Added to Local Administrators Group",
+          "rule": "title: Member Added to Local Administrators Group\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4732\n    TargetUserName: 'Administrators'\n  condition: selection\nfalsepositives:\n  - IT adding service or admin accounts during deployment\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4733,
@@ -2996,7 +3181,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Member Added to Privileged Universal Group",
+          "rule": "SecurityEvent\n| where EventID == 4756\n| where TargetUserName in (\"Enterprise Admins\", \"Schema Admins\")\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, TargetUserName, MemberSid\n| order by TimeGenerated desc",
+          "notes": "Universal groups span all domains in the forest. Enterprise Admins and Schema Admins in universal scope have the broadest impact."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4757,

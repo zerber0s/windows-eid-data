@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Security Mitigations (Exploit Protection)",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "0.2.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security-mitigations.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -111,7 +111,20 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
       },
-      "lastReviewed": "2026-04-03"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "ACG Enforce-Mode Block — Shellcode Injection Attempt",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Security-Mitigations\"\n| where EventID == 2\n| parse EventData with * '<Data Name=\"ImagePath\">' ImagePath '</Data>' *\n| where ImagePath !has_any (\"node.exe\", \"java.exe\", \"javaw.exe\")\n| project TimeGenerated, Computer, ImagePath\n| order by TimeGenerated desc",
+          "notes": "Exclude known JIT-dependent apps (node, java) via allowlist. Any remaining block is near-certain shellcode injection. Correlate with WER crash events on the same process."
+        },
+        {
+          "platform": "Sigma",
+          "title": "ACG Enforce Mode Block",
+          "rule": "title: Exploit Protection ACG Block\nstatus: stable\nlogsource:\n  product: windows\n  service: security-mitigations\ndetection:\n  selection:\n    EventID: 2\n  condition: selection\nfalsepositives:\n  - Applications not excluded from ACG that require JIT\nlevel: critical"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 3,
@@ -207,7 +220,19 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
       },
-      "lastReviewed": "2026-04-03"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Child Process Blocked — Post-Exploitation Execution Attempt",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Security-Mitigations\"\n| where EventID == 4\n| parse EventData with * '<Data Name=\"ImagePath\">' ImagePath '</Data>' *\n| parse EventData with * '<Data Name=\"ChildImagePath\">' ChildImagePath '</Data>' *\n| project TimeGenerated, Computer, ImagePath, ChildImagePath\n| order by TimeGenerated desc"
+        },
+        {
+          "platform": "Sigma",
+          "title": "Exploit Protection Child Process Blocked",
+          "rule": "title: Exploit Protection Child Process Blocked\nstatus: stable\nlogsource:\n  product: windows\n  service: security-mitigations\ndetection:\n  selection:\n    EventID: 4\n  condition: selection\nfalsepositives:\n  - Policy misconfiguration on apps requiring child spawning\nlevel: critical"
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 5,

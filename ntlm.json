@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - NTLM Authentication",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "0.3.0",
+    "generatedAt": "2026-04-05T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ntlm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -71,7 +71,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
       },
-      "lastReviewed": "2026-04-03"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Forced NTLM Authentication Attempt from Unexpected Process",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Security-NTLM\"\n| where EventID == 4001\n| parse EventData with * '<Data Name=\"CallerProcessName\">' CallerProcessName '</Data>' *\n| parse EventData with * '<Data Name=\"TargetName\">' TargetName '</Data>' *\n| parse EventData with * '<Data Name=\"ClientUserName\">' ClientUserName '</Data>' *\n| where CallerProcessName !has_any (\"lsass.exe\", \"svchost.exe\")\n| project TimeGenerated, Computer, CallerProcessName, TargetName, ClientUserName\n| order by TimeGenerated desc",
+          "notes": "Requires NTLM outbound auditing enabled via Group Policy. A browser or Office app as CallerProcessName is a strong UNC injection / forced auth indicator."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     },
     {
       "id": 4002,
@@ -325,7 +333,15 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
       },
-      "lastReviewed": "2026-04-02"
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Privileged Account NTLM Auth from Unexpected Source",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Security-NTLM\"\n| where EventID == 8004\n| parse EventData with * '<Data Name=\"ClientUserName\">' ClientUserName '</Data>' *\n| parse EventData with * '<Data Name=\"CallingMachineHostName\">' CallingMachineHostName '</Data>' *\n| where ClientUserName has_any (\"admin\", \"Administrator\")\n| project TimeGenerated, Computer, ClientUserName, CallingMachineHostName\n| order by TimeGenerated desc",
+          "notes": "Correlate CallingMachineHostName against the victim host's EID 8001 logs to verify the machine actually initiated the auth — in relay attacks the true origin differs."
+        }
+      ],
+      "lastReviewed": "2026-04-05"
     }
   ]
 }
