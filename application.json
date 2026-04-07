@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Application",
-    "version": "0.6.1",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "0.6.2",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/application.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -211,7 +211,7 @@
         "investigationPivots": [
           "Review the managed stack trace in the event message for suspicious namespace/class names (e.g., Cobalt Strike artifacts, SharpXxx tool names)",
           "Correlate the faulting process with EID 1 (Sysmon process create) to see parent process and command line",
-          "A crash in powershell.exe, msbuild.exe, regasm.exe, or other LOLBins with a .NET stack trace is a high-priority indicator"
+          "A crash in powershell.exe (LOLBAS Scripts), msbuild.exe, regasm.exe (LOLBAS Binaries), or other LOLBAS tools with a .NET stack trace is a high-priority indicator — these tools are commonly weaponized for in-memory .NET payload execution"
         ],
         "commonFalsePositives": [
           "Legitimate .NET application bugs causing unhandled exceptions",
@@ -222,7 +222,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/dotnet/standard/exceptions/"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 1026,

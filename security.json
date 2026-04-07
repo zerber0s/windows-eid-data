@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.9.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "0.9.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -1046,7 +1046,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "CommandLine (requires audit policy: Include command line in process creation events) is the highest-value field — search for encoded commands, download cradles, and LOLBin abuse",
+          "CommandLine (requires audit policy: Include command line in process creation events) is the highest-value field — search for encoded commands, download cradles, and LOLBAS abuse (binaries such as certutil.exe and mshta.exe, scripts via wscript.exe/cscript.exe, and libraries loaded through rundll32.exe)",
           "ParentProcessName establishes the process chain — unexpected parents (e.g., Office spawning cmd.exe, or wscript.exe spawning PowerShell) are strong malicious indicators",
           "SubjectUserName identifies the account context — SYSTEM or service account spawning interactive shells is suspicious",
           "Correlate NewProcessId with EID 4689 to track process lifetime"
@@ -1073,11 +1073,12 @@
         },
         {
           "platform": "Sigma",
-          "title": "Living Off the Land Binary (LOLBin) Execution",
-          "rule": "title: LOLBin Execution via Process Creation\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4688\n    NewProcessName|endswith:\n      - '\\certutil.exe'\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\rundll32.exe'\n      - '\\bitsadmin.exe'\n  condition: selection\nfalsepositives:\n  - Legitimate administrative use of these binaries\nlevel: medium"
+          "title": "LOLBAS Execution via Process Creation",
+          "rule": "title: LOLBAS Execution via Process Creation\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4688\n    NewProcessName|endswith:\n      - '\\certutil.exe'\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\rundll32.exe'\n      - '\\bitsadmin.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n      - '\\msbuild.exe'\n      - '\\wmic.exe'\n  condition: selection\nfalsepositives:\n  - Legitimate administrative use of these binaries or scripting engines\nlevel: medium",
+          "notes": "Covers LOLBAS Binaries (certutil, mshta, regsvr32, rundll32, bitsadmin, wmic, msbuild) and Scripts (wscript, cscript). For library abuse (DLLs loaded via rundll32/regsvr32), inspect CommandLine for unusual .dll paths."
         }
       ],
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4689,
@@ -1087,7 +1088,7 @@
       "level": "AuditSuccess",
       "title": "A process has exited",
       "summary": "Process termination event.",
-      "details": "Generated every time a process exits. Pair with 4688 using ProcessId to track full process lifetime. Useful for detecting short-lived processes indicative of payload execution or LOLBin abuse.",
+      "details": "Generated every time a process exits. Pair with 4688 using ProcessId to track full process lifetime. Useful for detecting short-lived processes indicative of payload execution or LOLBAS abuse (e.g., certutil.exe, mshta.exe, wscript.exe, or rundll32.exe completing after a single-shot payload).",
       "category": "Process Execution",
       "tags": [
         "process",
@@ -1112,7 +1113,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4689"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4692,

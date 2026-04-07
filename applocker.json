@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - AppLocker",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "0.2.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/applocker.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -232,7 +232,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Look for follow-on execution events using LOLBins (mshta.exe, regsvr32.exe, wscript.exe with /b flag, rundll32.exe) that may indicate an AppLocker bypass attempt",
+          "Look for follow-on execution events using LOLBAS tools that may indicate an AppLocker bypass attempt — LOLBins: mshta.exe, regsvr32.exe, rundll32.exe; LOLBAS Scripts: wscript.exe with /b flag, cscript.exe; LOLBAS Libraries: .dll files invoked via rundll32.exe or regsvr32.exe /s",
           "FileName with a .ps1 extension being blocked, followed by PowerShell execution via encodedcommand, is a common evasion pivot",
           "Correlate UserName with logon events to understand attacker access level at time of block"
         ],
@@ -245,7 +245,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 8020,

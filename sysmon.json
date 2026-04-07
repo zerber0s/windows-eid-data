@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "0.4.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "0.4.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -66,7 +66,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Compare Image path against expected locations — system binaries should reside in System32 or SysWOW64",
-          "Review CommandLine for encoded payloads (base64, -EncodedCommand), LOLBin flags, or unusual argument patterns",
+          "Review CommandLine for encoded payloads (base64, -EncodedCommand), LOLBAS flags (e.g., certutil -decode, regsvr32 /s /u, wscript /b, rundll32 with a non-standard export), or unusual argument patterns",
           "Examine ParentImage to identify unexpected process parent-child relationships (e.g., Office apps spawning scripting engines)",
           "Hash lookups against threat intelligence feeds can confirm known-bad binaries",
           "IntegrityLevel of High or System for unexpected processes may indicate privilege escalation"
@@ -94,7 +94,7 @@
           "rule": "title: Suspicious Process Created by Office Application\nstatus: stable\nlogsource:\n  category: process_creation\n  product: windows\ndetection:\n  selection:\n    ParentImage|endswith:\n      - '\\WINWORD.EXE'\n      - '\\EXCEL.EXE'\n      - '\\POWERPNT.EXE'\n      - '\\OUTLOOK.EXE'\n    Image|endswith:\n      - '\\cmd.exe'\n      - '\\powershell.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n      - '\\mshta.exe'\n  condition: selection\nfalsepositives:\n  - Macros legitimately invoking scripts for business automation\nlevel: high"
         }
       ],
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 2,
@@ -189,7 +189,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Flag processes that do not ordinarily make network connections (e.g., Office applications, LOLBins like regsvr32, mshta, certutil)",
+          "Flag processes that do not ordinarily make network connections — this includes LOLBAS tools: LOLBins such as regsvr32.exe, mshta.exe, certutil.exe, and bitsadmin.exe; LOLBAS Scripts such as wscript.exe and cscript.exe; and libraries loaded via rundll32.exe",
           "Check DestinationIp against threat intelligence; newly registered domains and dynamic DNS providers are common C2 indicators",
           "Periodic beaconing patterns (regular intervals to the same IP) suggest C2 heartbeats",
           "Correlate with EID 22 to link DNS resolution to the subsequent connection"
@@ -209,15 +209,16 @@
           "platform": "KQL",
           "title": "Unexpected Process Making Outbound Connection",
           "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 3\n| parse EventData with * '<Data Name=\"Image\">' Image '</Data>' *\n| parse EventData with * '<Data Name=\"DestinationIp\">' DestinationIp '</Data>' *\n| parse EventData with * '<Data Name=\"DestinationPort\">' DestinationPort '</Data>' *\n| where Image has_any (\"notepad.exe\", \"mshta.exe\", \"regsvr32.exe\", \"wscript.exe\", \"cscript.exe\", \"certutil.exe\", \"bitsadmin.exe\")\n| project TimeGenerated, Computer, Image, DestinationIp, DestinationPort\n| order by TimeGenerated desc",
-          "notes": "Expand the process list based on your environment's baseline. LOLBins making outbound connections on unusual ports are high-fidelity C2 indicators."
+          "notes": "Expand the process list based on your environment's baseline. LOLBAS tools (binaries, scripts, and library loaders) making outbound connections on unusual ports are high-fidelity C2 indicators."
         },
         {
           "platform": "Sigma",
-          "title": "LOLBin Making Network Connection",
-          "rule": "title: LOLBin Network Connection\nstatus: stable\nlogsource:\n  category: network_connection\n  product: windows\ndetection:\n  selection:\n    Initiated: 'true'\n    Image|endswith:\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\certutil.exe'\n      - '\\bitsadmin.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n  condition: selection\nfalsepositives:\n  - certutil performing legitimate CRL checks\n  - bitsadmin performing authorized downloads\nlevel: high"
+          "title": "LOLBAS Tool Making Network Connection",
+          "rule": "title: LOLBAS Network Connection\nstatus: stable\nlogsource:\n  category: network_connection\n  product: windows\ndetection:\n  selection:\n    Initiated: 'true'\n    Image|endswith:\n      - '\\mshta.exe'\n      - '\\regsvr32.exe'\n      - '\\certutil.exe'\n      - '\\bitsadmin.exe'\n      - '\\wscript.exe'\n      - '\\cscript.exe'\n      - '\\msbuild.exe'\n      - '\\wmic.exe'\n      - '\\rundll32.exe'\n  condition: selection\nfalsepositives:\n  - certutil performing legitimate CRL checks\n  - bitsadmin performing authorized downloads\n  - msbuild during legitimate build pipeline tasks\nlevel: high",
+          "notes": "Covers LOLBAS Binaries (mshta, regsvr32, certutil, bitsadmin, wmic, msbuild, rundll32) and Scripts (wscript, cscript). rundll32 and regsvr32 are also entry points for LOLBAS Libraries (malicious .dll side-loading)."
         }
       ],
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4,
@@ -543,7 +544,7 @@
       "level": "Information",
       "title": "RawAccessRead",
       "summary": "A process read from a disk device using raw access.",
-      "details": "Generated when a process reads directly from a disk volume using raw access (bypassing the filesystem), detected via \\\\.\\PhysicalDrive or \\\\.\\HarddiskVolume handles. Key fields: Image (the reading process) and Device. Raw disk access is used by credential harvesting tools (to read the NTDS.dit database directly or read hibernation/page files), disk imaging utilities, rootkits to hide files, and destructive wipers. Legitimate consumers are narrow: backup software, disk management utilities, and forensic tools. Any raw disk access by unexpected processes — especially scripting engines, LOLBins, or unknown executables — is suspicious.",
+      "details": "Generated when a process reads directly from a disk volume using raw access (bypassing the filesystem), detected via \\\\.\\PhysicalDrive or \\\\.\\HarddiskVolume handles. Key fields: Image (the reading process) and Device. Raw disk access is used by credential harvesting tools (to read the NTDS.dit database directly or read hibernation/page files), disk imaging utilities, rootkits to hide files, and destructive wipers. Legitimate consumers are narrow: backup software, disk management utilities, and forensic tools. Any raw disk access by unexpected processes — especially scripting engines, LOLBAS tools (binaries, scripts, or library loaders), or unknown executables — is suspicious.",
       "category": "Disk Access",
       "tags": [
         "raw-access",
@@ -595,7 +596,7 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 10,
@@ -869,7 +870,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Review Details field for suspicious values: encoded commands, paths to temp/user-writable directories, LOLBin invocations",
+          "Review Details field for suspicious values: encoded commands, paths to temp/user-writable directories, LOLBAS invocations (e.g., certutil, wscript, mshta, rundll32 with a .dll argument)",
           "TargetObject pointing to Run, RunOnce, Winlogon, AppInit_DLLs, or services parameters are high-value targets",
           "Image that is a scripting engine or dropped binary writing to persistence keys is a strong signal",
           "Correlate TargetObject value path with EID 11 to see if the referenced file was recently dropped"
@@ -883,7 +884,7 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 14,
@@ -1110,7 +1111,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "PipeName matching known C2 framework patterns (Cobalt Strike, Metasploit, Sliver, Brute Ratel) is a high-confidence indicator",
-          "Pipes created by scripting engines, LOLBins, or unsigned executables are suspicious regardless of name",
+          "Pipes created by LOLBAS tools (scripting engines such as wscript.exe/cscript.exe, LOLBins such as mshta.exe/rundll32.exe, or unsigned executables) are suspicious regardless of name",
           "Correlate with EID 18 to identify the connecting process and map the full IPC channel",
           "Random or GUID-formatted pipe names are atypical for legitimate software"
         ],
@@ -1123,7 +1124,7 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 18,
@@ -1289,7 +1290,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Type of CommandLineEventConsumer or ActiveScriptEventConsumer indicates code execution capability — investigate immediately",
-          "Destination reveals the payload: examine for encoded commands, paths to dropped files, or LOLBin invocations",
+          "Destination reveals the payload: examine for encoded commands, paths to dropped files, or LOLBAS invocations (e.g., cmd.exe, wscript.exe, mshta.exe, certutil.exe, or rundll32.exe with a .dll path)",
           "Correlate Name with EID 19 filter and EID 21 binding to reconstruct the complete subscription"
         ],
         "commonFalsePositives": [
@@ -1300,7 +1301,7 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 21,
@@ -1368,7 +1369,7 @@
       "level": "Information",
       "title": "DNS query",
       "summary": "A process made a DNS query.",
-      "details": "Generated when a process makes a DNS query. Key fields: Image (the querying process), QueryName (the domain queried), QueryStatus (success/failure), and QueryResults (the resolved IP addresses). DNS is the most common C2 discovery channel. This event captures the domain lookup that precedes a network connection — correlating EID 22 with EID 3 on the same Image links a domain name to the subsequent IP-level connection. DNS-based C2 (DNS tunneling) produces high query volumes to unusual subdomains of a single parent domain. Unusual domains queried by system processes or LOLBins are a strong signal.",
+      "details": "Generated when a process makes a DNS query. Key fields: Image (the querying process), QueryName (the domain queried), QueryStatus (success/failure), and QueryResults (the resolved IP addresses). DNS is the most common C2 discovery channel. This event captures the domain lookup that precedes a network connection — correlating EID 22 with EID 3 on the same Image links a domain name to the subsequent IP-level connection. DNS-based C2 (DNS tunneling) produces high query volumes to unusual subdomains of a single parent domain. Unusual domains queried by system processes or LOLBAS tools (e.g., certutil.exe, mshta.exe, wscript.exe, powershell.exe) are a strong signal.",
       "category": "DNS Activity",
       "tags": [
         "dns",
@@ -1421,7 +1422,7 @@
         "name": "Microsoft Sysinternals - Sysmon",
         "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 23,
