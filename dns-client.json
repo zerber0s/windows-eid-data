@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DNS Client",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-client.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -44,22 +44,34 @@
         "dga"
       ],
       "relatedEventIds": [
-        { "id": 3008, "log": "DNSClient" },
-        { "id": 3010, "log": "DNSClient" }
+        {
+          "id": 3008,
+          "log": "DNSClient"
+        },
+        {
+          "id": 3010,
+          "log": "DNSClient"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1071.004",
           "techniqueName": "Application Layer Protocol: DNS",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         },
         {
           "techniqueId": "T1568.002",
           "techniqueName": "Dynamic Resolution: Domain Generation Algorithms",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -79,6 +91,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -107,22 +123,34 @@
         "dns-tunneling"
       ],
       "relatedEventIds": [
-        { "id": 3006, "log": "DNSClient" },
-        { "id": 3010, "log": "DNSClient" }
+        {
+          "id": 3006,
+          "log": "DNSClient"
+        },
+        {
+          "id": 3010,
+          "log": "DNSClient"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1568.002",
           "techniqueName": "Dynamic Resolution: Domain Generation Algorithms",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         },
         {
           "techniqueId": "T1071.004",
           "techniqueName": "Application Layer Protocol: DNS",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -141,6 +169,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -168,16 +200,28 @@
         "dns-tunneling"
       ],
       "relatedEventIds": [
-        { "id": 3006, "log": "DNSClient" },
-        { "id": 3008, "log": "DNSClient" },
-        { "id": 3020, "log": "DNSClient" }
+        {
+          "id": 3006,
+          "log": "DNSClient"
+        },
+        {
+          "id": 3008,
+          "log": "DNSClient"
+        },
+        {
+          "id": 3020,
+          "log": "DNSClient"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1071.004",
           "techniqueName": "Application Layer Protocol: DNS",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -194,6 +238,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -221,16 +269,28 @@
         "c2"
       ],
       "relatedEventIds": [
-        { "id": 3006, "log": "DNSClient" },
-        { "id": 3010, "log": "DNSClient" }
+        {
+          "id": 3006,
+          "log": "DNSClient"
+        },
+        {
+          "id": 3010,
+          "log": "DNSClient"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0009", "tacticName": "Collection" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -247,6 +307,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     }

@@ -1,0 +1,561 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Active Directory Certificate Services",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ad-cs.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      },
+      {
+        "name": "SpecterOps - Certified Pre-Owned",
+        "url": "https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf",
+        "type": "secondary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4885,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The audit filter for Certificate Services changed",
+      "summary": "The audit filter settings for the Certification Authority were modified.",
+      "details": "Generated when the auditing configuration for a Certificate Authority (CA) is changed — specifically, which categories of CA events are audited (e.g., certificate requests, revocation, configuration changes, backup/restore). Key fields: SubjectAccountName (who changed the filter) and the new audit filter bitmask. CA audit settings govern whether events like 4886 (certificate request received), 4887 (certificate issued), and 4888 (request denied) are logged at all. An attacker who has compromised a CA may disable auditing of certificate issuance events (by zeroing out the audit filter) to prevent detection of ESC-based certificate abuse. Reduction or zeroing of the audit filter without change authorization is a critical finding. CA-only event.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit Certification Services' under Advanced Audit Policy Configuration > Object Access. CA auditing must also be configured in the CA management console (certsrv.msc) or via certutil -setreg CA\\AuditFilter."
+        }
+      ],
+      "category": "Certificate Services Configuration",
+      "tags": [
+        "ad-cs",
+        "certificate-services",
+        "audit-config",
+        "defense-evasion",
+        "esc"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4890,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any change to the audit filter that reduces the bitmask (disabling auditing categories) without an authorized change ticket is critical",
+          "A filter value of 0 means all CA auditing is disabled — this is an immediate escalation indicator",
+          "SubjectAccountName should be a CA administrator or PKI team member; changes by other accounts require investigation",
+          "Correlate temporally with other CA events to determine if the filter change preceded an issuance event that would normally have been audited"
+        ],
+        "commonFalsePositives": [
+          "Authorized PKI administrators adjusting audit verbosity to reduce log volume on high-traffic CAs",
+          "CA reconfiguration during PKI refresh or upgrade projects"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4885"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4886,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Certificate Services received a certificate request",
+      "summary": "A client submitted a certificate request to the Certification Authority.",
+      "details": "Generated when a CA receives a certificate request. Key fields: Requester (SubjectAccountName of who submitted the request), RequestID (internal CA tracking number), Attributes (including the certificate template name and SAN if specified). This is the intake event for all certificate issuance workflows — pair with EID 4887 (approved), 4888 (denied), or 4889 (pending) to track the full request lifecycle. In AD CS attack contexts (ESC1-ESC8), this event reveals the template being abused: ESC1 abuse involves a requester specifying an arbitrary Subject Alternative Name (SAN) with a privileged account's UPN or DNS name in the request. Attributes field containing SubjectAltName with a value not matching the requester's identity is a high-confidence ESC1 indicator. CA-only event.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit Certification Services' under Advanced Audit Policy Configuration > Object Access. CA must be configured to audit certificate requests via certutil -setreg CA\\AuditFilter with the appropriate bitmask."
+        }
+      ],
+      "category": "Certificate Request",
+      "tags": [
+        "ad-cs",
+        "certificate-request",
+        "esc1",
+        "san-abuse",
+        "credential-access",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        },
+        {
+          "id": 4889,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Attributes field containing SubjectAltName with a UPN or DNS name that differs from the Requester identity is the primary ESC1 indicator",
+          "Template name in Attributes that is a highly-privileged template (e.g., SubCA, DomainController, Administrator) requested by a regular user account is critical",
+          "High volume of certificate requests from a single Requester in a short window may indicate certificate-based credential spray or automated certificate theft tooling",
+          "Correlate RequestID with EID 4887 to confirm if the request was approved and a certificate was issued"
+        ],
+        "commonFalsePositives": [
+          "Legitimate auto-enrollment requests from workstations and servers using standard machine or user certificate templates",
+          "Scripted certificate provisioning for VPN, web servers, or code signing pipelines",
+          "MDM/endpoint management platforms requesting device certificates"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4886"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4887,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Certificate Services approved a certificate request and issued a certificate",
+      "summary": "The CA approved a certificate request and issued a signed certificate to the requester.",
+      "details": "Generated when a CA approves a certificate request and issues a certificate. Key fields: Requester (SubjectAccountName), RequestID (matches the EID 4886 intake event), Attributes (template name, SAN, and other request attributes), and the issued certificate's serial number. This is the highest-value AD CS event for attack detection because it confirms a certificate was actually issued — not just requested. In ESC attacks, this event confirms successful exploitation: ESC1 (SAN abuse with privileged UPN), ESC3 (enrollment agent certificate used to request on behalf of another user), and ESC6 (EDITF_ATTRIBUTESUBJECTALTNAME2 flag enabling arbitrary SAN on any template). The issued certificate can be used for PKINIT authentication to obtain a TGT as any user, enabling persistent privileged access that survives password resets. CA-only event.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit Certification Services' under Advanced Audit Policy Configuration > Object Access. Configure CA auditing via certutil -setreg CA\\AuditFilter 127."
+        }
+      ],
+      "category": "Certificate Issuance",
+      "tags": [
+        "ad-cs",
+        "certificate-issued",
+        "esc1",
+        "esc3",
+        "esc6",
+        "pkinit",
+        "credential-access",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Certificate",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Attributes containing SubjectAltName with a UPN for a privileged account (e.g., Administrator@domain.com, krbtgt) that is not the Requester is a confirmed ESC1 exploitation",
+          "Template name in Attributes that is a CA-level or high-privilege template (SubCA, DomainControllerAuthentication) issued to a standard user is critical",
+          "RequestID cross-referenced with EID 4886 reveals the full request chain including the original submission context",
+          "Issued certificate serial number can be used to track the certificate in subsequent PKINIT (EID 4768 with Certificate field) or LDAP authentication events",
+          "Requester that is an enrollment agent account (ESC3) issuing certificates on behalf of other users should match authorized agent configurations"
+        ],
+        "commonFalsePositives": [
+          "High-volume auto-enrollment issuances to domain-joined machines and users via standard templates",
+          "Scripted or MDM-driven certificate issuance for device management, VPN, or Wi-Fi authentication",
+          "PKI renewal events that issue replacement certificates for expiring ones"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4887"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4888,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "Certificate Services denied a certificate request",
+      "summary": "The CA rejected a certificate request from a requester.",
+      "details": "Generated when a CA denies a certificate request. Key fields: Requester (SubjectAccountName), RequestID, Attributes (including the requested template and any SAN fields), and the denial reason. Denials can occur because the requester lacks enrollment permissions on the template, the request fails policy validation, a CA manager denied a pending request, or the request was blocked by issuance requirements. In attack contexts, repeated denials targeting the same template from the same Requester indicate an adversary probing for exploitable templates — a pattern consistent with Certify/Certipy enumeration followed by exploitation attempts. Denial reason codes revealing 'Denied by Policy Module' vs. 'Access Denied' help distinguish misconfigured requests from unauthorized ones. CA-only event.",
+      "category": "Certificate Request",
+      "tags": [
+        "ad-cs",
+        "certificate-denied",
+        "esc-probing",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4889,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Multiple denials from the same Requester targeting different templates in a short window indicates template enumeration and exploitation attempts",
+          "Denial of a request that included an arbitrary SubjectAltName indicates an attempted ESC1 attack that was blocked by policy",
+          "Correlate Requester with EID 4886 for the same RequestID to see the original request attributes",
+          "Denial by a CA manager (manual rejection) should be correlated with EID 4889 (pending) to confirm review process was followed"
+        ],
+        "commonFalsePositives": [
+          "Auto-enrollment failures from endpoints that have lost enrollment permissions due to GPO changes",
+          "Certificate requests that fail because the template requires CA manager approval but none was configured",
+          "Renewal requests that fail because the issuing CA has changed or the template was updated"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4888"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4889,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Certificate Services set the status of a certificate request to pending",
+      "summary": "A certificate request is awaiting CA manager approval before issuance.",
+      "details": "Generated when a CA places a certificate request into a pending (held) state, requiring a CA manager to manually review and approve or deny it before the certificate is issued. Key fields: Requester (SubjectAccountName), RequestID, and Attributes (template and request details). Pending is typically configured on high-value templates (e.g., code signing, sub-CA) to require human review. In attack contexts, an adversary may submit requests for high-privilege templates expecting them to be approved without scrutiny — particularly if the CA is misconfigured (ESC4: template with weak CA manager approval settings, or ESC7: CA manager permissions granted to non-admin accounts). Pending requests that are subsequently approved via EID 4887 without a corresponding change ticket should be investigated. CA-only event.",
+      "category": "Certificate Request",
+      "tags": [
+        "ad-cs",
+        "certificate-pending",
+        "ca-approval",
+        "esc4",
+        "esc7"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pending requests for high-privilege templates (SubCA, code signing) submitted by unfamiliar or non-standard accounts should be reviewed before approval",
+          "Correlate approval (EID 4887) with the pending request (EID 4889) to ensure the approver was an authorized CA manager",
+          "A burst of pending requests from the same Requester targeting multiple templates may indicate automated attack tooling"
+        ],
+        "commonFalsePositives": [
+          "Legitimate code signing or sub-CA requests that are intentionally configured to require manual approval",
+          "Certificate renewal requests for templates with CA manager approval requirements"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4889"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4890,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The audit settings for Certificate Services changed",
+      "summary": "The audit configuration for the Certification Authority was modified.",
+      "details": "Generated when the audit settings (audit filter bitmask) for the CA are changed via the CA management console or certutil. Key fields: SubjectAccountName (who made the change) and the old vs. new audit filter values. The CA audit filter controls which event categories are logged — requests, issuance, revocation, configuration changes, and backup/restore. This event differs from EID 4885 (which tracks filter application) — EID 4890 specifically records the configuration change action itself. An adversary who has compromised the CA with CA Admin privileges may disable issuance auditing (EID 4887) to hide certificate abuse. Any reduction in the audit filter value without change authorization is a high-severity finding. CA-only event.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit Certification Services' under Advanced Audit Policy Configuration > Object Access."
+        }
+      ],
+      "category": "Certificate Services Configuration",
+      "tags": [
+        "ad-cs",
+        "certificate-services",
+        "audit-config",
+        "defense-evasion",
+        "ca-admin"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4885,
+          "log": "Security"
+        },
+        {
+          "id": 4891,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "New audit filter value that is less than the previous value (fewer categories audited) without change authorization is a critical indicator",
+          "SubjectAccountName should be a PKI administrator or CA admin; changes by other accounts indicate privilege escalation to CA Admin (ESC7)",
+          "Correlate with EID 4891 (CA configuration changed) to determine if broader CA reconfiguration is occurring"
+        ],
+        "commonFalsePositives": [
+          "PKI administrators adjusting audit settings during CA maintenance or tuning exercises",
+          "CA upgrade or migration activities that reset audit settings to defaults"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4890"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4891,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A configuration entry changed in Certificate Services",
+      "summary": "A configuration setting within the Certification Authority was modified.",
+      "details": "Generated when a configuration entry in the CA's registry or database is changed — this includes changes to CA extensions, policy modules, exit modules, validity periods, key recovery agent settings, and the EDITF_ATTRIBUTESUBJECTALTNAME2 flag. Key fields: SubjectAccountName (who made the change), Node (the registry path of the changed CA setting), and NewValue. The EDITF_ATTRIBUTESUBJECTALTNAME2 flag is directly tied to ESC6 attacks: when this flag is set on the CA, any template with an arbitrary SAN in the request will be honored, enabling any user with enrollment rights to specify a privileged UPN in the SAN field. A change to this flag (Node containing 'EditFlags' or 'SubjectAltName') is an ESC6 enablement indicator. Changes to ValidityPeriod/ValidityPeriodUnits (extending certificate lifetimes) can also indicate preparation for long-lived certificate persistence. CA-only event.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit Certification Services' under Advanced Audit Policy Configuration > Object Access."
+        }
+      ],
+      "category": "Certificate Services Configuration",
+      "tags": [
+        "ad-cs",
+        "certificate-services",
+        "esc6",
+        "editflags",
+        "san-abuse",
+        "ca-config",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4890,
+          "log": "Security"
+        },
+        {
+          "id": 4885,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1484.001",
+          "techniqueName": "Domain or Tenant Policy Modification: Group Policy Modification",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Node containing 'EditFlags' or 'SubjectAltName' in the CA\\PolicyModules path with NewValue setting EDITF_ATTRIBUTESUBJECTALTNAME2 (0x00040000 bit set) is a direct ESC6 enablement indicator",
+          "Node containing 'ValidityPeriod' or 'ValidityPeriodUnits' with extended values increases the window for certificate-based persistence",
+          "SubjectAccountName should be a PKI administrator or CA admin — changes by other accounts indicate ESC7-class privilege on the CA",
+          "Correlate this event with subsequent EID 4887 certificate issuances to determine if the configuration change was immediately exploited"
+        ],
+        "commonFalsePositives": [
+          "Authorized PKI administrators modifying CA settings as part of template or policy updates",
+          "CA software upgrades that update configuration entries",
+          "CA reconfiguration during PKI architecture changes (e.g., adding a new policy module)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4891"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    }
+  ]
+}

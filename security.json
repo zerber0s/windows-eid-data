@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "0.9.1",
+    "version": "1.10.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -78,6 +78,10 @@
           "rule": "title: Security Log Cleared\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 1102\n  condition: selection\nfalsepositives:\n  - Legitimate administrator log management\nlevel: high"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -127,6 +131,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4616"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -216,6 +224,10 @@
           "rule": "title: Suspicious Interactive Logon\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4624\n    LogonType:\n      - 2\n      - 10\n  condition: selection\nfalsepositives:\n  - Normal user desktop logons\nlevel: informational"
         }
       ],
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -288,6 +300,10 @@
           "rule": "title: Multiple Failed Logon Attempts (Brute Force)\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4625\n  condition: selection | count() by IpAddress > 20\n  timeframe: 5m\nfalsepositives:\n  - Misconfigured service accounts with stale credentials\nlevel: medium"
         }
       ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -327,6 +343,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4634"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -365,6 +385,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4647"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -455,6 +479,10 @@
           "rule": "title: Explicit Credential Logon Attempt\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4648\n  filter:\n    SubjectUserName|endswith: '$'\n  condition: selection and not filter\nfalsepositives:\n  - Administrators using runas\n  - Scheduled tasks using explicit credentials\nlevel: medium"
         }
       ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -473,15 +501,24 @@
         "credential-access"
       ],
       "relatedEventIds": [
-        { "id": 4768, "log": "Security" },
-        { "id": 4769, "log": "Security" }
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4769,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1558",
           "techniqueName": "Steal or Forge Kerberos Tickets",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -505,6 +542,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4649"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -568,6 +609,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4656"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -633,6 +678,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -687,6 +736,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4662"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -751,6 +804,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4663"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -804,6 +861,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4670"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -884,6 +945,10 @@
           "notes": "SYSTEM logons are extremely high-volume and routinely receive these privileges — exclude AccountName == 'SYSTEM' or baseline those first."
         }
       ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -903,24 +968,42 @@
         "mimikatz"
       ],
       "relatedEventIds": [
-        { "id": 4674, "log": "Security" },
-        { "id": 4688, "log": "Security" },
-        { "id": 4672, "log": "Security" }
+        {
+          "id": 4674,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 4672,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1003.001",
           "techniqueName": "OS Credential Dumping: LSASS Memory",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         },
         {
           "techniqueId": "T1134",
           "techniqueName": "Access Token Manipulation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -958,6 +1041,10 @@
           "rule": "title: Sensitive Privilege Use — SeDebugPrivilege\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4673\n    PrivilegeList|contains: 'SeDebugPrivilege'\n  filter:\n    ProcessName|startswith:\n      - 'C:\\Windows\\'\n      - 'C:\\Program Files\\'\n  condition: selection and not filter\nfalsepositives:\n  - Security software performing memory inspection\n  - Task Manager or Process Explorer run by administrators\nlevel: high"
         }
       ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -976,16 +1063,28 @@
         "credential-access"
       ],
       "relatedEventIds": [
-        { "id": 4673, "log": "Security" },
-        { "id": 4688, "log": "Security" }
+        {
+          "id": 4673,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1134",
           "techniqueName": "Access Token Manipulation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -1009,6 +1108,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4674"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -1078,6 +1181,10 @@
           "notes": "Covers LOLBAS Binaries (certutil, mshta, regsvr32, rundll32, bitsadmin, wmic, msbuild) and Scripts (wscript, cscript). For library abuse (DLLs loaded via rundll32/regsvr32), inspect CommandLine for unusual .dll paths."
         }
       ],
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-07"
     },
     {
@@ -1113,6 +1220,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4689"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-07"
     },
     {
@@ -1132,15 +1243,24 @@
         "backup"
       ],
       "relatedEventIds": [
-        { "id": 4693, "log": "Security" },
-        { "id": 4695, "log": "Security" }
+        {
+          "id": 4693,
+          "log": "Security"
+        },
+        {
+          "id": 4695,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1555.004",
           "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -1165,6 +1285,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4692"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -1184,22 +1308,34 @@
         "mimikatz"
       ],
       "relatedEventIds": [
-        { "id": 4692, "log": "Security" },
-        { "id": 4695, "log": "Security" }
+        {
+          "id": 4692,
+          "log": "Security"
+        },
+        {
+          "id": 4695,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1555.004",
           "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         },
         {
           "techniqueId": "T1552.004",
           "techniqueName": "Unsecured Credentials: Private Keys",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -1224,6 +1360,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4693"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -1242,15 +1382,24 @@
         "encryption"
       ],
       "relatedEventIds": [
-        { "id": 4695, "log": "Security" },
-        { "id": 4693, "log": "Security" }
+        {
+          "id": 4695,
+          "log": "Security"
+        },
+        {
+          "id": 4693,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1555.004",
           "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -1275,6 +1424,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4694"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -1294,23 +1447,38 @@
         "mimikatz"
       ],
       "relatedEventIds": [
-        { "id": 4694, "log": "Security" },
-        { "id": 4693, "log": "Security" },
-        { "id": 5379, "log": "Security" }
+        {
+          "id": 4694,
+          "log": "Security"
+        },
+        {
+          "id": 4693,
+          "log": "Security"
+        },
+        {
+          "id": 5379,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1555.003",
           "techniqueName": "Credentials from Password Stores: Credentials from Web Browsers",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         },
         {
           "techniqueId": "T1555.004",
           "techniqueName": "Credentials from Password Stores: Windows Credential Manager",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -1334,6 +1502,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4695"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -1397,6 +1569,10 @@
           "rule": "title: New Service Installed Outside Standard Paths\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4697\n  filter:\n    ServiceFileName|startswith:\n      - 'C:\\Windows\\'\n      - 'C:\\Program Files\\'\n      - 'C:\\Program Files (x86)\\'\n  condition: selection and not filter\nfalsepositives:\n  - Third-party software installing services in non-standard locations\nlevel: high"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -1472,6 +1648,10 @@
           "rule": "title: Scheduled Task Created\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4698\n  filter:\n    TaskName|startswith: '\\Microsoft\\'\n  condition: selection and not filter\nfalsepositives:\n  - Legitimate software installers creating scheduled tasks\n  - Group Policy deploying tasks\nlevel: medium"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -1543,6 +1723,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4699"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -1603,6 +1787,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4700"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -1673,6 +1861,10 @@
           "notes": "Inspect TaskContent XML for changes to the Action/Command element. Correlate with EID 4698 for the original task definition to identify what changed."
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -1726,6 +1918,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4703"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -1803,6 +1999,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4704"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -1853,6 +2053,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4705"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -1871,16 +2075,28 @@
         "active-directory"
       ],
       "relatedEventIds": [
-        { "id": 4707, "log": "Security" },
-        { "id": 4719, "log": "Security" }
+        {
+          "id": 4707,
+          "log": "Security"
+        },
+        {
+          "id": 4719,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.002",
           "techniqueName": "Domain or Tenant Policy Modification: Trust Modification",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -1906,6 +2122,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4706"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -1924,15 +2144,24 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 4706, "log": "Security" }
+        {
+          "id": 4706,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.002",
           "techniqueName": "Domain or Tenant Policy Modification: Trust Modification",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -1957,6 +2186,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4707"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -1976,16 +2209,28 @@
         "golden-ticket"
       ],
       "relatedEventIds": [
-        { "id": 4768, "log": "Security" },
-        { "id": 4769, "log": "Security" },
-        { "id": 4719, "log": "Security" }
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4719,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1558.001",
           "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -2009,6 +2254,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4713"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -2077,6 +2326,10 @@
           "rule": "title: Audit Policy Disabled\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4719\n    AuditPolicyChanges|contains: 'No Auditing'\n  condition: selection\nfalsepositives:\n  - Group Policy audit enforcement during gpupdate cycles\nlevel: high"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -2147,6 +2400,10 @@
           "rule": "title: New User Account Created\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4720\n  condition: selection\nfalsepositives:\n  - IT provisioning during onboarding\n  - Automated provisioning systems\nlevel: medium"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -2200,6 +2457,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4722"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -2252,6 +2513,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4723"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -2307,6 +2572,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4724"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -2360,6 +2629,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4725"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -2408,6 +2681,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4726"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -2477,6 +2754,10 @@
           "rule": "title: Member Added to Privileged Domain Group\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4728\n    TargetUserName:\n      - 'Domain Admins'\n      - 'Enterprise Admins'\n      - 'Schema Admins'\n  condition: selection\nfalsepositives:\n  - Authorized IT provisioning\nlevel: high"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -2532,6 +2813,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -2590,6 +2875,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4731"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -2660,6 +2949,10 @@
           "rule": "title: Member Added to Local Administrators Group\nstatus: stable\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4732\n    TargetUserName: 'Administrators'\n  condition: selection\nfalsepositives:\n  - IT adding service or admin accounts during deployment\nlevel: high"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -2716,6 +3009,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4733"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -2769,6 +3066,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4734"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -2828,6 +3129,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4735"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -2885,6 +3190,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4738"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -2937,6 +3246,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4740"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -3007,6 +3320,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4741"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -3072,6 +3389,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4742"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -3125,6 +3446,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4743"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -3190,6 +3515,10 @@
           "notes": "Universal groups span all domains in the forest. Enterprise Admins and Schema Admins in universal scope have the broadest impact."
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -3246,6 +3575,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -3265,17 +3598,32 @@
         "active-directory"
       ],
       "relatedEventIds": [
-        { "id": 4766, "log": "Security" },
-        { "id": 4728, "log": "Security" },
-        { "id": 4768, "log": "Security" }
+        {
+          "id": 4766,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1134.005",
           "techniqueName": "Access Token Manipulation: SID-History Injection",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -3300,6 +3648,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4765"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -3318,15 +3670,24 @@
         "active-directory"
       ],
       "relatedEventIds": [
-        { "id": 4765, "log": "Security" }
+        {
+          "id": 4765,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1134.005",
           "techniqueName": "Access Token Manipulation: SID-History Injection",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -3350,6 +3711,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4766"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -3368,16 +3733,28 @@
         "authentication"
       ],
       "relatedEventIds": [
-        { "id": 4740, "log": "Security" },
-        { "id": 4625, "log": "Security" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 4740,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1110",
           "techniqueName": "Brute Force",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -3401,6 +3778,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4767"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -3466,6 +3847,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -3519,6 +3904,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -3584,6 +3973,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4771"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -3648,6 +4041,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4776"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -3703,6 +4100,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4778"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -3756,6 +4157,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4779"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -3821,6 +4226,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4781"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -3841,15 +4250,24 @@
         "mimikatz"
       ],
       "relatedEventIds": [
-        { "id": 4662, "log": "Security" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 4662,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1003.006",
           "techniqueName": "OS Credential Dumping: DCSync",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -3874,6 +4292,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4782"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -3892,15 +4314,24 @@
         "password-spray"
       ],
       "relatedEventIds": [
-        { "id": 4625, "log": "Security" },
-        { "id": 4740, "log": "Security" }
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 4740,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1201",
           "techniqueName": "Password Policy Discovery",
           "tactics": [
-            { "tacticId": "TA0007", "tacticName": "Discovery" }
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
           ]
         }
       ],
@@ -3924,6 +4355,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4793"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -3974,6 +4409,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4794"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -4040,6 +4479,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4798"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4105,6 +4548,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4799"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4123,9 +4570,18 @@
         "timeline"
       ],
       "relatedEventIds": [
-        { "id": 4801, "log": "Security" },
-        { "id": 4624, "log": "Security" },
-        { "id": 4634, "log": "Security" }
+        {
+          "id": 4801,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4634,
+          "log": "Security"
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -4140,6 +4596,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4800"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -4159,8 +4619,14 @@
         "timeline"
       ],
       "relatedEventIds": [
-        { "id": 4800, "log": "Security" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 4800,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -4175,6 +4641,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4801"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -4230,6 +4700,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4886"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -4290,6 +4764,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4887"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4344,6 +4822,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4888"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4362,16 +4844,28 @@
         "pki"
       ],
       "relatedEventIds": [
-        { "id": 4886, "log": "Security" },
-        { "id": 4887, "log": "Security" },
-        { "id": 4888, "log": "Security" }
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1649",
           "techniqueName": "Steal or Forge Authentication Certificates",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -4395,6 +4889,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4889"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -4450,6 +4948,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4946"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -4504,6 +5006,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4947"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -4557,6 +5063,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4948"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -4627,6 +5137,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5136"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4691,6 +5205,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5137"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4751,6 +5269,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -4804,6 +5326,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5141"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -4822,16 +5348,28 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 5143, "log": "Security" },
-        { "id": 5144, "log": "Security" },
-        { "id": 5140, "log": "Security" }
+        {
+          "id": 5143,
+          "log": "Security"
+        },
+        {
+          "id": 5144,
+          "log": "Security"
+        },
+        {
+          "id": 5140,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.002",
           "techniqueName": "Remote Services: SMB/Windows Admin Shares",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -4856,6 +5394,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5142"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -4874,16 +5416,28 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 5142, "log": "Security" },
-        { "id": 5140, "log": "Security" },
-        { "id": 5145, "log": "Security" }
+        {
+          "id": 5142,
+          "log": "Security"
+        },
+        {
+          "id": 5140,
+          "log": "Security"
+        },
+        {
+          "id": 5145,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.002",
           "techniqueName": "Remote Services: SMB/Windows Admin Shares",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -4908,6 +5462,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5143"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -4926,16 +5484,28 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 5142, "log": "Security" },
-        { "id": 5143, "log": "Security" },
-        { "id": 5140, "log": "Security" }
+        {
+          "id": 5142,
+          "log": "Security"
+        },
+        {
+          "id": 5143,
+          "log": "Security"
+        },
+        {
+          "id": 5140,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1070",
           "techniqueName": "Indicator Removal",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -4959,6 +5529,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5144"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -5020,6 +5594,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5145"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -5039,15 +5617,24 @@
         "packet-drop"
       ],
       "relatedEventIds": [
-        { "id": 5157, "log": "Security" },
-        { "id": 5156, "log": "Security" }
+        {
+          "id": 5157,
+          "log": "Security"
+        },
+        {
+          "id": 5156,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1071",
           "techniqueName": "Application Layer Protocol",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -5072,6 +5659,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5152"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5091,15 +5682,24 @@
         "connection"
       ],
       "relatedEventIds": [
-        { "id": 5157, "log": "Security" },
-        { "id": 5152, "log": "Security" }
+        {
+          "id": 5157,
+          "log": "Security"
+        },
+        {
+          "id": 5152,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1071",
           "techniqueName": "Application Layer Protocol",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -5124,6 +5724,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5156"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5143,15 +5747,24 @@
         "connection-blocked"
       ],
       "relatedEventIds": [
-        { "id": 5156, "log": "Security" },
-        { "id": 5152, "log": "Security" }
+        {
+          "id": 5156,
+          "log": "Security"
+        },
+        {
+          "id": 5152,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.001",
           "techniqueName": "Remote Services: Remote Desktop Protocol",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -5175,6 +5788,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5157"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -5230,6 +5847,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5379"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -5249,16 +5870,28 @@
         "authentication"
       ],
       "relatedEventIds": [
-        { "id": 6273, "log": "Security" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 6273,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1078",
           "techniqueName": "Valid Accounts",
           "tactics": [
-            { "tacticId": "TA0001", "tacticName": "Initial Access" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -5283,6 +5916,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5303,15 +5940,24 @@
         "password-spray"
       ],
       "relatedEventIds": [
-        { "id": 6272, "log": "Security" },
-        { "id": 4625, "log": "Security" }
+        {
+          "id": 6272,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1110.003",
           "techniqueName": "Brute Force: Password Spraying",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -5336,6 +5982,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5355,14 +6005,20 @@
         "reconnaissance"
       ],
       "relatedEventIds": [
-        { "id": 6273, "log": "Security" }
+        {
+          "id": 6273,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1046",
           "techniqueName": "Network Service Discovery",
           "tactics": [
-            { "tacticId": "TA0007", "tacticName": "Discovery" }
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
           ]
         }
       ],
@@ -5387,6 +6043,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5407,15 +6067,24 @@
         "quarantine"
       ],
       "relatedEventIds": [
-        { "id": 6272, "log": "Security" },
-        { "id": 6278, "log": "Security" }
+        {
+          "id": 6272,
+          "log": "Security"
+        },
+        {
+          "id": 6278,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1078",
           "techniqueName": "Valid Accounts",
           "tactics": [
-            { "tacticId": "TA0001", "tacticName": "Initial Access" }
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
           ]
         }
       ],
@@ -5440,6 +6109,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5459,8 +6132,14 @@
         "nap"
       ],
       "relatedEventIds": [
-        { "id": 6272, "log": "Security" },
-        { "id": 6276, "log": "Security" }
+        {
+          "id": 6272,
+          "log": "Security"
+        },
+        {
+          "id": 6276,
+          "log": "Security"
+        }
       ],
       "prerequisites": [
         {
@@ -5483,6 +6162,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -5502,8 +6185,14 @@
         "nap"
       ],
       "relatedEventIds": [
-        { "id": 6272, "log": "Security" },
-        { "id": 6276, "log": "Security" }
+        {
+          "id": 6272,
+          "log": "Security"
+        },
+        {
+          "id": 6276,
+          "log": "Security"
+        }
       ],
       "prerequisites": [
         {
@@ -5524,6 +6213,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/dd772738(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     }

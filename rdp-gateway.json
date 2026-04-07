@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - RDP Gateway",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/rdp-gateway.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,14 +29,29 @@
       "summary": "The Remote Desktop Gateway service started successfully.",
       "details": "Generated when the Remote Desktop Gateway service starts. This event confirms the RD Gateway is operational. From a security monitoring perspective, unexpected restarts of the RD Gateway service — particularly outside maintenance windows or following configuration changes — may indicate tampering with the gateway infrastructure or a response to an attack. Correlate with System log EID 7036 (service state change) for the same service and with any preceding errors or configuration change events.",
       "category": "RD Gateway Service",
-      "tags": ["rdp", "gateway", "service-start", "remote-access"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "service-start",
+        "remote-access"
+      ],
       "relatedEventIds": [
-        {"id": 200, "log": "TerminalServices"},
-        {"id": 302, "log": "TerminalServices"}
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
       ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753352(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -50,18 +65,36 @@
       "summary": "A user met the connection authorization policy and was permitted to connect through the RD Gateway.",
       "details": "Generated when a user successfully passes the Connection Authorization Policy (CAP) evaluation at the RD Gateway. CAP controls who is allowed to connect through the gateway (authentication, group membership, device health). Key fields: Username, ClientAddress (external source IP), and the CAP name that was satisfied. This event represents successful external authentication to the RD Gateway and is the primary event for baselining who is accessing the gateway. Every EID 200 event should be expected — unexpected usernames, off-hours connections, or connections from unusual geographic locations or IP ranges warrant investigation. Correlate with EID 302 to confirm the user also reached an internal resource.",
       "category": "RD Gateway Authorization",
-      "tags": ["rdp", "gateway", "cap", "authentication", "remote-access"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "cap",
+        "authentication",
+        "remote-access"
+      ],
       "relatedEventIds": [
-        {"id": 201, "log": "TerminalServices"},
-        {"id": 302, "log": "TerminalServices"}
+        {
+          "id": 201,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1133",
           "techniqueName": "External Remote Services",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"},
-            {"tacticId": "TA0003", "tacticName": "Persistence"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -79,6 +112,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -91,25 +128,47 @@
       "summary": "A user failed the connection authorization policy and was denied access through the RD Gateway.",
       "details": "Generated when a user fails the Connection Authorization Policy evaluation at the RD Gateway. CAP failure can occur due to authentication failure (wrong credentials), lack of group membership in the allowed user group, or device health policy failure. Key fields: Username, ClientAddress (external source IP), and the reason for denial. This is the primary event for detecting brute-force and credential stuffing attacks against the RD Gateway from the internet. High volumes of EID 201 events from a single ClientAddress or targeting a single Username indicate an active attack. Unlike Security log EID 4625 (which logs failed logons on the internal host), EID 201 is logged on the gateway itself — visible before authentication reaches any internal system.",
       "category": "RD Gateway Authorization",
-      "tags": ["rdp", "gateway", "cap", "authentication-failure", "brute-force", "credential-stuffing"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "cap",
+        "authentication-failure",
+        "brute-force",
+        "credential-stuffing"
+      ],
       "relatedEventIds": [
-        {"id": 200, "log": "TerminalServices"},
-        {"id": 301, "log": "TerminalServices"},
-        {"id": 4625, "log": "Security"}
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 301,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1110",
           "techniqueName": "Brute Force",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         },
         {
           "techniqueId": "T1133",
           "techniqueName": "External Remote Services",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
           ]
         }
       ],
@@ -128,6 +187,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -140,17 +203,32 @@
       "summary": "A user was denied access through the RD Gateway because their device failed the Network Access Protection health policy.",
       "details": "Generated when a user passes authentication but is denied access because their device fails the Network Access Protection (NAP) health policy check configured at the RD Gateway. NAP checks can enforce requirements such as firewall status, AV signature currency, OS patch level, or custom health validators. Key fields: Username, ClientAddress, and the health policy that failed. NAP failures can indicate a user is connecting from an unmanaged or out-of-compliance device. From a security perspective, this event can also flag compromised devices that have had security controls (AV, firewall) disabled — an attacker accessing a victim account from their own device will fail NAP checks enforced by the organization.",
       "category": "RD Gateway Authorization",
-      "tags": ["rdp", "gateway", "nap", "health-policy", "device-compliance"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "nap",
+        "health-policy",
+        "device-compliance"
+      ],
       "relatedEventIds": [
-        {"id": 201, "log": "TerminalServices"},
-        {"id": 200, "log": "TerminalServices"}
+        {
+          "id": 201,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1133",
           "techniqueName": "External Remote Services",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
           ]
         }
       ],
@@ -169,6 +247,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc727350(v=ws.10)"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -181,17 +263,32 @@
       "summary": "A user passed connection authorization but was denied access to the requested internal resource by the resource authorization policy.",
       "details": "Generated when a user passes the CAP (connection authorization) but is denied access to a specific internal resource by the Resource Authorization Policy (RAP). RAP controls which internal hosts a user is permitted to reach through the gateway — limiting lateral movement potential even for authenticated users. Key fields: Username, ClientAddress, and the internal resource (TargetServer) that was denied. EID 301 is significant because it logs the specific internal host the user attempted to reach, making it a reconnaissance and lateral movement detection event. An attacker who has compromised an account and authenticated through the gateway (EID 200) may then attempt to reach internal hosts beyond their authorized scope, generating EID 301.",
       "category": "RD Gateway Authorization",
-      "tags": ["rdp", "gateway", "rap", "lateral-movement", "resource-access"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "rap",
+        "lateral-movement",
+        "resource-access"
+      ],
       "relatedEventIds": [
-        {"id": 200, "log": "TerminalServices"},
-        {"id": 302, "log": "TerminalServices"}
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.001",
           "techniqueName": "Remote Services: Remote Desktop Protocol",
           "tactics": [
-            {"tacticId": "TA0008", "tacticName": "Lateral Movement"}
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -210,6 +307,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775279(v=ws.10)"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -222,26 +323,50 @@
       "summary": "A user passed the resource authorization policy and successfully connected to an internal resource through the RD Gateway.",
       "details": "Generated when a user passes both the CAP (EID 200) and the RAP, and successfully establishes a connection to an internal resource through the gateway. This is the end-to-end success event: the user authenticated, was authorized by connection policy, authorized by resource policy, and reached their destination host. Key fields: Username, ClientAddress (external source IP), and TargetServer (the internal host reached). This event pair — EID 200 + EID 302 — is the primary baseline for RD Gateway activity. Every session should produce both. Anomalies: unexpected TargetServer values, connections outside business hours, or new ClientAddress IPs for a user all warrant investigation.",
       "category": "RD Gateway Authorization",
-      "tags": ["rdp", "gateway", "rap", "remote-access", "lateral-movement"],
+      "tags": [
+        "rdp",
+        "gateway",
+        "rap",
+        "remote-access",
+        "lateral-movement"
+      ],
       "relatedEventIds": [
-        {"id": 200, "log": "TerminalServices"},
-        {"id": 301, "log": "TerminalServices"},
-        {"id": 21, "log": "TerminalServices"}
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 301,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1133",
           "techniqueName": "External Remote Services",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"},
-            {"tacticId": "TA0003", "tacticName": "Persistence"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         },
         {
           "techniqueId": "T1021.001",
           "techniqueName": "Remote Services: Remote Desktop Protocol",
           "tactics": [
-            {"tacticId": "TA0008", "tacticName": "Lateral Movement"}
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -259,6 +384,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775263(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     }

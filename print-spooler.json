@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Print Spooler",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/print-spooler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -36,22 +36,34 @@
         "ransomware"
       ],
       "relatedEventIds": [
-        { "id": 316, "log": "PrintSpooler" },
-        { "id": 7036, "log": "System" }
+        {
+          "id": 316,
+          "log": "PrintSpooler"
+        },
+        {
+          "id": 7036,
+          "log": "System"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1489",
           "techniqueName": "Service Stop",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         },
         {
           "techniqueId": "T1562.001",
           "techniqueName": "Impair Defenses: Disable or Modify Tools",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -69,6 +81,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -89,14 +105,20 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 316, "log": "PrintSpooler" }
+        {
+          "id": 316,
+          "log": "PrintSpooler"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1048",
           "techniqueName": "Exfiltration Over Alternative Protocol",
           "tactics": [
-            { "tacticId": "TA0010", "tacticName": "Exfiltration" }
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
           ]
         }
       ],
@@ -114,6 +136,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -135,23 +161,38 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 808, "log": "PrintSpooler" },
-        { "id": 4, "log": "PrintSpooler" }
+        {
+          "id": 808,
+          "log": "PrintSpooler"
+        },
+        {
+          "id": 4,
+          "log": "PrintSpooler"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         },
         {
           "techniqueId": "T1547.012",
           "techniqueName": "Boot or Logon Autostart Execution: Print Processors",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -170,6 +211,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -191,14 +236,20 @@
         "privilege-escalation"
       ],
       "relatedEventIds": [
-        { "id": 316, "log": "PrintSpooler" }
+        {
+          "id": 316,
+          "log": "PrintSpooler"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -216,6 +267,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/print/introduction-to-print-providers"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     }

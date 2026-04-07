@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DHCP Server",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dhcp-server.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -29,17 +29,31 @@
       "summary": "A DHCP scope is running low on available IP addresses.",
       "details": "Generated when the available addresses in a DHCP scope fall below a configured warning threshold. Key field: the scope address and the remaining count. This event serves as an early warning for both operational and security purposes. The primary security use case is DHCP starvation attack detection (T1498 / network DoS): an attacker using a tool such as Gobbler or Yersinia sends rapid DHCPDISCOVER packets with randomized MAC addresses to exhaust the address pool, preventing legitimate clients from obtaining leases. EID 1020 precedes scope exhaustion (EID 1063) and provides an early detection window before the attack completes. Rapid progression from normal to warning to exhaustion in a short time window is the primary starvation indicator. Correlate with network traffic volume on the DHCP port (UDP 67/68) at the same time.",
       "category": "DHCP Scope Health",
-      "tags": ["dhcp", "scope-exhaustion", "starvation-attack", "dos"],
+      "tags": [
+        "dhcp",
+        "scope-exhaustion",
+        "starvation-attack",
+        "dos"
+      ],
       "relatedEventIds": [
-        {"id": 1063, "log": "DHCPServer"},
-        {"id": 1338, "log": "DHCPServer"}
+        {
+          "id": 1063,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1338,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1498",
           "techniqueName": "Network Denial of Service",
           "tactics": [
-            {"tacticId": "TA0040", "tacticName": "Impact"}
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -58,6 +72,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -70,19 +88,40 @@
       "summary": "The DHCP service detected another DHCP server on the network.",
       "details": "Generated when the DHCP service detects another DHCP server IP address on the network during its periodic authorization check. Key field: the IP address of the detected server. A rogue DHCP server is one of the most effective network-layer attack primitives: by responding to DHCPDISCOVER before the legitimate server, an attacker can assign clients a malicious default gateway (redirecting all traffic through an attacker-controlled host), a malicious DNS server (enabling DNS hijacking), or simply an invalid configuration (network DoS). This event fires on the legitimate DHCP server when it discovers the competitor. The detected server IP is the primary pivot for identifying the rogue host. In Active Directory environments, DHCP servers must be authorized in AD — EID 1042 may indicate a non-AD-authorized server or a workstation running rogue DHCP server software.",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "rogue-server", "mitm", "dns-hijacking", "lateral-movement"],
+      "tags": [
+        "dhcp",
+        "rogue-server",
+        "mitm",
+        "dns-hijacking",
+        "lateral-movement"
+      ],
       "relatedEventIds": [
-        {"id": 1045, "log": "DHCPServer"},
-        {"id": 1046, "log": "DHCPServer"},
-        {"id": 1052, "log": "DHCPServer"}
+        {
+          "id": 1045,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1052,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -101,6 +140,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -113,18 +156,35 @@
       "summary": "The DHCP service determined it is not authorized to serve clients and stopped.",
       "details": "Generated on a workgroup (non-domain) DHCP server when it detects another DHCP server on the network or detects a network error during its authorization check, causing it to stop serving clients. This event is the legitimate server's self-shutdown indicator when it detects an authorization conflict. Crucially, this event can also be generated on a legitimate server that encounters a rogue server — meaning the legitimate server stops while the rogue continues. If EID 1045 appears on your production DHCP server and clients begin reporting IP assignment failures, a rogue DHCP server may have caused the legitimate server to yield. Correlate with EID 1042 (rogue detected) to understand the sequence.",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "authorization", "rogue-server", "service-disruption"],
+      "tags": [
+        "dhcp",
+        "authorization",
+        "rogue-server",
+        "service-disruption"
+      ],
       "relatedEventIds": [
-        {"id": 1042, "log": "DHCPServer"},
-        {"id": 1046, "log": "DHCPServer"}
+        {
+          "id": 1042,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -143,6 +203,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -155,18 +219,35 @@
       "summary": "The DHCP service in an Active Directory domain determined it is not authorized and stopped serving clients.",
       "details": "Generated on a domain-joined DHCP server when Active Directory authorization check fails — either because the server is not in the DHCP Authorized Servers list in AD, it cannot reach a domain controller to verify authorization, or it detects an unauthorized server competing on the network. The DHCP service stops serving clients until authorization is confirmed. Key field: the domain name that was checked. This is the AD-integrated equivalent of EID 1045. Security context: this event can be triggered by an attacker who removes the DHCP server's AD authorization (requiring Domain Admins access) to create a DHCP denial of service, or by the DHCP server losing DC connectivity (potentially during a DCSync or network segmentation attack).",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "authorization", "active-directory", "service-disruption"],
+      "tags": [
+        "dhcp",
+        "authorization",
+        "active-directory",
+        "service-disruption"
+      ],
       "relatedEventIds": [
-        {"id": 1045, "log": "DHCPServer"},
-        {"id": 1051, "log": "DHCPServer"},
-        {"id": 1059, "log": "DHCPServer"}
+        {
+          "id": 1045,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1051,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1059,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1489",
           "techniqueName": "Service Stop",
           "tactics": [
-            {"tacticId": "TA0040", "tacticName": "Impact"}
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -185,6 +266,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -197,18 +282,35 @@
       "summary": "The DHCP service is not authorized to service clients in the Active Directory domain.",
       "details": "Generated when the DHCP service explicitly determines that it is not authorized in Active Directory to serve DHCP clients for the domain. Unlike EID 1046 (which may fire due to connectivity issues), EID 1051 is a definitive authorization failure — AD was reached and the server was confirmed as not authorized. Key field: the domain name. This event fires on a rogue DHCP server that was joined to the domain but not explicitly authorized, making it a detection event for unauthorized DHCP servers in AD environments. If this event appears on a server that was previously serving clients, an authorized server may have been de-authorized via AD.",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "authorization", "active-directory", "rogue-server"],
+      "tags": [
+        "dhcp",
+        "authorization",
+        "active-directory",
+        "rogue-server"
+      ],
       "relatedEventIds": [
-        {"id": 1046, "log": "DHCPServer"},
-        {"id": 1042, "log": "DHCPServer"}
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1042,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -227,6 +329,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -239,18 +345,35 @@
       "summary": "A workgroup DHCP server detected a competing DHCP server in a domain.",
       "details": "Generated on a workgroup (non-domain) DHCP server when it detects another DHCP server operating within a domain on the same network segment. Key field: the IP address of the domain DHCP server and the domain name. This event is a strong indicator of a rogue workgroup DHCP server operating alongside legitimate domain DHCP infrastructure. An attacker deploying a rogue DHCP server from a non-domain machine will generate this event on their rogue server — meaning this event, if found in logs of an unexpected host, reveals the rogue server itself. Correlate with EID 1053 (domain variant) to build the full picture.",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "rogue-server", "conflicting-server", "mitm"],
+      "tags": [
+        "dhcp",
+        "rogue-server",
+        "conflicting-server",
+        "mitm"
+      ],
       "relatedEventIds": [
-        {"id": 1053, "log": "DHCPServer"},
-        {"id": 1042, "log": "DHCPServer"}
+        {
+          "id": 1053,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1042,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -268,6 +391,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -280,19 +407,39 @@
       "summary": "A domain DHCP server detected another DHCP server competing on the network.",
       "details": "Generated on a domain-joined DHCP server when it detects a competing DHCP server (which may be rogue or unauthorized) on the same network segment. Key fields: the IP of the competing server. This is the domain-side complement to EID 1052. Together, EIDs 1042, 1045/1046, 1051, 1052, and 1053 form the complete rogue DHCP detection event cluster in Windows DHCP Server. The appearance of any of these events in a production environment without a known authorized explanation (server migration, failover setup) warrants investigation.",
       "category": "Rogue DHCP Detection",
-      "tags": ["dhcp", "rogue-server", "conflicting-server", "mitm"],
+      "tags": [
+        "dhcp",
+        "rogue-server",
+        "conflicting-server",
+        "mitm"
+      ],
       "relatedEventIds": [
-        {"id": 1052, "log": "DHCPServer"},
-        {"id": 1042, "log": "DHCPServer"},
-        {"id": 1046, "log": "DHCPServer"}
+        {
+          "id": 1052,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1042,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -311,6 +458,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -323,10 +474,21 @@
       "summary": "The DHCP service failed to contact Active Directory to verify server authorization.",
       "details": "Generated when the DHCP service cannot reach a domain controller to verify that this server is authorized to serve DHCP clients. The service will stop serving clients if it cannot confirm authorization. This event is an operational indicator that the DHCP server has lost connectivity to domain controllers — which may be caused by network disruption, a DCSync attack that caused the DC to restart, or an attacker segmenting the network. It is also relevant when an attacker compromises the DHCP server itself and attempts to prevent it from re-authorizing. Correlate with system-wide DC reachability (Kerberos events, netlogon events) to determine whether the DC connectivity loss is isolated to DHCP or broader.",
       "category": "DHCP Authorization",
-      "tags": ["dhcp", "authorization", "active-directory", "dc-reachability"],
+      "tags": [
+        "dhcp",
+        "authorization",
+        "active-directory",
+        "dc-reachability"
+      ],
       "relatedEventIds": [
-        {"id": 1046, "log": "DHCPServer"},
-        {"id": 1051, "log": "DHCPServer"}
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1051,
+          "log": "DHCPServer"
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -343,6 +505,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -355,17 +521,32 @@
       "summary": "No IP addresses are available for lease in a DHCP scope — the address pool is fully exhausted.",
       "details": "Generated when all IP addresses in a DHCP scope have been leased and no addresses are available to assign to new clients. This is the completion of a DHCP starvation attack: the attacker has consumed all available leases using tools like Gobbler or Yersinia, preventing any new legitimate client from obtaining an IP address on the affected segment. EID 1063 is preceded by EID 1020 (low address warning) as the pool depletes. Key field: the scope address/superscope name. The impact is a network-layer denial of service for new device connections on the affected subnet. Machines that already hold leases will continue to work until their lease expires, at which point they also become unable to renew.",
       "category": "DHCP Scope Health",
-      "tags": ["dhcp", "scope-exhaustion", "starvation-attack", "dos", "impact"],
+      "tags": [
+        "dhcp",
+        "scope-exhaustion",
+        "starvation-attack",
+        "dos",
+        "impact"
+      ],
       "relatedEventIds": [
-        {"id": 1020, "log": "DHCPServer"},
-        {"id": 1338, "log": "DHCPServer"}
+        {
+          "id": 1020,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1338,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1498",
           "techniqueName": "Network Denial of Service",
           "tactics": [
-            {"tacticId": "TA0040", "tacticName": "Impact"}
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -384,6 +565,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -396,17 +581,32 @@
       "summary": "The DHCP server's pending offer queue exceeded 1,000 messages and is dropping subsequent DHCPDISCOVER packets.",
       "details": "Generated when the DHCP server's internal queue of pending DHCPOFFER messages exceeds 1,000 entries, at which point the server begins dropping incoming DHCPDISCOVER packets. This is a high-fidelity indicator of a DHCP starvation attack in progress: the attack tool floods the server with DHCPDISCOVER packets faster than the server can process and send OFFERs, filling the queue. Under normal load, this queue should never reach 1,000. EID 1338 fires at the peak of the attack and is followed by EID 1339 when the queue drains back below 1,000 (attack stopped or paused). The time window between 1338 and 1339 represents the attack duration. Correlate with EID 1020 and 1063 to see the full impact on scope address availability.",
       "category": "DHCP Scope Health",
-      "tags": ["dhcp", "starvation-attack", "queue-flood", "dos", "impact"],
+      "tags": [
+        "dhcp",
+        "starvation-attack",
+        "queue-flood",
+        "dos",
+        "impact"
+      ],
       "relatedEventIds": [
-        {"id": 1020, "log": "DHCPServer"},
-        {"id": 1063, "log": "DHCPServer"}
+        {
+          "id": 1020,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1063,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1498",
           "techniqueName": "Network Denial of Service",
           "tactics": [
-            {"tacticId": "TA0040", "tacticName": "Impact"}
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -424,6 +624,10 @@
         "name": "Microsoft Learn - DHCP Server Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-server-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -436,10 +640,21 @@
       "summary": "The DHCP server lost communication with its failover partner.",
       "details": "Generated when a DHCP server configured for failover loses network contact with its failover partner server. Key fields: the partner server identity and the relationship name. DHCP failover ensures continuity of address assignment if one server fails. Loss of contact triggers a state transition that may place the surviving server in PARTNER-DOWN mode after the MCLT (Maximum Client Lead Time) expires, at which point it takes over the full address pool. Security relevance: unexpected failover partner loss can indicate network segmentation by an attacker, compromise of the partner server, or DoS. A rogue DHCP attack that targets the failover partner can leave the primary server operating in a degraded failover state. Correlate with System log connectivity events on the partner server.",
       "category": "DHCP Failover",
-      "tags": ["dhcp", "failover", "availability", "partner-down"],
+      "tags": [
+        "dhcp",
+        "failover",
+        "availability",
+        "partner-down"
+      ],
       "relatedEventIds": [
-        {"id": 1046, "log": "DHCPServer"},
-        {"id": 1059, "log": "DHCPServer"}
+        {
+          "id": 1046,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 1059,
+          "log": "DHCPServer"
+        }
       ],
       "notesGuidance": {
         "investigationPivots": [
@@ -456,6 +671,10 @@
         "name": "Microsoft Learn - DHCP Failover Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-failover-events"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -468,19 +687,40 @@
       "summary": "A DHCP failover BINDING-UPDATE message from the partner was rejected because the message authentication digest did not match.",
       "details": "Generated when a DHCP failover BINDING-UPDATE message is received from the failover partner but rejected because the HMAC-MD5 message authentication digest in the message does not match what the receiving server computes. Key fields: the partner server IP and the failover relationship name. This event is a network-level security indicator: an unexpected digest mismatch may indicate a man-in-the-middle attack modifying failover replication traffic between DHCP servers, or an attacker attempting to inject forged BINDING-UPDATE messages to manipulate the DHCP lease database (e.g., removing leases for specific hosts to cause them to lose network access, or adding rogue lease entries). Legitimate causes are limited to shared secret misconfiguration.",
       "category": "DHCP Failover Security",
-      "tags": ["dhcp", "failover", "authentication-failure", "mitm", "message-integrity"],
+      "tags": [
+        "dhcp",
+        "failover",
+        "authentication-failure",
+        "mitm",
+        "message-integrity"
+      ],
       "relatedEventIds": [
-        {"id": 20255, "log": "DHCPServer"},
-        {"id": 20257, "log": "DHCPServer"},
-        {"id": 20258, "log": "DHCPServer"}
+        {
+          "id": 20255,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 20257,
+          "log": "DHCPServer"
+        },
+        {
+          "id": 20258,
+          "log": "DHCPServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            {"tacticId": "TA0006", "tacticName": "Credential Access"},
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -498,6 +738,10 @@
       "source": {
         "name": "Microsoft Learn - DHCP Failover Events",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/dhcp/dhcp-failover-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-04"
     }

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Code Integrity",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/code-integrity.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -37,22 +37,34 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3033, "log": "CodeIntegrity" },
-        { "id": 3034, "log": "CodeIntegrity" }
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3034,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         },
         {
           "techniqueId": "T1562.001",
           "techniqueName": "Impair Defenses: Disable or Modify Tools",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -71,6 +83,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -91,15 +107,24 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3001, "log": "CodeIntegrity" },
-        { "id": 3004, "log": "CodeIntegrity" }
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3004,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.002",
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -117,6 +142,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -137,15 +166,24 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3003, "log": "CodeIntegrity" },
-        { "id": 3033, "log": "CodeIntegrity" }
+        {
+          "id": 3003,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.002",
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -163,6 +201,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -185,23 +227,38 @@
         "privilege-escalation"
       ],
       "relatedEventIds": [
-        { "id": 3001, "log": "CodeIntegrity" },
-        { "id": 3034, "log": "CodeIntegrity" },
-        { "id": 3077, "log": "CodeIntegrity" }
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3034,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3077,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         },
         {
           "techniqueId": "T1553.006",
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -219,6 +276,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -246,16 +307,28 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3033, "log": "CodeIntegrity" },
-        { "id": 3001, "log": "CodeIntegrity" },
-        { "id": 3076, "log": "CodeIntegrity" }
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3076,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -273,6 +346,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -294,15 +371,24 @@
         "privilege-escalation"
       ],
       "relatedEventIds": [
-        { "id": 3001, "log": "CodeIntegrity" },
-        { "id": 3033, "log": "CodeIntegrity" }
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -320,6 +406,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -347,16 +437,28 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3034, "log": "CodeIntegrity" },
-        { "id": 3077, "log": "CodeIntegrity" },
-        { "id": 3089, "log": "CodeIntegrity" }
+        {
+          "id": 3034,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3077,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3089,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.006",
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -374,6 +476,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -401,23 +507,38 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3076, "log": "CodeIntegrity" },
-        { "id": 3089, "log": "CodeIntegrity" },
-        { "id": 3033, "log": "CodeIntegrity" }
+        {
+          "id": 3076,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3089,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.006",
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         },
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -435,6 +556,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -455,15 +580,24 @@
         "correlation"
       ],
       "relatedEventIds": [
-        { "id": 3076, "log": "CodeIntegrity" },
-        { "id": 3077, "log": "CodeIntegrity" }
+        {
+          "id": 3076,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3077,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.006",
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -480,6 +614,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -500,15 +638,24 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 3077, "log": "CodeIntegrity" },
-        { "id": 3076, "log": "CodeIntegrity" }
+        {
+          "id": 3077,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3076,
+          "log": "CodeIntegrity"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1553.006",
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -526,6 +673,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 / Server 2016"
       },
       "lastReviewed": "2026-04-02"
     }

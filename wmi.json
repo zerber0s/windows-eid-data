@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WMI Activity",
-    "version": "0.5.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "1.6.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -68,6 +68,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-03-29"
     },
     {
@@ -131,6 +135,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -205,6 +213,10 @@
           "notes": "Correlate with EID 5861 to find when the subscription was registered. A 5859 firing shortly after a suspicious 5861 confirms active execution of a malicious subscription."
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -265,6 +277,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wmisdk/tracing-wmi-activity"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
     },
@@ -345,6 +361,10 @@
           "rule": "title: WMI Permanent Event Subscription Registered\nstatus: stable\nlogsource:\n  product: windows\n  service: wmi\ndetection:\n  selection:\n    EventID: 5861\n    Consumer|contains:\n      - 'CommandLineEventConsumer'\n      - 'ActiveScriptEventConsumer'\n  condition: selection\nfalsepositives:\n  - Legitimate AV/EDR or SCCM subscriptions\nlevel: high"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     }
   ]

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Group Policy",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/group-policy.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -36,17 +36,32 @@
         "domain"
       ],
       "relatedEventIds": [
-        { "id": 5016, "log": "GroupPolicy" },
-        { "id": 5312, "log": "GroupPolicy" },
-        { "id": 4739, "log": "Security" }
+        {
+          "id": 5016,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5312,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 4739,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -64,6 +79,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -84,17 +103,32 @@
         "domain"
       ],
       "relatedEventIds": [
-        { "id": 5017, "log": "GroupPolicy" },
-        { "id": 5313, "log": "GroupPolicy" },
-        { "id": 4001, "log": "GroupPolicy" }
+        {
+          "id": 5017,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5313,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 4001,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -112,6 +146,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -132,17 +170,32 @@
         "domain"
       ],
       "relatedEventIds": [
-        { "id": 4000, "log": "GroupPolicy" },
-        { "id": 5312, "log": "GroupPolicy" },
-        { "id": 7016, "log": "GroupPolicy" }
+        {
+          "id": 4000,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5312,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 7016,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -159,6 +212,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -179,17 +236,32 @@
         "domain"
       ],
       "relatedEventIds": [
-        { "id": 4001, "log": "GroupPolicy" },
-        { "id": 5313, "log": "GroupPolicy" },
-        { "id": 7017, "log": "GroupPolicy" }
+        {
+          "id": 4001,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5313,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 7017,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -206,6 +278,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -227,16 +303,28 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 5016, "log": "GroupPolicy" },
-        { "id": 5313, "log": "GroupPolicy" }
+        {
+          "id": 5016,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5313,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -254,6 +342,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -275,16 +367,28 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 5017, "log": "GroupPolicy" },
-        { "id": 5312, "log": "GroupPolicy" }
+        {
+          "id": 5017,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5312,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -302,6 +406,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -322,16 +430,28 @@
         "machine-policy"
       ],
       "relatedEventIds": [
-        { "id": 5016, "log": "GroupPolicy" },
-        { "id": 5312, "log": "GroupPolicy" }
+        {
+          "id": 5016,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5312,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -349,6 +469,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -369,16 +493,28 @@
         "user-policy"
       ],
       "relatedEventIds": [
-        { "id": 5017, "log": "GroupPolicy" },
-        { "id": 5313, "log": "GroupPolicy" }
+        {
+          "id": 5017,
+          "log": "GroupPolicy"
+        },
+        {
+          "id": 5313,
+          "log": "GroupPolicy"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1484.001",
           "techniqueName": "Domain Policy Modification: Group Policy Modification",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -396,6 +532,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     }

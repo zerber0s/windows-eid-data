@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Firewall",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-02T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/windows-firewall.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -35,15 +35,24 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 4950, "log": "Security" },
-        { "id": 4954, "log": "Security" }
+        {
+          "id": 4950,
+          "log": "Security"
+        },
+        {
+          "id": 4954,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -62,6 +71,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -82,16 +95,28 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 2005, "log": "Firewall" },
-        { "id": 2006, "log": "Firewall" },
-        { "id": 4946, "log": "Security" }
+        {
+          "id": 2005,
+          "log": "Firewall"
+        },
+        {
+          "id": 2006,
+          "log": "Firewall"
+        },
+        {
+          "id": 4946,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -112,6 +137,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -130,16 +159,28 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 2004, "log": "Firewall" },
-        { "id": 2006, "log": "Firewall" },
-        { "id": 4947, "log": "Security" }
+        {
+          "id": 2004,
+          "log": "Firewall"
+        },
+        {
+          "id": 2006,
+          "log": "Firewall"
+        },
+        {
+          "id": 4947,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -158,6 +199,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -178,16 +223,28 @@
         "anti-forensics"
       ],
       "relatedEventIds": [
-        { "id": 2004, "log": "Firewall" },
-        { "id": 2005, "log": "Firewall" },
-        { "id": 4948, "log": "Security" }
+        {
+          "id": 2004,
+          "log": "Firewall"
+        },
+        {
+          "id": 2005,
+          "log": "Firewall"
+        },
+        {
+          "id": 4948,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -208,6 +265,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -227,14 +288,20 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 2033, "log": "Firewall" }
+        {
+          "id": 2033,
+          "log": "Firewall"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -252,6 +319,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -272,16 +343,28 @@
         "critical"
       ],
       "relatedEventIds": [
-        { "id": 2004, "log": "Firewall" },
-        { "id": 2006, "log": "Firewall" },
-        { "id": 4949, "log": "Security" }
+        {
+          "id": 2004,
+          "log": "Firewall"
+        },
+        {
+          "id": 2006,
+          "log": "Firewall"
+        },
+        {
+          "id": 4949,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -301,6 +384,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -319,14 +406,20 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 2003, "log": "Firewall" }
+        {
+          "id": 2003,
+          "log": "Firewall"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1562.004",
           "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -345,6 +438,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     }

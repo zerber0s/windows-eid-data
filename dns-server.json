@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DNS Server",
-    "version": "0.1.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-server.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -37,22 +37,34 @@
         "exfiltration"
       ],
       "relatedEventIds": [
-        { "id": 258, "log": "DNSServer" },
-        { "id": 263, "log": "DNSServer" }
+        {
+          "id": 258,
+          "log": "DNSServer"
+        },
+        {
+          "id": 263,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1071.004",
           "techniqueName": "Application Layer Protocol: DNS",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         },
         {
           "techniqueId": "T1048.003",
           "techniqueName": "Exfiltration Over Alternative Protocol: Exfiltration Over Unencrypted Non-C2 Protocol",
           "tactics": [
-            { "tacticId": "TA0010", "tacticName": "Exfiltration" }
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
           ]
         }
       ],
@@ -80,6 +92,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-03"
     },
     {
@@ -100,14 +116,20 @@
         "beaconing"
       ],
       "relatedEventIds": [
-        { "id": 257, "log": "DNSServer" }
+        {
+          "id": 257,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1568.002",
           "techniqueName": "Dynamic Resolution: Domain Generation Algorithms",
           "tactics": [
-            { "tacticId": "TA0011", "tacticName": "Command and Control" }
+            {
+              "tacticId": "TA0011",
+              "tacticName": "Command and Control"
+            }
           ]
         }
       ],
@@ -133,6 +155,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-03"
     },
     {
@@ -152,15 +178,24 @@
         "persistence"
       ],
       "relatedEventIds": [
-        { "id": 519, "log": "DNSServer" },
-        { "id": 520, "log": "DNSServer" }
+        {
+          "id": 519,
+          "log": "DNSServer"
+        },
+        {
+          "id": 520,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -186,6 +221,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
       "lastReviewed": "2026-04-03"
     },
     {
@@ -205,22 +244,34 @@
         "impact"
       ],
       "relatedEventIds": [
-        { "id": 514, "log": "DNSServer" },
-        { "id": 515, "log": "DNSServer" }
+        {
+          "id": 514,
+          "log": "DNSServer"
+        },
+        {
+          "id": 515,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         },
         {
           "techniqueId": "T1489",
           "techniqueName": "Service Stop",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -238,6 +289,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -258,15 +313,24 @@
         "tampering"
       ],
       "relatedEventIds": [
-        { "id": 513, "log": "DNSServer" },
-        { "id": 519, "log": "DNSServer" }
+        {
+          "id": 513,
+          "log": "DNSServer"
+        },
+        {
+          "id": 519,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -284,6 +348,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -304,15 +372,24 @@
         "dns-hijacking"
       ],
       "relatedEventIds": [
-        { "id": 516, "log": "DNSServer" },
-        { "id": 519, "log": "DNSServer" }
+        {
+          "id": 516,
+          "log": "DNSServer"
+        },
+        {
+          "id": 519,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -330,6 +407,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -350,15 +431,24 @@
         "impact"
       ],
       "relatedEventIds": [
-        { "id": 515, "log": "DNSServer" },
-        { "id": 520, "log": "DNSServer" }
+        {
+          "id": 515,
+          "log": "DNSServer"
+        },
+        {
+          "id": 520,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1070",
           "techniqueName": "Indicator Removal",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -376,6 +466,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -397,17 +491,32 @@
         "credential-access"
       ],
       "relatedEventIds": [
-        { "id": 520, "log": "DNSServer" },
-        { "id": 263, "log": "DNSServer" },
-        { "id": 515, "log": "DNSServer" }
+        {
+          "id": 520,
+          "log": "DNSServer"
+        },
+        {
+          "id": 263,
+          "log": "DNSServer"
+        },
+        {
+          "id": 515,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0009", "tacticName": "Collection" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -425,6 +534,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -445,16 +558,28 @@
         "cover-tracks"
       ],
       "relatedEventIds": [
-        { "id": 519, "log": "DNSServer" },
-        { "id": 516, "log": "DNSServer" }
+        {
+          "id": 519,
+          "log": "DNSServer"
+        },
+        {
+          "id": 516,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0009", "tacticName": "Collection" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -472,6 +597,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -493,15 +622,24 @@
         "discovery"
       ],
       "relatedEventIds": [
-        { "id": 563, "log": "DNSServer" },
-        { "id": 513, "log": "DNSServer" }
+        {
+          "id": 563,
+          "log": "DNSServer"
+        },
+        {
+          "id": 513,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1590.002",
           "techniqueName": "Gather Victim Network Information: DNS",
           "tactics": [
-            { "tacticId": "TA0043", "tacticName": "Reconnaissance" }
+            {
+              "tacticId": "TA0043",
+              "tacticName": "Reconnaissance"
+            }
           ]
         }
       ],
@@ -519,6 +657,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -539,14 +681,20 @@
         "reconnaissance"
       ],
       "relatedEventIds": [
-        { "id": 562, "log": "DNSServer" }
+        {
+          "id": 562,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1590.002",
           "techniqueName": "Gather Victim Network Information: DNS",
           "tactics": [
-            { "tacticId": "TA0043", "tacticName": "Reconnaissance" }
+            {
+              "tacticId": "TA0043",
+              "tacticName": "Reconnaissance"
+            }
           ]
         }
       ],
@@ -563,6 +711,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -583,23 +735,38 @@
         "dns-hijacking"
       ],
       "relatedEventIds": [
-        { "id": 578, "log": "DNSServer" },
-        { "id": 579, "log": "DNSServer" }
+        {
+          "id": 578,
+          "log": "DNSServer"
+        },
+        {
+          "id": 579,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         },
         {
           "techniqueId": "T1556",
           "techniqueName": "Modify Authentication Process",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -617,6 +784,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -636,15 +807,24 @@
         "tampering"
       ],
       "relatedEventIds": [
-        { "id": 577, "log": "DNSServer" },
-        { "id": 579, "log": "DNSServer" }
+        {
+          "id": 577,
+          "log": "DNSServer"
+        },
+        {
+          "id": 579,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -660,6 +840,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -679,15 +863,24 @@
         "cover-tracks"
       ],
       "relatedEventIds": [
-        { "id": 577, "log": "DNSServer" },
-        { "id": 578, "log": "DNSServer" }
+        {
+          "id": 577,
+          "log": "DNSServer"
+        },
+        {
+          "id": 578,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1070",
           "techniqueName": "Indicator Removal",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -703,6 +896,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -723,15 +920,24 @@
         "dns-hijacking"
       ],
       "relatedEventIds": [
-        { "id": 577, "log": "DNSServer" },
-        { "id": 581, "log": "DNSServer" }
+        {
+          "id": 577,
+          "log": "DNSServer"
+        },
+        {
+          "id": 581,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -747,6 +953,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -766,15 +976,24 @@
         "tampering"
       ],
       "relatedEventIds": [
-        { "id": 580, "log": "DNSServer" },
-        { "id": 582, "log": "DNSServer" }
+        {
+          "id": 580,
+          "log": "DNSServer"
+        },
+        {
+          "id": 582,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1584.002",
           "techniqueName": "Compromise Infrastructure: DNS Server",
           "tactics": [
-            { "tacticId": "TA0042", "tacticName": "Resource Development" }
+            {
+              "tacticId": "TA0042",
+              "tacticName": "Resource Development"
+            }
           ]
         }
       ],
@@ -790,6 +1009,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -809,15 +1032,24 @@
         "cover-tracks"
       ],
       "relatedEventIds": [
-        { "id": 580, "log": "DNSServer" },
-        { "id": 581, "log": "DNSServer" }
+        {
+          "id": 580,
+          "log": "DNSServer"
+        },
+        {
+          "id": 581,
+          "log": "DNSServer"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1070",
           "techniqueName": "Indicator Removal",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -833,6 +1065,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
       },
       "lastReviewed": "2026-04-03"
     }

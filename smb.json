@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - SMB Client and Server",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/smb.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -37,15 +37,24 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 31010, "log": "SMB" }
+        {
+          "id": 31010,
+          "log": "SMB"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0009", "tacticName": "Collection" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -63,6 +72,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -84,14 +97,20 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 1009, "log": "SMB" }
+        {
+          "id": 1009,
+          "log": "SMB"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1210",
           "techniqueName": "Exploitation of Remote Services",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -123,6 +142,10 @@
           "rule": "title: SMB1 Protocol Negotiated\nstatus: stable\nlogsource:\n  product: windows\n  service: smb\ndetection:\n  selection:\n    EventID: 3000\n  condition: selection\nfalsepositives:\n  - Legacy NAS/printer devices using SMB1\n  - Old OS versions not yet upgraded\nlevel: medium"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -142,16 +165,28 @@
         "reconnaissance"
       ],
       "relatedEventIds": [
-        { "id": 30804, "log": "SMB" },
-        { "id": 31001, "log": "SMB" },
-        { "id": 5140, "log": "Security" }
+        {
+          "id": 30804,
+          "log": "SMB"
+        },
+        {
+          "id": 31001,
+          "log": "SMB"
+        },
+        {
+          "id": 5140,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.002",
           "techniqueName": "Remote Services: SMB/Windows Admin Shares",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -171,6 +206,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
       },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -189,15 +228,24 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 30803, "log": "SMB" },
-        { "id": 4634, "log": "Security" }
+        {
+          "id": 30803,
+          "log": "SMB"
+        },
+        {
+          "id": 4634,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.002",
           "techniqueName": "Remote Services: SMB/Windows Admin Shares",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -216,6 +264,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -237,22 +289,34 @@
         "pass-the-hash"
       ],
       "relatedEventIds": [
-        { "id": 30803, "log": "SMB" },
-        { "id": 4625, "log": "Security" }
+        {
+          "id": 30803,
+          "log": "SMB"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1550.002",
           "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         },
         {
           "techniqueId": "T1110",
           "techniqueName": "Brute Force",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -281,6 +345,10 @@
           "notes": "Multiple target servers is a stronger lateral movement signal than single-target failures. Correlate with EID 4625 on target hosts."
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -300,16 +368,28 @@
         "credential-access"
       ],
       "relatedEventIds": [
-        { "id": 1009, "log": "SMB" },
-        { "id": 31001, "log": "SMB" }
+        {
+          "id": 1009,
+          "log": "SMB"
+        },
+        {
+          "id": 31001,
+          "log": "SMB"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557",
           "techniqueName": "Adversary-in-the-Middle",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0009", "tacticName": "Collection" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         }
       ],
@@ -327,6 +407,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-security"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     }

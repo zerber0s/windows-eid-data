@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - NTLM Authentication",
-    "version": "0.3.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ntlm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -43,16 +43,28 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 4002, "log": "NTLM" },
-        { "id": 8001, "log": "NTLM" },
-        { "id": 4625, "log": "Security" }
+        {
+          "id": 4002,
+          "log": "NTLM"
+        },
+        {
+          "id": 8001,
+          "log": "NTLM"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1187",
           "techniqueName": "Forced Authentication",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
           ]
         }
       ],
@@ -79,6 +91,10 @@
           "notes": "Requires NTLM outbound auditing enabled via Group Policy. A browser or Office app as CallerProcessName is a strong UNC injection / forced auth indicator."
         }
       ],
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -105,17 +121,32 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 4001, "log": "NTLM" },
-        { "id": 8004, "log": "NTLM" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 4001,
+          "log": "NTLM"
+        },
+        {
+          "id": 8004,
+          "log": "NTLM"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
           "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -133,6 +164,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -153,16 +188,28 @@
         "credential-access"
       ],
       "relatedEventIds": [
-        { "id": 8002, "log": "NTLM" },
-        { "id": 4001, "log": "NTLM" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 8002,
+          "log": "NTLM"
+        },
+        {
+          "id": 4001,
+          "log": "NTLM"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1550.002",
           "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -180,6 +227,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -200,17 +251,32 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 8001, "log": "NTLM" },
-        { "id": 4002, "log": "NTLM" },
-        { "id": 4624, "log": "Security" }
+        {
+          "id": 8001,
+          "log": "NTLM"
+        },
+        {
+          "id": 4002,
+          "log": "NTLM"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
           "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -228,6 +294,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -249,15 +319,24 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 8004, "log": "NTLM" },
-        { "id": 4776, "log": "Security" }
+        {
+          "id": 8004,
+          "log": "NTLM"
+        },
+        {
+          "id": 4776,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1550.002",
           "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -275,6 +354,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -297,24 +380,42 @@
         "lateral-movement"
       ],
       "relatedEventIds": [
-        { "id": 4002, "log": "NTLM" },
-        { "id": 8002, "log": "NTLM" },
-        { "id": 4625, "log": "Security" }
+        {
+          "id": 4002,
+          "log": "NTLM"
+        },
+        {
+          "id": 8002,
+          "log": "NTLM"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
           "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
           "tactics": [
-            { "tacticId": "TA0006", "tacticName": "Credential Access" },
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         },
         {
           "techniqueId": "T1550.002",
           "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -341,6 +442,10 @@
           "notes": "Correlate CallingMachineHostName against the victim host's EID 8001 logs to verify the machine actually initiated the auth — in relay attacks the true origin differs."
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-05"
     }
   ]

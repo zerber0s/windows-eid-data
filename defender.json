@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.6.1",
+    "version": "1.7.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -72,6 +72,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -136,6 +140,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-07"
     },
     {
@@ -188,6 +196,10 @@
           "rule": "title: Windows Defender Malware Detection\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 1116\n  condition: selection\nfalsepositives:\n  - Security research tools\n  - Packed legitimate software\nlevel: high"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-07"
     },
     {
@@ -240,6 +252,10 @@
           "rule": "title: Windows Defender Remediation Action\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 1117\n  condition: selection\nfalsepositives:\n  - Legitimate software quarantined due to false positive\nlevel: medium"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -278,6 +294,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-07"
     },
@@ -322,6 +342,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
+      },
       "lastReviewed": "2026-04-03"
     },
     {
@@ -359,6 +383,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -414,6 +442,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -478,6 +510,10 @@
           "rule": "title: Windows Defender Real-Time Protection Disabled\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 5001\n  condition: selection\nfalsepositives:\n  - IT administrators temporarily disabling for maintenance\n  - Third-party AV managing Defender coexistence\nlevel: high"
         }
       ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -532,6 +568,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -597,6 +637,10 @@
           "rule": "title: Windows Defender Exclusion Added\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 5007\n    NewValue|contains:\n      - 'Exclusion'\n  condition: selection\nfalsepositives:\n  - Legitimate software adding exclusions during installation\n  - Group Policy managing exclusion policies\nlevel: high"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -651,6 +695,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -711,6 +759,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -769,6 +821,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows 8.1 / Server 2012 R2"
       },
       "lastReviewed": "2026-04-02"
     }

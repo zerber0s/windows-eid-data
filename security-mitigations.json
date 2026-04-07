@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Security Mitigations (Exploit Protection)",
-    "version": "0.2.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security-mitigations.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -37,15 +37,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 2, "log": "SecurityMitigations" }
+        {
+          "id": 2,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055",
           "techniqueName": "Process Injection",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -63,6 +72,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -84,15 +97,24 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 1, "log": "SecurityMitigations" }
+        {
+          "id": 1,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055",
           "techniqueName": "Process Injection",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -124,6 +146,10 @@
           "rule": "title: Exploit Protection ACG Block\nstatus: stable\nlogsource:\n  product: windows\n  service: security-mitigations\ndetection:\n  selection:\n    EventID: 2\n  condition: selection\nfalsepositives:\n  - Applications not excluded from ACG that require JIT\nlevel: critical"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -143,21 +169,30 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 4, "log": "SecurityMitigations" }
+        {
+          "id": 4,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1059",
           "techniqueName": "Command and Scripting Interpreter",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         },
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -175,6 +210,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -195,14 +234,20 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 3, "log": "SecurityMitigations" }
+        {
+          "id": 3,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -232,6 +277,10 @@
           "rule": "title: Exploit Protection Child Process Blocked\nstatus: stable\nlogsource:\n  product: windows\n  service: security-mitigations\ndetection:\n  selection:\n    EventID: 4\n  condition: selection\nfalsepositives:\n  - Policy misconfiguration on apps requiring child spawning\nlevel: critical"
         }
       ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
+      },
       "lastReviewed": "2026-04-05"
     },
     {
@@ -251,15 +300,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 6, "log": "SecurityMitigations" }
+        {
+          "id": 6,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1574.001",
           "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -276,6 +334,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -296,15 +358,24 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 5, "log": "SecurityMitigations" }
+        {
+          "id": 5,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1574.001",
           "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -320,6 +391,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -341,15 +416,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 8, "log": "SecurityMitigations" }
+        {
+          "id": 8,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1574.002",
           "techniqueName": "Hijack Execution Flow: DLL Side-Loading",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -366,6 +450,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -386,15 +474,24 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 7, "log": "SecurityMitigations" }
+        {
+          "id": 7,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1574.002",
           "techniqueName": "Hijack Execution Flow: DLL Side-Loading",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0003", "tacticName": "Persistence" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -410,6 +507,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -431,14 +532,20 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 10, "log": "SecurityMitigations" }
+        {
+          "id": 10,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -454,6 +561,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -475,14 +586,20 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 9, "log": "SecurityMitigations" }
+        {
+          "id": 9,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1068",
           "techniqueName": "Exploitation for Privilege Escalation",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -498,6 +615,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -519,15 +640,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 12, "log": "SecurityMitigations" }
+        {
+          "id": 12,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055.001",
           "techniqueName": "Process Injection: Dynamic-link Library Injection",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -545,6 +675,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -566,15 +700,24 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 11, "log": "SecurityMitigations" }
+        {
+          "id": 11,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055.001",
           "techniqueName": "Process Injection: Dynamic-link Library Injection",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -592,6 +735,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -613,15 +760,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 14, "log": "SecurityMitigations" },
-        { "id": 2, "log": "SecurityMitigations" }
+        {
+          "id": 14,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 2,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1620",
           "techniqueName": "Reflective Code Loading",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -638,6 +794,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -658,14 +818,20 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 13, "log": "SecurityMitigations" }
+        {
+          "id": 13,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1620",
           "techniqueName": "Reflective Code Loading",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -681,6 +847,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -702,15 +872,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 16, "log": "SecurityMitigations" },
-        { "id": 13, "log": "SecurityMitigations" }
+        {
+          "id": 16,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 13,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1620",
           "techniqueName": "Reflective Code Loading",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -726,6 +905,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -747,14 +930,20 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 15, "log": "SecurityMitigations" }
+        {
+          "id": 15,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1620",
           "techniqueName": "Reflective Code Loading",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -770,6 +959,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -791,15 +984,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 18, "log": "SecurityMitigations" }
+        {
+          "id": 18,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055.012",
           "techniqueName": "Process Injection: Process Hollowing",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -816,6 +1018,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -836,15 +1042,24 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 17, "log": "SecurityMitigations" }
+        {
+          "id": 17,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1055.012",
           "techniqueName": "Process Injection: Process Hollowing",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -860,6 +1075,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -881,16 +1100,28 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 20, "log": "SecurityMitigations" },
-        { "id": 21, "log": "SecurityMitigations" },
-        { "id": 23, "log": "SecurityMitigations" }
+        {
+          "id": 20,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 21,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 23,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -908,6 +1139,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -929,14 +1164,20 @@
         "exploit"
       ],
       "relatedEventIds": [
-        { "id": 19, "log": "SecurityMitigations" }
+        {
+          "id": 19,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -953,6 +1194,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -974,15 +1219,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 22, "log": "SecurityMitigations" },
-        { "id": 19, "log": "SecurityMitigations" }
+        {
+          "id": 22,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 19,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -999,6 +1253,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -1019,14 +1277,20 @@
         "blocked"
       ],
       "relatedEventIds": [
-        { "id": 21, "log": "SecurityMitigations" }
+        {
+          "id": 21,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -1042,6 +1306,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -1063,15 +1331,24 @@
         "audit"
       ],
       "relatedEventIds": [
-        { "id": 24, "log": "SecurityMitigations" },
-        { "id": 21, "log": "SecurityMitigations" }
+        {
+          "id": 24,
+          "log": "SecurityMitigations"
+        },
+        {
+          "id": 21,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -1089,6 +1366,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     },
@@ -1110,14 +1391,20 @@
         "exploit"
       ],
       "relatedEventIds": [
-        { "id": 23, "log": "SecurityMitigations" }
+        {
+          "id": 23,
+          "log": "SecurityMitigations"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1203",
           "techniqueName": "Exploitation for Client Execution",
           "tactics": [
-            { "tacticId": "TA0002", "tacticName": "Execution" }
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
           ]
         }
       ],
@@ -1134,6 +1421,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/exploit-protection-reference"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1709 / Server 2019"
       },
       "lastReviewed": "2026-04-03"
     }

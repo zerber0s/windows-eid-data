@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Application",
-    "version": "0.6.2",
+    "version": "1.7.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/application.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -72,6 +72,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -125,6 +129,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -165,6 +173,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -222,6 +234,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/dotnet/standard/exceptions/"
       },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-07"
     },
     {
@@ -272,6 +288,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -327,6 +347,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/msi/event-logging"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -377,6 +401,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/msi/event-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -434,6 +462,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -490,6 +522,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -545,6 +581,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
     },
@@ -606,6 +646,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-04"
     },
     {
@@ -659,6 +703,10 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/msi/event-logging"
       },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "lastReviewed": "2026-04-02"
     },
     {
@@ -701,6 +749,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/msi/event-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     },
@@ -752,6 +804,10 @@
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/msi/event-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
     }

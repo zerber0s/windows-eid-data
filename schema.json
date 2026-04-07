@@ -187,6 +187,18 @@
             "additionalProperties": false
           }
         },
+        "volumeIndicator": {
+          "type": "string",
+          "enum": ["high", "medium", "low", "rare"]
+        },
+        "windowsVersions": {
+          "type": "object",
+          "properties": {
+            "minVersion": { "type": "string" },
+            "maxVersion": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
         "lastReviewed": { "type": "string", "format": "date" }
       },
       "additionalProperties": false
