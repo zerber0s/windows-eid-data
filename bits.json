@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BITS Client",
-    "version": "0.4.0",
-    "generatedAt": "2026-04-04T00:00:00Z",
+    "version": "0.4.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bits.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,11 +27,11 @@
       "level": "Information",
       "title": "BITS job created",
       "summary": "A new BITS transfer job was created.",
-      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot — legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBin abuse. Correlate jobId with EID 59 and 60 to track what was transferred.",
+      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot — legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBAS abuse — bitsadmin.exe is a LOLBin (binary), while PowerShell's Start-BitsTransfer and wscript.exe represent the Scripts category of LOLBAS. Correlate jobId with EID 59 and 60 to track what was transferred.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
-        "lolbin",
+        "lolbas",
         "file-transfer",
         "persistence"
       ],
@@ -76,7 +76,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4,
@@ -90,6 +90,7 @@
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
+        "lolbas",
         "job-modification",
         "persistence",
         "c2"
@@ -139,7 +140,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 16,
@@ -153,6 +154,7 @@
       "category": "BITS Service Lifecycle",
       "tags": [
         "bits",
+        "lolbas",
         "service-stop",
         "defense-evasion"
       ],
@@ -193,7 +195,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 59,
@@ -207,7 +209,7 @@
       "category": "BITS Transfer",
       "tags": [
         "bits",
-        "lolbin",
+        "lolbas",
         "file-transfer",
         "c2"
       ],
@@ -252,7 +254,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 60,
@@ -266,7 +268,7 @@
       "category": "BITS Transfer",
       "tags": [
         "bits",
-        "lolbin",
+        "lolbas",
         "file-transfer"
       ],
       "relatedEventIds": [
@@ -309,7 +311,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 61,
@@ -323,6 +325,7 @@
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
+        "lolbas",
         "job-error",
         "c2",
         "exfiltration"
@@ -372,7 +375,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-04-07"
     }
   ]
 }

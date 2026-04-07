@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "0.6.0",
-    "generatedAt": "2026-04-03T00:00:00Z",
+    "version": "0.6.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -31,6 +31,7 @@
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
+        "lolbas",
         "engine-lifecycle",
         "execution"
       ],
@@ -67,7 +68,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 403,
@@ -374,6 +375,7 @@
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
+        "lolbas",
         "module-logging",
         "execution"
       ],
@@ -418,7 +420,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4104,
@@ -438,6 +440,7 @@
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
+        "lolbas",
         "script-block-logging",
         "execution",
         "defense-evasion"
@@ -498,7 +501,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4105,

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "0.6.0",
-    "generatedAt": "2026-04-05T00:00:00Z",
+    "version": "0.6.1",
+    "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -123,7 +123,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Process Name is the primary pivot — behavioral detections in LOLBins (powershell.exe, wscript.exe, mshta.exe) or Office applications are high priority",
+          "Process Name is the primary pivot — behavioral detections in LOLBAS tools (LOLBins: mshta.exe; LOLBAS Scripts: powershell.exe, wscript.exe) or Office applications are high priority",
           "Correlate with Security EID 4688 to review the full process ancestry and command line",
           "A 1015 with no subsequent 1117 may mean Defender flagged but did not remediate — the activity may still be active"
         ],
@@ -136,7 +136,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 1116,
@@ -146,7 +146,7 @@
       "level": "Warning",
       "title": "Malware or unwanted software detected",
       "summary": "Windows Defender detected a threat.",
-      "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBins (e.g., powershell.exe, mshta.exe, wscript.exe) are higher priority than detections in temp directories.",
+      "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBAS tools (e.g., powershell.exe and wscript.exe as LOLBAS Scripts; mshta.exe, certutil.exe, and rundll32.exe as LOLBins) are higher priority than detections in temp directories.",
       "category": "Threat Detection",
       "tags": [
         "defender",
@@ -188,7 +188,7 @@
           "rule": "title: Windows Defender Malware Detection\nstatus: stable\nlogsource:\n  product: windows\n  service: windefend\ndetection:\n  selection:\n    EventID: 1116\n  condition: selection\nfalsepositives:\n  - Security research tools\n  - Packed legitimate software\nlevel: high"
         }
       ],
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 1117,
@@ -267,7 +267,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Map the rule GUID to a specific ASR rule using Microsoft's ASR rule reference to understand what technique was blocked",
-          "Process Name reveals what attempted the blocked operation — flag Office apps, scripting engines, or LOLBins",
+          "Process Name reveals what attempted the blocked operation — flag Office apps or LOLBAS tools (scripting engines such as wscript.exe, cscript.exe, powershell.exe; LOLBins such as mshta.exe, regsvr32.exe, rundll32.exe)",
           "Correlate timestamp and process with Security EID 4688 to build the full execution chain"
         ],
         "commonFalsePositives": [
@@ -279,7 +279,7 @@
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 1122,
