@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Netlogon",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/netlogon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -274,7 +274,44 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ComputerName",
+          "xpath": "EventData/Data[@Name='ComputerName']",
+          "description": "Name of the computer attempting the vulnerable secure channel; the attacker machine in a Zerologon attempt"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain for which the secure channel was denied"
+        },
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "Machine account name associated with the connection attempt"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Zerologon Attempt Blocked (EID 5827)",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Netlogon\"\n| where EventID == 5827\n| project TimeGenerated, Computer, ComputerName = extract(@'machine (\\S+)', 1, RenderedDescription), RenderedDescription\n| extend Severity = \"CRITICAL - Zerologon attempt blocked\"",
+          "notes": "Any occurrence of EID 5827 is a critical alert. The ComputerName field identifies the attacking machine. Correlate with network logs from that IP immediately."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Zerologon Blocked Connection",
+          "rule": "index=wineventlog EventCode=5827\n| eval severity=\"CRITICAL\"\n| table _time, ComputerName, DomainName, severity, host",
+          "notes": "Zero false positive threshold — any event is a confirmed Zerologon attempt. Page on-call immediately."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Zerologon Attack Blocked by Netlogon",
+          "rule": "title: Zerologon Attack Blocked by Netlogon\nid: zerologon-blocked\nstatus: stable\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        EventID: 5827\ncondition: selection\nfalsepositives:\n    - None known; this event only fires when enforcement blocks a vulnerable connection\nlevel: critical",
+          "notes": "CVE-2020-1472 detection. No false positives expected in patched environments with enforcement mode enabled."
+        }
+      ]
     },
     {
       "id": 5828,
@@ -459,7 +496,44 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ComputerName",
+          "xpath": "EventData/Data[@Name='ComputerName']",
+          "description": "Name of the computer that was allowed a vulnerable connection — indicates an unpatched DC or compatibility mode"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain for which the vulnerable connection was permitted"
+        },
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "Machine account allowed to use the vulnerable channel"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "CRITICAL: Zerologon Allowed — Vulnerable Connection Permitted (EID 5829)",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Netlogon\"\n| where EventID == 5829\n| project TimeGenerated, Computer, RenderedDescription\n| extend Severity = \"P0 - Zerologon ALLOWED - immediate action required\"",
+          "notes": "HIGHEST SEVERITY. This means either: (1) the DC is not fully patched, or (2) enforcement mode was disabled for compatibility. The domain may already be compromised. Isolate the DC and audit immediately."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Zerologon Allowed — P0 Alert",
+          "rule": "index=wineventlog EventCode=5829\n| eval severity=\"P0 - ZEROLOGON ALLOWED\"\n| table _time, ComputerName, DomainName, severity, host\n| sort -_time",
+          "notes": "P0 alert. If seen in production, assume domain compromise until proven otherwise."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Zerologon Vulnerable Connection Allowed",
+          "rule": "title: Zerologon Vulnerable Connection Allowed\nid: zerologon-allowed\nstatus: stable\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        EventID: 5829\ncondition: selection\nfalsepositives:\n    - None; this event fires only when a vulnerable Netlogon connection is explicitly permitted\nlevel: critical",
+          "notes": "More severe than 5827. The DC is actively allowing Zerologon-vulnerable connections."
+        }
+      ]
     }
   ]
 }

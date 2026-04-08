@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BitLocker",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bitlocker.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -181,7 +181,39 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Volume on which BitLocker was disabled; system drive (C:) disable is highest priority"
+        },
+        {
+          "name": "DriveType",
+          "xpath": "EventData/Data[@Name='DriveType']",
+          "description": "Type of drive (fixed, removable); fixed drive disablement outside maintenance is suspicious"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "BitLocker Disabled — Ransomware Pre-Staging Indicator",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-BitLocker-DrivePreparationTool\"\n    or Source == \"Microsoft-Windows-BitLocker-API\"\n| where EventID == 771\n| project TimeGenerated, Computer, VolumeName, RenderedDescription\n| extend Severity = \"HIGH - BitLocker disabled; investigate for ransomware pre-staging\"",
+          "notes": "Ransomware actors disable BitLocker before deploying their own encryption to avoid performance issues from double-encryption. Any disable event outside a documented change window is high priority. Alert immediately."
+        },
+        {
+          "platform": "Splunk",
+          "title": "BitLocker Drive Encryption Disabled",
+          "rule": "index=wineventlog EventCode=771 sourcetype=\"XmlWinEventLog:Microsoft-Windows-BitLocker/BitLocker Management\"\n| table _time, Volume_Name, Drive_Type, host\n| eval alert=\"HIGH - Potential ransomware pre-staging\"",
+          "notes": "Monitor the BitLocker Management channel. Any disable event should trigger immediate investigation."
+        },
+        {
+          "platform": "Sigma",
+          "title": "BitLocker Drive Encryption Disabled",
+          "rule": "title: BitLocker Drive Encryption Disabled\nstatus: stable\nlogsource:\n    product: windows\n    service: bitlocker\ndetection:\n    selection:\n        EventID: 771\ncondition: selection\nfalsepositives:\n    - Authorized BitLocker management during change windows\n    - Drive decommissioning procedures\nlevel: high",
+          "notes": "Zero-noise rule in environments with BitLocker policy enforced. Any occurrence outside change management should page the incident response team."
+        }
+      ]
     },
     {
       "id": 773,
@@ -495,7 +527,39 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Volume on which BitLocker was suspended; suspension leaves data encrypted but removes the key protector temporarily"
+        },
+        {
+          "name": "DriveType",
+          "xpath": "EventData/Data[@Name='DriveType']",
+          "description": "Type of drive; system volume suspension is the most impactful for ransomware pre-staging"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "BitLocker Suspended — Ransomware Pre-Staging Indicator",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-BitLocker-DrivePreparationTool\"\n    or Source == \"Microsoft-Windows-BitLocker-API\"\n| where EventID == 776\n| project TimeGenerated, Computer, VolumeName, RenderedDescription\n| extend Severity = \"HIGH - BitLocker suspended; investigate for ransomware pre-staging\"",
+          "notes": "BitLocker suspension removes key protection. Ransomware may suspend before encryption to simplify their encryption operation. Correlate with EID 771 (disable) and process creation events."
+        },
+        {
+          "platform": "Splunk",
+          "title": "BitLocker Drive Encryption Suspended",
+          "rule": "index=wineventlog EventCode=776 sourcetype=\"XmlWinEventLog:Microsoft-Windows-BitLocker/BitLocker Management\"\n| table _time, Volume_Name, Drive_Type, host\n| eval alert=\"HIGH - BitLocker suspended\"",
+          "notes": "Suspension is often a precursor to either disable (771) or ransomware deployment. Monitor for follow-on events."
+        },
+        {
+          "platform": "Sigma",
+          "title": "BitLocker Drive Encryption Suspended",
+          "rule": "title: BitLocker Drive Encryption Suspended\nstatus: stable\nlogsource:\n    product: windows\n    service: bitlocker\ndetection:\n    selection:\n        EventID: 776\ncondition: selection\nfalsepositives:\n    - Authorized BitLocker management (BIOS updates, TPM operations)\n    - IT administrative operations\nlevel: high",
+          "notes": "Correlate with EID 771 (disable) and endpoint process events for ransomware pre-staging chain detection."
+        }
+      ]
     }
   ]
 }

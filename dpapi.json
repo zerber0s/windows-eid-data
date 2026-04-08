@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DPAPI",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dpapi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -104,7 +104,49 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account performing the master key backup; SYSTEM is normal for AD-backed backup, user accounts are suspicious"
+        },
+        {
+          "name": "MasterKeyId",
+          "xpath": "EventData/Data[@Name='MasterKeyId']",
+          "description": "GUID of the DPAPI master key being backed up; correlate across 4692/4693 to track key lifecycle"
+        },
+        {
+          "name": "RecoveryServer",
+          "xpath": "EventData/Data[@Name='RecoveryServer']",
+          "description": "DC used for the backup operation; backup to an unexpected DC or non-DC may indicate Mimikatz dpapi::masterkey /rpc"
+        },
+        {
+          "name": "ReturnCode",
+          "xpath": "EventData/Data[@Name='ReturnCode']",
+          "description": "0x0 = success; non-zero indicates backup failure which may itself be suspicious"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "DPAPI Master Key Backup by Non-SYSTEM Account",
+          "rule": "SecurityEvent\n| where EventID == 4692\n| where SubjectUserName != \"SYSTEM\"\n| project TimeGenerated, SubjectUserName, SubjectDomainName, MasterKeyId, RecoveryServer, ReturnCode, Computer",
+          "notes": "SYSTEM performs legitimate AD-backed DPAPI master key backups. Any user account performing this operation is abnormal and may indicate Mimikatz 'dpapi::masterkey /rpc' usage."
+        },
+        {
+          "platform": "Splunk",
+          "title": "DPAPI Master Key Backup by Non-System Account",
+          "rule": "index=wineventlog EventCode=4692 NOT Account_Name=SYSTEM\n| table _time, Account_Name, Master_Key_ID, Recovery_Server, Return_Code, host",
+          "notes": "Alert on user-context DPAPI master key backup operations."
+        },
+        {
+          "platform": "Sigma",
+          "title": "DPAPI Master Key Backup by Non-System Account",
+          "rule": "title: DPAPI Master Key Backup by Non-System Account\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4692\n    filter_system:\n        SubjectUserName: 'SYSTEM'\n    condition: selection and not filter_system\nfalsepositives:\n    - Domain administrator performing manual key backup\nlevel: medium",
+          "notes": "Low false positive rate; legitimate non-SYSTEM backups are rare. Investigate immediately."
+        }
+      ]
     },
     {
       "id": 4693,
@@ -193,7 +235,49 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account performing master key recovery; unexpected accounts recovering keys may indicate credential harvesting"
+        },
+        {
+          "name": "MasterKeyId",
+          "xpath": "EventData/Data[@Name='MasterKeyId']",
+          "description": "GUID of the recovered master key; correlate with 4692 backup events to track the key's history"
+        },
+        {
+          "name": "RecoveryServer",
+          "xpath": "EventData/Data[@Name='RecoveryServer']",
+          "description": "DC used for recovery; recovery from an unexpected DC is suspicious"
+        },
+        {
+          "name": "ReturnCode",
+          "xpath": "EventData/Data[@Name='ReturnCode']",
+          "description": "Recovery result code; 0x0 = successful recovery, non-zero = failure"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "DPAPI Master Key Recovery — Suspicious Account or Timing",
+          "rule": "SecurityEvent\n| where EventID == 4693\n| where ReturnCode == \"0x0\"\n| where SubjectUserName != \"SYSTEM\"\n| project TimeGenerated, SubjectUserName, SubjectDomainName, MasterKeyId, RecoveryServer, Computer",
+          "notes": "Successful DPAPI master key recovery by non-SYSTEM accounts. May indicate Mimikatz 'sekurlsa::dpapi' or manual credential extraction. Correlate with 4692 events for the same MasterKeyId."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Successful DPAPI Master Key Recovery by Non-System Account",
+          "rule": "index=wineventlog EventCode=4693 Return_Code=0x0 NOT Account_Name=SYSTEM\n| table _time, Account_Name, Master_Key_ID, Recovery_Server, host",
+          "notes": "Successful key recovery by user accounts; correlate with DPAPI backup events (4692)."
+        },
+        {
+          "platform": "Sigma",
+          "title": "DPAPI Master Key Recovery by Non-System Account",
+          "rule": "title: DPAPI Master Key Recovery by Non-System Account\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4693\n        ReturnCode: '0x0'\n    filter_system:\n        SubjectUserName: 'SYSTEM'\n    condition: selection and not filter_system\nfalsepositives:\n    - Administrator-initiated credential recovery procedures\nlevel: medium",
+          "notes": "Pair with process creation events to identify the tool performing the recovery."
+        }
+      ]
     },
     {
       "id": 4694,

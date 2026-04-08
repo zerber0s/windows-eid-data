@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Kerberos",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/kerberos.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -109,7 +109,54 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account requesting the TGT; look for service accounts or computer accounts in unusual requests"
+        },
+        {
+          "name": "TicketEncryptionType",
+          "xpath": "EventData/Data[@Name='TicketEncryptionType']",
+          "description": "Encryption type of the issued ticket; 0x17 (RC4-HMAC) is a Kerberoasting/downgrade indicator"
+        },
+        {
+          "name": "PreAuthType",
+          "xpath": "EventData/Data[@Name='PreAuthType']",
+          "description": "Pre-authentication type; 0 means pre-auth not required (AS-REP roasting target)"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source IP of the AS-REQ; non-DC IPs requesting TGTs for privileged accounts are suspicious"
+        },
+        {
+          "name": "TicketOptions",
+          "xpath": "EventData/Data[@Name='TicketOptions']",
+          "description": "Bitmask of requested ticket flags; unusual options may indicate Golden Ticket use"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "AS-REP Roasting — Pre-Auth Not Required",
+          "rule": "SecurityEvent\n| where EventID == 4768\n| where PreAuthType == \"0\"\n| where TargetUserName !endswith \"$\"\n| summarize count() by TargetUserName, IpAddress, bin(TimeGenerated, 1h)\n| where count_ > 5",
+          "notes": "PreAuthType 0 means Kerberos pre-authentication is disabled — attacker can request AS-REP and crack offline. Tune threshold per environment."
+        },
+        {
+          "platform": "Splunk",
+          "title": "AS-REP Roasting Detection",
+          "rule": "index=wineventlog EventCode=4768 Pre_Authentication_Type=0 NOT Account_Name=\"*$\"\n| stats count by Account_Name, Client_Address\n| where count > 5",
+          "notes": "Detects AS-REP roasting attempts against accounts with pre-auth disabled."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Kerberos AS-REP Roasting and RC4 Downgrade",
+          "rule": "title: Kerberos AS-REP Roasting and RC4 Downgrade\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4768\n    filter_preauth:\n        PreAuthType: '0'\n    filter_rc4:\n        TicketEncryptionType:\n            - '0x17'\n            - '0x18'\n    condition: selection and (filter_preauth or filter_rc4)\nfalsepositives:\n    - Legacy systems requiring RC4\n    - Accounts with pre-authentication intentionally disabled\nlevel: medium",
+          "notes": "Match on either pre-auth disabled or RC4 encryption type."
+        }
+      ]
     },
     {
       "id": 4769,
@@ -197,7 +244,54 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ServiceName",
+          "xpath": "EventData/Data[@Name='ServiceName']",
+          "description": "SPN of the service ticket requested; Kerberoasting targets service accounts with SPNs"
+        },
+        {
+          "name": "TicketEncryptionType",
+          "xpath": "EventData/Data[@Name='TicketEncryptionType']",
+          "description": "0x17 (RC4-HMAC) TGS requests for SPN accounts are the core Kerberoasting indicator"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source IP; bulk TGS requests from a single IP suggest automated Kerberoasting"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "Result code; 0x0 = success, non-zero = failure with reason"
+        },
+        {
+          "name": "TicketOptions",
+          "xpath": "EventData/Data[@Name='TicketOptions']",
+          "description": "Requested ticket flags; Silver Ticket indicators include forwardable flag mismatches"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Kerberoasting — RC4 TGS Requests",
+          "rule": "SecurityEvent\n| where EventID == 4769\n| where TicketEncryptionType == \"0x17\"\n| where ServiceName !endswith \"$\"\n| where Status == \"0x0\"\n| summarize RequestCount = count(), Services = make_set(ServiceName) by IpAddress, Account, bin(TimeGenerated, 10m)\n| where RequestCount > 3",
+          "notes": "RC4 TGS requests for non-machine accounts. Threshold of 3+ in 10 min catches automated tools like Rubeus and Impacket GetUserSPNs."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Kerberoasting RC4 Service Ticket Requests",
+          "rule": "index=wineventlog EventCode=4769 Ticket_Encryption_Type=0x17 NOT Service_Name=\"*$\"\n| stats count as RequestCount values(Service_Name) as Services by Client_Address, Account_Name\n| where RequestCount > 3",
+          "notes": "High volume RC4 TGS requests from a single source suggest Kerberoasting."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Kerberoasting Service Ticket Request with RC4",
+          "rule": "title: Kerberoasting Service Ticket Request with RC4\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4769\n        TicketEncryptionType:\n            - '0x17'\n            - '0x18'\n        Status: '0x0'\n    filter_machine:\n        ServiceName|endswith: '$'\n    condition: selection and not filter_machine\nfalsepositives:\n    - Legacy applications requiring RC4 Kerberos encryption\nlevel: medium",
+          "notes": "Filter machine account TGS (ending in $) to reduce noise."
+        }
+      ]
     },
     {
       "id": 4770,
@@ -275,7 +369,29 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ServiceName",
+          "xpath": "EventData/Data[@Name='ServiceName']",
+          "description": "Service ticket being renewed; watch for unusual service accounts"
+        },
+        {
+          "name": "TicketEncryptionType",
+          "xpath": "EventData/Data[@Name='TicketEncryptionType']",
+          "description": "Encryption type; RC4 renewal may indicate pass-the-ticket activity"
+        },
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account whose ticket is being renewed"
+        },
+        {
+          "name": "TicketOptions",
+          "xpath": "EventData/Data[@Name='TicketOptions']",
+          "description": "Renewed ticket flags; renewable flag must be set; mismatches can indicate manipulation"
+        }
+      ]
     },
     {
       "id": 4771,
@@ -363,7 +479,49 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account that failed pre-authentication; pivot for spray (many accounts) vs. brute force (one account)"
+        },
+        {
+          "name": "FailureCode",
+          "xpath": "EventData/Data[@Name='FailureCode']",
+          "description": "0x18 = bad password (most common); 0x10 = pre-auth not required; 0x25 = clock skew"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source IP of the AS-REQ; single IP hitting many accounts = password spray"
+        },
+        {
+          "name": "PreAuthType",
+          "xpath": "EventData/Data[@Name='PreAuthType']",
+          "description": "Pre-authentication method used; type 0 indicates no pre-auth required (AS-REP roasting target)"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Kerberos Password Spray Detection",
+          "rule": "SecurityEvent\n| where EventID == 4771\n| where FailureCode == \"0x18\"\n| summarize UniqueAccounts = dcount(TargetUserName), FailureCount = count() by IpAddress, bin(TimeGenerated, 5m)\n| where UniqueAccounts > 10",
+          "notes": "Single IP failing pre-auth against many accounts within 5 minutes. Tune UniqueAccounts threshold per environment size."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Kerberos Pre-Authentication Spray",
+          "rule": "index=wineventlog EventCode=4771 Failure_Code=0x18\n| bin _time span=5m\n| stats dc(Target_Account_Name) as UniqueAccounts count by _time, Client_Address\n| where UniqueAccounts > 10",
+          "notes": "Detects password spray via Kerberos pre-authentication failures from a single source."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Kerberos Pre-Authentication Failure — Spray Pattern",
+          "rule": "title: Kerberos Pre-Authentication Failure - Spray Pattern\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4771\n        FailureCode: '0x18'\ncondition: selection | count() by IpAddress > 10\ntimeframe: 5m\nfalsepositives:\n    - Misconfigured applications\n    - User password change propagation delay\nlevel: medium",
+          "notes": "Threshold-based detection; may require SIEM-specific syntax adjustment."
+        }
+      ]
     },
     {
       "id": 4773,
@@ -437,7 +595,24 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ServiceName",
+          "xpath": "EventData/Data[@Name='ServiceName']",
+          "description": "Target service for the failed TGS; repeated failures across many SPNs may indicate enumeration"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "Failure code; 0x7 = server not found (SPN enumeration), 0x34 = ticket expired"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source IP of the failed request; pivot for SPN scanning"
+        }
+      ]
     }
   ]
 }

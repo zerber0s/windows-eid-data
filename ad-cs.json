@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Certificate Services",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ad-cs.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -264,7 +264,54 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "RequesterName",
+          "xpath": "EventData/Data[@Name='RequesterName']",
+          "description": "Account that requested the certificate; unexpected accounts requesting certs for other identities indicate ESC1/ESC4 abuse"
+        },
+        {
+          "name": "CertificateTemplate",
+          "xpath": "EventData/Data[@Name='CertificateTemplate']",
+          "description": "Template used to issue the certificate; vulnerable templates (user-editable SANs, enrollee-supplied subject) are ESC1 targets"
+        },
+        {
+          "name": "SubjectKeyIdentifier",
+          "xpath": "EventData/Data[@Name='SubjectKeyIdentifier']",
+          "description": "Unique key identifier for the issued certificate; use for certificate tracking and revocation investigation"
+        },
+        {
+          "name": "SubjectAltName",
+          "xpath": "EventData/Data[@Name='SubjectAltName']",
+          "description": "Subject Alternative Name in the certificate; attacker-supplied SANs (another user's UPN) are the core ESC1 indicator"
+        },
+        {
+          "name": "Disposition",
+          "xpath": "EventData/Data[@Name='Disposition']",
+          "description": "Issuance disposition; 3 = issued, 2 = denied, 6 = issued out-of-band"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "AD CS ESC1 — Certificate Issued with Enrollee-Supplied SAN",
+          "rule": "SecurityEvent\n| where EventID == 4887\n| where Disposition == \"3\"\n| where SubjectAltName != \"\"\n| where RequesterName !has SubjectAltName\n| project TimeGenerated, RequesterName, CertificateTemplate, SubjectAltName, SubjectKeyIdentifier, Computer",
+          "notes": "ESC1 abuse: requester obtains a certificate with a SAN for a different identity (e.g., Domain Admin UPN). Filters where requester name doesn't appear in SAN. Tune SubjectAltName parsing per CA configuration."
+        },
+        {
+          "platform": "Splunk",
+          "title": "AD CS Certificate Issued with Suspicious SAN",
+          "rule": "index=wineventlog EventCode=4887 Disposition=3\n| where len(Subject_Alt_Name) > 0\n| table _time, Requester_Name, Certificate_Template, Subject_Alt_Name, host",
+          "notes": "Any certificate with an enrollee-supplied SAN should be reviewed, especially for high-privilege UPNs."
+        },
+        {
+          "platform": "Sigma",
+          "title": "AD CS Certificate Issued with Subject Alternative Name",
+          "rule": "title: AD CS Certificate Issued with Subject Alternative Name\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4887\n        Disposition: '3'\n    filter_empty_san:\n        SubjectAltName: ''\n    condition: selection and not filter_empty_san\nfalsepositives:\n    - Web server certificates with legitimate DNS SANs\n    - Enterprise PKI templates that legitimately use SANs\nlevel: medium",
+          "notes": "Baseline; tune with CertificateTemplate allowlist for known-safe templates that legitimately use SANs."
+        }
+      ]
     },
     {
       "id": 4888,

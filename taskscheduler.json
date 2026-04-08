@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Task Scheduler",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -287,7 +287,44 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-03-29",
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the registered task; tasks in \\Microsoft\\Windows\\ subdirectories masquerading as built-in tasks are suspicious"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that registered the task; non-admin accounts or SYSTEM creating tasks outside maintenance windows warrant review"
+        },
+        {
+          "name": "TaskContent",
+          "xpath": "EventData/Data[@Name='TaskContent']",
+          "description": "XML definition of the task including actions and triggers; look for suspicious executables, scripts, or encoded commands in Actions"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Scheduled Task Created with Suspicious Action",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-TaskScheduler\"\n| where EventID == 106\n| where RenderedDescription has_any (\n    \"powershell\", \"cmd.exe\", \"wscript\", \"cscript\", \"mshta\",\n    \"regsvr32\", \"rundll32\", \"certutil\", \"bitsadmin\",\n    \"AppData\", \"Temp\\\\\", \"ProgramData\"\n  )\n| project TimeGenerated, Computer, UserName, RenderedDescription",
+          "notes": "Task content field (XML) will contain the action. Suspicious executables or paths in temp/roaming directories are high priority."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Scheduled Task Registration with Suspicious Executable",
+          "rule": "index=wineventlog EventCode=106\n(Task_Content=\"*powershell*\" OR Task_Content=\"*cmd.exe*\" OR Task_Content=\"*mshta*\"\nOR Task_Content=\"*wscript*\" OR Task_Content=\"*AppData*\" OR Task_Content=\"*Temp\\\\*\")\n| table _time, Task_Name, User, Task_Content, host",
+          "notes": "Inspect TaskContent XML for suspicious action executables and script paths."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Created with Suspicious Script or Binary",
+          "rule": "title: Scheduled Task Created with Suspicious Script or Binary\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 106\n        TaskContent|contains:\n            - 'powershell'\n            - 'cmd.exe'\n            - 'wscript.exe'\n            - 'mshta.exe'\n            - 'regsvr32'\n            - 'certutil'\n            - 'AppData'\nfalsepositives:\n    - Software installations creating scheduled tasks\n    - IT management tools (SCCM, etc.)\nlevel: medium",
+          "notes": "Combine with SubjectUserName filter to exclude known admin accounts."
+        }
+      ]
     },
     {
       "id": 111,
@@ -568,7 +605,39 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-03-29",
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the deleted task; attackers delete persistence tasks post-operation during cleanup"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that deleted the task; correlate with task creation (EID 106) to identify short-lived attacker tasks"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Scheduled Task Deleted — Potential Attacker Cleanup",
+          "rule": "let TaskCreations = Event\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 106\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), CreateTime = TimeGenerated, CreateUser = UserName;\nEvent\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 141\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), DeleteTime = TimeGenerated, DeleteUser = UserName, Computer\n| join kind=inner TaskCreations on TaskName\n| where DeleteTime - CreateTime < 1h",
+          "notes": "Correlates task creation with deletion within 1 hour — characteristic of attacker-created persistence tasks that are cleaned up post-exploitation."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Scheduled Task Deletion After Recent Creation",
+          "rule": "index=wineventlog (EventCode=106 OR EventCode=141)\n| eval action=if(EventCode=106, \"created\", \"deleted\")\n| stats list(action) as actions list(_time) as times by Task_Name\n| where mvcount(actions) > 1\n| where abs(mvindex(times,0) - mvindex(times,-1)) < 3600",
+          "notes": "Finds tasks created and deleted within an hour — attacker cleanup pattern."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Deleted",
+          "rule": "title: Scheduled Task Deleted\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 141\ncondition: selection\nfalsepositives:\n    - Software uninstallation\n    - Routine maintenance\nlevel: low",
+          "notes": "Base rule; correlate with EID 106 creation events for higher fidelity attacker cleanup detection."
+        }
+      ]
     },
     {
       "id": 200,

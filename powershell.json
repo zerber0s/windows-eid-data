@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -452,7 +452,49 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "Payload",
+          "xpath": "EventData/Data[@Name='Payload']",
+          "description": "The pipeline execution detail or command output; search for download cradles, encoded strings, and suspicious cmdlets"
+        },
+        {
+          "name": "ContextInfo",
+          "xpath": "EventData/Data[@Name='ContextInfo']",
+          "description": "Contextual information including host application, runspace, and connected user"
+        },
+        {
+          "name": "HostName",
+          "xpath": "EventData/Data[@Name='HostName']",
+          "description": "PowerShell host running the command (e.g., ConsoleHost, Windows PowerShell ISE); non-standard hosts are suspicious"
+        },
+        {
+          "name": "HostApplication",
+          "xpath": "EventData/Data[@Name='HostApplication']",
+          "description": "Full path of the application hosting PowerShell; unexpected parents like wscript.exe or mshta.exe are red flags"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "PowerShell Module Logging — Suspicious Download Cradle or Obfuscation",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-PowerShell\"\n| where EventID == 4103\n| where RenderedDescription has_any (\n    \"IEX\", \"Invoke-Expression\", \"DownloadString\", \"DownloadFile\",\n    \"WebClient\", \"Net.WebClient\", \"System.Net.WebClient\",\n    \"FromBase64String\", \"[Convert]::\", \"EncodedCommand\",\n    \"Invoke-Mimikatz\", \"Invoke-ReflectivePEInjection\"\n  )\n| project TimeGenerated, Computer, UserName, RenderedDescription",
+          "notes": "Module logging captures all pipeline execution. Payload field contains the command. High volume — tune with additional context filters like HostApplication."
+        },
+        {
+          "platform": "Splunk",
+          "title": "PowerShell Module Logging Suspicious Keywords",
+          "rule": "index=wineventlog EventCode=4103\n(Payload=\"*IEX*\" OR Payload=\"*Invoke-Expression*\" OR Payload=\"*DownloadString*\"\nOR Payload=\"*WebClient*\" OR Payload=\"*FromBase64String*\" OR Payload=\"*Invoke-Mimikatz*\")\n| table _time, Computer, User, Payload, ContextInfo",
+          "notes": "Search the Payload field for known attacker keywords and download cradles."
+        },
+        {
+          "platform": "Sigma",
+          "title": "PowerShell Module Logging Suspicious Activity",
+          "rule": "title: PowerShell Module Logging Suspicious Activity\nstatus: experimental\nlogsource:\n    product: windows\n    service: powershell\ndetection:\n    selection:\n        EventID: 4103\n        Payload|contains:\n            - 'IEX'\n            - 'Invoke-Expression'\n            - 'DownloadString'\n            - 'Net.WebClient'\n            - 'FromBase64String'\n            - 'Invoke-Mimikatz'\n            - 'Invoke-ReflectivePEInjection'\nfalsepositives:\n    - Legitimate administration scripts\n    - Software deployment tools\nlevel: medium",
+          "notes": "Baseline keyword list; expand with environment-specific attacker TTPs."
+        }
+      ]
     },
     {
       "id": 4104,
@@ -537,7 +579,44 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "ScriptBlockText",
+          "xpath": "EventData/Data[@Name='ScriptBlockText']",
+          "description": "Full text of the script block being executed; the primary field for detecting malicious PowerShell content"
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "Path of the script file if executed from disk; empty means executed interactively or from memory"
+        },
+        {
+          "name": "ScriptBlockId",
+          "xpath": "EventData/Data[@Name='ScriptBlockId']",
+          "description": "GUID uniquely identifying the script block; large scripts are split across multiple events with the same ID"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "PowerShell Script Block — Attacker Toolkit Keywords",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-PowerShell\"\n| where EventID == 4104\n| where RenderedDescription has_any (\n    \"Invoke-Mimikatz\", \"Invoke-ReflectivePEInjection\", \"Invoke-Shellcode\",\n    \"PowerSploit\", \"Get-GPPPassword\", \"Invoke-CredentialInjection\",\n    \"AmsiUtils\", \"amsiInitFailed\", \"System.Management.Automation.AmsiUtils\",\n    \"-EncodedCommand\", \"-enc \", \"[System.Convert]::FromBase64String\",\n    \"VirtualAlloc\", \"WriteProcessMemory\", \"CreateThread\"\n  )\n| project TimeGenerated, Computer, UserName, RenderedDescription",
+          "notes": "Script block logging captures full script content even for obfuscated scripts (AMSI sees decoded content). Higher fidelity than 4103 for detecting known tools."
+        },
+        {
+          "platform": "Splunk",
+          "title": "PowerShell Script Block Logging — Malicious Content",
+          "rule": "index=wineventlog EventCode=4104\n(ScriptBlock_Text=\"*Invoke-Mimikatz*\" OR ScriptBlock_Text=\"*AmsiUtils*\"\nOR ScriptBlock_Text=\"*amsiInitFailed*\" OR ScriptBlock_Text=\"*FromBase64String*\"\nOR ScriptBlock_Text=\"*VirtualAlloc*\" OR ScriptBlock_Text=\"*Invoke-ReflectivePEInjection*\")\n| table _time, Computer, User, ScriptBlock_Text, Path",
+          "notes": "The ScriptBlock_Text field contains the full decoded script content."
+        },
+        {
+          "platform": "Sigma",
+          "title": "PowerShell Script Block Logging Malicious Keywords",
+          "rule": "title: PowerShell Script Block Logging Malicious Keywords\nstatus: stable\nlogsource:\n    product: windows\n    service: powershell\ndetection:\n    selection:\n        EventID: 4104\n        ScriptBlockText|contains:\n            - 'Invoke-Mimikatz'\n            - 'AmsiUtils'\n            - 'amsiInitFailed'\n            - 'Invoke-ReflectivePEInjection'\n            - 'PowerSploit'\n            - 'Get-GPPPassword'\n            - 'VirtualAlloc'\n            - 'WriteProcessMemory'\nfalsepositives:\n    - Security tooling and EDR agents\n    - Penetration testing\nlevel: high",
+          "notes": "High confidence rule; these strings rarely appear in legitimate scripts."
+        }
+      ]
     },
     {
       "id": 4105,

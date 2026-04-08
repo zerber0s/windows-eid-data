@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "1.11.0",
+    "version": "1.12.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -3194,7 +3194,34 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-03-29",
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account that was modified; privileged accounts (admin, service) changes should always be reviewed"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that made the change; unexpected accounts modifying privileged users warrant investigation"
+        },
+        {
+          "name": "PasswordLastSet",
+          "xpath": "EventData/Data[@Name='PasswordLastSet']",
+          "description": "New password set timestamp; '-' means unchanged"
+        },
+        {
+          "name": "UserAccountControl",
+          "xpath": "EventData/Data[@Name='UserAccountControl']",
+          "description": "UAC flags changed; enabling accounts or setting 'Password Not Required' are high-risk changes"
+        },
+        {
+          "name": "SamAccountName",
+          "xpath": "EventData/Data[@Name='SamAccountName']",
+          "description": "SAM account name; changes to this field can indicate account rename operations"
+        }
+      ]
     },
     {
       "id": 4740,
@@ -3251,7 +3278,24 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-03-29",
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account that was locked out; repeated lockouts suggest ongoing brute force or spray"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that reported the lockout (usually SYSTEM on the authenticating DC)"
+        },
+        {
+          "name": "CallerComputerName",
+          "xpath": "EventData/Data[@Name='CallerComputerName']",
+          "description": "Machine originating the failed authentication attempts; the primary investigative pivot for lockouts"
+        }
+      ]
     },
     {
       "id": 4741,
@@ -3851,7 +3895,44 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-03-29",
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "NTLM Authentication Failure — Password Spray Pattern",
+          "rule": "SecurityEvent\n| where EventID == 4776\n| where Status != \"0x0\"\n| summarize UniqueAccounts = dcount(TargetUserName), FailureCount = count() by Workstation, bin(TimeGenerated, 5m)\n| where UniqueAccounts > 10 or FailureCount > 50",
+          "notes": "NTLM credential validation failures. UniqueAccounts > 10 suggests spray; high FailureCount from one source suggests brute force. Tune thresholds per environment."
+        },
+        {
+          "platform": "Splunk",
+          "title": "NTLM Credential Validation Failure Spike",
+          "rule": "index=wineventlog EventCode=4776 NOT Status=0x0\n| bin _time span=5m\n| stats dc(Target_Account_Name) as UniqueAccounts count by _time, Workstation\n| where UniqueAccounts > 10 OR count > 50",
+          "notes": "NTLM-based authentication failures from a single workstation."
+        },
+        {
+          "platform": "Sigma",
+          "title": "NTLM Authentication Failure Brute Force or Spray",
+          "rule": "title: NTLM Authentication Failure Brute Force or Spray\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4776\n        Status:\n            - '0xC000006A'\n            - '0xC0000064'\n            - '0xC000006D'\ncondition: selection | count() by Workstation > 20\ntimeframe: 5m\nfalsepositives:\n    - Application service accounts with misconfigured credentials\n    - Kerberos fallback to NTLM\nlevel: medium",
+          "notes": "Threshold-based; adjust count per environment NTLM baseline."
+        }
+      ],
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account whose credentials were validated; pivot for spray (many accounts) vs brute force (one account)"
+        },
+        {
+          "name": "Workstation",
+          "xpath": "EventData/Data[@Name='Workstation']",
+          "description": "Machine initiating the NTLM authentication; attackers may use compromised hosts or tools like Responder"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "0xC000006A = bad password, 0xC0000064 = no such user, 0xC000006D = generic auth failure"
+        }
+      ]
     },
     {
       "id": 4778,
@@ -3968,7 +4049,49 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-02",
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Remote Session Disconnect from Unexpected Client",
+          "rule": "SecurityEvent\n| where EventID == 4779\n| join kind=leftouter (\n    SecurityEvent\n    | where EventID == 4778\n    | project AccountName, ClientAddress, TimeGenerated\n) on AccountName\n| where ClientAddress != ClientAddress1\n| project TimeGenerated, AccountName, SessionName, ClientName, ClientAddress, Computer",
+          "notes": "Correlates disconnects (4779) with reconnects (4778) — session appearing on a different client IP can indicate session hijacking. Simplified query; adjust for your schema."
+        },
+        {
+          "platform": "Splunk",
+          "title": "RDP Session Disconnect",
+          "rule": "index=wineventlog EventCode=4779\n| table _time, Account_Name, Session_Name, Client_Name, Client_Address, host\n| sort -_time",
+          "notes": "Baseline query; correlate ClientAddress with known endpoints for the AccountName to detect unusual disconnects."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Remote Session Disconnected from Workstation",
+          "rule": "title: Remote Session Disconnected from Workstation\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4779\ncondition: selection\nfalsepositives:\n    - Normal user RDP session disconnects\nlevel: informational",
+          "notes": "Base rule; add ClientAddress allowlist or correlate with 4778 for higher fidelity."
+        }
+      ],
+      "keyFields": [
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "Account whose session was disconnected; track for unusual disconnect patterns"
+        },
+        {
+          "name": "SessionName",
+          "xpath": "EventData/Data[@Name='SessionName']",
+          "description": "Name of the disconnected session (e.g., RDP-Tcp#0); helps identify session type"
+        },
+        {
+          "name": "ClientName",
+          "xpath": "EventData/Data[@Name='ClientName']",
+          "description": "Hostname of the client that disconnected"
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "IP address of the disconnected client; compare against known endpoints for the user"
+        }
+      ]
     },
     {
       "id": 4781,
@@ -5657,7 +5780,44 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-04-02",
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Credential Manager Bulk Read — Potential Harvesting",
+          "rule": "SecurityEvent\n| where EventID == 5379\n| where SubjectUserName != \"SYSTEM\"\n| where CountOfCredentialsReturned > 5\n| project TimeGenerated, SubjectUserName, SubjectDomainName, TargetName, CountOfCredentialsReturned, Computer",
+          "notes": "Filters out normal SYSTEM reads. High CountOfCredentialsReturned from a user context may indicate credential manager dumping (e.g., via Windows Credential Manager enumeration)."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Credential Manager High-Volume Read",
+          "rule": "index=wineventlog EventCode=5379 NOT Account_Name=SYSTEM Count_Of_Credentials_Returned>5\n| table _time, Account_Name, Target_Name, Count_Of_Credentials_Returned, host",
+          "notes": "Non-SYSTEM accounts reading more than 5 credentials from Credential Manager."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Credential Manager Credentials Read by Non-System Account",
+          "rule": "title: Credential Manager Credentials Read by Non-System Account\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 5379\n    filter_system:\n        SubjectUserName: 'SYSTEM'\n    condition: selection and not filter_system\nfalsepositives:\n    - Credential Manager UI usage by users\n    - Applications that enumerate stored credentials legitimately\nlevel: low",
+          "notes": "Low severity individually; correlate with process creation events to identify the reading process."
+        }
+      ],
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account reading credentials; SYSTEM is normal for credential manager operations, other accounts are suspicious"
+        },
+        {
+          "name": "TargetName",
+          "xpath": "EventData/Data[@Name='TargetName']",
+          "description": "Name of the credential being read; domain credentials, certificate credentials, or generic stored creds"
+        },
+        {
+          "name": "CountOfCredentialsReturned",
+          "xpath": "EventData/Data[@Name='CountOfCredentialsReturned']",
+          "description": "Number of credentials returned; bulk reads (>5) by non-SYSTEM processes suggest credential harvesting"
+        }
+      ]
     },
     {
       "id": 6272,

@@ -55,7 +55,7 @@
   "$defs": {
     "logEnum": {
       "type": "string",
-      "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Sysmon", "Firewall", "SMB", "NTLM", "CodeIntegrity", "AppLocker", "PrintSpooler", "GroupPolicy", "CAPI2", "DNSClient", "ActiveDirectoryDS", "DNSServer", "SecurityMitigations", "DHCPServer", "Netlogon", "BitLocker", "Other"]
+      "enum": ["Security", "System", "Application", "PowerShell", "TerminalServices", "WMI", "TaskScheduler", "BITS", "WindowsDefender", "DriverFrameworks", "WinRM", "Sysmon", "Firewall", "SMB", "NTLM", "CodeIntegrity", "AppLocker", "PrintSpooler", "GroupPolicy", "CAPI2", "DNSClient", "ActiveDirectoryDS", "DNSServer", "SecurityMitigations", "DHCPServer", "Netlogon", "BitLocker", "MSExchange", "IIS", "Other"]
     },
     "entry": {
       "type": "object",
@@ -198,6 +198,19 @@
             "maxVersion": { "type": "string" }
           },
           "additionalProperties": false
+        },
+        "keyFields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "description"],
+            "properties": {
+              "name": { "type": "string" },
+              "xpath": { "type": "string" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
         },
         "lastReviewed": { "type": "string", "format": "date" }
       },

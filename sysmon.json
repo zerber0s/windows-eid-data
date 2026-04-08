@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -1510,7 +1510,29 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "QueryName",
+          "xpath": "EventData/Data[@Name='QueryName']",
+          "description": "DNS name queried; the primary field for detecting C2 domains, DGA patterns, and suspicious resolution"
+        },
+        {
+          "name": "QueryResults",
+          "xpath": "EventData/Data[@Name='QueryResults']",
+          "description": "Resolved IP addresses; compare against threat intel feeds for known C2 infrastructure"
+        },
+        {
+          "name": "Image",
+          "xpath": "EventData/Data[@Name='Image']",
+          "description": "Full path of the process making the DNS query; unexpected processes (e.g., powershell.exe, mshta.exe) querying external names are suspicious"
+        },
+        {
+          "name": "ProcessId",
+          "xpath": "EventData/Data[@Name='ProcessId']",
+          "description": "Process ID making the query; correlate with Sysmon EID 1 (Process Create) to get the full process context"
+        }
+      ]
     },
     {
       "id": 23,
@@ -1711,7 +1733,49 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-03-30",
+      "keyFields": [
+        {
+          "name": "Image",
+          "xpath": "EventData/Data[@Name='Image']",
+          "description": "Path of the process that was tampered with; hollowed or herpaderped system processes are highest priority"
+        },
+        {
+          "name": "Type",
+          "xpath": "EventData/Data[@Name='Type']",
+          "description": "Tampering type: Herpaderp = image replacement on disk after mapping, Hollowing = process memory hollowed"
+        },
+        {
+          "name": "ProcessId",
+          "xpath": "EventData/Data[@Name='ProcessId']",
+          "description": "PID of the tampered process; correlate with EID 1 (Process Create) and EID 10 (Process Access) for full attack chain"
+        },
+        {
+          "name": "RuleName",
+          "xpath": "EventData/Data[@Name='RuleName']",
+          "description": "Sysmon rule that triggered this event; useful for identifying which process type was targeted"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Sysmon Process Tampering — Hollowing or Herpaderping",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 25\n| project TimeGenerated, Computer, UserName,\n    Image = extract(@'<Data Name=\"Image\">(.+?)</Data>', 1, EventData),\n    Type = extract(@'<Data Name=\"Type\">(.+?)</Data>', 1, EventData),\n    ProcessId = extract(@'<Data Name=\"ProcessId\">(.+?)</Data>', 1, EventData)\n| extend Severity = \"HIGH - Process tampering detected\"",
+          "notes": "Any EID 25 event should be treated as high confidence malicious activity. Process hollowing and Herpaderping are used to evade AV/EDR by running malicious code inside legitimate process images."
+        },
+        {
+          "platform": "Splunk",
+          "title": "Sysmon Process Tampering Detection",
+          "rule": "index=sysmon EventCode=25\n| eval severity=\"HIGH\"\n| table _time, Image, Type, ProcessId, host, severity",
+          "notes": "Zero-noise rule. Process tampering is not a benign operation — treat every event as an incident until proven otherwise."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Sysmon Process Tampering",
+          "rule": "title: Sysmon Process Tampering\nstatus: stable\nlogsource:\n    product: windows\n    service: sysmon\ndetection:\n    selection:\n        EventID: 25\ncondition: selection\nfalsepositives:\n    - None known in production environments\nlevel: critical",
+          "notes": "Requires Sysmon 13+ with ProcessTampering enabled in the Sysmon configuration. No false positives in practice."
+        }
+      ]
     },
     {
       "id": 26,

@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Domain Services",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/active-directory.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -483,7 +483,54 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that performed the access; non-DC machine accounts performing replication are DCSync indicators"
+        },
+        {
+          "name": "ObjectName",
+          "xpath": "EventData/Data[@Name='ObjectName']",
+          "description": "Distinguished name of the accessed object; domain root (DC=domain,DC=com) is the DCSync target"
+        },
+        {
+          "name": "Properties",
+          "xpath": "EventData/Data[@Name='Properties']",
+          "description": "GUIDs of accessed properties; 1131f6ad (DS-Replication-Get-Changes-All) = DCSync critical indicator"
+        },
+        {
+          "name": "AccessMask",
+          "xpath": "EventData/Data[@Name='AccessMask']",
+          "description": "Access rights requested; 0x100 (Control Access) is used in DCSync operations"
+        },
+        {
+          "name": "OperationType",
+          "xpath": "EventData/Data[@Name='OperationType']",
+          "description": "Type of operation performed on the object"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "DCSync — Replication Rights Accessed by Non-DC Account",
+          "rule": "SecurityEvent\n| where EventID == 4662\n| where AccessMask == \"0x100\"\n| where Properties has \"1131f6ad-9c07-11d1-f79f-00c04fc2dcd2\"\n    or Properties has \"1131f6aa-9c07-11d1-f79f-00c04fc2dcd2\"\n    or Properties has \"89e95b76-444d-4c62-991a-0facbeda640c\"\n| where SubjectUserName !endswith \"$\"\n| project TimeGenerated, SubjectUserName, SubjectDomainName, ObjectName, Properties, Computer",
+          "notes": "GUIDs: 1131f6ad = DS-Replication-Get-Changes-All, 1131f6aa = DS-Replication-Get-Changes, 89e95b76 = DS-Replication-Get-Changes-In-Filtered-Set. Non-machine-account subjects are high confidence DCSync."
+        },
+        {
+          "platform": "Splunk",
+          "title": "DCSync Detection via AD Object Access",
+          "rule": "index=wineventlog EventCode=4662 Access_Mask=0x100\n(Properties=\"*1131f6ad*\" OR Properties=\"*1131f6aa*\" OR Properties=\"*89e95b76*\")\nNOT Account_Name=\"*$\"\n| table _time, Account_Name, Object_Name, Properties, host",
+          "notes": "Identifies non-computer accounts accessing replication GUIDs on domain objects."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Active Directory DCSync Attack",
+          "rule": "title: Active Directory DCSync Attack\nstatus: stable\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4662\n        AccessMask: '0x100'\n        Properties|contains:\n            - '1131f6ad'\n            - '1131f6aa'\n            - '89e95b76'\n    filter_machine:\n        SubjectUserName|endswith: '$'\n    condition: selection and not filter_machine\nfalsepositives:\n    - Legitimate AD replication between domain controllers\nlevel: high",
+          "notes": "Well-established detection for Mimikatz dcsync and similar tools."
+        }
+      ]
     },
     {
       "id": 4706,
@@ -1224,7 +1271,49 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "DestinationDRA",
+          "xpath": "EventData/Data[@Name='DestinationDRA']",
+          "description": "Distinguished name of the destination DC; unexpected non-DC names indicate rogue replication"
+        },
+        {
+          "name": "NamingContext",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "Naming context being replicated (domain, configuration, schema); domain NC is most sensitive"
+        },
+        {
+          "name": "Options",
+          "xpath": "EventData/Data[@Name='Options']",
+          "description": "Replication options bitmask"
+        },
+        {
+          "name": "SessionOperation",
+          "xpath": "EventData/Data[@Name='SessionOperation']",
+          "description": "Operation type within the replication session"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Suspicious AD Replication Session — Non-DC Partner",
+          "rule": "SecurityEvent\n| where EventID == 4932\n| where DestinationDRA !contains \"CN=NTDS Settings\"\n| project TimeGenerated, DestinationDRA, NamingContext, Options, Computer",
+          "notes": "Legitimate replication partners have 'CN=NTDS Settings' in their DRA name. Any other value warrants investigation."
+        },
+        {
+          "platform": "Splunk",
+          "title": "AD Replication with Unexpected Partner",
+          "rule": "index=wineventlog EventCode=4932 NOT Destination_DRA=\"*CN=NTDS Settings*\"\n| table _time, Destination_DRA, Naming_Context, host",
+          "notes": "Alert on replication sessions initiated with non-standard DRA names."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Suspicious Active Directory Replication from Non-DC",
+          "rule": "title: Suspicious Active Directory Replication from Non-DC\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4932\n    filter_dc:\n        DestinationDRA|contains: 'CN=NTDS Settings'\n    condition: selection and not filter_dc\nfalsepositives:\n    - New DC promotion in progress\nlevel: high",
+          "notes": "Detects AD replication sessions from unexpected sources."
+        }
+      ]
     },
     {
       "id": 4933,
@@ -1289,7 +1378,49 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "DestinationDRA",
+          "xpath": "EventData/Data[@Name='DestinationDRA']",
+          "description": "Destination DC completing the sync; unexpected values indicate rogue replication partner"
+        },
+        {
+          "name": "NamingContext",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "Naming context that was synchronized"
+        },
+        {
+          "name": "AttributeCount",
+          "xpath": "EventData/Data[@Name='AttributeCount']",
+          "description": "Number of attributes synchronized; abnormally high counts may indicate bulk data exfiltration via replication"
+        },
+        {
+          "name": "SessionOperation",
+          "xpath": "EventData/Data[@Name='SessionOperation']",
+          "description": "Final operation type in the completed session"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "AD Replication Sync Completed with Unexpected Partner",
+          "rule": "SecurityEvent\n| where EventID == 4933\n| where DestinationDRA !contains \"CN=NTDS Settings\"\n| project TimeGenerated, DestinationDRA, NamingContext, AttributeCount, Computer",
+          "notes": "Complements EID 4932 — confirms a full replication cycle completed with a non-standard partner. Correlate with 4932."
+        },
+        {
+          "platform": "Splunk",
+          "title": "AD Sync Completion with Non-Standard Partner",
+          "rule": "index=wineventlog EventCode=4933 NOT Destination_DRA=\"*CN=NTDS Settings*\"\n| table _time, Destination_DRA, Naming_Context, Attribute_Count, host",
+          "notes": "Alert on completed sync sessions from unexpected partners."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Active Directory Replication Sync Completed by Non-DC",
+          "rule": "title: Active Directory Replication Sync Completed by Non-DC\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4933\n    filter_dc:\n        DestinationDRA|contains: 'CN=NTDS Settings'\n    condition: selection and not filter_dc\nfalsepositives:\n    - New DC promotion in progress\nlevel: high",
+          "notes": "Pair with EID 4932 detection for full replication cycle coverage."
+        }
+      ]
     },
     {
       "id": 5136,
@@ -1381,7 +1512,54 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that made the modification; unexpected accounts modifying privileged objects are high priority"
+        },
+        {
+          "name": "ObjectDN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "Distinguished name of the modified object; AdminSDHolder, privileged groups, and GPO objects are high-value targets"
+        },
+        {
+          "name": "AttributeLDAPDisplayName",
+          "xpath": "EventData/Data[@Name='AttributeLDAPDisplayName']",
+          "description": "LDAP attribute that was changed; member (group membership), userAccountControl, adminCount are critical"
+        },
+        {
+          "name": "AttributeValue",
+          "xpath": "EventData/Data[@Name='AttributeValue']",
+          "description": "New value set on the attribute; for member changes, shows the added/removed account DN"
+        },
+        {
+          "name": "OperationType",
+          "xpath": "EventData/Data[@Name='OperationType']",
+          "description": "%%14674 = Value Added, %%14675 = Value Deleted"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Privileged Group Membership or AdminSDHolder Modification",
+          "rule": "SecurityEvent\n| where EventID == 5136\n| where AttributeLDAPDisplayName in (\"member\", \"adminCount\", \"userAccountControl\", \"msDS-AllowedToDelegateTo\", \"servicePrincipalName\")\n| where ObjectDN has_any (\"CN=AdminSDHolder\", \"CN=Domain Admins\", \"CN=Enterprise Admins\", \"CN=Schema Admins\", \"CN=Administrators\")\n| project TimeGenerated, SubjectUserName, ObjectDN, AttributeLDAPDisplayName, AttributeValue, OperationType, Computer",
+          "notes": "Focus on high-value AD objects. Tune ObjectDN list to match your privileged group structure."
+        },
+        {
+          "platform": "Splunk",
+          "title": "AD Privileged Object Attribute Modified",
+          "rule": "index=wineventlog EventCode=5136\n(LDAP_Display_Name=member OR LDAP_Display_Name=adminCount OR LDAP_Display_Name=userAccountControl)\n(Object_DN=\"*CN=AdminSDHolder*\" OR Object_DN=\"*CN=Domain Admins*\" OR Object_DN=\"*CN=Enterprise Admins*\")\n| table _time, Account_Name, Object_DN, LDAP_Display_Name, Attribute_Value, host",
+          "notes": "Modification of privileged AD object attributes."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Privileged AD Object Modification",
+          "rule": "title: Privileged AD Object Modification\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 5136\n        AttributeLDAPDisplayName:\n            - 'member'\n            - 'adminCount'\n            - 'userAccountControl'\n            - 'msDS-AllowedToDelegateTo'\n    filter_objects:\n        ObjectDN|contains:\n            - 'CN=AdminSDHolder'\n            - 'CN=Domain Admins'\n            - 'CN=Enterprise Admins'\n            - 'CN=Schema Admins'\n    condition: selection and filter_objects\nfalsepositives:\n    - Routine user provisioning\n    - Scheduled admin tasks\nlevel: high",
+          "notes": "Tune object list to environment-specific privileged groups."
+        }
+      ]
     },
     {
       "id": 5137,
@@ -1468,7 +1646,24 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that created the object; unexpected accounts creating GPOs or user objects warrant investigation"
+        },
+        {
+          "name": "ObjectDN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "Distinguished name of the newly created object; creation in sensitive OUs is suspicious"
+        },
+        {
+          "name": "ObjectClass",
+          "xpath": "EventData/Data[@Name='ObjectClass']",
+          "description": "LDAP object class created; groupPolicyContainer (GPO), user, computer, group are common targets"
+        }
+      ]
     },
     {
       "id": 5138,
@@ -1681,7 +1876,24 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-07",
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that deleted the object; attacker may delete logs or cleanup created objects"
+        },
+        {
+          "name": "ObjectDN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "Distinguished name of the deleted object; deletion of GPOs or computer objects may indicate cleanup"
+        },
+        {
+          "name": "ObjectClass",
+          "xpath": "EventData/Data[@Name='ObjectClass']",
+          "description": "LDAP class of the deleted object"
+        }
+      ]
     }
   ]
 }
