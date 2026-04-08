@@ -1,0 +1,355 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - DPAPI",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dpapi.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4692,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Backup of the DPAPI Master Key was attempted",
+      "summary": "An attempt was made to back up the DPAPI Master Key.",
+      "details": "Generated when a DPAPI Master Key backup is attempted. DPAPI (Data Protection API) is used by Windows to encrypt sensitive data including saved browser credentials, Wi-Fi passwords, RDP saved credentials, and application secrets. Each user has a set of DPAPI Master Keys stored in their profile (AppData\\Roaming\\Microsoft\\Protect\\<SID>). Key fields: SubjectAccountName (who initiated the backup), SubjectLogonId (session), KeyIdentifier (GUID of the master key being backed up), BackupType (0=recovery agent backup, 1=domain backup via DC). Legitimate backups occur automatically when a new master key is created or when the domain controller performs a backup via DPAPI RPC. Adversarial use: `mimikatz dpapi::masterkey /rpc` forces a backup request to the DC and extracts the plaintext master key — this generates a 4692 event. SubjectAccountName backing up keys for a different user's SID (lateral path), or backup activity from unexpected processes/hosts, is suspicious.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit DPAPI Activity' under Advanced Audit Policy Configuration > Object Access. Disabled by default."
+        }
+      ],
+      "category": "DPAPI / Credential Protection",
+      "tags": [
+        "dpapi",
+        "master-key",
+        "backup",
+        "credential-access",
+        "mimikatz"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4693,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555",
+          "techniqueName": "Credentials from Password Stores",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1555.003",
+          "techniqueName": "Credentials from Password Stores: Credentials from Web Browsers",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1552.001",
+          "techniqueName": "Unsecured Credentials: Credentials In Files",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SubjectAccountName performing a backup for a KeyIdentifier belonging to a different user's profile (different SID path) indicates cross-user credential theft",
+          "Backup activity originating from an unusual process (check parent process via EID 4688) — legitimate DPAPI backups come from lsass.exe or the CryptProtectData API, not cmd.exe or PowerShell",
+          "Correlate with network connections (Sysmon EID 3) from the same host to a DC on port 135/RPC at the same time — mimikatz dpapi::masterkey /rpc initiates an RPC call to the DC",
+          "KeyIdentifier can be cross-referenced with the master key files in the user's Protect folder to identify which credentials are at risk"
+        ],
+        "commonFalsePositives": [
+          "Automatic domain backup of newly created master keys by the Windows DPAPI infrastructure — occurs periodically and is normal",
+          "Backup during account migration or profile restoration by authorized IT staff"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4692"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4693,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Recovery of the DPAPI Master Key was attempted",
+      "summary": "An attempt was made to recover the DPAPI Master Key.",
+      "details": "Generated when a DPAPI Master Key recovery is attempted. Recovery occurs when the local master key copy is unavailable (e.g., profile corruption, password reset) and the backup must be retrieved from the domain controller. Key fields: SubjectAccountName, KeyIdentifier (master key GUID), RecoveryServer (DC that performed the recovery), RecoveryKeyId (the recovery agent key used). Adversarial use: `mimikatz sekurlsa::dpapi` and `mimikatz dpapi::masterkey /rpc` trigger recovery requests; these generate 4693 events on the source machine. Recovery by an account that did not experience a legitimate password reset or profile loss is suspicious. Recovery of a master key belonging to a high-privilege account (Domain Admin, service account) from an unusual machine or at an unusual time is a high-priority investigation. Also generated by recovery agents (DRA) in PKI environments.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit DPAPI Activity' under Advanced Audit Policy Configuration > Object Access. Disabled by default."
+        }
+      ],
+      "category": "DPAPI / Credential Protection",
+      "tags": [
+        "dpapi",
+        "master-key",
+        "recovery",
+        "credential-access",
+        "mimikatz",
+        "sekurlsa"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4692,
+          "log": "Security"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555",
+          "techniqueName": "Credentials from Password Stores",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1555.003",
+          "techniqueName": "Credentials from Password Stores: Credentials from Web Browsers",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1003",
+          "techniqueName": "OS Credential Dumping",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "RecoveryServer identifies which DC processed the recovery — an unexpected DC or a DC in a different site than the user's normal location is anomalous",
+          "SubjectAccountName recovering keys for an account that has not recently had a password reset or profile issue is suspicious",
+          "Recovery of keys for privileged accounts (Domain Admins, service accounts with broad access) from non-standard workstations is highest priority",
+          "Correlate with Sysmon EID 10 (ProcessAccess) targeting lsass.exe in the same timeframe — Mimikatz operations often touch LSASS before or after DPAPI recovery"
+        ],
+        "commonFalsePositives": [
+          "Legitimate recovery after a user password reset that invalidates the existing master key",
+          "Data Recovery Agent (DRA) operations in environments with a configured DPAPI DRA as part of PKI policy",
+          "Profile restoration from backup where the master key backup must be recovered from the domain"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4693"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4694,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Protection of auditable protected data was attempted",
+      "summary": "An application attempted to encrypt data using DPAPI with auditing enabled on the data.",
+      "details": "Generated when CryptProtectData is called on data that was marked as auditable (using the CRYPTPROTECT_AUDIT flag). This is an application-level event — most DPAPI encryption operations do NOT generate this event unless the application explicitly opts into DPAPI auditing by setting the audit flag on the data. Key fields: SubjectAccountName, DataDescription (application-provided label for the protected data), ProcessName (which process called CryptProtectData). Applications that use auditable DPAPI include some credential managers, enterprise password vaults, and security-sensitive applications. In attack contexts, a malicious application masquerading as a legitimate one and calling CryptProtectData with audit flags may generate unexpected 4694 events for processes that should not be encrypting credentials. This event is rare in most environments — any unexpected source is worth investigating.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit DPAPI Activity' under Advanced Audit Policy Configuration > Object Access. Additionally, the application must call CryptProtectData with the CRYPTPROTECT_AUDIT flag."
+        }
+      ],
+      "category": "DPAPI / Credential Protection",
+      "tags": [
+        "dpapi",
+        "data-protection",
+        "encrypt",
+        "auditable-data"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4695,
+          "log": "Security"
+        },
+        {
+          "id": 4692,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555",
+          "techniqueName": "Credentials from Password Stores",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ProcessName that is not a known credential manager or enterprise application encrypting data is anomalous",
+          "DataDescription field (set by the calling application) may reveal what data type is being protected — unexpected descriptions from unexpected processes are suspicious",
+          "Correlate SubjectAccountName with session activity — encryption by a background process in a logged-off user's context is unusual"
+        ],
+        "commonFalsePositives": [
+          "Legitimate credential manager applications that explicitly use the CRYPTPROTECT_AUDIT flag for compliance purposes",
+          "Enterprise security applications that encrypt sensitive configuration data with auditing enabled"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4694"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4695,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Unprotection of auditable protected data was attempted",
+      "summary": "An application attempted to decrypt DPAPI-protected auditable data.",
+      "details": "The decryption counterpart to EID 4694 — generated when CryptUnprotectData is called on data that was originally protected with the CRYPTPROTECT_AUDIT flag. Key fields: SubjectAccountName, DataDescription (the label assigned when the data was originally encrypted), ProcessName. This event is more security-relevant than 4694 because decryption is the exfiltration step — an attacker who obtains DPAPI-protected credential blobs and can decrypt them (by recovering the master key first via 4692/4693) may trigger this event if the original encryption used the audit flag. The DataDescription field is particularly valuable: it may directly reveal what credential type is being decrypted (e.g., \"Windows Live\", \"IE/Edge credentials\", \"RDP password\"). ProcessName that is unexpected for the DataDescription type is a key pivot.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Enable 'Audit DPAPI Activity' under Advanced Audit Policy Configuration > Object Access. Additionally, the data must have been originally encrypted with the CRYPTPROTECT_AUDIT flag."
+        }
+      ],
+      "category": "DPAPI / Credential Protection",
+      "tags": [
+        "dpapi",
+        "data-unprotection",
+        "decrypt",
+        "auditable-data",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4694,
+          "log": "Security"
+        },
+        {
+          "id": 4693,
+          "log": "Security"
+        },
+        {
+          "id": 4692,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1555",
+          "techniqueName": "Credentials from Password Stores",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1555.003",
+          "techniqueName": "Credentials from Password Stores: Credentials from Web Browsers",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1552.001",
+          "techniqueName": "Unsecured Credentials: Credentials In Files",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "DataDescription containing credential-related strings (browser names, 'RDP', 'password', application names) being decrypted by an unexpected ProcessName is a high-confidence credential theft indicator",
+          "ProcessName that is powershell.exe, cmd.exe, or any non-browser/non-credential-manager process decrypting browser or application credentials is critical",
+          "SubjectAccountName decrypting credentials belonging to a different user's data (cross-user decryption) indicates lateral credential theft",
+          "Correlate with EID 4693 (master key recovery) in the same session — recovery followed immediately by decryption indicates active credential extraction"
+        ],
+        "commonFalsePositives": [
+          "Legitimate applications decrypting their own credential stores during normal startup or authentication flows",
+          "Enterprise credential managers performing routine decryption for password autofill"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4695"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    }
+  ]
+}

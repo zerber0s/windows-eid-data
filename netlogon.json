@@ -1,0 +1,465 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Netlogon",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/netlogon.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 5805,
+      "log": "Netlogon",
+      "provider": "Microsoft-Windows-Netlogon",
+      "channel": "Microsoft-Windows-Netlogon/Operational",
+      "level": "AuditFailure",
+      "title": "Session setup from computer failed to authenticate",
+      "summary": "A computer account failed to authenticate to the domain during session setup.",
+      "details": "Generated when a computer account fails to establish an authenticated session with the domain controller via the Netlogon service. Key fields: ComputerName (the machine that failed to authenticate) and the failure reason. Common causes: the computer's machine account password has drifted (machine account password is older than the DC's copy), the computer was rejoined to the domain without the DC being notified, or the computer account was deleted/disabled. In attack contexts, this can indicate an attacker testing machine accounts with incorrect passwords (reconnaissance), or a rogue machine trying to authenticate with a mismatched computer account. DC-only event.",
+      "category": "Netlogon / Secure Channel",
+      "tags": [
+        "netlogon",
+        "machine-auth",
+        "secure-channel",
+        "authentication-failure"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5823,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5827,
+          "log": "Netlogon"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078.002",
+          "techniqueName": "Valid Accounts: Domain Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ComputerName that is not in the known machine inventory may indicate an unauthorized or rogue machine attempting domain authentication",
+          "Repeated failures from the same ComputerName after attempts to reset the machine account password indicate a persistent secure channel issue that should be remediated",
+          "Burst of 5805 events from many different ComputerName values in a short window may indicate automated machine account password spraying or reconnaissance"
+        ],
+        "commonFalsePositives": [
+          "Decommissioned machines whose computer accounts remain in AD but whose machine account passwords have drifted beyond the maximum age",
+          "Virtual machines restored from old snapshots that have a stale machine account password"
+        ]
+      },
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Netlogon operational log is not enabled by default on all Windows versions. Enable via: wevtutil sl Microsoft-Windows-Netlogon/Operational /e:true"
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5805"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 5823,
+      "log": "Netlogon",
+      "provider": "Microsoft-Windows-Netlogon",
+      "channel": "Microsoft-Windows-Netlogon/Operational",
+      "level": "Warning",
+      "title": "The system attempted to establish a Netlogon secure channel but failed",
+      "summary": "The Netlogon service failed to establish a secure channel to a domain controller.",
+      "details": "Generated when the Netlogon service on a domain member (workstation, server, or DC) cannot establish a secure channel to a domain controller. Key fields: machine name and the reason for failure. Secure channel failures can indicate network connectivity issues, DC unavailability, or machine account problems. In attack contexts, this can be a pre-Zerologon indicator: early CVE-2020-1472 exploitation attempts that do not fully succeed may produce secure channel failures. Also generated when an attacker is attempting to manipulate the Netlogon secure channel negotiation. Correlate with 5827/5829 on the target DC for definitive Zerologon indicators. DC-side event.",
+      "category": "Netlogon / Secure Channel",
+      "tags": [
+        "netlogon",
+        "secure-channel",
+        "authentication-failure",
+        "domain-trust"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5805,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5827,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5828,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5829,
+          "log": "Netlogon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1210",
+          "techniqueName": "Exploitation of Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate timing with EID 5827/5828 on nearby DCs — secure channel failures immediately preceding Zerologon block events are a strong exploitation indicator",
+          "Source machine that does not have a corresponding active computer account in AD is suspicious",
+          "Failure reason indicating authentication errors (rather than network errors) warrants deeper investigation"
+        ],
+        "commonFalsePositives": [
+          "Network connectivity issues between domain members and DCs during maintenance windows or network outages",
+          "Machine account password drift on rarely-used or isolated machines"
+        ]
+      },
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Netlogon operational log may not be enabled by default. Enable via: wevtutil sl Microsoft-Windows-Netlogon/Operational /e:true"
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5823"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 5827,
+      "log": "Netlogon",
+      "provider": "Microsoft-Windows-Netlogon",
+      "channel": "Microsoft-Windows-Netlogon/Operational",
+      "level": "Error",
+      "title": "Netlogon denied a vulnerable Netlogon secure channel connection from a machine account",
+      "summary": "The Netlogon service blocked a vulnerable secure channel connection attempt — Zerologon exploitation attempt detected.",
+      "details": "Generated on domain controllers when the Netlogon service denies a connection that used the vulnerable Netlogon secure channel established by CVE-2020-1472 (Zerologon). This event was added by Microsoft's patch for Zerologon (KB4557222) and fires when the DC detects and blocks a connection using the vulnerable authentication protocol. Key fields: ComputerName (the machine attempting the connection — may be the attacker's machine or a spoofed machine account name). This is a high-confidence Zerologon exploitation attempt indicator — this event should never appear in a healthy environment. The complement is EID 5829, which fires when the DC allows a similarly vulnerable connection (indicating enforcement mode is not active). Requires DC to be patched with the Zerologon fix and running in enforcement mode (deployment phase 2 of the Zerologon patch). DC-only event.",
+      "category": "Zerologon / Netlogon",
+      "tags": [
+        "netlogon",
+        "zerologon",
+        "cve-2020-1472",
+        "secure-channel",
+        "exploitation-attempt",
+        "domain-controller"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5828,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5829,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5823,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5805,
+          "log": "Netlogon"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any occurrence of this event is a critical alert — treat as an active Zerologon exploitation attempt and investigate ComputerName immediately",
+          "ComputerName that does not match a known machine account in AD indicates a spoofed or attacker-controlled machine name",
+          "Correlate source IP of the connection with network logs and DHCP/ARP to identify the actual attacking machine",
+          "Check for subsequent password change events (EID 4723, 4724) on the domain or krbtgt account — successful Zerologon results in machine account password being set to empty",
+          "Presence of 5827 without 5829 confirms enforcement mode is active and the attack was blocked"
+        ],
+        "commonFalsePositives": [
+          "No known legitimate false positives — this event only fires for connections using the vulnerable Netlogon protocol variant",
+          "Old or unpatched member machines using legacy Netlogon implementations may trigger this if enforcement mode catches their normal authentication"
+        ]
+      },
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "DC must be patched with the Zerologon fix (KB4557222 or later cumulative update) and in enforcement mode (set HKLM\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\FullSecureChannelProtection = 1)."
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5827"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 5828,
+      "log": "Netlogon",
+      "provider": "Microsoft-Windows-Netlogon",
+      "channel": "Microsoft-Windows-Netlogon/Operational",
+      "level": "Error",
+      "title": "Netlogon denied a vulnerable Netlogon secure channel connection using a trust account",
+      "summary": "The Netlogon service blocked a vulnerable secure channel connection via a trust account — Zerologon variant detected.",
+      "details": "Closely related to EID 5827, this variant fires when the blocked vulnerable Netlogon connection used a trust account rather than a machine account. Trust accounts represent inter-domain trust relationships — a Zerologon attack targeting a trust account could allow an attacker to compromise a domain trust and gain cross-domain access. Key fields: AccountName (the trust account targeted), source IP or machine context. The same severity and investigation approach as 5827 applies, with the additional dimension that trust accounts control domain boundary security. DC-only event. Requires the same Zerologon patch as 5827.",
+      "category": "Zerologon / Netlogon",
+      "tags": [
+        "netlogon",
+        "zerologon",
+        "cve-2020-1472",
+        "secure-channel",
+        "trust-account",
+        "exploitation-attempt"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5827,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5829,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5823,
+          "log": "Netlogon"
+        },
+        {
+          "id": 4706,
+          "log": "Security"
+        },
+        {
+          "id": 4716,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1484.002",
+          "techniqueName": "Domain Policy Modification: Trust Modification",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any occurrence is a critical alert — a Zerologon attempt against a trust account targets the domain trust boundary, enabling cross-domain privilege escalation",
+          "AccountName reveals which trust relationship was targeted — investigate the source and destination domains of that trust",
+          "Correlate with EID 4706/4716 (trust creation/modification) to determine if the attacker has already tampered with the targeted trust",
+          "Presence alongside EID 5827 events indicates a sophisticated attacker targeting both machine and trust accounts"
+        ],
+        "commonFalsePositives": [
+          "No known legitimate false positives for the vulnerable protocol variant"
+        ]
+      },
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "DC must be patched with the Zerologon fix (KB4557222 or later) and operating in enforcement mode."
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5828"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 5829,
+      "log": "Netlogon",
+      "provider": "Microsoft-Windows-Netlogon",
+      "channel": "Microsoft-Windows-Netlogon/Operational",
+      "level": "Warning",
+      "title": "Netlogon allowed a vulnerable Netlogon secure channel connection",
+      "summary": "The Netlogon service allowed a connection using the vulnerable Netlogon protocol — enforcement mode is not fully active.",
+      "details": "Generated on domain controllers when a connection using the vulnerable Netlogon secure channel protocol (the same one exploited by CVE-2020-1472 / Zerologon) was allowed rather than blocked. This event fires during the compatibility phase of the Zerologon patch, where enforcement mode has not yet been enabled (FullSecureChannelProtection = 0) and the DC logs the vulnerable connection without blocking it. This event is critical because it indicates: (1) the DC is not fully protected against Zerologon, and (2) a potentially active Zerologon exploitation attempt was allowed to proceed. In a fully patched, enforcement-mode DC, this event should not appear — its presence means either enforcement mode is disabled or a legacy device is using the vulnerable protocol. Key fields: ComputerName (the machine allowed to connect using the vulnerable channel). DC-only event.",
+      "category": "Zerologon / Netlogon",
+      "tags": [
+        "netlogon",
+        "zerologon",
+        "cve-2020-1472",
+        "secure-channel",
+        "allowed-vulnerable",
+        "domain-controller"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5827,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5828,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5823,
+          "log": "Netlogon"
+        },
+        {
+          "id": 5805,
+          "log": "Netlogon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any occurrence of this event means the DC accepted a Zerologon-vulnerable connection — treat as a potential active exploitation even if 5827 is not also present",
+          "Immediately check whether enforcement mode is enabled (HKLM\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\FullSecureChannelProtection) — if 0, enable it after verifying legacy device compatibility",
+          "ComputerName should be investigated — if it is not a known legacy device with a documented compatibility exception, treat as an attacker",
+          "Audit for downstream impact: check for machine account password resets (EID 4723/4724) and unexpected domain admin logons in the timeframe following this event"
+        ],
+        "commonFalsePositives": [
+          "Legacy devices (older printers, embedded systems, older NAS devices) that use the vulnerable Netlogon protocol for compatibility reasons and have been explicitly allowed",
+          "Compatibility mode enabled intentionally during the patching transition period"
+        ]
+      },
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Fired when FullSecureChannelProtection = 0 (compatibility mode). To block instead of allow, set HKLM\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\FullSecureChannelProtection = 1 after verifying legacy device compatibility."
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5829"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    }
+  ]
+}

@@ -1,0 +1,443 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Kerberos",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/kerberos.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4768,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A Kerberos authentication ticket (TGT) was requested",
+      "summary": "A Kerberos TGT was requested from the Key Distribution Center (KDC).",
+      "details": "DC-only event generated whenever a Kerberos Authentication Service Request (AS-REQ) is processed by the KDC. Key fields: TargetUserName (the account requesting the ticket), TicketEncryptionType (0x12=AES256, 0x11=AES128, 0x17=RC4, 0x18=DES — RC4 or DES indicates a downgrade), IpAddress (the requesting host), TicketOptions (bitmask of requested ticket flags), ResultCode (0x0=success, 0x6=username does not exist, 0x12=account disabled/locked/expired, 0x18=wrong password). AS-REP roasting: when an account has pre-authentication disabled (DONT_REQ_PREAUTH), an attacker can request a TGT without knowing the password and receive an encrypted blob to crack offline — these appear as successful 4768 events without a preceding pre-auth exchange, and no corresponding 4771 failure will be generated. Golden Ticket abuse: forged TGTs may appear with unusual TicketOptions or encryption types inconsistent with domain policy. IpAddresses that are not domain-joined machines requesting TGTs for privileged accounts are anomalous. This event also fires as AuditFailure for failed TGT requests.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "tgt",
+        "as-req",
+        "golden-ticket",
+        "as-rep-roasting",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        },
+        {
+          "id": 4770,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.004",
+          "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TicketEncryptionType 0x17 (RC4-HMAC) when the environment enforces AES indicates a downgrade attack or legacy client",
+          "Successful TGT for an account that has pre-auth disabled (check msDS-SupportedEncryptionTypes or DONT_REQ_PREAUTH flag) without a corresponding 4771 failure is an AS-REP roasting indicator",
+          "IpAddress that is not domain-joined, a DC, or a known privileged admin workstation requesting TGTs for sensitive accounts is anomalous",
+          "TicketOptions 0x40810010 (forwardable+renewable+canonicalize) is normal; unusual combinations may indicate Golden Ticket usage",
+          "High volume of 4768 events for the same TargetUserName from many different IpAddresses may indicate credential stuffing or distributed brute force"
+        ],
+        "commonFalsePositives": [
+          "Normal Kerberos authentication for all domain users — extremely high volume on DCs",
+          "Legacy systems genuinely requiring RC4 (TicketEncryptionType 0x17) due to application compatibility",
+          "Kerberos authentication from non-domain-joined Linux/Mac machines that support Kerberos"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4768"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4769,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A Kerberos service ticket was requested",
+      "summary": "A Kerberos TGS service ticket was requested from the KDC.",
+      "details": "DC-only event generated whenever a Kerberos Ticket Granting Service Request (TGS-REQ) is processed by the KDC. Key fields: ServiceName (the SPN being requested — e.g., MSSQLSvc/server.domain.com), TicketEncryptionType (0x17=RC4 is the primary Kerberoasting indicator), IpAddress (the requesting host), TicketOptions (bitmask), ResultCode. Kerberoasting: an attacker requests TGS tickets for SPN-bearing service accounts using RC4 encryption (0x17), receives an encrypted blob hashed with the service account password, and cracks it offline. Detection indicators include bulk 4769 events for multiple SPNs from one source, or a single 4769 with RC4 for a high-privilege SPN. Silver Ticket: forged service tickets do not hit the KDC at all and therefore do not generate 4769 events — the absence of a 4769 for a targeted service while that service is being accessed is itself an indicator. RODC key compromise may be indicated by 4769 events for sensitive accounts originating from RODCs.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "tgs",
+        "tgs-req",
+        "kerberoasting",
+        "silver-ticket",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        },
+        {
+          "id": 4770,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558.003",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Kerberoasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.002",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Silver Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TicketEncryptionType 0x17 (RC4) for a ServiceName associated with a high-privilege service account (Domain Admin service account, SQL SA) is the primary Kerberoasting indicator",
+          "Multiple 4769 events in rapid succession from one IpAddress targeting different SPNs indicates automated Kerberoasting (Rubeus, Impacket GetUserSPNs)",
+          "ServiceName for krbtgt with RC4 encryption is a Golden Ticket usage indicator",
+          "4769 with failure code 0x20 (expired ticket) is routine and not indicative of attack",
+          "IpAddress cross-referenced with EID 4768 for the same source — legitimate users request TGT first, then TGS; missing TGT may indicate pass-the-ticket"
+        ],
+        "commonFalsePositives": [
+          "High-volume TGS requests are normal for any authenticated user accessing network services",
+          "RC4 TGS requests from legacy applications or non-Windows clients that do not support AES",
+          "Service accounts with SPNs legitimately authenticating between services"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4769"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4770,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A Kerberos service ticket was renewed",
+      "summary": "A Kerberos service ticket was renewed by the KDC.",
+      "details": "DC-only event generated when a Kerberos service ticket is renewed before it expires. Key fields: ServiceName (the SPN for the renewed ticket), TicketEncryptionType, IpAddress. Ticket renewals are expected for long-running sessions such as RDP sessions, database connections, and print server connections. Adversaries using pass-the-ticket or overpass-the-hash may trigger anomalous renewals — a ticket being renewed from a different IpAddress than the original TGS request (EID 4769), or renewal of a high-privilege service ticket long after the associated logon session should have ended, are investigation pivots. Renewal of a krbtgt ticket, which should not normally occur, may indicate Golden Ticket abuse with an extended MaxRenewAge setting; cross-reference EID 4713 for Kerberos policy changes.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "ticket-renewal",
+        "pass-the-ticket",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4713,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Renewal IpAddress differing from the original 4769 TGS request IpAddress may indicate ticket theft and use from a different host",
+          "Renewal of tickets for highly privileged service accounts (Domain Admins, Exchange, backup services) outside business hours is anomalous",
+          "Renewal of krbtgt service tickets should not occur in normal operations — investigate immediately",
+          "Correlate ticket lifetime against domain Kerberos policy (EID 4713) — unusually long renewal windows may have been set by an attacker to extend Golden Ticket validity"
+        ],
+        "commonFalsePositives": [
+          "Long-running legitimate sessions (RDP, database, file server connections) that renew tickets before expiry",
+          "Service accounts with persistent connections (scheduled jobs, monitoring agents) renewing tickets automatically"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4770"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4771,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "Kerberos pre-authentication failed",
+      "summary": "A Kerberos pre-authentication request failed at the KDC.",
+      "details": "DC-only event generated when the KDC fails to issue a TGT during pre-authentication. Key fields: TargetUserName (the account for which pre-auth failed), IpAddress (the client), FailureCode. Important failure codes: 0x17 (password expired), 0x18 (wrong password — brute force or spray indicator), 0x10 (certificate or smart card error), 0x12 (account disabled, locked, or expired), 0x25 (clock skew too large — Kerberos requires clocks within 5 minutes), 0x6 (client not found — username enumeration indicator). Important caveat: if an account has pre-authentication disabled (DONT_REQ_PREAUTH), authentication failures are NOT captured by this event — they appear as successes in EID 4768 and require offline cracking (AS-REP roasting). This event only fires for Kerberos authentication failures, not NTLM; failed NTLM authentications are recorded in EID 4625.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "pre-auth-failure",
+        "brute-force",
+        "password-spray",
+        "as-rep-roasting",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558.004",
+          "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110.003",
+          "techniqueName": "Brute Force: Password Spraying",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110.001",
+          "techniqueName": "Brute Force: Password Guessing",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FailureCode 0x18 (wrong password) across many different TargetUserName values from one IpAddress in a short window indicates a password spray attack",
+          "FailureCode 0x18 repeatedly against a single TargetUserName from one or few IpAddresses indicates brute force",
+          "FailureCode 0x6 (client not found) in volume from one source indicates username enumeration",
+          "FailureCode 0x12 immediately after high-volume 0x18 failures for the same account indicates account lockout confirming brute force",
+          "IpAddress that is external, from an unusual network segment, or a known-bad IP range elevates all failure codes to critical"
+        ],
+        "commonFalsePositives": [
+          "Users with genuinely expired or forgotten passwords generating isolated 0x17 or 0x18 failures",
+          "Smart card or certificate configuration issues generating 0x10 failures",
+          "Time synchronization issues between clients and DCs generating 0x25 failures"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4771"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4773,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "A Kerberos service ticket request failed",
+      "summary": "A Kerberos TGS service ticket request failed at the KDC.",
+      "details": "DC-only event generated when a TGS request fails — the client submitted a valid TGT but the service ticket request itself was rejected by the KDC. Key fields: ServiceName (the SPN that was requested), IpAddress (the requesting client), FailureCode. Common failure codes: 0x7 (server not found — the SPN does not exist, the primary indicator for SPN enumeration and scanning), 0x3d (inappropriate field in message), 0x32 (KDC cannot accommodate requested option). FailureCode 0x7 at volume from one source is the principal SPN enumeration indicator: tools such as Rubeus, Impacket, and PowerView enumerate all SPNs by requesting TGS tickets for each one, generating a burst of 4773 events with 0x7 for non-existent SPNs. Legitimate users rarely encounter 0x7 failures organically. This event is a useful precursor signal for Kerberoasting — SPN enumeration typically precedes targeted TGS requests against discovered service accounts.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "tgs-failure",
+        "spn-enumeration",
+        "reconnaissance"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1558.003",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Kerberoasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1087.002",
+          "techniqueName": "Account Discovery: Domain Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Multiple 4773 events with FailureCode 0x7 from the same IpAddress in rapid succession indicates automated SPN enumeration (precursor to Kerberoasting)",
+          "ServiceName values that follow sequential or alphabetical patterns suggest scripted enumeration rather than organic user activity",
+          "IpAddress correlating with recent BloodHound/SharpHound LDAP queries (EID 1644 on DCs) indicates a full AD reconnaissance session in progress",
+          "Single 4773 with 0x7 for a high-privilege SPN (krbtgt, administrator) from an unexpected host warrants investigation"
+        ],
+        "commonFalsePositives": [
+          "Applications with misconfigured or stale SPN references failing to authenticate to their target services",
+          "Service accounts referencing decommissioned services that no longer have registered SPNs"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4773"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    }
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - BitLocker",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-07T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bitlocker.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 770,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Information",
+      "title": "BitLocker Drive Encryption was enabled on a volume",
+      "summary": "BitLocker Drive Encryption was enabled on a volume.",
+      "details": "Generated when BitLocker Drive Encryption is successfully enabled on a drive volume. Key fields: VolumeName (the drive letter or volume label being encrypted), VolumeType (operating system drive, fixed data drive, or removable). In a well-managed enterprise, BitLocker enablement is a deliberate IT action — enablement on endpoints not in the standard BitLocker deployment list is anomalous. In ransomware scenarios, some ransomware strains (notably Ryuk and its successors) use BitLocker as the encryption engine, enabling it on all volumes to leverage Windows' own trusted encryption. Enablement of BitLocker on a large number of machines in a short window is a strong ransomware detonation indicator. Also used by attackers who have admin access to lock out legitimate users from their own data.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "encryption-enabled",
+        "drive-encryption",
+        "ransomware",
+        "impact"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 771,
+          "log": "BitLocker"
+        },
+        {
+          "id": 776,
+          "log": "BitLocker"
+        },
+        {
+          "id": 4719,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Enablement on multiple machines in a short window (many EID 770 events across hosts) is a ransomware detonation signature",
+          "Enablement outside change management windows or by non-standard accounts (check SubjectAccountName) should be investigated",
+          "VolumeType indicating data drives on servers (especially backup servers or file servers) is highest priority",
+          "Correlate with EID 524 (Volume Shadow Copy deletion) and Windows Event 7036 for Volume Shadow Copy Service stopping — these are common ransomware preparation steps preceding BitLocker enablement"
+        ],
+        "commonFalsePositives": [
+          "Authorized BitLocker deployment by IT/security teams as part of endpoint hardening",
+          "New machine provisioning with BitLocker enabled during device setup"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 771,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Information",
+      "title": "BitLocker Drive Encryption was disabled on a volume",
+      "summary": "BitLocker Drive Encryption was disabled on a volume.",
+      "details": "Generated when BitLocker is fully disabled and the volume is decrypted. Key fields: VolumeName, VolumeType. BitLocker disablement is a high-severity event in enterprise environments — it reduces the data protection posture of the affected machine. In ransomware pre-staging contexts, adversaries may disable BitLocker on volumes before deploying their own ransomware payload to avoid performance degradation from double-encryption (encrypting already-encrypted data). The pattern of BitLocker disable followed by ransomware encryption is documented in Ryuk, Conti, and LockBit ransomware campaigns. Any BitLocker disablement without a corresponding authorized IT change ticket should be escalated. OS drive disablement is especially critical as it may indicate preparation for full disk encryption by ransomware or an attacker clearing BitLocker protectors to prevent recovery.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "encryption-disabled",
+        "ransomware",
+        "defense-evasion",
+        "impact"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 770,
+          "log": "BitLocker"
+        },
+        {
+          "id": 773,
+          "log": "BitLocker"
+        },
+        {
+          "id": 776,
+          "log": "BitLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any disablement event outside a documented change management action should be treated as critical",
+          "Disablement followed within minutes by high disk I/O or new suspicious processes is a ransomware pre-staging indicator — pull EDR telemetry immediately",
+          "Disablement on backup servers or file servers is highest priority — these are primary ransomware targets",
+          "Correlate with EID 773 (key protector removed) — attackers sometimes remove protectors rather than fully disabling to accomplish the same goal with less noise"
+        ],
+        "commonFalsePositives": [
+          "Authorized decryption for hardware refresh, disk replacement, or before decommissioning a machine",
+          "BitLocker management tooling decrypting volumes as part of a policy change"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 773,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Information",
+      "title": "A BitLocker key protector was removed from a volume",
+      "summary": "A BitLocker key protector (TPM, password, or recovery key) was removed from an encrypted volume.",
+      "details": "Generated when a key protector is removed from a BitLocker-encrypted volume. BitLocker volumes can have multiple key protectors: TPM, TPM+PIN, password, recovery password (numerical key), and recovery key file. Key fields: VolumeName, KeyProtectorType (identifies which protector was removed). Removing all key protectors from a volume effectively makes it inaccessible after the next reboot (since there is no way to unlock it). Attackers may remove key protectors from critical volumes — particularly the OS drive — to render a machine unbootable or to prevent recovery, as part of a destructive or ransomware attack. Removing recovery keys specifically prevents IT from recovering encrypted data if the primary protector fails. Correlate with EID 774 to detect failed AD recovery key backup (indicating an attacker may have also blocked backup to AD).",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "key-protector",
+        "tpm",
+        "recovery-key",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 771,
+          "log": "BitLocker"
+        },
+        {
+          "id": 774,
+          "log": "BitLocker"
+        },
+        {
+          "id": 775,
+          "log": "BitLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Removal of all protectors from a volume (multiple 773 events for the same volume in sequence) renders the volume permanently inaccessible after reboot — critical alert",
+          "KeyProtectorType = recovery password or recovery key removal specifically targets disaster recovery capability",
+          "OS drive protector removal is highest severity — it will prevent the machine from booting after next reboot",
+          "Correlate with EID 774 (backup failure) — an attacker may remove protectors AND ensure AD backup fails to prevent recovery from domain-stored keys"
+        ],
+        "commonFalsePositives": [
+          "IT removing the recovery password protector before re-keying and adding a new one as part of key rotation policy",
+          "BitLocker management software removing and re-adding protectors during policy enforcement"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 774,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Warning",
+      "title": "BitLocker Drive Encryption failed to back up recovery information to Active Directory",
+      "summary": "BitLocker failed to back up recovery information to Active Directory.",
+      "details": "Generated when BitLocker attempts to back up recovery keys or TPM owner information to Active Directory and fails. Key fields: VolumeName, reason for failure. In well-managed environments with the GPO \"Do not enable BitLocker until recovery information is stored to AD DS\" configured, this failure would block BitLocker enablement. In environments without this strict policy, the failure is logged but BitLocker proceeds. Security implications: (1) the absence of a domain-stored recovery key leaves no domain-side recovery path if the primary protector fails; (2) in attack contexts, an attacker who has disrupted AD connectivity (e.g., disabled network access to DCs) may trigger this event while enabling their own encryption to ensure IT cannot recover data using domain-stored keys. Correlate with network connectivity events and DC availability around the same timeframe.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "recovery-key",
+        "ad-backup",
+        "backup-failure"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 775,
+          "log": "BitLocker"
+        },
+        {
+          "id": 770,
+          "log": "BitLocker"
+        },
+        {
+          "id": 773,
+          "log": "BitLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "774 events coinciding with 770 (BitLocker enabled) during an attack timeline indicate an attacker enabling encryption while ensuring no AD recovery path exists",
+          "Check DC reachability from the affected machine at the time of the event — deliberate network isolation is a ransomware pre-staging technique",
+          "Verify whether the GPO requiring AD backup before enablement is configured — if yes, BitLocker should not have been enabled; if it was, investigate how the policy was bypassed"
+        ],
+        "commonFalsePositives": [
+          "Domain-joined machines that are temporarily off-network (VPN not connected, laptop in transit) when BitLocker attempts AD backup during setup",
+          "AD replication delays or DC unavailability causing transient backup failures that self-resolve"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 775,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Information",
+      "title": "BitLocker Drive Encryption successfully backed up recovery information to Active Directory",
+      "summary": "BitLocker successfully backed up recovery information to Active Directory.",
+      "details": "Generated when BitLocker successfully stores recovery key or TPM owner information in Active Directory. Key fields: VolumeName. While generally a positive event (recovery information is now protected in AD), it also means the recovery key is now stored in AD and accessible to anyone with appropriate AD read permissions. In attack contexts, adversaries with access to Active Directory (e.g., via DCSync or Domain Admin compromise) can read BitLocker recovery keys stored in AD using Get-BitLockerVolume or direct AD queries against the msFVE-RecoveryInformation object class. A new 775 event followed by a query of the corresponding msFVE-RecoveryInformation object in AD (EID 4662 with the msFVE-RecoveryInformation object class) may indicate an attacker reading recovery keys to later decrypt or access encrypted volumes.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "recovery-key",
+        "ad-backup",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 774,
+          "log": "BitLocker"
+        },
+        {
+          "id": 770,
+          "log": "BitLocker"
+        },
+        {
+          "id": 4662,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1552",
+          "techniqueName": "Unsecured Credentials",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1555",
+          "techniqueName": "Credentials from Password Stores",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4662 (DS object access) on domain controllers for msFVE-RecoveryInformation object reads — attackers querying BitLocker recovery keys from AD will generate these events",
+          "New 775 events for machines that have been encrypted for a long time (not new enrollments) may indicate an attacker forcing a new key backup after modifying the key",
+          "Bulk 775 events across many machines in a short window may indicate BitLocker management tooling performing mass re-keying, or an attacker forcing recovery key rotation"
+        ],
+        "commonFalsePositives": [
+          "Normal BitLocker deployment — this event is expected during initial BitLocker setup on domain-joined machines",
+          "Periodic key rotation as part of BitLocker management policy"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 776,
+      "log": "BitLocker",
+      "provider": "Microsoft-Windows-BitLocker-API",
+      "channel": "Microsoft-Windows-BitLocker/BitLocker Management",
+      "level": "Information",
+      "title": "BitLocker Drive Encryption was suspended on a volume",
+      "summary": "BitLocker Drive Encryption was suspended on a volume.",
+      "details": "Generated when BitLocker is suspended on an encrypted volume. Suspension differs from disablement: suspended BitLocker leaves the volume data intact and encrypted, but stores the volume encryption key (FVEK) in the clear on disk (unprotected by key protectors), allowing the volume to be accessed without authentication. This is typically used by IT for firmware/BIOS updates that require temporary BitLocker suspension. Security implications: a suspended BitLocker volume is effectively unprotected — the encryption key is stored openly and the data is accessible without the TPM or recovery key. In attack scenarios, suspension (rather than full disablement) is a subtler approach that achieves the same goal of bypassing encryption while potentially evading monitoring that specifically looks for full disablement (EID 771). Ransomware pre-staging using suspension: attacker suspends BitLocker, deploys ransomware, ransomware reads and encrypts the now-accessible data or forces a reboot that clears the suspended state.",
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The BitLocker Management operational log is not enabled by default. Enable via: wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q",
+          "command": "wevtutil sl \"Microsoft-Windows-BitLocker/BitLocker Management\" /e:true /q"
+        }
+      ],
+      "category": "BitLocker / Drive Encryption",
+      "tags": [
+        "bitlocker",
+        "encryption-suspended",
+        "ransomware",
+        "defense-evasion",
+        "impact"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 771,
+          "log": "BitLocker"
+        },
+        {
+          "id": 770,
+          "log": "BitLocker"
+        },
+        {
+          "id": 773,
+          "log": "BitLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Suspension outside a documented firmware update or IT maintenance window should be treated as suspicious",
+          "Suspension on servers (especially file/backup servers) rather than workstations during update windows is anomalous",
+          "Suspension followed by high disk I/O or new process activity (EDR telemetry) within minutes indicates ransomware or data exfiltration leveraging the unprotected state",
+          "Check whether suspension was followed by a reboot (which would re-enable protection) or whether it persists — persistent suspension is higher severity"
+        ],
+        "commonFalsePositives": [
+          "Authorized suspension during BIOS/UEFI firmware updates that require BitLocker to be suspended to avoid recovery mode on next boot",
+          "IT management tooling temporarily suspending BitLocker during Windows feature updates on managed endpoints"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-07"
+    }
+  ]
+}
