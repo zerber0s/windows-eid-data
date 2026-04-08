@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
