@@ -181,7 +181,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "VolumeName",
@@ -213,7 +212,8 @@
           "rule": "title: BitLocker Drive Encryption Disabled\nstatus: stable\nlogsource:\n    product: windows\n    service: bitlocker\ndetection:\n    selection:\n        EventID: 771\ncondition: selection\nfalsepositives:\n    - Authorized BitLocker management during change windows\n    - Drive decommissioning procedures\nlevel: high",
           "notes": "Zero-noise rule in environments with BitLocker policy enforced. Any occurrence outside change management should page the incident response team."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 773,
@@ -527,7 +527,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "VolumeName",
@@ -559,7 +558,8 @@
           "rule": "title: BitLocker Drive Encryption Suspended\nstatus: stable\nlogsource:\n    product: windows\n    service: bitlocker\ndetection:\n    selection:\n        EventID: 776\ncondition: selection\nfalsepositives:\n    - Authorized BitLocker management (BIOS updates, TPM operations)\n    - IT administrative operations\nlevel: high",
           "notes": "Correlate with EID 771 (disable) and endpoint process events for ransomware pre-staging chain detection."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     }
   ]
 }

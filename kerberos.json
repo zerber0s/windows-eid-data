@@ -109,7 +109,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "TargetUserName",
@@ -156,7 +155,8 @@
           "rule": "title: Kerberos AS-REP Roasting and RC4 Downgrade\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4768\n    filter_preauth:\n        PreAuthType: '0'\n    filter_rc4:\n        TicketEncryptionType:\n            - '0x17'\n            - '0x18'\n    condition: selection and (filter_preauth or filter_rc4)\nfalsepositives:\n    - Legacy systems requiring RC4\n    - Accounts with pre-authentication intentionally disabled\nlevel: medium",
           "notes": "Match on either pre-auth disabled or RC4 encryption type."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4769,
@@ -244,7 +244,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ServiceName",
@@ -291,7 +290,8 @@
           "rule": "title: Kerberoasting Service Ticket Request with RC4\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4769\n        TicketEncryptionType:\n            - '0x17'\n            - '0x18'\n        Status: '0x0'\n    filter_machine:\n        ServiceName|endswith: '$'\n    condition: selection and not filter_machine\nfalsepositives:\n    - Legacy applications requiring RC4 Kerberos encryption\nlevel: medium",
           "notes": "Filter machine account TGS (ending in $) to reduce noise."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4770,
@@ -369,7 +369,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ServiceName",
@@ -391,7 +390,8 @@
           "xpath": "EventData/Data[@Name='TicketOptions']",
           "description": "Renewed ticket flags; renewable flag must be set; mismatches can indicate manipulation"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4771,
@@ -479,7 +479,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "TargetUserName",
@@ -521,7 +520,8 @@
           "rule": "title: Kerberos Pre-Authentication Failure - Spray Pattern\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4771\n        FailureCode: '0x18'\ncondition: selection | count() by IpAddress > 10\ntimeframe: 5m\nfalsepositives:\n    - Misconfigured applications\n    - User password change propagation delay\nlevel: medium",
           "notes": "Threshold-based detection; may require SIEM-specific syntax adjustment."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4773,
@@ -595,7 +595,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ServiceName",
@@ -612,7 +611,8 @@
           "xpath": "EventData/Data[@Name='IpAddress']",
           "description": "Source IP of the failed request; pivot for SPN scanning"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     }
   ]
 }

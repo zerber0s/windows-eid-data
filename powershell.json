@@ -452,7 +452,6 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "Payload",
@@ -494,7 +493,8 @@
           "rule": "title: PowerShell Module Logging Suspicious Activity\nstatus: experimental\nlogsource:\n    product: windows\n    service: powershell\ndetection:\n    selection:\n        EventID: 4103\n        Payload|contains:\n            - 'IEX'\n            - 'Invoke-Expression'\n            - 'DownloadString'\n            - 'Net.WebClient'\n            - 'FromBase64String'\n            - 'Invoke-Mimikatz'\n            - 'Invoke-ReflectivePEInjection'\nfalsepositives:\n    - Legitimate administration scripts\n    - Software deployment tools\nlevel: medium",
           "notes": "Baseline keyword list; expand with environment-specific attacker TTPs."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4104,
@@ -579,7 +579,6 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ScriptBlockText",
@@ -616,7 +615,8 @@
           "rule": "title: PowerShell Script Block Logging Malicious Keywords\nstatus: stable\nlogsource:\n    product: windows\n    service: powershell\ndetection:\n    selection:\n        EventID: 4104\n        ScriptBlockText|contains:\n            - 'Invoke-Mimikatz'\n            - 'AmsiUtils'\n            - 'amsiInitFailed'\n            - 'Invoke-ReflectivePEInjection'\n            - 'PowerSploit'\n            - 'Get-GPPPassword'\n            - 'VirtualAlloc'\n            - 'WriteProcessMemory'\nfalsepositives:\n    - Security tooling and EDR agents\n    - Penetration testing\nlevel: high",
           "notes": "High confidence rule; these strings rarely appear in legitimate scripts."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4105,

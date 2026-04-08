@@ -483,7 +483,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -530,7 +529,8 @@
           "rule": "title: Active Directory DCSync Attack\nstatus: stable\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4662\n        AccessMask: '0x100'\n        Properties|contains:\n            - '1131f6ad'\n            - '1131f6aa'\n            - '89e95b76'\n    filter_machine:\n        SubjectUserName|endswith: '$'\n    condition: selection and not filter_machine\nfalsepositives:\n    - Legitimate AD replication between domain controllers\nlevel: high",
           "notes": "Well-established detection for Mimikatz dcsync and similar tools."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4706,
@@ -1271,7 +1271,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "DestinationDRA",
@@ -1313,7 +1312,8 @@
           "rule": "title: Suspicious Active Directory Replication from Non-DC\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4932\n    filter_dc:\n        DestinationDRA|contains: 'CN=NTDS Settings'\n    condition: selection and not filter_dc\nfalsepositives:\n    - New DC promotion in progress\nlevel: high",
           "notes": "Detects AD replication sessions from unexpected sources."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4933,
@@ -1378,7 +1378,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "DestinationDRA",
@@ -1420,7 +1419,8 @@
           "rule": "title: Active Directory Replication Sync Completed by Non-DC\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4933\n    filter_dc:\n        DestinationDRA|contains: 'CN=NTDS Settings'\n    condition: selection and not filter_dc\nfalsepositives:\n    - New DC promotion in progress\nlevel: high",
           "notes": "Pair with EID 4932 detection for full replication cycle coverage."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 5136,
@@ -1512,7 +1512,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -1559,7 +1558,8 @@
           "rule": "title: Privileged AD Object Modification\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 5136\n        AttributeLDAPDisplayName:\n            - 'member'\n            - 'adminCount'\n            - 'userAccountControl'\n            - 'msDS-AllowedToDelegateTo'\n    filter_objects:\n        ObjectDN|contains:\n            - 'CN=AdminSDHolder'\n            - 'CN=Domain Admins'\n            - 'CN=Enterprise Admins'\n            - 'CN=Schema Admins'\n    condition: selection and filter_objects\nfalsepositives:\n    - Routine user provisioning\n    - Scheduled admin tasks\nlevel: high",
           "notes": "Tune object list to environment-specific privileged groups."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 5137,
@@ -1646,7 +1646,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -1663,7 +1662,8 @@
           "xpath": "EventData/Data[@Name='ObjectClass']",
           "description": "LDAP object class created; groupPolicyContainer (GPO), user, computer, group are common targets"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 5138,
@@ -1876,7 +1876,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -1893,7 +1892,8 @@
           "xpath": "EventData/Data[@Name='ObjectClass']",
           "description": "LDAP class of the deleted object"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     }
   ]
 }

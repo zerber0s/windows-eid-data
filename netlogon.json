@@ -274,7 +274,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ComputerName",
@@ -311,7 +310,8 @@
           "rule": "title: Zerologon Attack Blocked by Netlogon\nid: zerologon-blocked\nstatus: stable\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        EventID: 5827\ncondition: selection\nfalsepositives:\n    - None known; this event only fires when enforcement blocks a vulnerable connection\nlevel: critical",
           "notes": "CVE-2020-1472 detection. No false positives expected in patched environments with enforcement mode enabled."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 5828,
@@ -496,7 +496,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "ComputerName",
@@ -533,7 +532,8 @@
           "rule": "title: Zerologon Vulnerable Connection Allowed\nid: zerologon-allowed\nstatus: stable\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        EventID: 5829\ncondition: selection\nfalsepositives:\n    - None; this event fires only when a vulnerable Netlogon connection is explicitly permitted\nlevel: critical",
           "notes": "More severe than 5827. The DC is actively allowing Zerologon-vulnerable connections."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     }
   ]
 }

@@ -34,7 +34,14 @@
       "summary": "An Exchange management cmdlet was executed successfully via EMS (Exchange Management Shell) or EAC. Records every administrative action taken through Exchange's management layer.",
       "details": "Generated for every successful Exchange management cmdlet execution. The event captures the cmdlet name, parameters used, the calling user, and the object modified. This is the primary audit trail for Exchange administration and the first place to look when investigating mailbox data exposure, unauthorized rule creation, or privilege escalation within Exchange. Attackers who gain Exchange admin rights will appear here when exporting mailboxes, adding forwarding rules, or creating new administrator accounts.\n\nHigh-risk cmdlets to monitor:\n- New-MailboxExportRequest / New-MailboxSearch (data exfiltration)\n- Set-Mailbox -ForwardingAddress / -DeliverToMailboxAndForward (email forwarding)\n- Add-RoleGroupMember / New-ManagementRoleAssignment (privilege escalation)\n- Set-TransportRule / New-TransportRule (mail flow manipulation)\n- New-MailboxPermission / Add-MailboxPermission (delegation abuse)",
       "category": "Exchange Administration",
-      "tags": ["exchange", "email", "admin-audit", "lateral-movement", "collection", "data-exfiltration"],
+      "tags": [
+        "exchange",
+        "email",
+        "admin-audit",
+        "lateral-movement",
+        "collection",
+        "data-exfiltration"
+      ],
       "keyFields": [
         {
           "name": "CmdletName",
@@ -78,28 +85,40 @@
         }
       ],
       "relatedEventIds": [
-        {"id": 2, "log": "MSExchange"}
+        {
+          "id": 2,
+          "log": "MSExchange"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1114.002",
           "techniqueName": "Remote Email Collection",
           "tactics": [
-            {"tacticId": "TA0009", "tacticName": "Collection"}
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
           ]
         },
         {
           "techniqueId": "T1098.002",
           "techniqueName": "Account Manipulation: Exchange Email Delegate Permissions",
           "tactics": [
-            {"tacticId": "TA0003", "tacticName": "Persistence"}
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         },
         {
           "techniqueId": "T1564.008",
           "techniqueName": "Hide Artifacts: Email Hiding Rules",
           "tactics": [
-            {"tacticId": "TA0005", "tacticName": "Defense Evasion"}
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -130,7 +149,8 @@
       "source": {
         "name": "Microsoft Learn — Exchange Server Admin Audit Logging",
         "url": "https://learn.microsoft.com/en-us/exchange/policy-and-compliance/admin-audit-logging/admin-audit-logging"
-      }
+      },
+      "lastReviewed": "2026-04-08"
     },
     {
       "id": 2,
@@ -142,7 +162,13 @@
       "summary": "An Exchange management cmdlet execution failed. May indicate permission errors, misconfigured environments, or an attacker probing Exchange RBAC permissions.",
       "details": "Generated when an Exchange management cmdlet fails to execute. While individual failures are common (permission denied, object not found), patterns of repeated failures across different cmdlets from the same account can indicate reconnaissance of Exchange RBAC permissions — an attacker mapping what level of access they have before escalating.\n\nAlso relevant for detecting compromised accounts that have lost access (e.g., password reset during incident response) still attempting administrative actions.",
       "category": "Exchange Administration",
-      "tags": ["exchange", "email", "admin-audit", "reconnaissance", "error"],
+      "tags": [
+        "exchange",
+        "email",
+        "admin-audit",
+        "reconnaissance",
+        "error"
+      ],
       "keyFields": [
         {
           "name": "CmdletName",
@@ -178,14 +204,20 @@
         }
       ],
       "relatedEventIds": [
-        {"id": 1, "log": "MSExchange"}
+        {
+          "id": 1,
+          "log": "MSExchange"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1069.002",
           "techniqueName": "Permission Groups Discovery: Domain Groups",
           "tactics": [
-            {"tacticId": "TA0007", "tacticName": "Discovery"}
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
           ]
         }
       ],
@@ -207,7 +239,8 @@
       "source": {
         "name": "Microsoft Learn — Exchange Server Admin Audit Logging",
         "url": "https://learn.microsoft.com/en-us/exchange/policy-and-compliance/admin-audit-logging/admin-audit-logging"
-      }
+      },
+      "lastReviewed": "2026-04-08"
     },
     {
       "id": 115,
@@ -219,7 +252,14 @@
       "summary": "An IIS ISAPI filter or extension encountered an error. Can indicate web application exploitation attempts, particularly ProxyLogon (CVE-2021-26855) which abuses the OWA ISAPI filter.",
       "details": "ISAPI filter/extension errors in IIS are often benign, but clusters of EID 115 events on Exchange servers are associated with ProxyLogon exploitation (CVE-2021-26855). During ProxyLogon, attackers send malformed requests to the Exchange OWA ISAPI filter to bypass authentication. The resulting ISAPI errors may precede web shell deployment.\n\nAlso relevant for other IIS-based exploitation such as ASP.NET deserialization attacks against Exchange (CVE-2021-26857) and older OWA vulnerabilities.\n\nAlone this event has low fidelity, but spikes in frequency on Exchange servers — especially correlated with EID 1309 (ASP.NET exceptions) and IIS access logs showing POST requests to /ecp/ or /owa/ from unexpected IPs — constitute a high-confidence ProxyLogon/ProxyShell indicator.",
       "category": "Web Server",
-      "tags": ["iis", "exchange", "exploitation", "proxylogon", "web-shell", "initial-access"],
+      "tags": [
+        "iis",
+        "exchange",
+        "exploitation",
+        "proxylogon",
+        "web-shell",
+        "initial-access"
+      ],
       "keyFields": [
         {
           "name": "FilterName",
@@ -251,14 +291,20 @@
         }
       ],
       "relatedEventIds": [
-        {"id": 1309, "log": "Application"}
+        {
+          "id": 1309,
+          "log": "Application"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1190",
           "techniqueName": "Exploit Public-Facing Application",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
           ]
         }
       ],
@@ -282,7 +328,8 @@
       "source": {
         "name": "Microsoft Security Response Center — ProxyLogon CVE-2021-26855",
         "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-26855"
-      }
+      },
+      "lastReviewed": "2026-04-08"
     },
     {
       "id": 1309,
@@ -294,7 +341,16 @@
       "summary": "An unhandled ASP.NET exception occurred in a web application. On Exchange or IIS servers, spikes in this event — especially with specific ExceptionTypes — are associated with ProxyShell exploitation (CVE-2021-34473/34523/31207) and web shell activity.",
       "details": "ASP.NET unhandled exceptions are common in normal operation, but specific patterns on Exchange servers indicate exploitation. During ProxyShell (CVE-2021-34473/34523/31207), attackers trigger a chain of bugs in Exchange's backend that causes ASP.NET exceptions as part of the exploit. Clusters of 1309 events with Microsoft.Exchange exception types, followed by unusual files appearing in Exchange virtual directories, are a high-confidence ProxyShell indicator.\n\nAlso associated with:\n- CVE-2021-26857 (Exchange deserialization) — triggers Microsoft.Exchange.Diagnostics.UnifiedTracing exceptions\n- Web shell interactions causing application crashes or unexpected code paths\n- Exploit attempts against Outlook Web App (OWA) deserialization endpoints\n\nInvestigate when: frequency spikes on Exchange servers; ExceptionType contains Microsoft.Exchange; RequestUrl includes /ecp/, /owa/, /autodiscover/, or /mapi/.",
       "category": "Web Server",
-      "tags": ["iis", "exchange", "aspnet", "proxyshell", "proxylogon", "web-shell", "exploitation", "initial-access"],
+      "tags": [
+        "iis",
+        "exchange",
+        "aspnet",
+        "proxyshell",
+        "proxylogon",
+        "web-shell",
+        "exploitation",
+        "initial-access"
+      ],
       "keyFields": [
         {
           "name": "ExceptionType",
@@ -334,21 +390,30 @@
         }
       ],
       "relatedEventIds": [
-        {"id": 115, "log": "Application"}
+        {
+          "id": 115,
+          "log": "Application"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1190",
           "techniqueName": "Exploit Public-Facing Application",
           "tactics": [
-            {"tacticId": "TA0001", "tacticName": "Initial Access"}
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
           ]
         },
         {
           "techniqueId": "T1505.003",
           "techniqueName": "Server Software Component: Web Shell",
           "tactics": [
-            {"tacticId": "TA0003", "tacticName": "Persistence"}
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
           ]
         }
       ],
@@ -372,7 +437,8 @@
       "source": {
         "name": "Microsoft Security Blog — ProxyShell Vulnerabilities",
         "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34473"
-      }
+      },
+      "lastReviewed": "2026-04-08"
     }
   ]
 }

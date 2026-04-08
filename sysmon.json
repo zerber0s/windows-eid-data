@@ -1510,7 +1510,6 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "QueryName",
@@ -1532,7 +1531,8 @@
           "xpath": "EventData/Data[@Name='ProcessId']",
           "description": "Process ID making the query; correlate with Sysmon EID 1 (Process Create) to get the full process context"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 23,
@@ -1733,7 +1733,6 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30",
       "keyFields": [
         {
           "name": "Image",
@@ -1775,7 +1774,8 @@
           "rule": "title: Sysmon Process Tampering\nstatus: stable\nlogsource:\n    product: windows\n    service: sysmon\ndetection:\n    selection:\n        EventID: 25\ncondition: selection\nfalsepositives:\n    - None known in production environments\nlevel: critical",
           "notes": "Requires Sysmon 13+ with ProcessTampering enabled in the Sysmon configuration. No false positives in practice."
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-30"
     },
     {
       "id": 26,

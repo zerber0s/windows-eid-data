@@ -287,7 +287,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29",
       "keyFields": [
         {
           "name": "TaskName",
@@ -324,7 +323,8 @@
           "rule": "title: Scheduled Task Created with Suspicious Script or Binary\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 106\n        TaskContent|contains:\n            - 'powershell'\n            - 'cmd.exe'\n            - 'wscript.exe'\n            - 'mshta.exe'\n            - 'regsvr32'\n            - 'certutil'\n            - 'AppData'\nfalsepositives:\n    - Software installations creating scheduled tasks\n    - IT management tools (SCCM, etc.)\nlevel: medium",
           "notes": "Combine with SubjectUserName filter to exclude known admin accounts."
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 111,
@@ -605,7 +605,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29",
       "keyFields": [
         {
           "name": "TaskName",
@@ -637,7 +636,8 @@
           "rule": "title: Scheduled Task Deleted\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 141\ncondition: selection\nfalsepositives:\n    - Software uninstallation\n    - Routine maintenance\nlevel: low",
           "notes": "Base rule; correlate with EID 106 creation events for higher fidelity attacker cleanup detection."
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 200,

@@ -3194,7 +3194,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29",
       "keyFields": [
         {
           "name": "TargetUserName",
@@ -3221,7 +3220,8 @@
           "xpath": "EventData/Data[@Name='SamAccountName']",
           "description": "SAM account name; changes to this field can indicate account rename operations"
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4740,
@@ -3278,7 +3278,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29",
       "keyFields": [
         {
           "name": "TargetUserName",
@@ -3295,7 +3294,8 @@
           "xpath": "EventData/Data[@Name='CallerComputerName']",
           "description": "Machine originating the failed authentication attempts; the primary investigative pivot for lockouts"
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4741,
@@ -3895,7 +3895,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29",
       "detectionRules": [
         {
           "platform": "KQL",
@@ -3932,7 +3931,8 @@
           "xpath": "EventData/Data[@Name='Status']",
           "description": "0xC000006A = bad password, 0xC0000064 = no such user, 0xC000006D = generic auth failure"
         }
-      ]
+      ],
+      "lastReviewed": "2026-03-29"
     },
     {
       "id": 4778,
@@ -4049,7 +4049,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02",
       "detectionRules": [
         {
           "platform": "KQL",
@@ -4091,7 +4090,8 @@
           "xpath": "EventData/Data[@Name='ClientAddress']",
           "description": "IP address of the disconnected client; compare against known endpoints for the user"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 4781,
@@ -5780,7 +5780,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02",
       "detectionRules": [
         {
           "platform": "KQL",
@@ -5817,7 +5816,8 @@
           "xpath": "EventData/Data[@Name='CountOfCredentialsReturned']",
           "description": "Number of credentials returned; bulk reads (>5) by non-SYSTEM processes suggest credential harvesting"
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-02"
     },
     {
       "id": 6272,

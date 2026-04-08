@@ -264,7 +264,6 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "RequesterName",
@@ -311,7 +310,8 @@
           "rule": "title: AD CS Certificate Issued with Subject Alternative Name\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4887\n        Disposition: '3'\n    filter_empty_san:\n        SubjectAltName: ''\n    condition: selection and not filter_empty_san\nfalsepositives:\n    - Web server certificates with legitimate DNS SANs\n    - Enterprise PKI templates that legitimately use SANs\nlevel: medium",
           "notes": "Baseline; tune with CertificateTemplate allowlist for known-safe templates that legitimately use SANs."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4888,

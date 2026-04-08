@@ -104,7 +104,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -146,7 +145,8 @@
           "rule": "title: DPAPI Master Key Backup by Non-System Account\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4692\n    filter_system:\n        SubjectUserName: 'SYSTEM'\n    condition: selection and not filter_system\nfalsepositives:\n    - Domain administrator performing manual key backup\nlevel: medium",
           "notes": "Low false positive rate; legitimate non-SYSTEM backups are rare. Investigate immediately."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4693,
@@ -235,7 +235,6 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07",
       "keyFields": [
         {
           "name": "SubjectUserName",
@@ -277,7 +276,8 @@
           "rule": "title: DPAPI Master Key Recovery by Non-System Account\nstatus: experimental\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4693\n        ReturnCode: '0x0'\n    filter_system:\n        SubjectUserName: 'SYSTEM'\n    condition: selection and not filter_system\nfalsepositives:\n    - Administrator-initiated credential recovery procedures\nlevel: medium",
           "notes": "Pair with process creation events to identify the tool performing the recovery."
         }
-      ]
+      ],
+      "lastReviewed": "2026-04-07"
     },
     {
       "id": 4694,
