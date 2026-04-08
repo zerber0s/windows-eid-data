@@ -1,9 +1,9 @@
 {
   "dataset": {
-    "name": "EID Quick Reference - Exchange / IIS",
-    "version": "1.0.1",
+    "name": "EID Quick Reference - Exchange",
+    "version": "1.0.2",
     "generatedAt": "2026-04-07T00:00:00Z",
-    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/exchange-iis.json",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/exchange.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
       "name": "Creative Commons Attribution 4.0 International",
