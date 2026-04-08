@@ -1,0 +1,382 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - IIS",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-08T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/iis.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 2276,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-W3SVC-WP",
+      "channel": "Application",
+      "level": "Error",
+      "title": "IIS worker process failure",
+      "summary": "A worker process (w3wp.exe) serving an application pool encountered a fatal error.",
+      "details": "Generated when an IIS worker process crashes or encounters a fatal error while processing requests. Key fields: the application pool name and the error code. A single worker process crash may indicate a bug or a single exploitation attempt — a crash at an unusual time or following unusual request patterns is higher priority. Correlate the crash timestamp with IIS access logs (W3C format) to identify what request triggered the crash, which may reveal the exploit payload (long field values, unusual HTTP methods, known CVE patterns). Follow-up crashes for the same pool within minutes indicate rapid-fail conditions. Correlate with Sysmon EID 1 to see whether w3wp.exe spawned any child processes before or after the crash — child process creation from w3wp.exe is a high-confidence web shell or code execution indicator.",
+      "category": "Application Pool",
+      "tags": [
+        "iis",
+        "worker-process",
+        "crash",
+        "exploitation"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2282,
+          "log": "IIS"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate crash timestamp with IIS W3C access logs to identify the triggering request — large Content-Length values, unusual URIs, or known vulnerable parameter names are significant",
+          "Check Sysmon EID 1 for child processes spawned by w3wp.exe around the crash time — cmd.exe, powershell.exe, or net.exe spawned from w3wp.exe indicates code execution",
+          "Identify the application pool from the event and check which site it serves — externally accessible sites are higher priority",
+          "Review minidump files in %SystemRoot%\\System32\\inetsrv\\Logs if process crash dumps are enabled"
+        ],
+        "commonFalsePositives": [
+          "Application bugs causing worker process crashes under normal load",
+          "Memory pressure or resource exhaustion causing w3wp.exe to terminate"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    },
+    {
+      "id": 2282,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-W3SVC-WP",
+      "channel": "Application",
+      "level": "Error",
+      "title": "Application pool disabled — rapid-fail protection triggered",
+      "summary": "IIS disabled an application pool after repeated worker process crashes.",
+      "details": "Generated when IIS disables an application pool because the worker process has crashed more than the configured number of times within the rapid-fail protection window (default: 5 failures in 5 minutes). Once triggered, the pool stops serving requests and returns HTTP 503 to clients until manually re-enabled. Key fields: the application pool name and the number of failures. From a security perspective, rapid-fail protection activating is a high-priority signal during an incident — it may indicate a sustained exploitation attempt, an attacker-triggered crash loop, or a deployed web shell crashing w3wp.exe through heavy post-exploitation activity. Correlate with IIS access logs for the request pattern that preceded the crashes, and with Sysmon for any w3wp.exe child process spawns.",
+      "category": "Application Pool",
+      "tags": [
+        "iis",
+        "application-pool",
+        "rapid-fail",
+        "exploitation",
+        "dos"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2276,
+          "log": "IIS"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1499.004",
+          "techniqueName": "Endpoint Denial of Service: Application or System Exploitation",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Review IIS W3C access logs in the window before the pool was disabled — look for repeated requests to the same URI, unusual HTTP methods (PUT, TRACE, OPTIONS), or abnormally large bodies",
+          "Correlate with EID 2276 entries immediately preceding this event to identify the crash sequence",
+          "Check whether the pool was manually re-enabled after disablement — if so, by whom and when",
+          "An attacker may deliberately keep the pool crashing to maintain a denial-of-service state or to obscure web shell activity in the noise"
+        ],
+        "commonFalsePositives": [
+          "Application bugs causing repeated crashes during high traffic or specific input patterns",
+          "Memory leak or resource exhaustion triggering rapid-fail under legitimate load"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/failure"
+      },
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Rapid-fail protection must be enabled on the application pool (enabled by default in IIS). Rapid-fail threshold and time window are configurable via IIS Manager or applicationHost.config."
+        }
+      ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    },
+    {
+      "id": 1008,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-WMSVC",
+      "channel": "Application",
+      "level": "Warning",
+      "title": "IIS Manager — client IP locked out after failed authentication",
+      "summary": "A client IP was locked out from the IIS Web Management Service after too many failed login attempts.",
+      "details": "Generated by the IIS Web Management Service (WMSVC) when a client IP address has been locked out due to repeated failed authentication attempts. WMSVC provides remote management of IIS via IIS Manager and listens on TCP port 8172 by default. This event is a high-confidence brute force indicator against the IIS remote administration interface. Key fields: the locked-out client IP address and the lockout timeout duration. An IP lockout from an unexpected external address — particularly during off-hours — is a strong indicator of targeted reconnaissance or credential stuffing against the server management interface. The lockout timeout is configurable; after expiry the IP is automatically unblocked (EID 1009). Correlate the locked-out IP with firewall logs and other authentication logs to determine whether the same source is attacking other services.",
+      "category": "Authentication",
+      "tags": [
+        "iis",
+        "wmsvc",
+        "brute-force",
+        "account-lockout",
+        "remote-management"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1009,
+          "log": "IIS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110.001",
+          "techniqueName": "Brute Force: Password Guessing",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The locked-out IP is the primary pivot — check whether it appears in other authentication failure logs (Security EID 4625, RDP, VPN) to assess scope of the attack",
+          "Determine whether WMSVC (port 8172) is externally accessible — if so, immediate firewall restriction is warranted",
+          "Correlate with successful WMSVC authentications (Security EID 4624 or IIS Manager session start) to check whether the attacker succeeded before triggering lockout",
+          "Multiple lockout events from different IPs in a short window may indicate credential stuffing from a botnet"
+        ],
+        "commonFalsePositives": [
+          "Legitimate administrator mistyping credentials multiple times",
+          "Automated monitoring or infrastructure tools attempting WMSVC connections with stale credentials"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/manage/remote-administration/remote-administration-for-iis-manager"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "IIS Management Service Account Lockout",
+          "rule": "Event\n| where Source == \"Microsoft-IIS-WMSVC\"\n| where EventID == 1008\n| parse EventData with * '<Data>' LockedIP '</Data>' *\n| project TimeGenerated, Computer, LockedIP\n| order by TimeGenerated desc",
+          "notes": "Any occurrence warrants investigation. The locked IP field format may vary — adjust parsing to your ingestion method."
+        },
+        {
+          "platform": "Sigma",
+          "title": "IIS Web Management Service Account Lockout",
+          "rule": "title: IIS Web Management Service Account Lockout\nstatus: stable\nlogsource:\n  product: windows\n  service: application\ndetection:\n  selection:\n    Source: Microsoft-IIS-WMSVC\n    EventID: 1008\n  condition: selection\nfalsepositives:\n  - Administrator mistyping credentials\nlevel: medium"
+        }
+      ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    },
+    {
+      "id": 1009,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-WMSVC",
+      "channel": "Application",
+      "level": "Information",
+      "title": "IIS Manager — locked-out client IP unblocked",
+      "summary": "A previously locked-out client IP was automatically unblocked by the IIS Web Management Service.",
+      "details": "Generated by the IIS Web Management Service (WMSVC) when a previously locked-out IP address has had its lockout timeout expire and is permitted to attempt authentication again. On its own this is informational, but it acquires investigative significance when correlated with EID 1008 — if the same IP that triggered the lockout immediately resumes failed attempts after unblocking (producing a new EID 1008), it indicates automated brute force tooling that does not give up after an initial lockout. Multiple lockout-unblock-lockout cycles from the same IP confirm sustained automated credential attack activity.",
+      "category": "Authentication",
+      "tags": [
+        "iis",
+        "wmsvc",
+        "account-lockout",
+        "remote-management"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1008,
+          "log": "IIS"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "A rapid sequence of EID 1008 → 1009 → 1008 from the same IP confirms automated brute force tooling",
+          "If no subsequent EID 1008 follows after unblocking, check whether a successful logon (EID 1008 absence plus Security EID 4624) occurred",
+          "Cross-reference the unblocked IP with threat intelligence for known attack infrastructure"
+        ],
+        "commonFalsePositives": [
+          "Routine unblocking of a legitimate administrator who was locked out",
+          "Scheduled infrastructure monitoring that had stale credentials being unblocked after timeout"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/manage/remote-administration/remote-administration-for-iis-manager"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    },
+    {
+      "id": 1001,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-WMSVC",
+      "channel": "Application",
+      "level": "Information",
+      "title": "IIS Web Management Service stopped",
+      "summary": "The IIS remote management service (WMSVC) was stopped.",
+      "details": "Generated when the IIS Web Management Service (WMSVC) stops. WMSVC provides remote management of IIS via IIS Manager over port 8172 and is required for remote IIS administration. If an attacker has already gained a foothold on a server, stopping WMSVC is a common technique to prevent administrators from remotely inspecting or modifying the web server configuration — particularly to remove web shells or reverse proxy rules. Stopping the service does not affect site availability (W3SVC still runs), but it blind-spots the IIS administration interface. Correlate the stop event with Security EID 4688 to identify the process and account that stopped the service. An unexpected WMSVC stop outside of maintenance windows from a non-admin account is a strong indicator of post-exploitation defensive degradation.",
+      "category": "Service Lifecycle",
+      "tags": [
+        "iis",
+        "wmsvc",
+        "service-stop",
+        "defense-evasion",
+        "remote-management"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1000,
+          "log": "IIS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1489",
+          "techniqueName": "Service Stop",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with Security EID 4688 and 4624 to identify what process and account stopped the service — a non-admin account or unexpected process (e.g., cmd.exe or PowerShell) is suspicious",
+          "Check whether the service was restarted shortly after — a brief stop-and-start cycle may indicate the attacker was temporarily hiding activity or testing the management interface",
+          "Correlate with concurrent IIS configuration changes, new files in wwwroot, or changes to applicationHost.config"
+        ],
+        "commonFalsePositives": [
+          "Planned maintenance or IIS update procedures that require WMSVC to restart",
+          "IT automation stopping and restarting WMSVC as part of configuration management"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/manage/remote-administration/remote-administration-for-iis-manager"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    },
+    {
+      "id": 1000,
+      "log": "IIS",
+      "provider": "Microsoft-IIS-WMSVC",
+      "channel": "Application",
+      "level": "Information",
+      "title": "IIS Web Management Service started",
+      "summary": "The IIS remote management service (WMSVC) was started.",
+      "details": "Generated when the IIS Web Management Service (WMSVC) starts. This event is primarily useful as a corroboration anchor — an unexpected WMSVC start outside of maintenance windows or system startup, particularly when preceded by EID 1001 (service stopped), may indicate an attacker re-enabling remote management after previously stopping it. It can also indicate a lateral movement scenario where an attacker starts WMSVC on a server where it was previously disabled, in order to use IIS Manager as an administration and staging channel.",
+      "category": "Service Lifecycle",
+      "tags": [
+        "iis",
+        "wmsvc",
+        "service-start",
+        "remote-management"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1001,
+          "log": "IIS"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "An unexpected WMSVC start on a server where it was previously stopped warrants investigation — correlate with Security EID 4688 and 4624 to identify what started it",
+          "WMSVC starting on a server that does not normally have remote IIS management enabled is a persistence or lateral movement indicator",
+          "Correlate with EID 1001 from an earlier time — if WMSVC was stopped and then restarted in the same session, check what occurred between stop and restart"
+        ],
+        "commonFalsePositives": [
+          "System startup or planned maintenance",
+          "IT automation enabling WMSVC as part of server provisioning"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/iis/manage/remote-administration/remote-administration-for-iis-manager"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 / IIS 7.0"
+      },
+      "lastReviewed": "2026-04-08"
+    }
+  ]
+}
