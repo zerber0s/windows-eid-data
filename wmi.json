@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WMI Activity",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -39,6 +39,10 @@
         {
           "id": 5861,
           "log": "WMI"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
         }
       ],
       "mitreAttack": [
@@ -72,7 +76,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 5858,
@@ -82,7 +86,7 @@
       "level": "Error",
       "title": "WMI operation failed",
       "summary": "A WMI provider or client operation returned an error.",
-      "details": "Generated when a WMI operation fails, including provider load errors, query execution failures, and access denied results. Key fields: ClientMachine, ClientProcessId, User, and the HRESULT error code. Isolated errors are common in legitimate management software, but clusters of errors from a single process — especially access denied results on sensitive WMI classes (Win32_Process, Win32_NetworkAdapter, Win32_ShadowCopy) — may indicate failed WMI-based enumeration or exploitation. Correlate ClientProcessId with Security EID 4688 to identify the responsible process.",
+      "details": "Generated when a WMI operation fails, including provider load errors, query execution failures, and access denied results. Key fields: ClientMachine, ClientProcessId, User, and the HRESULT error code. Isolated errors are common in legitimate management software, but clusters of errors from a single process \u2014 especially access denied results on sensitive WMI classes (Win32_Process, Win32_NetworkAdapter, Win32_ShadowCopy) \u2014 may indicate failed WMI-based enumeration or exploitation. Correlate ClientProcessId with Security EID 4688 to identify the responsible process.",
       "category": "WMI Error",
       "tags": [
         "wmi",
@@ -150,7 +154,7 @@
       "level": "Information",
       "title": "WMI ESS subscription notification fired",
       "summary": "A WMI Event Subscription System (ESS) notification was triggered.",
-      "details": "Generated when a WMI ESS (Eventing Sub-System) subscription fires — that is, when an event filter condition is met and a bound event consumer is invoked. This event confirms that a WMI subscription has actively triggered, as opposed to EID 5860 (temporary registration) and EID 5861 (permanent registration) which only record creation. Key fields: the triggering query and the consumer that was invoked. A 5859 on a system where the corresponding 5861 registration appeared recently, or where the subscription references an unexpected executable, is a strong lateral movement or persistence-execution indicator.",
+      "details": "Generated when a WMI ESS (Eventing Sub-System) subscription fires \u2014 that is, when an event filter condition is met and a bound event consumer is invoked. This event confirms that a WMI subscription has actively triggered, as opposed to EID 5860 (temporary registration) and EID 5861 (permanent registration) which only record creation. Key fields: the triggering query and the consumer that was invoked. A 5859 on a system where the corresponding 5861 registration appeared recently, or where the subscription references an unexpected executable, is a strong lateral movement or persistence-execution indicator.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -167,6 +171,14 @@
         {
           "id": 5861,
           "log": "WMI"
+        },
+        {
+          "id": 20,
+          "log": "Sysmon"
+        },
+        {
+          "id": 21,
+          "log": "Sysmon"
         }
       ],
       "mitreAttack": [
@@ -194,7 +206,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with EID 5861 to find when the triggering subscription was registered",
-          "Identify the consumer type — CommandLineEventConsumer or ActiveScriptEventConsumer executing unexpected binaries is a high-confidence indicator",
+          "Identify the consumer type \u2014 CommandLineEventConsumer or ActiveScriptEventConsumer executing unexpected binaries is a high-confidence indicator",
           "Correlate with Security EID 4688 to find any processes spawned as a result of the subscription firing"
         ],
         "commonFalsePositives": [
@@ -217,7 +229,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 5860,
@@ -267,7 +279,7 @@
         "investigationPivots": [
           "Examine the Query field for suspicious event filters (e.g., triggering on process creation or logon events)",
           "Correlate the registering process with Security EID 4688 to identify what created the subscription",
-          "Temporary subscriptions do not persist — if persistence is suspected, look for EID 5861 instead"
+          "Temporary subscriptions do not persist \u2014 if persistence is suspected, look for EID 5861 instead"
         ],
         "commonFalsePositives": [
           "Monitoring and management tools that use WMI event subscriptions",
@@ -292,7 +304,7 @@
       "level": "Information",
       "title": "WMI permanent event subscription registered",
       "summary": "A persistent WMI event subscription was registered.",
-      "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
+      "details": "Generated when a permanent WMI event subscription is created \u2014 the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -308,6 +320,18 @@
         {
           "id": 5860,
           "log": "WMI"
+        },
+        {
+          "id": 19,
+          "log": "Sysmon"
+        },
+        {
+          "id": 20,
+          "log": "Sysmon"
+        },
+        {
+          "id": 21,
+          "log": "Sysmon"
         }
       ],
       "mitreAttack": [
@@ -365,7 +389,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-10"
     }
   ]
 }

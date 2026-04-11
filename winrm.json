@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WinRM",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/winrm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -68,7 +68,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with Security EID 4624 LogonType 3 using the same timestamp and username to confirm the network logon",
-          "Connection URI identifies the WinRM endpoint — wsman:// connections to non-standard endpoints may indicate tool use",
+          "Connection URI identifies the WinRM endpoint \u2014 wsman:// connections to non-standard endpoints may indicate tool use",
           "Correlate with PowerShell EID 4103/4104 to review commands executed over the session"
         ],
         "commonFalsePositives": [
@@ -170,6 +170,10 @@
         {
           "id": 168,
           "log": "WinRM"
+        },
+        {
+          "id": 4104,
+          "log": "PowerShell"
         }
       ],
       "mitreAttack": [
@@ -186,7 +190,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ResourceUri identifies the shell type — a cmd shell URI from an unexpected host warrants immediate investigation",
+          "ResourceUri identifies the shell type \u2014 a cmd shell URI from an unexpected host warrants immediate investigation",
           "Correlate with PowerShell EID 4103/4104 if a PowerShell endpoint URI is present to review executed commands",
           "Pair with EID 6 to link the shell session back to the originating WSMan session"
         ],
@@ -203,7 +207,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 132,
@@ -213,7 +217,7 @@
       "level": "Error",
       "title": "WSMan authentication failed",
       "summary": "WinRM authentication attempt failed on this host.",
-      "details": "Generated on the destination host when a WinRM authentication attempt fails. Key fields: the username that failed, the authentication mechanism attempted (Kerberos, NTLM, Basic, CredSSP), and the source. Multiple EID 132 events from the same source indicate credential spraying or brute-force attempts over WinRM. NTLM authentication failures may indicate a pass-the-hash attempt where the supplied hash did not match. Correlate with EID 168 (successful authentication) to determine whether a subsequent attempt succeeded — a 132 followed closely by a 168 from the same source may indicate a successful brute-force.",
+      "details": "Generated on the destination host when a WinRM authentication attempt fails. Key fields: the username that failed, the authentication mechanism attempted (Kerberos, NTLM, Basic, CredSSP), and the source. Multiple EID 132 events from the same source indicate credential spraying or brute-force attempts over WinRM. NTLM authentication failures may indicate a pass-the-hash attempt where the supplied hash did not match. Correlate with EID 168 (successful authentication) to determine whether a subsequent attempt succeeded \u2014 a 132 followed closely by a 168 from the same source may indicate a successful brute-force.",
       "category": "WinRM Authentication",
       "tags": [
         "winrm",
@@ -262,7 +266,7 @@
         "investigationPivots": [
           "Multiple EID 132 events from a single source in a short timeframe indicate brute-force or credential spraying over WinRM",
           "Correlate with Security EID 4625 using the same timestamp and username to find the matching logon failure record",
-          "A 132 followed quickly by a 168 from the same source may indicate a successful brute-force — confirm with Security EID 4624"
+          "A 132 followed quickly by a 168 from the same source may indicate a successful brute-force \u2014 confirm with Security EID 4624"
         ],
         "commonFalsePositives": [
           "Misconfigured automation tools with stale credentials",
@@ -325,7 +329,7 @@
         "investigationPivots": [
           "Correlate with EID 6 to determine whether an active session existed at the time of the failure",
           "Repeated failures from the same source combined with EID 6 session events may indicate in-progress lateral movement with partial success",
-          "Check error codes — access denied errors on an established session may indicate a privilege issue or security tool intervention"
+          "Check error codes \u2014 access denied errors on an established session may indicate a privilege issue or security tool intervention"
         ],
         "commonFalsePositives": [
           "Network instability causing transient WinRM connection failures",

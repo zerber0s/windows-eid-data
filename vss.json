@@ -1,0 +1,321 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Volume Shadow Copy Service",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/vss.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 25,
+      "log": "VSS",
+      "provider": "VSS",
+      "channel": "Application",
+      "level": "Information",
+      "title": "Volume Shadow Copy operation complete",
+      "summary": "A Volume Shadow Copy Service operation completed successfully, typically indicating a snapshot was created or a backup operation finished.",
+      "details": "Event 25 is logged by the VSS service in the Application log when a shadow copy operation completes successfully. This is the primary baseline event for shadow copy activity. The message typically indicates the operation type (backup, restore, or general shadow copy creation) and the volume(s) involved.\n\nFrom a security perspective, EID 25 establishes the expected rhythm of shadow copy creation in your environment. Most organisations create shadow copies via:\n- Windows Server Backup or Backup Exec on a scheduled basis\n- System Restore (consumer/workstation)\n- Hyper-V checkpoints\n- Third-party backup agents (Veeam, Commvault, etc.)\n\n**Why this baseline matters:**\n\nRansomware actors frequently delete shadow copies immediately before or during encryption to prevent recovery (T1490). Detection of shadow copy deletion relies on correlating process creation events (Security 4688 / Sysmon 1) for tools commonly used to delete shadows: `vssadmin delete shadows`, `wmic shadowcopy delete`, `wbadmin delete catalog`, `diskshadow.exe`. The absence of EID 25 after an expected backup window, combined with VSS error events (8193, 8224), is a strong indicator of active ransomware activity.\n\n**Investigation approach:** Establish your baseline shadow copy schedule. Alert on VSS error events (8193, 8229) outside of change windows, and correlate with process creation for shadow deletion commands. A 25 immediately followed by an 8193 or a process running `vssadmin delete shadows /all` within the same hour is a high-confidence ransomware indicator.",
+      "category": "Data Protection",
+      "tags": [
+        "vss",
+        "shadow-copy",
+        "backup",
+        "ransomware",
+        "data-protection"
+      ],
+      "relatedEventIds": [
+        { "id": 8193, "log": "VSS" },
+        { "id": 8224, "log": "VSS" },
+        { "id": 8229, "log": "VSS" },
+        { "id": 4688, "log": "Security" },
+        { "id": 1, "log": "Sysmon" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Baseline creation frequency — how many EID 25 events occur per day/week? A sudden drop or cessation of 25 events after previously regular occurrences indicates shadow copies are no longer being created",
+          "Correlation with error events — EID 25 followed closely by 8193 or 8224 suggests a shadow copy was started but the service was subsequently disrupted",
+          "Process creation context — check Security 4688 / Sysmon 1 around the same time for backup agent processes; unexpected processes initiating VSS (e.g., cmd.exe, powershell.exe) warrant review"
+        ],
+        "commonFalsePositives": [
+          "Scheduled backup jobs running via Windows Server Backup, Veeam, or similar agents",
+          "System Restore points created after software installation on workstations",
+          "Hyper-V checkpoint operations on virtualisation hosts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
+      },
+      "volumeIndicator": "low",
+      "keyFields": [
+        {
+          "name": "Message",
+          "description": "Operation type and volume(s) involved in the completed shadow copy operation"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "VSS Shadow Copy Creation Cessation — Missing Expected Events",
+          "rule": "let expectedDailyCreations = 1;\nEvent\n| where Source == \"VSS\"\n| where EventID == 25\n| summarize DailyCount = count() by Computer, bin(TimeGenerated, 1d)\n| where DailyCount < expectedDailyCreations\n| project TimeGenerated, Computer, DailyCount",
+          "notes": "Tune expectedDailyCreations to match your backup schedule. This query flags days where shadow copy creation is below baseline. Combine with 8193/8229 error events and process creation for vssadmin/wmic for higher-fidelity ransomware detection."
+        },
+        {
+          "platform": "Sigma",
+          "title": "VSS Shadow Copy Operation Complete",
+          "rule": "title: VSS Shadow Copy Operation Complete\nstatus: informational\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 25\n    condition: selection\nfalsepositives:\n    - All legitimate backup operations\nlevel: informational\ntags:\n    - attack.impact\n    - attack.t1490"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 8193,
+      "log": "VSS",
+      "provider": "VSS",
+      "channel": "Application",
+      "level": "Error",
+      "title": "VSS error — shadow copy operation failed",
+      "summary": "The Volume Shadow Copy Service encountered an error while attempting to create or manage a shadow copy, often indicating service disruption or ransomware-driven interference.",
+      "details": "Event 8193 is the primary VSS error event and is logged when a shadow copy operation fails due to an internal error, typically involving a Win32 API call failure. The message format is: 'Volume Shadow Copy Service error: Unexpected error calling routine <routine>. hr = <HRESULT> [error description].'\n\nCommon HRESULT values and their security significance:\n\n- **0x80042306 (VSS_E_WRITERERROR_INCONSISTENTSNAPSHOT):** A VSS writer reported an inconsistent snapshot. Can indicate file system changes occurring during snapshot (active ransomware encryption in progress).\n- **0x80070005 (E_ACCESSDENIED):** Access denied during VSS operation. May indicate a process with insufficient privileges is interfering with VSS, or security software blocking VSS calls as an anti-ransomware measure.\n- **0x8004231f (VSS_E_UNEXPECTED_WRITER_ERROR):** Unexpected writer error. Common when backup software conflicts with ransomware attempting simultaneous VSS operations.\n- **0x80042302 (VSS_E_PROVIDER_VETO):** The VSS provider rejected the operation. Can indicate a hardware VSS provider conflict or deliberate disruption.\n\n**Ransomware context:** Many ransomware families (LockBit, BlackCat/ALPHV, Conti, REvil) delete shadow copies as one of the first steps of their execution routine. The sequence is typically: 1) Ransomware process spawns `vssadmin delete shadows /all /quiet` or `wmic shadowcopy delete`, 2) VSS service logs 8193 as the deletion or a subsequent operation fails, 3) Encryption begins. Detecting 8193 outside of backup windows, especially alongside process creation for known shadow deletion commands, provides early warning.",
+      "category": "Impact",
+      "tags": [
+        "vss",
+        "shadow-copy",
+        "ransomware",
+        "impact",
+        "anti-forensics"
+      ],
+      "relatedEventIds": [
+        { "id": 25, "log": "VSS" },
+        { "id": 8224, "log": "VSS" },
+        { "id": 8229, "log": "VSS" },
+        { "id": 4688, "log": "Security" },
+        { "id": 1, "log": "Sysmon" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Timing relative to backup windows — 8193 during a scheduled backup is usually benign; 8193 outside of any expected backup activity is high priority",
+          "Process creation correlation — check Security 4688 / Sysmon 1 for vssadmin.exe, wmic.exe, diskshadow.exe, or wbadmin.exe running with shadow deletion arguments within 10 minutes of the 8193",
+          "HRESULT code — 0x80042306 (inconsistent snapshot) combined with high I/O and file rename activity is consistent with active encryption; 0x80070005 may indicate anti-ransomware product intervening",
+          "Recurrence — a single 8193 is often a transient backup conflict; multiple 8193 events in rapid succession indicate sustained disruption"
+        ],
+        "commonFalsePositives": [
+          "Backup software conflicts where multiple backup agents attempt VSS snapshots simultaneously",
+          "Antivirus or EDR products configured to block VSS access as a ransomware protection measure, causing legitimate backup failures",
+          "Low disk space preventing shadow copy storage allocation",
+          "VSS writer errors from applications that register as VSS writers but have transient failures (SQL Server, Exchange)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
+      },
+      "volumeIndicator": "low",
+      "keyFields": [
+        {
+          "name": "Message",
+          "description": "Contains the failing Win32 API routine name and HRESULT error code; the HRESULT is the primary pivot for determining the failure cause"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "VSS Error Outside Backup Window — Possible Ransomware Impact",
+          "rule": "let BackupWindowStart = 2;\nlet BackupWindowEnd = 5;\nEvent\n| where Source == \"VSS\"\n| where EventID == 8193\n| extend Hour = hourofday(TimeGenerated)\n| where Hour < BackupWindowStart or Hour > BackupWindowEnd\n| project TimeGenerated, Computer, EventData",
+          "notes": "Adjust BackupWindowStart and BackupWindowEnd to match your scheduled backup times (24-hour format). Events outside the backup window are more likely to indicate active interference. Combine with a search for shadow deletion commands in Security 4688 for the same host."
+        },
+        {
+          "platform": "KQL",
+          "title": "Shadow Copy Deletion Command Followed by VSS Error",
+          "rule": "let ShadowDeletion = SecurityEvent\n| where EventID == 4688\n| where CommandLine has_any (\"vssadmin\", \"wmic shadowcopy\", \"diskshadow\", \"wbadmin\")\n| where CommandLine has_any (\"delete\", \"Delete\")\n| project DeletionTime = TimeGenerated, Computer, CommandLine, Account;\nlet VSSErrors = Event\n| where Source == \"VSS\"\n| where EventID in (8193, 8224, 8229)\n| project ErrorTime = TimeGenerated, Computer;\nShadowDeletion\n| join kind=inner VSSErrors on Computer\n| where abs(datetime_diff('minute', DeletionTime, ErrorTime)) < 15\n| project DeletionTime, Computer, CommandLine, Account, ErrorTime",
+          "notes": "This correlation rule is high-fidelity for ransomware detection. Tune the 15-minute window based on your environment. False positives are rare — legitimate administrators rarely delete shadows immediately before a VSS error."
+        },
+        {
+          "platform": "Sigma",
+          "title": "VSS Shadow Copy Operation Error",
+          "rule": "title: VSS Shadow Copy Operation Error\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8193\n    condition: selection\nfalsepositives:\n    - Backup software conflicts\n    - Antivirus blocking VSS access\n    - Low disk space\nlevel: medium\ntags:\n    - attack.impact\n    - attack.t1490"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 8224,
+      "log": "VSS",
+      "provider": "VSS",
+      "channel": "Application",
+      "level": "Information",
+      "title": "VSS service shutting down due to idle timeout",
+      "summary": "The VSS service is shutting down after an idle period with no pending requests, which is normal behaviour but can mask deliberate service termination.",
+      "details": "Event 8224 is logged when the VSS service shuts itself down after remaining idle for its configured timeout period (default: 10 minutes with no active requests). The message is: 'The VSS service is shutting down due to idle timeout.'\n\nUnder normal conditions, VSS starts on demand (triggered by backup software or system restore), performs its operation, and then shuts down after the idle timeout. EID 8224 marks the end of this lifecycle.\n\n**Security relevance:**\n\nWhile 8224 alone is low-fidelity, it becomes significant when:\n\n1. **Sequenced with ransomware activity:** If 8224 appears shortly after a shadow deletion command (`vssadmin delete shadows /all`) and before the first file encryption events (indicated by high write I/O or file rename activity in Sysmon), it may indicate the VSS service was killed after shadow deletion succeeded, clearing the path for encryption.\n\n2. **Forced service termination masquerading as idle shutdown:** Some ransomware strains issue `net stop vss` or `sc stop vss` to terminate the VSS service. This forced stop may log 8224 rather than a service error event, making it appear as a normal idle shutdown. Correlate with Security 7036 (service state changed) and Security 4688/Sysmon 1 for net.exe/sc.exe with VSS stop arguments.\n\n3. **Absence of subsequent restart:** In environments with scheduled backups, 8224 should be followed by a VSS service start around the next backup window. Extended absence of VSS activity after 8224 (especially if accompanied by 8193 errors) suggests VSS has been persistently disabled.",
+      "category": "Defense Evasion",
+      "tags": [
+        "vss",
+        "shadow-copy",
+        "service-lifecycle",
+        "ransomware",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        { "id": 25, "log": "VSS" },
+        { "id": 8193, "log": "VSS" },
+        { "id": 8229, "log": "VSS" },
+        { "id": 4688, "log": "Security" },
+        { "id": 7036, "log": "System" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        },
+        {
+          "techniqueId": "T1489",
+          "techniqueName": "Service Stop",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Preceding process creation — check Sysmon 1 / Security 4688 for net.exe, sc.exe, or PowerShell with VSS stop commands in the 5 minutes before 8224",
+          "Time since last 8224 — VSS should regularly cycle on/off during backup windows; an 8224 with no subsequent VSS activity for days may indicate VSS has been permanently stopped",
+          "System 7036 correlation — a service-stopped event for VSS in the System log at the same time as 8224 confirms the shutdown; check whether it was a clean idle stop or a forced termination"
+        ],
+        "commonFalsePositives": [
+          "Normal VSS idle shutdown after every completed backup job — this is expected behaviour",
+          "Systems where no backups are configured and VSS is started on-demand by System Restore or Windows Update, then shuts down normally"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
+      },
+      "volumeIndicator": "low",
+      "keyFields": [
+        {
+          "name": "Message",
+          "description": "Confirms idle timeout shutdown; no additional structured fields — security value is in timing correlation rather than the event content itself"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "VSS Service Stop Following Shadow Deletion Command",
+          "rule": "let ShadowDeletion = SecurityEvent\n| where EventID == 4688\n| where CommandLine has_any (\"vssadmin\", \"wmic shadowcopy\", \"diskshadow\", \"wbadmin\")\n| where CommandLine has_any (\"delete\", \"Delete\")\n| project DeletionTime = TimeGenerated, Computer, CommandLine;\nlet VSSStop = Event\n| where Source == \"VSS\"\n| where EventID == 8224\n| project StopTime = TimeGenerated, Computer;\nShadowDeletion\n| join kind=inner VSSStop on Computer\n| where StopTime > DeletionTime and StopTime < datetime_add('minute', 15, DeletionTime)\n| project DeletionTime, Computer, CommandLine, StopTime",
+          "notes": "VSS shutting down within 15 minutes of a shadow deletion command is suspicious. This combination — delete then shutdown — is a common ransomware pre-encryption pattern."
+        },
+        {
+          "platform": "Sigma",
+          "title": "VSS Service Idle Shutdown",
+          "rule": "title: VSS Service Idle Shutdown\nstatus: informational\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8224\n    condition: selection\nfalsepositives:\n    - All normal VSS idle shutdowns after backup completion\nlevel: informational\ntags:\n    - attack.impact\n    - attack.t1490\n    - attack.t1489"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 8229,
+      "log": "VSS",
+      "provider": "VSS",
+      "channel": "Application",
+      "level": "Warning",
+      "title": "VSS writer rejected a shadow copy event",
+      "summary": "A VSS writer component refused to participate in a shadow copy operation, causing a partial or failed snapshot that may not be backup-consistent.",
+      "details": "Event 8229 is logged when a registered VSS writer reports an error or explicitly rejects (vetoes) a shadow copy event during the freeze/thaw cycle. The message format is: 'A VSS writer has rejected an event with error <HRESULT>. Changes that the writer made to the writer components and to the backup components document may not be stable.'\n\nVSS writers are application-specific components that ensure their application data is in a consistent state during snapshot creation. Common VSS writers include: NTDS (Active Directory), SqlServerWriter (SQL Server), Exchange Writer (Exchange Server), WMI Writer, Registry Writer, and System Writer.\n\n**Security relevance:**\n\n1. **Backup disruption:** Ransomware that actively interferes with VSS (e.g., by terminating writer processes or corrupting VSS state) will produce 8229 from the affected writers. A burst of 8229 events from multiple writers simultaneously is a strong indicator of VSS interference.\n\n2. **NTDS/Registry Writer failures:** Failure of the NTDS or Registry VSS writer is especially sensitive because it may indicate the corresponding service has been terminated or corrupted. Cross-reference with System log for unexpected service stops (EID 7036).\n\n3. **Backup integrity:** From a defensive standpoint, 8229 means the backup created at that time may not be consistent and may not be recoverable. This is directly relevant to incident response planning — an organisation that has only 8229-logged backups may find their recovery options limited after a ransomware event.\n\nThe HRESULT in the event identifies the writer and error type. Common writers can be resolved using `vssadmin list writers` output.",
+      "category": "Impact",
+      "tags": [
+        "vss",
+        "shadow-copy",
+        "backup-integrity",
+        "ransomware",
+        "impact"
+      ],
+      "relatedEventIds": [
+        { "id": 25, "log": "VSS" },
+        { "id": 8193, "log": "VSS" },
+        { "id": 8224, "log": "VSS" },
+        { "id": 4688, "log": "Security" },
+        { "id": 7036, "log": "System" }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            { "tacticId": "TA0040", "tacticName": "Impact" }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Which writer rejected the event — NTDS or SQL Server writer failures are more sensitive than generic system writer failures; identify the writer name from the HRESULT or from concurrent VSS diagnostic events",
+          "Frequency and concurrency — multiple writers failing simultaneously suggests systemic VSS disruption rather than an isolated writer crash",
+          "Correlation with service stops (System 7036) — a VSS writer rejection accompanied by a service-stopped event for the corresponding application confirms the writer process was terminated"
+        ],
+        "commonFalsePositives": [
+          "VSS writers for applications under heavy load (SQL Server during peak transactions) failing to freeze within the VSS timeout window",
+          "Third-party backup agents that register custom VSS writers with intermittent failures",
+          "VSS writer failures during system restarts or patch application when the underlying service is restarting"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
+      },
+      "volumeIndicator": "rare",
+      "keyFields": [
+        {
+          "name": "Message",
+          "description": "Contains the HRESULT error code from the rejecting writer; cross-reference with vssadmin list writers output to identify which application's writer failed"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Multiple VSS Writers Failing Simultaneously — Possible VSS Interference",
+          "rule": "Event\n| where Source == \"VSS\"\n| where EventID == 8229\n| summarize WriterErrorCount = count() by Computer, bin(TimeGenerated, 10m)\n| where WriterErrorCount > 2\n| project TimeGenerated, Computer, WriterErrorCount",
+          "notes": "Multiple writer rejections within 10 minutes suggests systemic VSS disruption. A single writer rejection is usually benign (transient application load). Correlate with 8193 and process creation for shadow deletion tools."
+        },
+        {
+          "platform": "Sigma",
+          "title": "VSS Writer Rejected Shadow Copy Event",
+          "rule": "title: VSS Writer Rejected Shadow Copy Event\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8229\n    condition: selection\nfalsepositives:\n    - Applications under heavy load during snapshot window\n    - Third-party backup agent VSS writer failures\nlevel: medium\ntags:\n    - attack.impact\n    - attack.t1490"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

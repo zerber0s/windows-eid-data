@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "1.6.1",
+    "version": "1.6.2",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Process created",
       "summary": "A new process was created.",
-      "details": "Generated when a new process is created. This is one of the most forensically valuable Sysmon events. Key fields: Image (full path of the new process), CommandLine (full command line including arguments), ParentImage and ParentCommandLine (the parent process that spawned this one), User (account context), Hashes (configurable; SHA256 recommended), CurrentDirectory, and IntegrityLevel. The combination of Image and CommandLine reveals masquerading — e.g., a process named svchost.exe running from a non-system path, or cmd.exe with encoded commands. ParentImage exposes process tree anomalies such as Word spawning PowerShell. Hashes enable threat intelligence lookups. Correlate with EID 5 to track process lifetime.",
+      "details": "Generated when a new process is created. This is one of the most forensically valuable Sysmon events. Key fields: Image (full path of the new process), CommandLine (full command line including arguments), ParentImage and ParentCommandLine (the parent process that spawned this one), User (account context), Hashes (configurable; SHA256 recommended), CurrentDirectory, and IntegrityLevel. The combination of Image and CommandLine reveals masquerading \u2014 e.g., a process named svchost.exe running from a non-system path, or cmd.exe with encoded commands. ParentImage exposes process tree anomalies such as Word spawning PowerShell. Hashes enable threat intelligence lookups. Correlate with EID 5 to track process lifetime.",
       "category": "Process Execution",
       "tags": [
         "process-creation",
@@ -39,6 +39,10 @@
         {
           "id": 5,
           "log": "Sysmon"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -65,7 +69,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Compare Image path against expected locations — system binaries should reside in System32 or SysWOW64",
+          "Compare Image path against expected locations \u2014 system binaries should reside in System32 or SysWOW64",
           "Review CommandLine for encoded payloads (base64, -EncodedCommand), LOLBAS flags (e.g., certutil -decode, regsvr32 /s /u, wscript /b, rundll32 with a non-standard export), or unusual argument patterns",
           "Examine ParentImage to identify unexpected process parent-child relationships (e.g., Office apps spawning scripting engines)",
           "Hash lookups against threat intelligence feeds can confirm known-bad binaries",
@@ -98,7 +102,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 2,
@@ -131,7 +135,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "PreviousCreationUtcTime more recent than CreationUtcTime confirms deliberate backdating",
-          "Identify Image — timestomping by scripting engines, tools like touch.exe, or unknown binaries warrants investigation",
+          "Identify Image \u2014 timestomping by scripting engines, tools like touch.exe, or unknown binaries warrants investigation",
           "Correlate TargetFilename with EID 11 (FileCreate) to establish when the file was actually written to disk",
           "Check if the forged CreationUtcTime aligns with a date that would make the file appear pre-existing"
         ],
@@ -158,7 +162,7 @@
       "level": "Information",
       "title": "Network connection",
       "summary": "A process initiated or received a network connection.",
-      "details": "Generated when a process makes or accepts a TCP/UDP network connection. Key fields: Image (the process), SourceIp, SourcePort, DestinationIp, DestinationPort, Protocol, and User. This event is invaluable for identifying C2 beaconing, lateral movement, and data exfiltration. Processes that do not normally communicate over the network (e.g., notepad.exe, mshta.exe, regsvr32.exe) making outbound connections are strong indicators of malicious activity. DestinationPort context matters — common ports used unusually (e.g., DNS over port 53 for tunneling, HTTP on non-standard ports) should be investigated. Correlate with EID 22 for DNS lookups that preceded the connection.",
+      "details": "Generated when a process makes or accepts a TCP/UDP network connection. Key fields: Image (the process), SourceIp, SourcePort, DestinationIp, DestinationPort, Protocol, and User. This event is invaluable for identifying C2 beaconing, lateral movement, and data exfiltration. Processes that do not normally communicate over the network (e.g., notepad.exe, mshta.exe, regsvr32.exe) making outbound connections are strong indicators of malicious activity. DestinationPort context matters \u2014 common ports used unusually (e.g., DNS over port 53 for tunneling, HTTP on non-standard ports) should be investigated. Correlate with EID 22 for DNS lookups that preceded the connection.",
       "category": "Network Activity",
       "tags": [
         "network",
@@ -197,7 +201,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Flag processes that do not ordinarily make network connections — this includes LOLBAS tools: LOLBins such as regsvr32.exe, mshta.exe, certutil.exe, and bitsadmin.exe; LOLBAS Scripts such as wscript.exe and cscript.exe; and libraries loaded via rundll32.exe",
+          "Flag processes that do not ordinarily make network connections \u2014 this includes LOLBAS tools: LOLBins such as regsvr32.exe, mshta.exe, certutil.exe, and bitsadmin.exe; LOLBAS Scripts such as wscript.exe and cscript.exe; and libraries loaded via rundll32.exe",
           "Check DestinationIp against threat intelligence; newly registered domains and dynamic DNS providers are common C2 indicators",
           "Periodic beaconing patterns (regular intervals to the same IP) suggest C2 heartbeats",
           "Correlate with EID 22 to link DNS resolution to the subsequent connection"
@@ -240,7 +244,7 @@
       "level": "Information",
       "title": "Sysmon service state changed",
       "summary": "The Sysmon service started or stopped.",
-      "details": "Generated when the Sysmon service itself starts or stops. Key field: State (Running or Stopped). A Stopped state outside of planned maintenance or updates is a significant indicator — adversaries frequently attempt to disable or uninstall Sysmon as part of defense evasion. Correlate with EID 16 to check for configuration tampering that may have preceded a service stop, and with Security log EID 4697 or System log EID 7036 to correlate with service control manager events.",
+      "details": "Generated when the Sysmon service itself starts or stops. Key field: State (Running or Stopped). A Stopped state outside of planned maintenance or updates is a significant indicator \u2014 adversaries frequently attempt to disable or uninstall Sysmon as part of defense evasion. Correlate with EID 16 to check for configuration tampering that may have preceded a service stop, and with Security log EID 4697 or System log EID 7036 to correlate with service control manager events.",
       "category": "Service Activity",
       "tags": [
         "sysmon",
@@ -300,7 +304,7 @@
       "level": "Information",
       "title": "Process terminated",
       "summary": "A process exited.",
-      "details": "Generated when a monitored process terminates. Key fields: Image and ProcessId. Correlate with EID 1 to determine the full process lifetime. Short-lived processes — those that spawn and terminate within seconds — are commonly used to execute payloads while avoiding prolonged visibility. The time delta between EID 1 and EID 5 for the same ProcessId reveals how briefly a process ran. Processes that are killed (rather than exiting naturally) may also be reflected here; correlate with parent process activity to distinguish clean exits from forced termination.",
+      "details": "Generated when a monitored process terminates. Key fields: Image and ProcessId. Correlate with EID 1 to determine the full process lifetime. Short-lived processes \u2014 those that spawn and terminate within seconds \u2014 are commonly used to execute payloads while avoiding prolonged visibility. The time delta between EID 1 and EID 5 for the same ProcessId reveals how briefly a process ran. Processes that are killed (rather than exiting naturally) may also be reflected here; correlate with parent process activity to distinguish clean exits from forced termination.",
       "category": "Process Execution",
       "tags": [
         "process-termination",
@@ -327,7 +331,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Calculate process lifetime by correlating ProcessId across EID 1 and EID 5 — very short-lived processes are a detection signal",
+          "Calculate process lifetime by correlating ProcessId across EID 1 and EID 5 \u2014 very short-lived processes are a detection signal",
           "Repeated rapid creation and termination of the same Image may indicate a dropper or loader pattern",
           "Correlate with EID 3 and EID 11 to see what network connections or files were created during the process lifetime"
         ],
@@ -354,7 +358,7 @@
       "level": "Information",
       "title": "Driver loaded",
       "summary": "A driver was loaded into the kernel.",
-      "details": "Generated when a driver is loaded into the kernel. Key fields: ImageLoaded (full path of the driver), Hashes, Signed (whether the driver has a valid digital signature), and SignatureStatus (Valid, Expired, Revoked, etc.). Kernel-mode drivers have unrestricted system access, making malicious driver loading (BYOVD — Bring Your Own Vulnerable Driver) a high-severity technique. Unsigned or invalidly signed drivers are immediately suspicious on modern systems, which enforce Driver Signature Enforcement (DSE). Even signed drivers loaded from unusual paths (user temp directories, non-system folders) warrant scrutiny. Correlate hashes against known vulnerable driver lists (e.g., loldrivers.io).",
+      "details": "Generated when a driver is loaded into the kernel. Key fields: ImageLoaded (full path of the driver), Hashes, Signed (whether the driver has a valid digital signature), and SignatureStatus (Valid, Expired, Revoked, etc.). Kernel-mode drivers have unrestricted system access, making malicious driver loading (BYOVD \u2014 Bring Your Own Vulnerable Driver) a high-severity technique. Unsigned or invalidly signed drivers are immediately suspicious on modern systems, which enforce Driver Signature Enforcement (DSE). Even signed drivers loaded from unusual paths (user temp directories, non-system folders) warrant scrutiny. Correlate hashes against known vulnerable driver lists (e.g., loldrivers.io).",
       "category": "Driver Load",
       "tags": [
         "driver",
@@ -388,7 +392,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Signed: false or SignatureStatus not Valid on a production system is a critical finding",
-          "Check ImageLoaded path — drivers should load from System32\\drivers or a known vendor path",
+          "Check ImageLoaded path \u2014 drivers should load from System32\\drivers or a known vendor path",
           "Hash the driver and check against known BYOVD databases (e.g., loldrivers.io)",
           "Correlate with EID 1 to identify what process initiated the driver load"
         ],
@@ -405,7 +409,17 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-04-10",
+      "relatedEventIds": [
+        {
+          "id": 3001,
+          "log": "CodeIntegrity"
+        },
+        {
+          "id": 3033,
+          "log": "CodeIntegrity"
+        }
+      ]
     },
     {
       "id": 7,
@@ -431,6 +445,10 @@
         {
           "id": 10,
           "log": "Sysmon"
+        },
+        {
+          "id": 316,
+          "log": "PrintSpooler"
         }
       ],
       "mitreAttack": [
@@ -463,7 +481,7 @@
           "Hash lookups can identify known malicious or vulnerable modules"
         ],
         "commonFalsePositives": [
-          "High-volume event — most loads are legitimate; effective detection requires tight scoping to sensitive processes",
+          "High-volume event \u2014 most loads are legitimate; effective detection requires tight scoping to sensitive processes",
           "Legitimate software loading unsigned third-party DLLs for plugins or add-ons"
         ]
       },
@@ -488,7 +506,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 8,
@@ -536,7 +554,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetImage of lsass.exe, winlogon.exe, or explorer.exe is high-priority — these are common injection targets",
+          "TargetImage of lsass.exe, winlogon.exe, or explorer.exe is high-priority \u2014 these are common injection targets",
           "StartAddress outside the address space of known loaded modules indicates shellcode",
           "Correlate SourceImage with EID 1 to understand the origin of the injecting process",
           "Correlate with EID 10 on the same TargetImage in the same time window to confirm the full injection sequence"
@@ -576,7 +594,7 @@
       "level": "Information",
       "title": "RawAccessRead",
       "summary": "A process read from a disk device using raw access.",
-      "details": "Generated when a process reads directly from a disk volume using raw access (bypassing the filesystem), detected via \\\\.\\PhysicalDrive or \\\\.\\HarddiskVolume handles. Key fields: Image (the reading process) and Device. Raw disk access is used by credential harvesting tools (to read the NTDS.dit database directly or read hibernation/page files), disk imaging utilities, rootkits to hide files, and destructive wipers. Legitimate consumers are narrow: backup software, disk management utilities, and forensic tools. Any raw disk access by unexpected processes — especially scripting engines, LOLBAS tools (binaries, scripts, or library loaders), or unknown executables — is suspicious.",
+      "details": "Generated when a process reads directly from a disk volume using raw access (bypassing the filesystem), detected via \\\\.\\PhysicalDrive or \\\\.\\HarddiskVolume handles. Key fields: Image (the reading process) and Device. Raw disk access is used by credential harvesting tools (to read the NTDS.dit database directly or read hibernation/page files), disk imaging utilities, rootkits to hide files, and destructive wipers. Legitimate consumers are narrow: backup software, disk management utilities, and forensic tools. Any raw disk access by unexpected processes \u2014 especially scripting engines, LOLBAS tools (binaries, scripts, or library loaders), or unknown executables \u2014 is suspicious.",
       "category": "Disk Access",
       "tags": [
         "raw-access",
@@ -614,7 +632,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify Image — raw disk access by anything other than known backup or forensic tools is suspicious",
+          "Identify Image \u2014 raw disk access by anything other than known backup or forensic tools is suspicious",
           "Correlate with EID 1 to inspect the full command line of the accessing process",
           "Raw access targeting PhysicalDrive0 or the system volume may indicate credential harvesting or disk wiping"
         ],
@@ -697,7 +715,7 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "LSASS Memory Access — Credential Dumping GrantedAccess",
+          "title": "LSASS Memory Access \u2014 Credential Dumping GrantedAccess",
           "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 10\n| parse EventData with * '<Data Name=\"TargetImage\">' TargetImage '</Data>' *\n| parse EventData with * '<Data Name=\"SourceImage\">' SourceImage '</Data>' *\n| parse EventData with * '<Data Name=\"GrantedAccess\">' GrantedAccess '</Data>' *\n| where TargetImage has \"lsass.exe\"\n| where GrantedAccess in (\"0x1010\", \"0x1410\", \"0x143A\", \"0x1438\", \"0x1FFFFF\")\n| where SourceImage !has_any (\"WerFault.exe\", \"MsMpEng.exe\")\n| project TimeGenerated, Computer, SourceImage, TargetImage, GrantedAccess\n| order by TimeGenerated desc",
           "notes": "GrantedAccess values 0x1010 and 0x1410 are the most common credential dumping access patterns. Allowlist your EDR/AV process. 0x1FFFFF (full access) is always suspicious."
         },
@@ -721,7 +739,7 @@
       "level": "Information",
       "title": "FileCreate",
       "summary": "A file was created or overwritten.",
-      "details": "Generated when a file is created or overwritten. Key fields: Image (the creating process), TargetFilename (full path of the file), and CreationUtcTime. This event complements EID 2 — EID 11 records when a file first appears on disk, while EID 2 records subsequent timestamp manipulation. High-value targets: files written to startup folders, Run key paths, scheduled task XML directories, web server roots, user temp/AppData directories, and system binary paths. Malware drops (executables, scripts, DLLs) to non-standard locations are primary detection targets. Correlate with EID 1 to tie the creating process to its full execution context.",
+      "details": "Generated when a file is created or overwritten. Key fields: Image (the creating process), TargetFilename (full path of the file), and CreationUtcTime. This event complements EID 2 \u2014 EID 11 records when a file first appears on disk, while EID 2 records subsequent timestamp manipulation. High-value targets: files written to startup folders, Run key paths, scheduled task XML directories, web server roots, user temp/AppData directories, and system binary paths. Malware drops (executables, scripts, DLLs) to non-standard locations are primary detection targets. Correlate with EID 1 to tie the creating process to its full execution context.",
       "category": "File Activity",
       "tags": [
         "file-creation",
@@ -774,7 +792,7 @@
         ],
         "commonFalsePositives": [
           "Software installers and patch processes create large numbers of files",
-          "Log and temp file creation by legitimate applications is very high volume — filter by extension and path"
+          "Log and temp file creation by legitimate applications is very high volume \u2014 filter by extension and path"
         ]
       },
       "source": {
@@ -806,7 +824,7 @@
       "provider": "Microsoft-Windows-Sysmon",
       "channel": "Microsoft-Windows-Sysmon/Operational",
       "level": "Information",
-      "title": "RegistryEvent — object created or deleted",
+      "title": "RegistryEvent \u2014 object created or deleted",
       "summary": "A registry key or value was created or deleted.",
       "details": "Generated when a registry key or value is created or deleted. Key fields: Image, EventType (CreateKey, DeleteKey, DeleteValue), TargetObject (the full registry path). Registry persistence mechanisms rely on key and value creation under well-known Run keys (HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run, HKCU equivalent), services keys (HKLM\\SYSTEM\\CurrentControlSet\\Services), and scheduled task registry entries. Deletions covering tracks (removing autorun keys after execution) are also captured. Correlate with EID 13 to track value data set under newly created keys.",
       "category": "Registry Activity",
@@ -875,9 +893,9 @@
       "provider": "Microsoft-Windows-Sysmon",
       "channel": "Microsoft-Windows-Sysmon/Operational",
       "level": "Information",
-      "title": "RegistryEvent — value set",
+      "title": "RegistryEvent \u2014 value set",
       "summary": "A registry value was set.",
-      "details": "Generated when a registry value is written. Key fields: Image, TargetObject (key path and value name), and Details (the data written to the value). This is the most forensically rich registry event because it captures the actual data — meaning you can see exactly what command, path, or payload was written into a persistence key. A Run value whose Details contain a PowerShell command, a path to a dropped executable in Temp, or an obfuscated command line is a high-confidence persistence indicator. Correlate with EID 12 (key creation) and EID 1 (execution of the registered payload).",
+      "details": "Generated when a registry value is written. Key fields: Image, TargetObject (key path and value name), and Details (the data written to the value). This is the most forensically rich registry event because it captures the actual data \u2014 meaning you can see exactly what command, path, or payload was written into a persistence key. A Run value whose Details contain a PowerShell command, a path to a dropped executable in Temp, or an obfuscated command line is a high-confidence persistence indicator. Correlate with EID 12 (key creation) and EID 1 (execution of the registered payload).",
       "category": "Registry Activity",
       "tags": [
         "registry",
@@ -944,9 +962,9 @@
       "provider": "Microsoft-Windows-Sysmon",
       "channel": "Microsoft-Windows-Sysmon/Operational",
       "level": "Information",
-      "title": "RegistryEvent — key or value renamed",
+      "title": "RegistryEvent \u2014 key or value renamed",
       "summary": "A registry key or value was renamed.",
-      "details": "Generated when a registry key or value is renamed. Key fields: Image, TargetObject (original name), and NewName (new name). Renaming is used to obscure malicious entries — for example, renaming a suspicious Run value to blend in with legitimate entries, or renaming a service key to impersonate a Windows component. Also used during cleanup: renaming to a temporary name before deletion. The combination of TargetObject and NewName reveals the attacker's obfuscation strategy.",
+      "details": "Generated when a registry key or value is renamed. Key fields: Image, TargetObject (original name), and NewName (new name). Renaming is used to obscure malicious entries \u2014 for example, renaming a suspicious Run value to blend in with legitimate entries, or renaming a service key to impersonate a Windows component. Also used during cleanup: renaming to a temporary name before deletion. The combination of TargetObject and NewName reveals the attacker's obfuscation strategy.",
       "category": "Registry Activity",
       "tags": [
         "registry",
@@ -1014,7 +1032,7 @@
       "level": "Information",
       "title": "FileCreateStreamHash",
       "summary": "A file was created with an alternate data stream.",
-      "details": "Generated when a file is created with an Alternate Data Stream (ADS), with the hash of the stream content. Key fields: Image, TargetFilename (includes the stream name, e.g., file.txt:Zone.Identifier), Hash, and Contents (if the stream is small). ADS has two primary security contexts: the Zone.Identifier stream added by Windows to files downloaded from the internet (Mark of the Web / MOTW), and adversarial use of ADS to hide payloads, executables, or scripts within innocent-looking files. MOTW bypass is a common initial access technique — files missing the expected Zone.Identifier stream after being received via email or download may indicate MOTW stripping. Executables or scripts stored in ADS by unexpected processes are high-confidence indicators.",
+      "details": "Generated when a file is created with an Alternate Data Stream (ADS), with the hash of the stream content. Key fields: Image, TargetFilename (includes the stream name, e.g., file.txt:Zone.Identifier), Hash, and Contents (if the stream is small). ADS has two primary security contexts: the Zone.Identifier stream added by Windows to files downloaded from the internet (Mark of the Web / MOTW), and adversarial use of ADS to hide payloads, executables, or scripts within innocent-looking files. MOTW bypass is a common initial access technique \u2014 files missing the expected Zone.Identifier stream after being received via email or download may indicate MOTW stripping. Executables or scripts stored in ADS by unexpected processes are high-confidence indicators.",
       "category": "Alternate Data Stream",
       "tags": [
         "ads",
@@ -1080,7 +1098,7 @@
       "level": "Information",
       "title": "Sysmon configuration changed",
       "summary": "The Sysmon configuration was updated.",
-      "details": "Generated when the Sysmon configuration file is updated. Key fields: Configuration (path to the new config file) and ConfigurationFileHash. This event is significant because an attacker with administrative access may update the Sysmon configuration to reduce or eliminate logging coverage before executing their next stage. An unexpected configuration change — especially one not correlated with a known change management window — should be treated as a defense evasion indicator. Correlate with EID 4 (service stop/start) to determine if a reconfiguration preceded a service restart.",
+      "details": "Generated when the Sysmon configuration file is updated. Key fields: Configuration (path to the new config file) and ConfigurationFileHash. This event is significant because an attacker with administrative access may update the Sysmon configuration to reduce or eliminate logging coverage before executing their next stage. An unexpected configuration change \u2014 especially one not correlated with a known change management window \u2014 should be treated as a defense evasion indicator. Correlate with EID 4 (service stop/start) to determine if a reconfiguration preceded a service restart.",
       "category": "Service Activity",
       "tags": [
         "sysmon",
@@ -1111,7 +1129,7 @@
           "Correlate with EID 1 to identify what process (sysmon.exe invocation) applied the configuration change",
           "Compare ConfigurationFileHash against the known-good hash of the authorized config",
           "Unexpected reconfiguration followed by reduced event volume is a strong tamper signal",
-          "Review EID 4 in the same time window — reconfiguration often accompanies a service restart"
+          "Review EID 4 in the same time window \u2014 reconfiguration often accompanies a service restart"
         ],
         "commonFalsePositives": [
           "Planned configuration updates deployed by the security team or via endpoint management tooling",
@@ -1202,7 +1220,7 @@
       "level": "Information",
       "title": "Pipe connected",
       "summary": "A process connected to a named pipe.",
-      "details": "Generated when a process connects to an existing named pipe. Key fields: Image (the connecting process) and PipeName. Correlate with EID 17 to map the full picture of a named pipe channel: which process created the pipe and which process connected to it. In lateral movement scenarios, a pipe may be created on a remote system and connected to locally via SMB. The combination of Image and PipeName — especially when the connecting process is unusual — is the key detection pivot.",
+      "details": "Generated when a process connects to an existing named pipe. Key fields: Image (the connecting process) and PipeName. Correlate with EID 17 to map the full picture of a named pipe channel: which process created the pipe and which process connected to it. In lateral movement scenarios, a pipe may be created on a remote system and connected to locally via SMB. The combination of Image and PipeName \u2014 especially when the connecting process is unusual \u2014 is the key detection pivot.",
       "category": "Named Pipe",
       "tags": [
         "named-pipe",
@@ -1244,7 +1262,7 @@
           "Connections from unexpected or scripting-engine processes to any named pipe warrants review"
         ],
         "commonFalsePositives": [
-          "Same as EID 17 — many legitimate applications use named pipe IPC",
+          "Same as EID 17 \u2014 many legitimate applications use named pipe IPC",
           "Windows system components and services communicate over named pipes extensively"
         ]
       },
@@ -1266,7 +1284,7 @@
       "level": "Information",
       "title": "WMI event filter registered",
       "summary": "A WMI event filter was registered.",
-      "details": "Generated when a WMI event filter is registered. Key fields: User, EventNamespace, Name (filter name), and Query (the WQL query defining the trigger condition). This is the first of three events that together document a WMI permanent event subscription — the other two are EID 20 (consumer) and EID 21 (binding). The Query field reveals the trigger: common malicious queries target __InstanceCreationEvent on Win32_Process (trigger on process creation), Win32_LoggedOnUser (trigger on logon), or timer events. Correlate EID 19, 20, and 21 together — a complete subscription requires all three. Also correlate with WMI EID 5861.",
+      "details": "Generated when a WMI event filter is registered. Key fields: User, EventNamespace, Name (filter name), and Query (the WQL query defining the trigger condition). This is the first of three events that together document a WMI permanent event subscription \u2014 the other two are EID 20 (consumer) and EID 21 (binding). The Query field reveals the trigger: common malicious queries target __InstanceCreationEvent on Win32_Process (trigger on process creation), Win32_LoggedOnUser (trigger on logon), or timer events. Correlate EID 19, 20, and 21 together \u2014 a complete subscription requires all three. Also correlate with WMI EID 5861.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -1365,7 +1383,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Type of CommandLineEventConsumer or ActiveScriptEventConsumer indicates code execution capability — investigate immediately",
+          "Type of CommandLineEventConsumer or ActiveScriptEventConsumer indicates code execution capability \u2014 investigate immediately",
           "Destination reveals the payload: examine for encoded commands, paths to dropped files, or LOLBAS invocations (e.g., cmd.exe, wscript.exe, mshta.exe, certutil.exe, or rundll32.exe with a .dll path)",
           "Correlate Name with EID 19 filter and EID 21 binding to reconstruct the complete subscription"
         ],
@@ -1391,7 +1409,7 @@
       "level": "Information",
       "title": "WMI consumer-to-filter binding",
       "summary": "A WMI consumer was bound to a filter, completing a persistent event subscription.",
-      "details": "Generated when a WMI consumer is bound to an event filter, completing a permanent WMI event subscription. Key fields: User, Consumer (the consumer reference), and Filter (the filter reference). This event is the final piece that activates a WMI subscription — without this binding, the filter and consumer exist independently but do not function. The presence of all three events (EID 19, 20, 21) within a short time window on the same system strongly indicates subscription creation. Enumerate the root\\subscription namespace to verify the subscription persists after reboot.",
+      "details": "Generated when a WMI consumer is bound to an event filter, completing a permanent WMI event subscription. Key fields: User, Consumer (the consumer reference), and Filter (the filter reference). This event is the final piece that activates a WMI subscription \u2014 without this binding, the filter and consumer exist independently but do not function. The presence of all three events (EID 19, 20, 21) within a short time window on the same system strongly indicates subscription creation. Enumerate the root\\subscription namespace to verify the subscription persists after reboot.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -1453,7 +1471,7 @@
       "level": "Information",
       "title": "DNS query",
       "summary": "A process made a DNS query.",
-      "details": "Generated when a process makes a DNS query. Key fields: Image (the querying process), QueryName (the domain queried), QueryStatus (success/failure), and QueryResults (the resolved IP addresses). DNS is the most common C2 discovery channel. This event captures the domain lookup that precedes a network connection — correlating EID 22 with EID 3 on the same Image links a domain name to the subsequent IP-level connection. DNS-based C2 (DNS tunneling) produces high query volumes to unusual subdomains of a single parent domain. Unusual domains queried by system processes or LOLBAS tools (e.g., certutil.exe, mshta.exe, wscript.exe, powershell.exe) are a strong signal.",
+      "details": "Generated when a process makes a DNS query. Key fields: Image (the querying process), QueryName (the domain queried), QueryStatus (success/failure), and QueryResults (the resolved IP addresses). DNS is the most common C2 discovery channel. This event captures the domain lookup that precedes a network connection \u2014 correlating EID 22 with EID 3 on the same Image links a domain name to the subsequent IP-level connection. DNS-based C2 (DNS tunneling) produces high query volumes to unusual subdomains of a single parent domain. Unusual domains queried by system processes or LOLBAS tools (e.g., certutil.exe, mshta.exe, wscript.exe, powershell.exe) are a strong signal.",
       "category": "DNS Activity",
       "tags": [
         "dns",
@@ -1466,6 +1484,10 @@
         {
           "id": 3,
           "log": "Sysmon"
+        },
+        {
+          "id": 3006,
+          "log": "DNSClient"
         }
       ],
       "mitreAttack": [
@@ -1532,7 +1554,7 @@
           "description": "Process ID making the query; correlate with Sysmon EID 1 (Process Create) to get the full process context"
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 23,
@@ -1608,7 +1630,7 @@
       "level": "Information",
       "title": "Clipboard changed",
       "summary": "New content was placed in the clipboard.",
-      "details": "Generated when the clipboard content changes. Key fields: Image (the process that changed the clipboard), Session, ClientInfo, and Hashes (hash of the clipboard content). This event supports detection of clipboard hijacking — a technique where malware monitors the clipboard and substitutes cryptocurrency wallet addresses or other values when a victim copies sensitive data. It also captures intentional clipboard data collection. The event can be high-volume on busy systems; targeted analysis around suspicious processes is more practical than bulk alerting.",
+      "details": "Generated when the clipboard content changes. Key fields: Image (the process that changed the clipboard), Session, ClientInfo, and Hashes (hash of the clipboard content). This event supports detection of clipboard hijacking \u2014 a technique where malware monitors the clipboard and substitutes cryptocurrency wallet addresses or other values when a victim copies sensitive data. It also captures intentional clipboard data collection. The event can be high-volume on busy systems; targeted analysis around suspicious processes is more practical than bulk alerting.",
       "category": "Clipboard Activity",
       "tags": [
         "clipboard",
@@ -1673,7 +1695,7 @@
       "level": "Information",
       "title": "Process tampering",
       "summary": "A process image was tampered with (hollowing or herpaderping detected).",
-      "details": "Generated when Sysmon detects that a process's memory image does not match its on-disk image — indicators of process hollowing or process herpaderping. Key fields: Image (the tampered process), ProcessId, and Type (Hollowing or Herpaderping). Process hollowing replaces the memory of a legitimate process with a malicious payload after creation, allowing malware to masquerade under a trusted process name. Process herpaderping modifies the on-disk executable after mapping it into memory, defeating hash-based detection. Both techniques are used to evade process-based detections and allowlisting. This is a high-fidelity detection event with very low false positive rates.",
+      "details": "Generated when Sysmon detects that a process's memory image does not match its on-disk image \u2014 indicators of process hollowing or process herpaderping. Key fields: Image (the tampered process), ProcessId, and Type (Hollowing or Herpaderping). Process hollowing replaces the memory of a legitimate process with a malicious payload after creation, allowing malware to masquerade under a trusted process name. Process herpaderping modifies the on-disk executable after mapping it into memory, defeating hash-based detection. Both techniques are used to evade process-based detections and allowlisting. This is a high-fidelity detection event with very low false positive rates.",
       "category": "Code Injection",
       "tags": [
         "process-hollowing",
@@ -1715,7 +1737,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Any EID 25 alert should be treated as a high-confidence indicator — false positive rates are very low",
+          "Any EID 25 alert should be treated as a high-confidence indicator \u2014 false positive rates are very low",
           "Identify Image and ProcessId, then correlate with EID 1 to find what created this process and what command line was used",
           "Type: Hollowing indicates the memory image was replaced; Type: Herpaderping indicates on-disk file was modified after mapping",
           "Correlate with EID 3 and EID 11 from the same process to identify C2 communications or file drops during the tampered process lifetime"
@@ -1758,7 +1780,7 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "Sysmon Process Tampering — Hollowing or Herpaderping",
+          "title": "Sysmon Process Tampering \u2014 Hollowing or Herpaderping",
           "rule": "Event\n| where Source == \"Microsoft-Windows-Sysmon\"\n| where EventID == 25\n| project TimeGenerated, Computer, UserName,\n    Image = extract(@'<Data Name=\"Image\">(.+?)</Data>', 1, EventData),\n    Type = extract(@'<Data Name=\"Type\">(.+?)</Data>', 1, EventData),\n    ProcessId = extract(@'<Data Name=\"ProcessId\">(.+?)</Data>', 1, EventData)\n| extend Severity = \"HIGH - Process tampering detected\"",
           "notes": "Any EID 25 event should be treated as high confidence malicious activity. Process hollowing and Herpaderping are used to evade AV/EDR by running malicious code inside legitimate process images."
         },
@@ -1766,7 +1788,7 @@
           "platform": "Splunk",
           "title": "Sysmon Process Tampering Detection",
           "rule": "index=sysmon EventCode=25\n| eval severity=\"HIGH\"\n| table _time, Image, Type, ProcessId, host, severity",
-          "notes": "Zero-noise rule. Process tampering is not a benign operation — treat every event as an incident until proven otherwise."
+          "notes": "Zero-noise rule. Process tampering is not a benign operation \u2014 treat every event as an incident until proven otherwise."
         },
         {
           "platform": "Sigma",
@@ -1785,7 +1807,7 @@
       "level": "Information",
       "title": "File delete detected",
       "summary": "A file deletion was detected (Sysmon v13+; monitoring only, no archive).",
-      "details": "Generated when a file is deleted, introduced in Sysmon v13. Unlike EID 23 (which archives the deleted file), EID 26 only records the deletion event without saving a copy, making it lower-cost for high-volume environments. Key fields: Image (the process that deleted the file), TargetFilename (deleted file path), and IsExecutable. High-frequency file deletions by a single process — especially targeting document files (.docx, .xlsx, .pdf) — is a strong ransomware indicator. Deletions targeting log files, forensic tools, or security software indicate anti-forensic activity.",
+      "details": "Generated when a file is deleted, introduced in Sysmon v13. Unlike EID 23 (which archives the deleted file), EID 26 only records the deletion event without saving a copy, making it lower-cost for high-volume environments. Key fields: Image (the process that deleted the file), TargetFilename (deleted file path), and IsExecutable. High-frequency file deletions by a single process \u2014 especially targeting document files (.docx, .xlsx, .pdf) \u2014 is a strong ransomware indicator. Deletions targeting log files, forensic tools, or security software indicate anti-forensic activity.",
       "category": "File System",
       "tags": [
         "file-delete",
@@ -1831,7 +1853,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "High-volume deletions of document files by an unexpected process is a ransomware indicator — correlate with EID 11 to check for concurrent encrypted file creation",
+          "High-volume deletions of document files by an unexpected process is a ransomware indicator \u2014 correlate with EID 11 to check for concurrent encrypted file creation",
           "Deletions targeting event log files, VSS snapshots, backup tools, or EDR components indicate anti-forensic behavior",
           "IsExecutable: true combined with a non-uninstaller process warrants immediate investigation",
           "Correlate Image with EID 1 to review full process ancestry and ParentCommandLine"
@@ -1859,7 +1881,7 @@
       "level": "Warning",
       "title": "FileBlockExecutable",
       "summary": "Sysmon blocked the creation of an executable file by a monitored process.",
-      "details": "Generated (Sysmon 14.0+) when a process that matches a configured FileBlockExecutable rule attempts to create an executable file (PE with MZ header) and Sysmon's blocking rule prevents the write. This event is generated instead of the file being created — the file creation is blocked. Key fields: RuleName, UtcTime, ProcessGuid, ProcessId, Image (the process that attempted to create the executable), TargetFilename, and Hashes. This provides enforcement capability beyond detection: processes like Word, Excel, or browsers can be blocked from writing executable files to disk, directly preventing the dropper stage of many malware infection chains.",
+      "details": "Generated (Sysmon 14.0+) when a process that matches a configured FileBlockExecutable rule attempts to create an executable file (PE with MZ header) and Sysmon's blocking rule prevents the write. This event is generated instead of the file being created \u2014 the file creation is blocked. Key fields: RuleName, UtcTime, ProcessGuid, ProcessId, Image (the process that attempted to create the executable), TargetFilename, and Hashes. This provides enforcement capability beyond detection: processes like Word, Excel, or browsers can be blocked from writing executable files to disk, directly preventing the dropper stage of many malware infection chains.",
       "category": "File Block",
       "tags": [
         "sysmon",
@@ -1909,9 +1931,9 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Image field identifies which process attempted to drop the executable — Office apps, browsers, script interpreters are highest priority",
-          "TargetFilename reveals the intended drop location — temp directories, startup folders, and AppData are most significant",
-          "Unlike EID 11 (FileCreate), EID 27 means the file was NOT written — but the attempt itself is the indicator"
+          "Image field identifies which process attempted to drop the executable \u2014 Office apps, browsers, script interpreters are highest priority",
+          "TargetFilename reveals the intended drop location \u2014 temp directories, startup folders, and AppData are most significant",
+          "Unlike EID 11 (FileCreate), EID 27 means the file was NOT written \u2014 but the attempt itself is the indicator"
         ],
         "commonFalsePositives": [
           "Legitimate software updaters or package managers that write executables and were not excluded in the Sysmon config",
@@ -1936,7 +1958,7 @@
       "level": "Warning",
       "title": "FileBlockShredding",
       "summary": "Sysmon blocked a file shredding (secure deletion) attempt by a monitored process.",
-      "details": "Generated (Sysmon 14.0+) when a process matching a FileBlockShredding rule attempts to securely delete (shred) a file — overwriting its content before deletion to prevent forensic recovery — and Sysmon blocks the operation. Key fields: RuleName, ProcessId, Image, TargetFilename. File shredding is used by attackers to destroy forensic evidence (log files, malware binaries, exfiltration staging files) after an operation. Blocking shredding preserves evidence that would otherwise be irrecoverably destroyed. This event type is most valuable for protecting evidence integrity during an active incident.",
+      "details": "Generated (Sysmon 14.0+) when a process matching a FileBlockShredding rule attempts to securely delete (shred) a file \u2014 overwriting its content before deletion to prevent forensic recovery \u2014 and Sysmon blocks the operation. Key fields: RuleName, ProcessId, Image, TargetFilename. File shredding is used by attackers to destroy forensic evidence (log files, malware binaries, exfiltration staging files) after an operation. Blocking shredding preserves evidence that would otherwise be irrecoverably destroyed. This event type is most valuable for protecting evidence integrity during an active incident.",
       "category": "File Block",
       "tags": [
         "sysmon",
@@ -1986,8 +2008,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the process attempting shredding (Image) — dedicated shredding tools (sdelete.exe, cipher.exe /w) in attacker context are high-confidence indicators",
-          "TargetFilename reveals what the attacker was trying to destroy — log files, malware binaries, and credential stores are highest priority targets",
+          "Identify the process attempting shredding (Image) \u2014 dedicated shredding tools (sdelete.exe, cipher.exe /w) in attacker context are high-confidence indicators",
+          "TargetFilename reveals what the attacker was trying to destroy \u2014 log files, malware binaries, and credential stores are highest priority targets",
           "Correlate with EID 23 (FileDelete) for the same process to see what was successfully deleted before the block"
         ],
         "commonFalsePositives": [
@@ -2013,7 +2035,7 @@
       "level": "Information",
       "title": "FileExecutableDetected",
       "summary": "Sysmon detected the creation of an executable file in a monitored directory.",
-      "details": "Generated (Sysmon 14.0+) when an executable file (detected by MZ header, not just file extension) is created in a directory monitored by a FileExecutableDetected rule. Key fields: RuleName, ProcessId, Image (the creating process), TargetFilename, and Hashes. Unlike EID 11 (FileCreate), which triggers on any file write matching a path filter, EID 29 specifically detects PE executables by content — catching renamed executables regardless of extension. This is the detection-only complement to EID 27 (FileBlockExecutable): use EID 29 to alert on executable drops in sensitive directories without blocking, and EID 27 to enforce blocking.",
+      "details": "Generated (Sysmon 14.0+) when an executable file (detected by MZ header, not just file extension) is created in a directory monitored by a FileExecutableDetected rule. Key fields: RuleName, ProcessId, Image (the creating process), TargetFilename, and Hashes. Unlike EID 11 (FileCreate), which triggers on any file write matching a path filter, EID 29 specifically detects PE executables by content \u2014 catching renamed executables regardless of extension. This is the detection-only complement to EID 27 (FileBlockExecutable): use EID 29 to alert on executable drops in sensitive directories without blocking, and EID 27 to enforce blocking.",
       "category": "File Detection",
       "tags": [
         "sysmon",
@@ -2052,9 +2074,9 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "EID 29 detects by MZ/PE header content, not extension — catches executables renamed to .txt, .jpg, or other extensions to evade EID 11 extension filters",
+          "EID 29 detects by MZ/PE header content, not extension \u2014 catches executables renamed to .txt, .jpg, or other extensions to evade EID 11 extension filters",
           "Monitor high-value staging paths: %TEMP%, %APPDATA%, user Download folders, and web server document roots",
-          "Correlate Hashes with threat intelligence immediately — the executable was already written to disk when this event fires"
+          "Correlate Hashes with threat intelligence immediately \u2014 the executable was already written to disk when this event fires"
         ],
         "commonFalsePositives": [
           "Software installers and update mechanisms writing executables to monitored directories",

@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Netlogon",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/netlogon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -160,7 +160,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate timing with EID 5827/5828 on nearby DCs — secure channel failures immediately preceding Zerologon block events are a strong exploitation indicator",
+          "Correlate timing with EID 5827/5828 on nearby DCs \u2014 secure channel failures immediately preceding Zerologon block events are a strong exploitation indicator",
           "Source machine that does not have a corresponding active computer account in AD is suspicious",
           "Failure reason indicating authentication errors (rather than network errors) warrants deeper investigation"
         ],
@@ -192,8 +192,8 @@
       "channel": "Microsoft-Windows-Netlogon/Operational",
       "level": "Error",
       "title": "Netlogon denied a vulnerable Netlogon secure channel connection from a machine account",
-      "summary": "The Netlogon service blocked a vulnerable secure channel connection attempt — Zerologon exploitation attempt detected.",
-      "details": "Generated on domain controllers when the Netlogon service denies a connection that used the vulnerable Netlogon secure channel established by CVE-2020-1472 (Zerologon). This event was added by Microsoft's patch for Zerologon (KB4557222) and fires when the DC detects and blocks a connection using the vulnerable authentication protocol. Key fields: ComputerName (the machine attempting the connection — may be the attacker's machine or a spoofed machine account name). This is a high-confidence Zerologon exploitation attempt indicator — this event should never appear in a healthy environment. The complement is EID 5829, which fires when the DC allows a similarly vulnerable connection (indicating enforcement mode is not active). Requires DC to be patched with the Zerologon fix and running in enforcement mode (deployment phase 2 of the Zerologon patch). DC-only event.",
+      "summary": "The Netlogon service blocked a vulnerable secure channel connection attempt \u2014 Zerologon exploitation attempt detected.",
+      "details": "Generated on domain controllers when the Netlogon service denies a connection that used the vulnerable Netlogon secure channel established by CVE-2020-1472 (Zerologon). This event was added by Microsoft's patch for Zerologon (KB4557222) and fires when the DC detects and blocks a connection using the vulnerable authentication protocol. Key fields: ComputerName (the machine attempting the connection \u2014 may be the attacker's machine or a spoofed machine account name). This is a high-confidence Zerologon exploitation attempt indicator \u2014 this event should never appear in a healthy environment. The complement is EID 5829, which fires when the DC allows a similarly vulnerable connection (indicating enforcement mode is not active). Requires DC to be patched with the Zerologon fix and running in enforcement mode (deployment phase 2 of the Zerologon patch). DC-only event.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",
@@ -249,14 +249,14 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Any occurrence of this event is a critical alert — treat as an active Zerologon exploitation attempt and investigate ComputerName immediately",
+          "Any occurrence of this event is a critical alert \u2014 treat as an active Zerologon exploitation attempt and investigate ComputerName immediately",
           "ComputerName that does not match a known machine account in AD indicates a spoofed or attacker-controlled machine name",
           "Correlate source IP of the connection with network logs and DHCP/ARP to identify the actual attacking machine",
-          "Check for subsequent password change events (EID 4723, 4724) on the domain or krbtgt account — successful Zerologon results in machine account password being set to empty",
+          "Check for subsequent password change events (EID 4723, 4724) on the domain or krbtgt account \u2014 successful Zerologon results in machine account password being set to empty",
           "Presence of 5827 without 5829 confirms enforcement mode is active and the attack was blocked"
         ],
         "commonFalsePositives": [
-          "No known legitimate false positives — this event only fires for connections using the vulnerable Netlogon protocol variant",
+          "No known legitimate false positives \u2014 this event only fires for connections using the vulnerable Netlogon protocol variant",
           "Old or unpatched member machines using legacy Netlogon implementations may trigger this if enforcement mode catches their normal authentication"
         ]
       },
@@ -302,7 +302,7 @@
           "platform": "Splunk",
           "title": "Zerologon Blocked Connection",
           "rule": "index=wineventlog EventCode=5827\n| eval severity=\"CRITICAL\"\n| table _time, ComputerName, DomainName, severity, host",
-          "notes": "Zero false positive threshold — any event is a confirmed Zerologon attempt. Page on-call immediately."
+          "notes": "Zero false positive threshold \u2014 any event is a confirmed Zerologon attempt. Page on-call immediately."
         },
         {
           "platform": "Sigma",
@@ -320,8 +320,8 @@
       "channel": "Microsoft-Windows-Netlogon/Operational",
       "level": "Error",
       "title": "Netlogon denied a vulnerable Netlogon secure channel connection using a trust account",
-      "summary": "The Netlogon service blocked a vulnerable secure channel connection via a trust account — Zerologon variant detected.",
-      "details": "Closely related to EID 5827, this variant fires when the blocked vulnerable Netlogon connection used a trust account rather than a machine account. Trust accounts represent inter-domain trust relationships — a Zerologon attack targeting a trust account could allow an attacker to compromise a domain trust and gain cross-domain access. Key fields: AccountName (the trust account targeted), source IP or machine context. The same severity and investigation approach as 5827 applies, with the additional dimension that trust accounts control domain boundary security. DC-only event. Requires the same Zerologon patch as 5827.",
+      "summary": "The Netlogon service blocked a vulnerable secure channel connection via a trust account \u2014 Zerologon variant detected.",
+      "details": "Closely related to EID 5827, this variant fires when the blocked vulnerable Netlogon connection used a trust account rather than a machine account. Trust accounts represent inter-domain trust relationships \u2014 a Zerologon attack targeting a trust account could allow an attacker to compromise a domain trust and gain cross-domain access. Key fields: AccountName (the trust account targeted), source IP or machine context. The same severity and investigation approach as 5827 applies, with the additional dimension that trust accounts control domain boundary security. DC-only event. Requires the same Zerologon patch as 5827.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",
@@ -387,8 +387,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Any occurrence is a critical alert — a Zerologon attempt against a trust account targets the domain trust boundary, enabling cross-domain privilege escalation",
-          "AccountName reveals which trust relationship was targeted — investigate the source and destination domains of that trust",
+          "Any occurrence is a critical alert \u2014 a Zerologon attempt against a trust account targets the domain trust boundary, enabling cross-domain privilege escalation",
+          "AccountName reveals which trust relationship was targeted \u2014 investigate the source and destination domains of that trust",
           "Correlate with EID 4706/4716 (trust creation/modification) to determine if the attacker has already tampered with the targeted trust",
           "Presence alongside EID 5827 events indicates a sophisticated attacker targeting both machine and trust accounts"
         ],
@@ -419,8 +419,8 @@
       "channel": "Microsoft-Windows-Netlogon/Operational",
       "level": "Warning",
       "title": "Netlogon allowed a vulnerable Netlogon secure channel connection",
-      "summary": "The Netlogon service allowed a connection using the vulnerable Netlogon protocol — enforcement mode is not fully active.",
-      "details": "Generated on domain controllers when a connection using the vulnerable Netlogon secure channel protocol (the same one exploited by CVE-2020-1472 / Zerologon) was allowed rather than blocked. This event fires during the compatibility phase of the Zerologon patch, where enforcement mode has not yet been enabled (FullSecureChannelProtection = 0) and the DC logs the vulnerable connection without blocking it. This event is critical because it indicates: (1) the DC is not fully protected against Zerologon, and (2) a potentially active Zerologon exploitation attempt was allowed to proceed. In a fully patched, enforcement-mode DC, this event should not appear — its presence means either enforcement mode is disabled or a legacy device is using the vulnerable protocol. Key fields: ComputerName (the machine allowed to connect using the vulnerable channel). DC-only event.",
+      "summary": "The Netlogon service allowed a connection using the vulnerable Netlogon protocol \u2014 enforcement mode is not fully active.",
+      "details": "Generated on domain controllers when a connection using the vulnerable Netlogon secure channel protocol (the same one exploited by CVE-2020-1472 / Zerologon) was allowed rather than blocked. This event fires during the compatibility phase of the Zerologon patch, where enforcement mode has not yet been enabled (FullSecureChannelProtection = 0) and the DC logs the vulnerable connection without blocking it. This event is critical because it indicates: (1) the DC is not fully protected against Zerologon, and (2) a potentially active Zerologon exploitation attempt was allowed to proceed. In a fully patched, enforcement-mode DC, this event should not appear \u2014 its presence means either enforcement mode is disabled or a legacy device is using the vulnerable protocol. Key fields: ComputerName (the machine allowed to connect using the vulnerable channel). DC-only event.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",
@@ -446,6 +446,14 @@
         {
           "id": 5805,
           "log": "Netlogon"
+        },
+        {
+          "id": 4723,
+          "log": "Security"
+        },
+        {
+          "id": 4724,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -472,9 +480,9 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Any occurrence of this event means the DC accepted a Zerologon-vulnerable connection — treat as a potential active exploitation even if 5827 is not also present",
-          "Immediately check whether enforcement mode is enabled (HKLM\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\FullSecureChannelProtection) — if 0, enable it after verifying legacy device compatibility",
-          "ComputerName should be investigated — if it is not a known legacy device with a documented compatibility exception, treat as an attacker",
+          "Any occurrence of this event means the DC accepted a Zerologon-vulnerable connection \u2014 treat as a potential active exploitation even if 5827 is not also present",
+          "Immediately check whether enforcement mode is enabled (HKLM\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\\FullSecureChannelProtection) \u2014 if 0, enable it after verifying legacy device compatibility",
+          "ComputerName should be investigated \u2014 if it is not a known legacy device with a documented compatibility exception, treat as an attacker",
           "Audit for downstream impact: check for machine account password resets (EID 4723/4724) and unexpected domain admin logons in the timeframe following this event"
         ],
         "commonFalsePositives": [
@@ -500,7 +508,7 @@
         {
           "name": "ComputerName",
           "xpath": "EventData/Data[@Name='ComputerName']",
-          "description": "Name of the computer that was allowed a vulnerable connection — indicates an unpatched DC or compatibility mode"
+          "description": "Name of the computer that was allowed a vulnerable connection \u2014 indicates an unpatched DC or compatibility mode"
         },
         {
           "name": "DomainName",
@@ -516,13 +524,13 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "CRITICAL: Zerologon Allowed — Vulnerable Connection Permitted (EID 5829)",
+          "title": "CRITICAL: Zerologon Allowed \u2014 Vulnerable Connection Permitted (EID 5829)",
           "rule": "Event\n| where Source == \"Microsoft-Windows-Netlogon\"\n| where EventID == 5829\n| project TimeGenerated, Computer, RenderedDescription\n| extend Severity = \"P0 - Zerologon ALLOWED - immediate action required\"",
           "notes": "HIGHEST SEVERITY. This means either: (1) the DC is not fully patched, or (2) enforcement mode was disabled for compatibility. The domain may already be compromised. Isolate the DC and audit immediately."
         },
         {
           "platform": "Splunk",
-          "title": "Zerologon Allowed — P0 Alert",
+          "title": "Zerologon Allowed \u2014 P0 Alert",
           "rule": "index=wineventlog EventCode=5829\n| eval severity=\"P0 - ZEROLOGON ALLOWED\"\n| table _time, ComputerName, DomainName, severity, host\n| sort -_time",
           "notes": "P0 alert. If seen in production, assume domain compromise until proven otherwise."
         },
@@ -533,7 +541,7 @@
           "notes": "More severe than 5827. The DC is actively allowing Zerologon-vulnerable connections."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-10"
     }
   ]
 }
