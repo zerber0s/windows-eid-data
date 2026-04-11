@@ -22,8 +22,8 @@
     {
       "id": 403,
       "log": "ADFS",
-      "provider": "AD FS",
-      "channel": "AD FS/Admin",
+      "provider": "AD FS Auditing",
+      "channel": "Security",
       "level": "Warning",
       "title": "ADFS authentication request rejected",
       "summary": "An authentication request to the ADFS federation service was rejected.",
@@ -125,8 +125,8 @@
     {
       "id": 411,
       "log": "ADFS",
-      "provider": "AD FS",
-      "channel": "AD FS/Admin",
+      "provider": "AD FS Auditing",
+      "channel": "Security",
       "level": "Information",
       "title": "Token request with additional authentication context",
       "summary": "An OAuth 2.0 or OIDC token request included additional authentication context, such as MFA claims.",
@@ -201,8 +201,8 @@
     {
       "id": 501,
       "log": "ADFS",
-      "provider": "AD FS",
-      "channel": "AD FS/Admin",
+      "provider": "AD FS Auditing",
+      "channel": "Security",
       "level": "Warning",
       "title": "Extranet lockout triggered",
       "summary": "An account has been locked out by the ADFS Extranet Smart Lockout mechanism due to excessive failed authentication attempts.",
@@ -274,8 +274,8 @@
     {
       "id": 510,
       "log": "ADFS",
-      "provider": "AD FS",
-      "channel": "AD FS/Admin",
+      "provider": "AD FS Auditing",
+      "channel": "Security",
       "level": "Information",
       "title": "Token issued to relying party",
       "summary": "ADFS successfully issued a SAML, OAuth, or WS-Federation token to a relying party application.",
@@ -531,74 +531,6 @@
           "title": "ADFS Token Signing Certificate Replacement",
           "rule": "title: ADFS Token Signing Certificate Replacement\nstatus: experimental\nlogsource:\n    product: windows\n    service: adfs\ndetection:\n    selection:\n        EventID: 1007\n    condition: selection\nfalsepositives:\n    - Planned certificate auto-rollover (ADFS default: 20 days before expiry)\n    - Administrator-initiated certificate rotation during scheduled maintenance\nlevel: high",
           "notes": "Alert level high due to Golden SAML risk. Correlate with change management records before closing."
-        }
-      ],
-      "lastReviewed": "2026-04-10"
-    },
-    {
-      "id": 7,
-      "log": "ADFS",
-      "provider": "AD FS",
-      "channel": "AD FS/Admin",
-      "level": "Warning",
-      "title": "Web Application Proxy request rejected",
-      "summary": "A request to the ADFS Web Application Proxy (WAP) was rejected and not forwarded to the internal ADFS server.",
-      "details": "Generated when the Web Application Proxy (WAP), which acts as the external-facing reverse proxy for ADFS, rejects an incoming request before forwarding it to the internal ADFS farm. Key fields: the source client IP, the requested endpoint/URL, and the rejection reason (e.g., preauthentication failure, invalid token, endpoint not published). WAP EID 7 rejections are the outermost layer of ADFS telemetry — they capture attack traffic that is blocked before it even reaches the internal ADFS servers. High volumes of EID 7 from a single IP indicate scanning or probing of the WAP/ADFS endpoint. Rejected requests due to preauthentication failure indicate that the attacker's credential was rejected at the WAP layer (when preauthentication is configured). Correlate with WAP access logs and ADFS EID 403 to understand which requests did reach the internal server.",
-      "category": "Federation Authentication",
-      "tags": [
-        "adfs",
-        "wap",
-        "proxy",
-        "authentication",
-        "perimeter"
-      ],
-      "relatedEventIds": [
-        {
-          "id": 403,
-          "log": "ADFS"
-        },
-        {
-          "id": 501,
-          "log": "ADFS"
-        }
-      ],
-      "mitreAttack": [
-        {
-          "techniqueId": "T1190",
-          "techniqueName": "Exploit Public-Facing Application",
-          "tactics": [
-            {
-              "tacticId": "TA0001",
-              "tacticName": "Initial Access"
-            }
-          ]
-        }
-      ],
-      "notesGuidance": {
-        "investigationPivots": [
-          "High volume of EID 7 from a single IP indicates automated probing or brute-force at the WAP layer — block at the perimeter firewall/WAF",
-          "Rejections targeting the /adfs/ls, /adfs/oauth2/token, or /adfs/portal endpoints indicate targeted ADFS exploitation attempts",
-          "Correlate with ADFS EID 403 — requests that are rejected at WAP do not appear in ADFS 403; requests that reach ADFS appear in both layers"
-        ],
-        "commonFalsePositives": [
-          "Internet scanners and vulnerability scanners probing common endpoints",
-          "Misconfigured application clients sending requests to incorrect WAP endpoints",
-          "Token expiry causing legitimate users to be rejected at WAP until they reauthenticate"
-        ]
-      },
-      "source": {
-        "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/en-us/windows-server/remote/remote-access/web-application-proxy/web-application-proxy-windows-server"
-      },
-      "volumeIndicator": "medium",
-      "windowsVersions": {
-        "minVersion": "Windows Server 2012 R2"
-      },
-      "keyFields": [
-        {
-          "name": "Client IP",
-          "xpath": "EventData/Data[@Name='clientIP']",
-          "description": "External source IP; primary pivot for perimeter blocking decisions"
         }
       ],
       "lastReviewed": "2026-04-10"
