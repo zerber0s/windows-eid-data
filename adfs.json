@@ -1,0 +1,607 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Active Directory Federation Services",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/adfs.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 403,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Warning",
+      "title": "ADFS authentication request rejected",
+      "summary": "An authentication request to the ADFS federation service was rejected.",
+      "details": "Generated when an incoming authentication request is rejected at the ADFS server boundary. Key fields include the client IP address, the user principal name (UPN) of the account being authenticated, and the reason for rejection (e.g., bad credentials, account disabled, unknown user). High volumes of EID 403 from a single IP or against multiple accounts indicate a credential spray or brute-force attack targeting the ADFS endpoint. ADFS is a common external authentication target because it exposes authentication via the /adfs/ls and /adfs/oauth2/token endpoints — any internet-accessible ADFS deployment faces constant credential attack. Correlate with ADFS Extranet Lockout EID 501 to determine if the Smart Lockout mechanism has triggered, and with Security EID 4625 on the ADFS server itself for the Windows-layer authentication failure.",
+      "category": "Federation Authentication",
+      "tags": [
+        "adfs",
+        "authentication",
+        "brute-force",
+        "credential-access",
+        "federated-identity"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 501,
+          "log": "ADFS"
+        },
+        {
+          "id": 510,
+          "log": "ADFS"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110.003",
+          "techniqueName": "Brute Force: Password Spraying",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "ADFS auditing must be enabled. Enable via ADFS Management console: Service > Edit Federation Service Properties > Events tab, or via PowerShell.",
+          "command": "Set-AdfsProperties -AuditLevel Verbose"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume of 403 events from a single IP in a short window (hundreds per minute) indicates automated credential attack against ADFS",
+          "403 events spread across many user accounts from a single IP with low per-account volume indicate password spraying — compare the UPN list against your user directory to confirm account validity",
+          "403 from a previously unseen geography or ASN targeting privileged accounts (admin UPNs) is high priority",
+          "Correlate with Extranet Lockout EID 501 — if smart lockout is triggering, the attack has reached the lockout threshold"
+        ],
+        "commonFalsePositives": [
+          "Users mistyping passwords, especially after password changes",
+          "Applications with stale cached credentials (mobile apps, legacy clients) generating repeated auth failures",
+          "Misconfigured service accounts attempting to authenticate via ADFS"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/troubleshooting/ad-fs-tshoot-logging"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "Client IP",
+          "xpath": "EventData/Data[@Name='clientIP']",
+          "description": "Source IP of the authentication request; primary pivot for credential attack investigation"
+        },
+        {
+          "name": "UPN",
+          "xpath": "EventData/Data[@Name='userPrincipalName']",
+          "description": "User identity being authenticated; cross-reference with user directory for account validity"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "ADFS Authentication Rejection — Possible Credential Spray",
+          "rule": "title: ADFS Authentication Rejection — Possible Credential Spray\nstatus: experimental\nlogsource:\n    product: windows\n    service: adfs\ndetection:\n    selection:\n        EventID: 403\n    condition: selection\n    timeframe: 5m\n    aggregate: count() > 50 by clientIP\nfalsepositives:\n    - Users with stale credentials on mobile devices\n    - Misconfigured service accounts\nlevel: medium",
+          "notes": "Aggregate on clientIP to detect spray patterns. A single IP with 50+ rejections in 5 minutes against multiple UPNs is high confidence spray."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 411,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Information",
+      "title": "Token request with additional authentication context",
+      "summary": "An OAuth 2.0 or OIDC token request included additional authentication context, such as MFA claims.",
+      "details": "Generated when ADFS processes an OAuth 2.0 authorization code or token request that includes additional authentication context claims (e.g., Multi-Factor Authentication completion, step-up auth). Key fields include the relying party (RP) application identifier, the client ID, the user UPN, and the authentication methods referenced. This event is useful for understanding which applications are receiving tokens with strong authentication claims versus those receiving tokens with only password-based authentication. In an investigation, a token request that should require MFA but only contains single-factor claims may indicate an MFA bypass — for example, via legacy authentication protocol abuse (Basic Auth, EWS) where ADFS issues tokens without the MFA claim. Correlate with ADFS EID 510 (token issued) to confirm the token was successfully issued.",
+      "category": "Federation Authentication",
+      "tags": [
+        "adfs",
+        "oauth",
+        "oidc",
+        "mfa",
+        "token-issuance"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 510,
+          "log": "ADFS"
+        },
+        {
+          "id": 403,
+          "log": "ADFS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1556",
+          "techniqueName": "Modify Authentication Process",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Token requests to high-value relying parties (e.g., Microsoft Graph, Exchange Online) without MFA claims when MFA is required by policy indicate MFA bypass via legacy auth",
+          "Unexpected client IDs or relying party identifiers in the token request indicate an unauthorised application seeking tokens",
+          "Correlate client IP with 403 failures — a pattern of failures then a successful 411/510 pair indicates successful credential attack followed by token issuance"
+        ],
+        "commonFalsePositives": [
+          "Legitimate OAuth flows for registered applications",
+          "Step-up authentication flows for conditional access policies"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/troubleshooting/ad-fs-tshoot-logging"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2016"
+      },
+      "keyFields": [
+        {
+          "name": "Relying Party",
+          "xpath": "EventData/Data[@Name='relyingParty']",
+          "description": "Application receiving the token; unexpected RPs are anomalous"
+        },
+        {
+          "name": "Authentication Methods",
+          "xpath": "EventData/Data[@Name='authenticationMethods']",
+          "description": "Auth methods used (password, MFA); absence of MFA on MFA-required RPs indicates bypass"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 501,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Warning",
+      "title": "Extranet lockout triggered",
+      "summary": "An account has been locked out by the ADFS Extranet Smart Lockout mechanism due to excessive failed authentication attempts.",
+      "details": "Generated when the ADFS Extranet Smart Lockout (ESL) feature locks an account after it exceeds the configured failed authentication threshold from unfamiliar IP addresses. ESL distinguishes between 'familiar' locations (IPs the user has successfully authenticated from before) and 'unfamiliar' locations, locking extranet access from unfamiliar IPs while preserving corporate network access. Key fields: the locked-out UPN, the source IP triggering lockout, the lockout threshold, and whether the lockout was soft (ESL audit mode) or hard (ESL enforcement mode). EID 501 fires indicate an active or recently completed credential spray or brute-force attack against external ADFS access. Multiple simultaneous 501 events across different accounts from the same IP indicates high-volume spray. Correlate with EID 403 (failures) in the minutes before each 501 to reconstruct the attack sequence.",
+      "category": "Federation Authentication",
+      "tags": [
+        "adfs",
+        "account-lockout",
+        "brute-force",
+        "credential-access",
+        "smart-lockout"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 403,
+          "log": "ADFS"
+        },
+        {
+          "id": 510,
+          "log": "ADFS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110.003",
+          "techniqueName": "Brute Force: Password Spraying",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Multiple accounts locked out in a short window from the same IP is the canonical credential spray indicator",
+          "Check if any accounts were successfully authenticated (EID 510) before lockout engaged — compromised accounts may have been accessed before the lockout threshold was reached",
+          "Accounts locked out from an 'unfamiliar' IP but with known UPNs indicate the attacker has a valid user list — investigate how the UPN list was obtained"
+        ],
+        "commonFalsePositives": [
+          "Legitimate users travelling to unfamiliar locations (hotels, conference centres) triggering ESL from new IPs",
+          "VPN or proxy IP changes causing familiar location detection to fail",
+          "Misconfigured applications repeatedly failing authentication until lockout"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/operations/configure-ad-fs-extranet-smart-lockout-protection"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2016"
+      },
+      "keyFields": [
+        {
+          "name": "UPN",
+          "xpath": "EventData/Data[@Name='userPrincipalName']",
+          "description": "Account that was locked out"
+        },
+        {
+          "name": "Client IP",
+          "xpath": "EventData/Data[@Name='clientIP']",
+          "description": "IP that triggered the lockout; cross-reference with 403 events to establish attack timeline"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 510,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Information",
+      "title": "Token issued to relying party",
+      "summary": "ADFS successfully issued a SAML, OAuth, or WS-Federation token to a relying party application.",
+      "details": "Generated when ADFS successfully issues a security token (SAML assertion, OAuth access token, WS-Fed token) to a relying party (RP). Key fields: the user UPN, the relying party identifier, the authentication method used, the client IP, and the token issuance time. This is the primary ADFS success audit event and the final step in the federation flow. From a security perspective, successful token issuance after a pattern of failures (403 events) indicates a successful credential attack. Token issuance to unexpected relying parties — particularly to applications not in the normal usage baseline for a given user — may indicate token theft or application-level persistence. Golden SAML attacks (forged SAML assertions using the stolen token signing private key) will NOT generate a normal 510 event because the token is forged externally and not processed by the ADFS server; the absence of a 510 for a SAML-based SSO event in the cloud target is therefore also an indicator. Correlate with EID 1007 (signing certificate change) to confirm the token signing key integrity.",
+      "category": "Federation Authentication",
+      "tags": [
+        "adfs",
+        "token-issuance",
+        "saml",
+        "oauth",
+        "authentication",
+        "golden-saml"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 403,
+          "log": "ADFS"
+        },
+        {
+          "id": 1007,
+          "log": "ADFS"
+        },
+        {
+          "id": 411,
+          "log": "ADFS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1606.002",
+          "techniqueName": "Forge Web Credentials: SAML Tokens",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "510 following multiple 403 failures from the same IP/UPN confirms successful authentication after brute-force or spray",
+          "Token issued to an RP not normally accessed by the user (e.g., production cloud management console accessed from an account that normally only uses email) is anomalous",
+          "Off-hours token issuance for privileged accounts — particularly to Azure, Office 365 admin portals, or cloud management platforms — warrants investigation",
+          "Compare the client IP in the 510 against the user's normal access geography; unexpected countries are high priority"
+        ],
+        "commonFalsePositives": [
+          "All successful federated logins generate this event — volume is high in active deployments",
+          "Automated service accounts performing OAuth flows for application access",
+          "Users accessing new cloud applications for the first time after onboarding"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/troubleshooting/ad-fs-tshoot-logging"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "Relying Party",
+          "xpath": "EventData/Data[@Name='relyingParty']",
+          "description": "Application receiving the token; unexpected RPs are the primary anomaly signal"
+        },
+        {
+          "name": "Client IP",
+          "xpath": "EventData/Data[@Name='clientIP']",
+          "description": "Source IP of the authentication request; geo-anomaly is a key pivot"
+        },
+        {
+          "name": "UPN",
+          "xpath": "EventData/Data[@Name='userPrincipalName']",
+          "description": "User receiving the token"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 364,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Warning",
+      "title": "Certificate validation failure",
+      "summary": "ADFS failed to validate a certificate used for token signing, encryption, or service communication.",
+      "details": "Generated when ADFS encounters a certificate validation failure — this may relate to the token signing certificate, the token encryption certificate, the SSL/TLS certificate, or a relying party's certificate. Key fields: the certificate thumbprint, the validation error (chain build failure, revocation check failure, expiry), and the context (signing, encryption, SSL). From a security perspective, certificate validation failures on the token signing certificate may indicate: (1) an attacker has attempted to substitute the signing certificate as a precursor to Golden SAML (forge SAML tokens) — though EID 1007 is more direct for this, (2) the ADFS server's certificate store has been tampered with, or (3) the issuing CA's CRL or OCSP is unreachable (network issue or intentional blocking). In an incident response scenario, a 364 event on the signing certificate shortly before a Golden SAML attack (cloud-side evidence of forged SAML assertions without corresponding ADFS 510 events) is a strong indicator of Golden SAML setup. Correlate with EID 1007 (signing cert change).",
+      "category": "Certificate Management",
+      "tags": [
+        "adfs",
+        "certificate",
+        "golden-saml",
+        "integrity",
+        "pki"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1007,
+          "log": "ADFS"
+        },
+        {
+          "id": 510,
+          "log": "ADFS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1606.002",
+          "techniqueName": "Forge Web Credentials: SAML Tokens",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Certificate validation failure on the token signing certificate is high priority — verify the certificate in ADFS Management matches the expected thumbprint",
+          "Correlate with EID 1007 — if the signing cert was recently changed AND validation failures are occurring, investigate whether the new cert was legitimate",
+          "CRL or OCSP unreachable errors may indicate the ADFS server's outbound internet access was blocked — either a network change or deliberate isolation"
+        ],
+        "commonFalsePositives": [
+          "Certificate expiry on token signing or SSL certificates generates validation failures until renewed",
+          "CRL distribution point unreachable due to transient network issues or firewall changes",
+          "Relying party certificate configuration mismatches after RP updates"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/troubleshooting/ad-fs-tshoot-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "Certificate Thumbprint",
+          "xpath": "EventData/Data[@Name='thumbprint']",
+          "description": "Thumbprint of the failing certificate; cross-reference against expected ADFS signing certificate thumbprint"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1007,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Information",
+      "title": "Token signing certificate changed",
+      "summary": "The ADFS token signing certificate was updated or replaced.",
+      "details": "Generated when the ADFS token signing certificate is changed — either automatically (during planned auto-rollover) or manually. This is the highest-sensitivity ADFS event from a security perspective because the token signing private key is the 'crown jewel' of an ADFS deployment. Possession of the token signing private key enables Golden SAML attacks: the attacker can forge arbitrary SAML assertions for any user and any relying party, achieving persistent authentication to any SAML-federated application (including Azure AD / Microsoft 365 in hybrid deployments) even after password resets or account disables. Key fields: the old certificate thumbprint and the new certificate thumbprint. Unexpected certificate changes — particularly outside of the standard auto-rollover schedule (ADFS auto-rolls certificates 20 days before expiry by default) — should be investigated immediately. Correlate with Security EID 4648 (explicit logon) and Security EID 4688 (process creation) on the ADFS server to identify who made the change and how.",
+      "category": "Certificate Management",
+      "tags": [
+        "adfs",
+        "certificate",
+        "golden-saml",
+        "credential-access",
+        "high-severity"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 364,
+          "log": "ADFS"
+        },
+        {
+          "id": 510,
+          "log": "ADFS"
+        },
+        {
+          "id": 4648,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1606.002",
+          "techniqueName": "Forge Web Credentials: SAML Tokens",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1552.004",
+          "techniqueName": "Unsecured Credentials: Private Keys",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any unexpected signing certificate change outside of known maintenance windows or auto-rollover schedule must be investigated immediately",
+          "Confirm the new certificate thumbprint matches what was authorised — if the thumbprint is unknown, treat as Golden SAML attack preparation",
+          "Correlate with Security EID 4648 on the ADFS server to identify which account made the change; an account other than the ADFS service account or an administrator performing scheduled maintenance is anomalous",
+          "After a suspected Golden SAML attack, rotate the token signing certificate immediately and revoke all existing tokens in cloud-federated services"
+        ],
+        "commonFalsePositives": [
+          "Planned certificate renewal and auto-rollover (ADFS rotates 20 days before expiry by default)",
+          "Administrator-initiated certificate rotation during scheduled maintenance",
+          "ADFS farm upgrades or migrations that require certificate re-configuration"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-ssl-certificates-ad-fs-wap"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "New Thumbprint",
+          "xpath": "EventData/Data[@Name='newThumbprint']",
+          "description": "Thumbprint of the replacement signing certificate; must match authorised certificate inventory"
+        },
+        {
+          "name": "Old Thumbprint",
+          "xpath": "EventData/Data[@Name='oldThumbprint']",
+          "description": "Thumbprint of the certificate being replaced; confirms which key material was superseded"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "ADFS Token Signing Certificate Changed",
+          "rule": "Event\n| where Source == \"AD FS\"\n| where EventID == 1007\n| project TimeGenerated, Computer, RenderedDescription",
+          "notes": "Any occurrence of this event should be reviewed. Correlate with maintenance change records. Alert immediately if outside planned maintenance windows."
+        },
+        {
+          "platform": "Sigma",
+          "title": "ADFS Token Signing Certificate Replacement",
+          "rule": "title: ADFS Token Signing Certificate Replacement\nstatus: experimental\nlogsource:\n    product: windows\n    service: adfs\ndetection:\n    selection:\n        EventID: 1007\n    condition: selection\nfalsepositives:\n    - Planned certificate auto-rollover (ADFS default: 20 days before expiry)\n    - Administrator-initiated certificate rotation during scheduled maintenance\nlevel: high",
+          "notes": "Alert level high due to Golden SAML risk. Correlate with change management records before closing."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 7,
+      "log": "ADFS",
+      "provider": "AD FS",
+      "channel": "AD FS/Admin",
+      "level": "Warning",
+      "title": "Web Application Proxy request rejected",
+      "summary": "A request to the ADFS Web Application Proxy (WAP) was rejected and not forwarded to the internal ADFS server.",
+      "details": "Generated when the Web Application Proxy (WAP), which acts as the external-facing reverse proxy for ADFS, rejects an incoming request before forwarding it to the internal ADFS farm. Key fields: the source client IP, the requested endpoint/URL, and the rejection reason (e.g., preauthentication failure, invalid token, endpoint not published). WAP EID 7 rejections are the outermost layer of ADFS telemetry — they capture attack traffic that is blocked before it even reaches the internal ADFS servers. High volumes of EID 7 from a single IP indicate scanning or probing of the WAP/ADFS endpoint. Rejected requests due to preauthentication failure indicate that the attacker's credential was rejected at the WAP layer (when preauthentication is configured). Correlate with WAP access logs and ADFS EID 403 to understand which requests did reach the internal server.",
+      "category": "Federation Authentication",
+      "tags": [
+        "adfs",
+        "wap",
+        "proxy",
+        "authentication",
+        "perimeter"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 403,
+          "log": "ADFS"
+        },
+        {
+          "id": 501,
+          "log": "ADFS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1190",
+          "techniqueName": "Exploit Public-Facing Application",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume of EID 7 from a single IP indicates automated probing or brute-force at the WAP layer — block at the perimeter firewall/WAF",
+          "Rejections targeting the /adfs/ls, /adfs/oauth2/token, or /adfs/portal endpoints indicate targeted ADFS exploitation attempts",
+          "Correlate with ADFS EID 403 — requests that are rejected at WAP do not appear in ADFS 403; requests that reach ADFS appear in both layers"
+        ],
+        "commonFalsePositives": [
+          "Internet scanners and vulnerability scanners probing common endpoints",
+          "Misconfigured application clients sending requests to incorrect WAP endpoints",
+          "Token expiry causing legitimate users to be rejected at WAP until they reauthenticate"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/remote/remote-access/web-application-proxy/web-application-proxy-windows-server"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "Client IP",
+          "xpath": "EventData/Data[@Name='clientIP']",
+          "description": "External source IP; primary pivot for perimeter blocking decisions"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

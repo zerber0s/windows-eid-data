@@ -1,0 +1,154 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows OpenSSH Server",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/openssh.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 4,
+      "log": "OpenSSH",
+      "provider": "OpenSSH SSH Server",
+      "channel": "Application",
+      "level": "Information",
+      "title": "SSH authentication event",
+      "summary": "The Windows OpenSSH server processed an authentication or session lifecycle event — accepted, failed, or session open/close.",
+      "details": "The Windows built-in OpenSSH server (available since Windows 10 1809 / Server 2019 as an optional feature) logs all authentication and session events to the Application log under the source 'OpenSSH SSH Server', all sharing EID 4. The event sub-type is determined by the message text:\n\n**Accepted publickey**: Public key authentication succeeded. Message format: 'Accepted publickey for <user> from <ip> port <port> ssh2: <keytype> <fingerprint>'. Unexpected key fingerprints (not matching your authorized_keys inventory) are high-confidence IOCs indicating a backdoored authorized_keys file or a stolen private key.\n\n**Accepted password**: Password authentication succeeded. Message format: 'Accepted password for <user> from <ip> port <port> ssh2'. Password auth should be disabled (PasswordAuthentication no in sshd_config) on hardened hosts; its presence indicates misconfiguration or deliberate re-enablement by an attacker.\n\n**Failed password / publickey**: Authentication failed. Message format: 'Failed password for <user> from <ip> port <port> ssh2' or 'Failed publickey for...'. High volume from a single source IP or against multiple usernames indicates brute-force or credential spray. 'Invalid user <username>' prefix indicates the username does not exist on the system.\n\n**Session opened**: A shell or subsystem session started post-authentication. Message format: 'session opened for user <user> by (uid=0)'. Marks the beginning of interactive or SFTP session activity.\n\n**Session closed**: Session ended. Message format: 'session closed for user <user>'. Pair with session opened to calculate session duration. Very short sessions (seconds) may indicate scripted command execution or C2 check-ins.\n\nNote: All sub-types share EID 4 in the Application log. Parse the message field to extract the sub-type, source IP, username, and authentication method. The source IP is the critical pivot for lateral movement and external access investigation.",
+      "category": "Remote Access",
+      "tags": [
+        "ssh",
+        "remote-access",
+        "authentication",
+        "lateral-movement",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.004",
+          "techniqueName": "Remote Services: SSH",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            },
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1098.004",
+          "techniqueName": "Account Manipulation: SSH Authorized Keys",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "feature-install",
+          "description": "Windows OpenSSH Server must be installed as an optional feature (not installed by default). Install via Settings > Optional Features or PowerShell.",
+          "command": "Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0"
+        },
+        {
+          "type": "log-enablement",
+          "description": "OpenSSH logging level must be set to INFO or higher in sshd_config (default is INFO). Ensure the sshd service is started and set to automatic.",
+          "command": "Set-Service -Name sshd -StartupType Automatic; Start-Service sshd"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Source IP not matching known admin or jump host IP ranges on an 'Accepted' event is the primary lateral movement pivot",
+          "Accepted password auth on a server where PasswordAuthentication should be disabled indicates either misconfiguration or attacker re-enablement of password auth",
+          "Unexpected public key fingerprint in 'Accepted publickey' — cross-reference against authorized_keys files for each user; a new or unrecognised fingerprint indicates persistence via added SSH key",
+          "High volume of 'Failed password' or 'Invalid user' from a single IP indicates brute force; multiple source IPs with low per-IP volume indicates credential spray",
+          "Very short session duration (session opened immediately followed by closed within seconds) from an unusual source indicates scripted C2 or automated data staging",
+          "SSH access to domain controllers or Tier 0 infrastructure from any non-privileged workstation is always anomalous"
+        ],
+        "commonFalsePositives": [
+          "Automated deployment tools (Ansible, Puppet, Chef) performing SSH-based configuration management",
+          "Administrators using SSH as a preferred remote management method on servers where it is authorised",
+          "SFTP transfers from backup and monitoring systems",
+          "CI/CD pipeline runners connecting via SSH to deploy applications"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh-server-configuration"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1809 / Server 2019"
+      },
+      "keyFields": [
+        {
+          "name": "Message",
+          "xpath": "EventData/Data[@Name='param1']",
+          "description": "Full sshd message text; parse to extract sub-type (Accepted/Failed/session), username, source IP, port, and auth method (publickey/password)"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "SSH Brute Force — High Volume Failed Authentications",
+          "rule": "Event\n| where Source == \"OpenSSH SSH Server\"\n| where EventID == 4\n| where RenderedDescription has \"Failed\"\n| parse RenderedDescription with * \"from \" SourceIP \" port\" *\n| summarize FailureCount = count() by SourceIP, bin(TimeGenerated, 5m)\n| where FailureCount > 20\n| project TimeGenerated, SourceIP, FailureCount",
+          "notes": "Tune the threshold to your environment. On internet-facing SSH servers, consider a lower threshold (10+ in 5 minutes). Combine with geo-IP enrichment for higher fidelity."
+        },
+        {
+          "platform": "KQL",
+          "title": "SSH Password Authentication Accepted on Hardened Host",
+          "rule": "Event\n| where Source == \"OpenSSH SSH Server\"\n| where EventID == 4\n| where RenderedDescription has \"Accepted password\"\n| parse RenderedDescription with * \"for \" Username \" from \" SourceIP \" port\" *\n| project TimeGenerated, Computer, Username, SourceIP, RenderedDescription",
+          "notes": "Password auth should be disabled (PasswordAuthentication no) on hardened servers. Any accepted password login warrants review."
+        },
+        {
+          "platform": "Sigma",
+          "title": "SSH Authentication Accepted via Password on Windows Host",
+          "rule": "title: SSH Authentication Accepted via Password on Windows Host\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\n    definition: Source must be 'OpenSSH SSH Server'\ndetection:\n    selection:\n        EventID: 4\n        Message|contains: 'Accepted password'\n    condition: selection\nfalsepositives:\n    - Hosts where password authentication is intentionally permitted\n    - Legacy automation that cannot use key-based auth\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Error Reporting",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wer.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1000,
+      "log": "Application",
+      "provider": "Application Error",
+      "channel": "Application",
+      "level": "Error",
+      "title": "Application crash",
+      "summary": "An application terminated unexpectedly and a crash report was generated.",
+      "details": "Generated in the Application event log by the 'Application Error' provider when a Windows process crashes (access violation, stack overflow, heap corruption, or other fatal exception). Key fields: FaultingApplication (the crashed process name and full path), FaultingModule (the DLL or module that caused the crash, including its path and version), ExceptionCode (the exception type — 0xC0000005 = access violation, 0xC0000094 = integer divide by zero, 0xC000001D = illegal instruction), and OffsetInModule (the code offset within the faulting module). From a security standpoint, application crashes are significant DFIR indicators for several reasons: (1) Exploit attempts frequently cause application crashes on failed exploitation — a cluster of 1000 events targeting the same process from the same host may indicate active exploitation attempts against a vulnerable service. (2) Security products (AV, EDR) terminating malicious injected code cause crashes that generate this event for the host process. (3) The FaultingModule field may name an injected DLL or shellcode stub location, exposing the attack. (4) Crashes in system processes (lsass.exe, services.exe, svchost.exe) are high-severity indicators. ExceptionCode 0xC0000005 (access violation) is the most common crash type and warrants FaultingModule inspection. Correlate with Sysmon EID 10 (ProcessAccess) and EID 8 (CreateRemoteThread) near the crash timestamp to identify injection precursors.",
+      "category": "Application Crash",
+      "tags": [
+        "crash",
+        "exploit",
+        "injection",
+        "wer"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1001,
+          "log": "Application"
+        },
+        {
+          "id": 10,
+          "log": "Sysmon"
+        },
+        {
+          "id": 8,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1203",
+          "techniqueName": "Exploitation for Client Execution",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1055",
+          "techniqueName": "Process Injection",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FaultingApplication = lsass.exe is highest severity — LSASS crashes are indicative of credential dumping tool failure or malicious injection",
+          "FaultingApplication = a browser or email client with FaultingModule = an unusual or non-vendor DLL indicates exploit or malware injection",
+          "ExceptionCode 0xC0000005 (access violation) + FaultingModule path in a user-writable location (AppData, Temp, Downloads) is a strong shellcode/injection indicator",
+          "Multiple 1000 events for the same FaultingApplication from one host in a short window indicates repeated exploitation attempts — possibly an exploit scan or automated attack",
+          "Correlate crash timestamp with Sysmon EID 8 (CreateRemoteThread) or EID 10 (ProcessAccess) on the same process for injection precursor evidence",
+          "FaultingModule containing randomised or entropy-high names (e.g., a12b3c4d.dll) indicates reflective DLL injection leaving a crash artefact"
+        ],
+        "commonFalsePositives": [
+          "Buggy software or beta applications crashing due to software defects",
+          "Driver incompatibility or hardware issues causing application faults",
+          "Out-of-memory conditions causing access violations in memory-hungry applications",
+          "Security tools that hook APIs sometimes cause crashes in poorly-written applications"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows XP / Server 2003"
+      },
+      "keyFields": [
+        {
+          "name": "FaultingApplicationName",
+          "xpath": "EventData/Data[@Name='FaultingApplicationName']",
+          "description": "Name of the crashed process; lsass.exe, services.exe, or svchost.exe crashes are critical"
+        },
+        {
+          "name": "FaultingModuleName",
+          "xpath": "EventData/Data[@Name='FaultingModuleName']",
+          "description": "Module that caused the crash; unexpected or unsigned DLLs indicate injection"
+        },
+        {
+          "name": "ExceptionCode",
+          "xpath": "EventData/Data[@Name='ExceptionCode']",
+          "description": "Exception type; 0xC0000005 = access violation (most common exploitation indicator)"
+        },
+        {
+          "name": "FaultingApplicationPath",
+          "xpath": "EventData/Data[@Name='FaultingApplicationPath']",
+          "description": "Full path of the crashed process; executables in user-writable paths are high risk"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "LSASS Crash — Critical Indicator",
+          "rule": "Event\n| where Source == \"Application Error\"\n| where EventID == 1000\n| where RenderedDescription has \"lsass.exe\"\n| project TimeGenerated, Computer, RenderedDescription",
+          "notes": "Any LSASS crash should be treated as a P1 incident. Correlate with Sysmon EID 10 (LSASS access) in the preceding 5 minutes."
+        },
+        {
+          "platform": "KQL",
+          "title": "Application Crash with Faulting Module in User-Writable Path",
+          "rule": "Event\n| where Source == \"Application Error\"\n| where EventID == 1000\n| where RenderedDescription has_any (\"\\\\AppData\\\\\", \"\\\\Temp\\\\\", \"\\\\Downloads\\\\\", \"\\\\Public\\\\\")\n| project TimeGenerated, Computer, RenderedDescription",
+          "notes": "Faulting modules in user-writable directories indicate injected or dropped DLLs. Cross-reference with Sysmon file creation events."
+        },
+        {
+          "platform": "Sigma",
+          "title": "LSASS or System Process Crash",
+          "rule": "title: Critical System Process Crash Detected\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: 'Application Error'\n        EventID: 1000\n        FaultingApplicationName:\n            - 'lsass.exe'\n            - 'services.exe'\n            - 'csrss.exe'\n    condition: selection\nfalsepositives:\n    - Buggy third-party security software crashing system processes\n    - Memory corruption due to hardware faults\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1001,
+      "log": "Application",
+      "provider": "Windows Error Reporting",
+      "channel": "Application",
+      "level": "Information",
+      "title": "Windows Error Reporting fault bucket recorded",
+      "summary": "Windows Error Reporting recorded a fault bucket summary following an application crash or hang.",
+      "details": "Generated by the 'Windows Error Reporting' provider after an application crash or hang. This event is the WER summary that follows EID 1000 and records the fault bucket identifier, event type, and the list of files included in the crash dump package (minidump, heap dump, etc.). Key fields: FaultBucketType (Type 4 = application crash, Type 5 = application hang), EventName (APPCRASH, APPHANG, etc.), Response (whether a solution was found), and the list of attached files. The crash dump files (WerFault.exe dumps them to C:\\Users\\<user>\\AppData\\Local\\CrashDumps or ProgramData\\Microsoft\\Windows\\WER\\) are forensic artefacts containing process memory at the time of crash — including potential decryption keys, injected shellcode, and cleartext credentials for running applications. WER dumps are routinely acquired during DFIR investigations. For applications where WER is configured to report to an internal WER server (WERSVR), these events stream to a central location for automated triage.",
+      "category": "Application Crash",
+      "tags": [
+        "crash",
+        "wer",
+        "memory-forensics",
+        "exploit"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1000,
+          "log": "Application"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1203",
+          "techniqueName": "Exploitation for Client Execution",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FaultBucketType and EventName fields identify the crash type — APPCRASH is highest interest for exploitation analysis",
+          "Crash dump path embedded in the event points to files that should be acquired as forensic evidence during incident response",
+          "Correlate fault bucket ID across multiple machines — same bucket ID on many endpoints indicates the same crash type and may indicate a widespread exploit campaign",
+          "Adversaries aware of WER may disable it via registry (HKLM\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting, Disabled=1) to suppress crash evidence — absence of expected 1001 events after known crashes is itself an indicator"
+        ],
+        "commonFalsePositives": [
+          "Any application crash generating a corresponding EID 1000 will also generate a 1001",
+          "High volume in environments with unstable software or hardware issues"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/wer/windows-error-reporting"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "FaultBucketType",
+          "xpath": "EventData/Data[@Name='FaultBucketType']",
+          "description": "Bucket type; 4 = application crash (APPCRASH), 5 = application hang (APPHANG)"
+        },
+        {
+          "name": "EventName",
+          "xpath": "EventData/Data[@Name='EventName']",
+          "description": "WER event type; APPCRASH and BEX64 (Buffer Overflow Exception 64-bit) are exploitation indicators"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

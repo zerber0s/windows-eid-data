@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Kerberos",
-    "version": "1.1.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/kerberos.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -613,6 +613,395 @@
         }
       ],
       "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4820,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "A Kerberos TGT was denied because the device does not meet access control restrictions",
+      "summary": "A Kerberos TGT request was denied because the device failed an authentication policy or Protected Users restriction.",
+      "details": "DC-only event generated when a Kerberos Authentication Service (AS) request is denied because the requesting device fails access control restrictions imposed by an Authentication Policy or Authentication Policy Silo. These policies, introduced in Windows Server 2012 R2, allow organisations to restrict which devices are authorised to obtain TGTs for specific high-value accounts — for example, requiring that an account can only authenticate from Privileged Access Workstations (PAWs). Key fields: TargetUserName (the account that was denied), TargetDomainName, IpAddress (the requesting device). A 4820 event indicates that the correct credentials were supplied but the device is not permitted to use them under the active authentication policy — this is expected behaviour when a compromised credential is used from an untrusted device. Correlate with EID 4820 volume from a specific IpAddress to detect credential theft attempts using a valid password from an attacker-controlled machine. Contrast: EID 4771 fires for pre-auth failures (wrong password); EID 4820 fires for correct password but policy-restricted device.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "tgt",
+        "authentication-policy",
+        "protected-users",
+        "credential-access",
+        "paw"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4771,
+          "log": "Security"
+        },
+        {
+          "id": 4821,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Authentication Policies or Authentication Policy Silos must be configured in Active Directory. Available on Windows Server 2012 R2 DCs and above. Accounts must be placed in the Protected Users security group or assigned to a policy."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "IpAddress not matching any known PAW or authorised admin workstation for the TargetUserName indicates a credential theft attempt from an untrusted device",
+          "Repeated 4820 for the same TargetUserName from multiple different IpAddresses indicates an attacker with a stolen credential attempting to authenticate from different hosts",
+          "Contrast with Security EID 4624 logon history for the TargetUserName — if the account normally logs on from a specific set of machines, any other source is anomalous",
+          "4820 events for Tier-0 accounts (Domain Admins, KRBTGT, Enterprise Admins) are highest severity"
+        ],
+        "commonFalsePositives": [
+          "Legitimate admin attempting to use a Tier-0 account from a non-PAW workstation (policy misconfiguration or user error)",
+          "Service accounts with authentication policies being accessed from a new server that has not been registered in the policy",
+          "Recently added machines not yet included in the Authentication Policy Silo"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4820"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account denied the TGT; Tier-0 accounts are highest priority"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source device IP; must match an authorised device per the authentication policy"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4821,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "A Kerberos service ticket was denied because the user, device, or both do not meet access control restrictions",
+      "summary": "A Kerberos TGS service ticket request was denied due to authentication policy or device restrictions.",
+      "details": "DC-only event generated when a TGS service ticket request is denied because the requesting user, device, or both fail the access control restrictions imposed by an Authentication Policy or Policy Silo. This is the TGS-phase equivalent of EID 4820 (which fires at the AS/TGT phase). Key fields: TargetUserName (the user requesting the service ticket), ServiceName (the target service SPN), IpAddress. This event is particularly valuable because it can fire even when the account has a valid TGT — the user authenticated successfully at AS but the service being accessed has additional device-level restrictions. Authentication Policy failures on high-value services (e.g., backup agents accessing domain controllers, SQL service accounts, Exchange services) are the primary investigation pivot. In a credential theft scenario, 4821 for a privileged service ticket indicates an attacker with a stolen TGT attempting to access restricted services from an unauthorised device.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "kerberos",
+        "tgs",
+        "authentication-policy",
+        "credential-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4769,
+          "log": "Security"
+        },
+        {
+          "id": 4820,
+          "log": "Security"
+        },
+        {
+          "id": 4822,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.003",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Authentication Policies or Authentication Policy Silos must be configured in Active Directory. Available on Windows Server 2012 R2 DCs and above."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ServiceName for a sensitive service (krbtgt, DCs, backup systems) combined with an unexpected IpAddress is highest priority",
+          "4821 after a successful 4768 (TGT issued) confirms the attacker has a valid TGT but cannot reach the target service — policy is working as designed; investigate the source IP",
+          "Cluster of 4821 events for the same TargetUserName across multiple ServiceName values indicates an attacker enumerating accessible services with a stolen credential"
+        ],
+        "commonFalsePositives": [
+          "Service accounts with restrictive authentication policies connecting from newly provisioned servers",
+          "Backup or monitoring tools accessing services from hosts not yet added to the authentication policy silo"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4821"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "User denied the service ticket"
+        },
+        {
+          "name": "ServiceName",
+          "xpath": "EventData/Data[@Name='ServiceName']",
+          "description": "Target service SPN that was denied; sensitive SPNs are highest priority"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Requesting device; must be authorised per the authentication policy for this service"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4822,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "NTLM authentication failed because the account is a member of the Protected Users group",
+      "summary": "An NTLM authentication attempt was denied because the account belongs to the Protected Users security group.",
+      "details": "DC-only event generated when an NTLM authentication attempt is rejected because the authenticating account is a member of the Protected Users global security group. The Protected Users group, introduced in Windows Server 2012 R2, enforces several security restrictions including: prohibiting NTLM authentication, prohibiting DES and RC4 Kerberos encryption, enforcing short TGT lifetimes, and preventing credential delegation. When an NTLM authentication is attempted for a Protected Users member — whether by a legacy application, an attacker using pass-the-hash, or an NTLM relay attack — the DC generates this event and denies the authentication. Key fields: TargetUserName, TargetDomainName, IpAddress. This event is a strong security indicator: it means an NTLM authentication was attempted for an account that should never use NTLM. NTLM relay and pass-the-hash attacks against Protected Users members will consistently generate 4822 and will never succeed — making this event a reliable indicator of attempted credential attack against a hardened account.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "ntlm",
+        "protected-users",
+        "pass-the-hash",
+        "relay",
+        "credential-access",
+        "blocked"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4820,
+          "log": "Security"
+        },
+        {
+          "id": 4823,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.002",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1557.001",
+          "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "The account must be a member of the Protected Users global security group. Domain controllers must be Windows Server 2012 R2 or later."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any 4822 event is anomalous — accounts in Protected Users should never be presented with NTLM challenges in a correctly configured environment",
+          "IpAddress of the NTLM authentication source is the primary investigation pivot — this is the attacker's relay host or the host performing pass-the-hash",
+          "TargetUserName for a Domain Admin or Tier-0 account is highest severity — indicates targeted credential attack against a privileged account",
+          "Correlate IpAddress with Responder/LLMNR poisoning indicators in DNS and DHCP logs to identify relay attack infrastructure"
+        ],
+        "commonFalsePositives": [
+          "Legacy applications that only support NTLM and are authenticating as a Protected Users member",
+          "Misconfigured services using Protected Users accounts against NTLM-only endpoints",
+          "Migration period where an account was recently added to Protected Users but service dependencies were not updated"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Protected Users member whose NTLM auth was blocked; Tier-0 accounts are highest priority"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source of the NTLM authentication attempt; this is the attacker or relay host"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "NTLM Auth Blocked for Protected Users Member",
+          "rule": "SecurityEvent\n| where EventID == 4822\n| project TimeGenerated, Computer, TargetUserName, IpAddress\n| order by TimeGenerated desc",
+          "notes": "Every 4822 event should be investigated. There is no valid reason for NTLM auth to be attempted for a Protected Users member in a well-configured environment."
+        },
+        {
+          "platform": "Sigma",
+          "title": "NTLM Authentication Blocked for Protected Users Member",
+          "rule": "title: NTLM Authentication Blocked for Protected Users Member\nstatus: stable\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4822\n    condition: selection\nfalsepositives:\n    - Legacy applications using Protected Users accounts with NTLM\n    - Recent Protected Users group membership change not propagated to all services\nlevel: high"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4823,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditFailure",
+      "title": "NTLM authentication failed because access control restrictions are required",
+      "summary": "An NTLM authentication was denied because the Authentication Policy requires Kerberos but NTLM was presented.",
+      "details": "DC-only event generated when an NTLM authentication attempt is denied because an Authentication Policy applied to the account requires that only Kerberos authentication be used. This differs from EID 4822 in that the restriction comes from an explicitly configured Authentication Policy (which can also restrict device access) rather than from Protected Users group membership. Key fields: TargetUserName, TargetDomainName, IpAddress, WorkstationName. Authentication Policies provide fine-grained control over which authentication protocols are permitted for specific accounts or silos. When an attacker attempts pass-the-hash or NTLM relay against an account covered by a strict Kerberos-only policy, they will receive this denial and EID 4823 will be generated on the DC. The combination of 4822 (Protected Users block) and 4823 (Policy block) together in proximity from the same source indicates an attacker systematically attempting NTLM authentication against hardened accounts — a red team or adversary reconnaissance pattern.",
+      "category": "Kerberos Authentication",
+      "tags": [
+        "ntlm",
+        "authentication-policy",
+        "pass-the-hash",
+        "credential-access",
+        "blocked"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4822,
+          "log": "Security"
+        },
+        {
+          "id": 4820,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.002",
+          "techniqueName": "Use Alternate Authentication Material: Pass the Hash",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1557.001",
+          "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "An Authentication Policy with NTLM restriction must be configured in Active Directory and applied to the account. Requires Windows Server 2012 R2 or later DCs."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Any 4823 event warrants review — it means NTLM was attempted against an account with a Kerberos-only policy",
+          "WorkstationName or IpAddress identifies the source of the NTLM attempt; non-domain-joined machines or known-bad IPs are critical",
+          "4823 events alongside 4822 events from the same IpAddress indicate systematic NTLM-based credential attack against hardened accounts",
+          "Correlate IpAddress with Sysmon network connection events to identify the responsible process on the source host"
+        ],
+        "commonFalsePositives": [
+          "Applications enforced to use NTLM (e.g., older IIS apps with Windows Integrated Auth) connecting as policy-restricted accounts",
+          "Authentication policy applied to an account before legacy application dependencies were migrated to Kerberos",
+          "Monitoring or backup agents using Authentication Policy-protected service accounts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4823"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2012 R2"
+      },
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "Account denied NTLM auth by policy; identifies the targeted account in an attack"
+        },
+        {
+          "name": "IpAddress",
+          "xpath": "EventData/Data[@Name='IpAddress']",
+          "description": "Source of the NTLM attempt; primary pivot for identifying the attacker host"
+        },
+        {
+          "name": "WorkstationName",
+          "xpath": "EventData/Data[@Name='WorkstationName']",
+          "description": "NetBIOS name of the source machine; corroborates IpAddress for source attribution"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
     }
   ]
 }

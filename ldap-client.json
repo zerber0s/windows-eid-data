@@ -1,0 +1,207 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - LDAP Client",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ldap-client.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 257,
+      "log": "LDAPClient",
+      "provider": "Microsoft-Windows-LDAP-Client",
+      "channel": "Microsoft-Windows-LDAP-Client/Debug",
+      "level": "Information",
+      "title": "LDAP search operation performed",
+      "summary": "An LDAP search query was issued by the local machine to a domain controller.",
+      "details": "Generated when the LDAP client on the local machine performs an LDAP search operation against a directory server (domain controller). Key fields include the server address (DC), the search base DN, filter, and scope. This is a debug-channel event requiring explicit enablement and produces high volume during normal domain-joined operation. Its primary security value is detection of anomalous LDAP enumeration patterns: AD recon tools such as BloodHound/SharpHound, ADFind, PowerView, and ldapsearch issue large volumes of LDAP searches — particularly for specific object classes and attributes (e.g., (objectClass=user), (objectClass=computer), (objectClass=group), servicePrincipalName=*, adminCount=1, and ACL-related attribute queries). Supplementary to client-side logging, the DC-side equivalent is Directory Service log EID 1644 (Microsoft-Windows-ActiveDirectory_DomainService), which fires on the DC for expensive or slow LDAP queries and requires a specific registry setting to enable. Both client-side (EID 257) and DC-side (EID 1644) telemetry should be collected for comprehensive LDAP enumeration detection.",
+      "category": "LDAP Enumeration",
+      "tags": [
+        "ldap",
+        "active-directory",
+        "enumeration",
+        "reconnaissance",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 259,
+          "log": "LDAPClient"
+        },
+        {
+          "id": 4798,
+          "log": "Security"
+        },
+        {
+          "id": 4799,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1087.002",
+          "techniqueName": "Account Discovery: Domain Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1069.002",
+          "techniqueName": "Permission Groups Discovery: Domain Groups",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1018",
+          "techniqueName": "Remote System Discovery",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-LDAP-Client/Debug log must be enabled. It is disabled by default and produces high volume. Enable selectively on endpoints of interest.",
+          "command": "wevtutil set-log \"Microsoft-Windows-LDAP-Client/Debug\" /enabled:true /quiet:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume of LDAP searches from a single endpoint in a short window — especially with filters for servicePrincipalName, adminCount, or userAccountControl — is a BloodHound/SharpHound indicator",
+          "LDAP searches originating from unusual processes (non-domain-admin tools, scripting engines, pentest frameworks) visible via Security EID 4688 correlation on the same host",
+          "On the DC side, enable EID 1644 (Directory Service log) via registry: HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics, '15 Field Engineering' = 5 — this captures expensive LDAP queries without needing to collect client-side debug logs",
+          "Correlate with Sysmon network connections to LDAP port 389/636/3268/3269 from suspicious processes",
+          "Multiple different search base DNs scanned in sequence (CN=Users, CN=Computers, CN=Schema, etc.) indicates systematic AD enumeration"
+        ],
+        "commonFalsePositives": [
+          "All domain-joined systems perform routine LDAP queries for Group Policy, authentication, and service discovery — volume is very high",
+          "Management tools such as Active Directory Users and Computers, PowerShell AD module, and Exchange perform frequent LDAP queries",
+          "Monitoring agents and SCCM/Intune clients query AD regularly"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/configure-ad-and-lds-event-logging"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Filter",
+          "xpath": "EventData/Data[@Name='Filter']",
+          "description": "LDAP search filter; BloodHound-characteristic filters include (objectClass=*), servicePrincipalName=*, adminCount=1"
+        },
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "DC being queried; queries to multiple DCs from one host may indicate DC enumeration"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "BloodHound-Characteristic LDAP Filters",
+          "rule": "title: BloodHound-Characteristic LDAP Search Filters\nstatus: experimental\nlogsource:\n    product: windows\n    service: ldap-client\ndetection:\n    selection:\n        EventID: 257\n        Filter|contains:\n            - 'servicePrincipalName=*'\n            - 'adminCount=1'\n            - '(objectClass=trustedDomain)'\n            - 'msDS-AllowedToDelegateTo'\n            - 'ms-DS-MachineAccountQuota'\n    condition: selection\nfalsepositives:\n    - AD management tools and authorised admin scripts\n    - Security scanning tools and baselines\nlevel: medium",
+          "notes": "These LDAP filters are strongly characteristic of BloodHound, PowerView, and similar AD enumeration tools. May also catch legitimate AD admin queries."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 259,
+      "log": "LDAPClient",
+      "provider": "Microsoft-Windows-LDAP-Client",
+      "channel": "Microsoft-Windows-LDAP-Client/Debug",
+      "level": "Warning",
+      "title": "LDAP connection failed",
+      "summary": "The LDAP client failed to connect to or communicate with a directory server.",
+      "details": "Generated when an LDAP connection attempt from the local machine to a domain controller fails. Key fields: Server (the DC address), and the error code. Repeated LDAP connection failures against multiple DCs from the same host may indicate network partitioning, DC enumeration probing, or an attacker attempting to identify available DCs. In an incident response scenario, an endpoint generating high-volume LDAP connection failures immediately before a successful BloodHound run may be attributing itself as the attacker's staging machine. Connection failures to LDAP SSL port (636) combined with failures to normal LDAP port (389) suggest LDAPS-preferred tooling being redirected after failure. Correlate with DNS queries for DC SRV records to confirm the endpoint is attempting DC discovery.",
+      "category": "LDAP Enumeration",
+      "tags": [
+        "ldap",
+        "active-directory",
+        "connection-failure",
+        "reconnaissance"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 257,
+          "log": "LDAPClient"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1087.002",
+          "techniqueName": "Account Discovery: Domain Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-LDAP-Client/Debug log must be enabled.",
+          "command": "wevtutil set-log \"Microsoft-Windows-LDAP-Client/Debug\" /enabled:true /quiet:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Failures against multiple different DC addresses from one host in quick succession indicate DC enumeration or port scanning",
+          "Failure on port 636 (LDAPS) immediately followed by success on port 389 (LDAP) suggests the client fell back to unencrypted LDAP — validate LDAP signing and channel binding settings",
+          "Correlate the server addresses with internal DC inventory — LDAP connections to IP addresses not matching any DC indicate potential redirection or typosquatting"
+        ],
+        "commonFalsePositives": [
+          "DC unavailability during failover or maintenance causing transient LDAP failures",
+          "Domain-join operations on machines that cannot initially reach a DC",
+          "Time synchronisation issues preventing Kerberos/LDAP from establishing sessions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/configure-ad-and-lds-event-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "Target DC address; connections to non-DC IPs are anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

@@ -1,0 +1,549 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - WLAN AutoConfig",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wlan.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 8001,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Information",
+      "title": "WLAN AutoConfig successfully connected to a wireless network",
+      "summary": "The WLAN AutoConfig service successfully associated and authenticated to a wireless network.",
+      "details": "Generated when Windows successfully connects to a wireless network including completion of 802.11 association and authentication (WPA2/WPA3/open). Key fields: InterfaceGuid (the wireless adapter), SSID (network name), BSSType (Infrastructure or Ad-Hoc), PHY type, and AuthenticationAlgorithm. From a security standpoint, unexpected connections to unfamiliar SSIDs, ad-hoc networks, or connections outside business hours on managed endpoints are investigation triggers. Rogue access points mimicking a corporate SSID (evil-twin attacks) generate a legitimate 8001 from the victim's perspective — pivot to BSSID (recorded in the associated 11001 event) and compare against the authorised list of corporate AP MAC addresses. Ad-hoc (peer-to-peer) connections are inherently untrusted and should be blocked by policy. Correlate with NetworkProfile EID 10000 to see the network category assigned after connection.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "network",
+        "lateral-movement",
+        "initial-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11001,
+          "log": "WLAN"
+        },
+        {
+          "id": 8003,
+          "log": "WLAN"
+        },
+        {
+          "id": 10000,
+          "log": "NetworkProfile"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled. It is disabled by default on some configurations.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SSID not matching any known corporate wireless network name is the primary pivot — compare against a maintained list of authorised SSIDs",
+          "BSSType = 'Independent' (ad-hoc/IBSS) should never appear on a managed endpoint and indicates peer-to-peer wireless activity",
+          "AuthenticationAlgorithm = 'Open' (no auth) on a corporate device is anomalous — rogue open APs are used for credential capture",
+          "Correlate InterfaceGuid with the physical adapter in Device Manager to confirm which NIC connected",
+          "Correlate timestamp with user logon events (Security EID 4624) to attribute the connection to a specific user session"
+        ],
+        "commonFalsePositives": [
+          "Normal daily wireless connections to authorised corporate or home SSIDs",
+          "Mobile hotspot connections used by travelling employees",
+          "Wireless adapter connecting to a guest network during a site visit"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Network name (SSID) connected to; compare against authorised SSID list"
+        },
+        {
+          "name": "InterfaceGuid",
+          "xpath": "EventData/Data[@Name='InterfaceGuid']",
+          "description": "GUID of the wireless network adapter; links to the physical interface"
+        },
+        {
+          "name": "BSSType",
+          "xpath": "EventData/Data[@Name='BSSType']",
+          "description": "Infrastructure (normal AP) vs. Independent (ad-hoc/peer-to-peer); ad-hoc is high-risk"
+        },
+        {
+          "name": "AuthenticationAlgorithm",
+          "xpath": "EventData/Data[@Name='AuthenticationAlgorithm']",
+          "description": "Authentication method; Open (no auth) is highest risk on a managed device"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Wireless Connection to Unknown SSID",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-WLAN-AutoConfig\"\n| where EventID == 8001\n| parse EventData with * '<Data Name=\"SSID\">' SSID '</Data>' *\n| parse EventData with * '<Data Name=\"BSSType\">' BSSType '</Data>' *\n| where SSID !in (\"Corp-WiFi\", \"CorpWLAN\", \"Guest-WiFi\") // Replace with known-good SSIDs\n   or BSSType == \"Independent\"\n| project TimeGenerated, Computer, SSID, BSSType",
+          "notes": "Replace the SSID list with your organisation's authorised wireless network names. Ad-hoc (Independent) connections should always alert."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Wireless Ad-Hoc Connection Detected",
+          "rule": "title: Wireless Ad-Hoc Network Connection\nstatus: experimental\nlogsource:\n    product: windows\n    service: wlan-autoconfig\ndetection:\n    selection:\n        EventID: 8001\n        BSSType: 'Independent'\n    condition: selection\nfalsepositives:\n    - Intentional peer-to-peer wireless use in lab environments\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 8002,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Error",
+      "title": "WLAN AutoConfig failed to connect to a wireless network",
+      "summary": "The WLAN AutoConfig service failed to associate or authenticate to a wireless network.",
+      "details": "Generated when a wireless connection attempt fails at the association or authentication phase. Key fields: InterfaceGuid, SSID, ReasonCode (the failure reason, e.g., authentication timeout, incorrect passphrase, RADIUS rejection). From a security perspective, repeated failures against known corporate SSIDs from a device may indicate a compromised or misconfigured credential. Failure against an unknown SSID may indicate an automated or attacker-driven probe. ReasonCode 0x0003 (authentication/security failure) on 802.1x networks indicates rejected EAP credentials — worth correlating with the NPS server's EID 6273 for the reason. High volumes of 8002 without successful 8001 events from a single device may indicate a deauthentication or jamming attack preventing connection.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "connection-failure",
+        "authentication-failure"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 8001,
+          "log": "WLAN"
+        },
+        {
+          "id": 11002,
+          "log": "WLAN"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ReasonCode 0x0003 on an 802.1x network indicates EAP credential rejection — cross-reference NPS log for the specific failure reason",
+          "High frequency of 8002 with no successful 8001 events suggests the device cannot reach the AP — possible deauthentication/jamming attack",
+          "Failure against an SSID the device has no profile for indicates a probing tool or misconfiguration"
+        ],
+        "commonFalsePositives": [
+          "Incorrect Wi-Fi password after a password rotation",
+          "Temporary AP unavailability causing transient failures",
+          "Expired or revoked machine certificate in 802.1x environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Target network name; failure against an unknown SSID is higher risk"
+        },
+        {
+          "name": "ReasonCode",
+          "xpath": "EventData/Data[@Name='ReasonCode']",
+          "description": "Failure reason; 0x0003 = authentication failure (bad credential or rejected EAP)"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 8003,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Information",
+      "title": "WLAN AutoConfig disconnected from a wireless network",
+      "summary": "The WLAN AutoConfig service disconnected from a previously connected wireless network.",
+      "details": "Generated when a wireless session ends. Key fields: InterfaceGuid, SSID, Reason (DisconnectReason field — e.g., explicit disconnect by OS, AP deauthentication, signal loss). In a forensic context, this event combined with the preceding 8001 event provides a wireless session timeline. DisconnectReason 0x0004 (AP sent deauthentication) or 0x0008 (AP sent disassociation) may indicate a deauthentication attack forcing a reconnect, which is a precursor to a capture-the-handshake or evil-twin attack. Unexpected disconnections from corporate SSIDs followed immediately by 8001 events to a different SSID are a strong indicator of an evil-twin attack in progress.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "disconnection"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 8001,
+          "log": "WLAN"
+        },
+        {
+          "id": 10001,
+          "log": "NetworkProfile"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "DisconnectReason indicating AP-initiated deauthentication (0x0004 or 0x0008) followed by a new 8001 to a different SSID indicates a possible evil-twin attack",
+          "Pair with EID 8001 to calculate session duration — very short sessions followed by reconnection to a different SSID are anomalous",
+          "Correlate with NetworkProfile EID 10001 to confirm the network profile was also dropped"
+        ],
+        "commonFalsePositives": [
+          "Normal disconnection when a laptop moves out of range, enters a building, or is put to sleep",
+          "Network adapter driver updates causing reconnects",
+          "Roaming between corporate APs on the same SSID"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Network disconnected from; pair with next 8001 event to detect SSID switching"
+        },
+        {
+          "name": "Reason",
+          "xpath": "EventData/Data[@Name='Reason']",
+          "description": "Disconnect reason; AP-initiated deauthentication is a red flag for evil-twin attacks"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 11000,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Information",
+      "title": "Wireless network association started",
+      "summary": "The wireless adapter began the 802.11 association process with an access point.",
+      "details": "Generated at the start of the 802.11 association process, before authentication completes. Key fields: SSID, BSSID (the MAC address of the access point), PHY type, and InterfaceGuid. The BSSID field is the primary pivot for evil-twin detection — an evil-twin AP shares the target SSID but uses a different BSSID (MAC address). Maintaining a list of authorised AP MAC addresses and alerting on SSIDs matching corporate names with unexpected BSSIDs provides high-confidence detection. Correlate with EID 11001 (success) or EID 11002 (failure) for the outcome. The presence of a 11000 without a subsequent 11001 or 11002 may indicate an aborted association attempt.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "association",
+        "evil-twin"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11001,
+          "log": "WLAN"
+        },
+        {
+          "id": 11002,
+          "log": "WLAN"
+        },
+        {
+          "id": 8001,
+          "log": "WLAN"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "BSSID (AP MAC address) not matching the known list of authorised corporate APs for the matching SSID is the primary evil-twin indicator",
+          "BSSID changes for the same SSID between connections indicate the client is connecting to different physical APs — verify this is expected roaming",
+          "Correlate with physical location data (badge access, VPN status) to determine whether wireless activity is expected at that time"
+        ],
+        "commonFalsePositives": [
+          "Normal roaming between authorised APs on the same SSID (BSSID changes are expected)",
+          "Replacement or addition of new corporate APs — BSSID list requires maintenance"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Network name being associated to"
+        },
+        {
+          "name": "BSSID",
+          "xpath": "EventData/Data[@Name='BSSID']",
+          "description": "MAC address of the access point; compare against authorised AP MAC list to detect evil-twin APs"
+        },
+        {
+          "name": "PHYType",
+          "xpath": "EventData/Data[@Name='PHYType']",
+          "description": "Wireless protocol (802.11a/b/g/n/ac/ax); unexpected downgrades may indicate a downgrade attack"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 11001,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Information",
+      "title": "Wireless network association succeeded",
+      "summary": "The wireless adapter successfully associated with an access point.",
+      "details": "Generated when the 802.11 association process completes successfully. At this point the client is associated with the AP but full network connectivity depends on subsequent authentication (WPA2/WPA3 handshake or 802.1x). Key fields: SSID, BSSID, AuthenticationAlgorithm, UnicastCipher, MulticastCipher. The cipher fields are security-critical: UnicastCipher = CCMP (AES) is expected for WPA2/WPA3; TKIP indicates a downgrade to WPA1 which is vulnerable to attacks. AuthenticationAlgorithm = 'Open80211' on a non-guest network is anomalous. Pair with EID 11000 for the start of the association and EID 8001 for confirmation of full connectivity.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "association",
+        "authentication"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11000,
+          "log": "WLAN"
+        },
+        {
+          "id": 8001,
+          "log": "WLAN"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "UnicastCipher = TKIP instead of CCMP indicates connection to an older or downgraded AP — investigate the AP configuration",
+          "AuthenticationAlgorithm = 'Open80211' on a managed corporate device connecting to a corporate SSID indicates an evil-twin AP or policy misconfiguration",
+          "BSSID from this event carries forward from EID 11000 — compare against authorised AP list"
+        ],
+        "commonFalsePositives": [
+          "Legitimate association events during normal wireless sessions"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "BSSID",
+          "xpath": "EventData/Data[@Name='BSSID']",
+          "description": "AP MAC address; correlate with authorised AP inventory"
+        },
+        {
+          "name": "UnicastCipher",
+          "xpath": "EventData/Data[@Name='UnicastCipher']",
+          "description": "Encryption cipher; CCMP (AES) is expected; TKIP indicates WPA1 downgrade"
+        },
+        {
+          "name": "AuthenticationAlgorithm",
+          "xpath": "EventData/Data[@Name='AuthenticationAlgorithm']",
+          "description": "Auth type; 'Open80211' on corporate SSID is anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 11002,
+      "log": "WLAN",
+      "provider": "Microsoft-Windows-WLAN-AutoConfig",
+      "channel": "Microsoft-Windows-WLAN-AutoConfig/Operational",
+      "level": "Warning",
+      "title": "Wireless network association failed",
+      "summary": "The wireless adapter failed to associate with an access point.",
+      "details": "Generated when the 802.11 association process fails before authentication completes. Key fields: SSID, BSSID (the attempted AP), FailureReason. This event fires before any credential exchange; failures here indicate a physical or protocol-layer rejection rather than a credential issue. Repeated association failures to the same BSSID may indicate AP-side filtering (MAC address filtering blocking the device) or a protocol mismatch. Repeated failures followed by a successful association to a different BSSID for the same SSID is characteristic of deauthentication attacks forcing a client to an attacker-controlled AP.",
+      "category": "Wireless Network Connection",
+      "tags": [
+        "wifi",
+        "wlan",
+        "association",
+        "connection-failure"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 11000,
+          "log": "WLAN"
+        },
+        {
+          "id": 8002,
+          "log": "WLAN"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-WLAN-AutoConfig/Operational log must be enabled.",
+          "command": "wevtutil set-log Microsoft-Windows-WLAN-AutoConfig/Operational /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pattern of 11002 against one BSSID followed by 11000/11001 against a different BSSID for the same SSID indicates forced roaming — possible deauth attack",
+          "FailureReason indicating peer rejection may indicate MAC filtering or AP-side deny listing of the device"
+        ],
+        "commonFalsePositives": [
+          "Transient association failures during normal roaming between corporate APs",
+          "AP firmware update causing momentary service interruption"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/nativewifi/wlan-autoconfig-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "BSSID",
+          "xpath": "EventData/Data[@Name='BSSID']",
+          "description": "AP MAC address that rejected association; compare with subsequent successful BSSID"
+        },
+        {
+          "name": "FailureReason",
+          "xpath": "EventData/Data[@Name='FailureReason']",
+          "description": "Reason for association failure; peer rejection vs. timeout vs. protocol mismatch"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

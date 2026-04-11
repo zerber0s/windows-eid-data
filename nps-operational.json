@@ -1,0 +1,362 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Network Policy Server Operational",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/nps-operational.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 6272,
+      "log": "NPS",
+      "provider": "Microsoft-Windows-NetworkPolicyServer",
+      "channel": "Microsoft-Windows-NetworkPolicyServer/Operational",
+      "level": "Information",
+      "title": "NPS granted network access",
+      "summary": "The Network Policy Server (NPS/RADIUS) granted network access to an authentication request.",
+      "details": "Generated in the NPS Operational log when NPS successfully authenticates a RADIUS request and grants access. This operational-channel version provides richer attribute detail than the equivalent Security log EID 6272 — it includes the RADIUS client IP (the NAS/switch/WAP sending the request), the matched Network Policy name, the EAP authentication type (PEAP-MSCHAPv2, EAP-TLS, etc.), the called station ID (identifies which network access device and port/SSID the user is connecting to), the calling station ID (MAC address of the connecting device), and the framed IP assigned. This event is the primary audit trail for 802.1X network access control (NAC) — who authenticated to which network segment, from which device, via which access point or switch. From a security perspective: (1) authentication using a credential type that should not be permitted (e.g., MSCHAPv2 when EAP-TLS certificate auth is required) may indicate a policy bypass, (2) the calling station ID (MAC address) can be compared against a known device inventory to detect rogue or unmanaged devices that obtained valid credentials, (3) RADIUS authentication from an unexpected NAS IP (not a managed switch or WAP) may indicate a rogue RADIUS client attempting to inject authentication.",
+      "category": "Network Access Control",
+      "tags": [
+        "nps",
+        "radius",
+        "802.1x",
+        "network-access",
+        "authentication"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 6273,
+          "log": "NPS"
+        },
+        {
+          "id": 2,
+          "log": "NPS"
+        },
+        {
+          "id": 6272,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EAP type PEAP-MSCHAPv2 on a network that requires EAP-TLS certificate authentication indicates a policy gap or deliberate downgrade — MSCHAPv2 credentials can be cracked offline after MITM capture",
+          "Calling Station ID (MAC) not in the managed device inventory indicates an unmanaged or rogue device obtained valid credentials and connected",
+          "RADIUS client IP not matching any managed switch or WAP in the NAS inventory indicates a rogue RADIUS proxy or misconfigured network device",
+          "User authenticating to multiple different NAS IPs or SSIDs simultaneously indicates credential reuse across devices or session hijacking"
+        ],
+        "commonFalsePositives": [
+          "All successful 802.1X Wi-Fi and wired NAC authentications generate this event — volume is proportional to environment size",
+          "New devices joining the network for the first time before MAC inventory is updated",
+          "Guest network RADIUS authentication if guests share the NPS infrastructure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/nps-top"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Client-IP-Address",
+          "xpath": "EventData/Data[@Name='ClientIPAddress']",
+          "description": "RADIUS client (NAS) IP — the switch or WAP forwarding the auth request; unexpected IPs indicate rogue RADIUS clients"
+        },
+        {
+          "name": "NP-Policy-Name",
+          "xpath": "EventData/Data[@Name='NPPolicyName']",
+          "description": "Network Policy that granted access; unexpected policy matches may indicate policy bypass"
+        },
+        {
+          "name": "Authentication-Type",
+          "xpath": "EventData/Data[@Name='AuthenticationType']",
+          "description": "EAP method used (PEAP, EAP-TLS, MSCHAPv2); MSCHAPv2 where certificate auth is required is anomalous"
+        },
+        {
+          "name": "Calling-Station-Id",
+          "xpath": "EventData/Data[@Name='CallingStationId']",
+          "description": "MAC address of the connecting device; cross-reference against managed device inventory"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "NPS RADIUS Auth Granted Using MSCHAPv2 on EAP-TLS Required Network",
+          "rule": "title: NPS RADIUS Auth Granted Using MSCHAPv2 on EAP-TLS Required Network\nstatus: experimental\nlogsource:\n    product: windows\n    service: nps\ndetection:\n    selection:\n        EventID: 6272\n        AuthenticationType: 'PEAP' # or 'MS-CHAPv2' depending on log format\n    condition: selection\nfalsepositives:\n    - Networks where PEAP-MSCHAPv2 is intentionally permitted\n    - Legacy devices that do not support EAP-TLS\nlevel: medium",
+          "notes": "Tune to your environment's required EAP type. Alert on any EAP method not in your approved authentication type list."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 6273,
+      "log": "NPS",
+      "provider": "Microsoft-Windows-NetworkPolicyServer",
+      "channel": "Microsoft-Windows-NetworkPolicyServer/Operational",
+      "level": "Warning",
+      "title": "NPS denied network access",
+      "summary": "The Network Policy Server (NPS/RADIUS) denied a network access authentication request.",
+      "details": "Generated when NPS denies a RADIUS authentication request. Key fields: the reason code (critical for distinguishing attack from misconfiguration), the user name, the RADIUS client IP, the calling station ID (device MAC), and the policy that evaluated the request. Reason codes include: 16 (Authentication failed — bad credentials), 48 (Account disabled in AD), 65 (EAP negotiation failure — client proposed an unacceptable method), 66 (Connection request matched a policy that denies access). High volumes of reason code 16 (bad credentials) from the same calling station ID or from the same NAS IP against multiple different usernames indicates a credential spray against 802.1X. An attacker who captures 802.1X PEAP-MSCHAPv2 challenge-response traffic (e.g., via a rogue access point) can perform offline cracking — EID 6273 denials may therefore be correlated with the start of an offline cracking window. Reason code 65 (EAP negotiation failure) may indicate a client or attacker attempting to negotiate a weaker EAP type that the server is configured to reject.",
+      "category": "Network Access Control",
+      "tags": [
+        "nps",
+        "radius",
+        "802.1x",
+        "authentication",
+        "brute-force",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 6272,
+          "log": "NPS"
+        },
+        {
+          "id": 2,
+          "log": "NPS"
+        },
+        {
+          "id": 6273,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110.003",
+          "techniqueName": "Brute Force: Password Spraying",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Reason code 16 (auth failure) for many different usernames from the same calling station ID or NAS IP indicates credential spray against 802.1X",
+          "Reason code 65 (EAP negotiation failure) in bulk from a single device may indicate a tool probing for weaker EAP methods or an incorrectly configured supplicant",
+          "Denials for a username that does not exist in AD (reason code 16 with an unknown UPN) indicate the attacker is guessing usernames as well as passwords",
+          "Correlate with WLAN EID 11002 (association failure) on the AP side — authentication failures that reach NPS are preceded by successful 802.11 association"
+        ],
+        "commonFalsePositives": [
+          "Incorrectly configured devices (wrong SSID credential or expired certificate) generating repeated auth failures",
+          "Users connecting with personal devices that don't have the required certificates for EAP-TLS",
+          "Service accounts with expired passwords triggering repeated auth failures from network-connected devices"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/nps-top"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Reason-Code",
+          "xpath": "EventData/Data[@Name='ReasonCode']",
+          "description": "Numeric reason for denial; 16 = bad credentials, 48 = account disabled, 65 = EAP negotiation failure, 66 = policy deny"
+        },
+        {
+          "name": "Client-IP-Address",
+          "xpath": "EventData/Data[@Name='ClientIPAddress']",
+          "description": "RADIUS client (NAS) IP forwarding the denial; unexpected IPs indicate rogue NAS"
+        },
+        {
+          "name": "Calling-Station-Id",
+          "xpath": "EventData/Data[@Name='CallingStationId']",
+          "description": "MAC of the device attempting to connect; spray pattern is multiple usernames from same MAC"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "NPS RADIUS Auth Denial — Possible Credential Spray",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-NetworkPolicyServer\"\n| where EventID == 6273\n| parse EventData with * 'ReasonCode=\"' ReasonCode '\"' * 'CallingStationId=\"' CallingStationId '\"' * 'FullyQualifiedSubjectUserName=\"' UserName '\"' *\n| where ReasonCode == \"16\" // Authentication failure\n| summarize FailureCount = count(), UniqueUsers = dcount(UserName) by CallingStationId, bin(TimeGenerated, 5m)\n| where FailureCount > 10 or UniqueUsers > 3\n| project TimeGenerated, CallingStationId, FailureCount, UniqueUsers",
+          "notes": "Multiple users failing from the same MAC in a short window is the 802.1X spray signature. UniqueUsers > 3 in 5 minutes from one device is high confidence."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4,
+      "log": "NPS",
+      "provider": "Microsoft-Windows-NetworkPolicyServer",
+      "channel": "Microsoft-Windows-NetworkPolicyServer/Operational",
+      "level": "Information",
+      "title": "NPS RADIUS request processed",
+      "summary": "NPS processed an IAS/RADIUS request and recorded all RADIUS attributes.",
+      "details": "Generated for each RADIUS request processed by NPS, recording the full set of RADIUS attributes and Vendor Specific Attributes (VSAs) received in the request. This event captures the raw RADIUS access-request data before policy evaluation — it includes attributes that may be filtered or not forwarded by the NAS, such as additional VSAs from specific switch or WAP vendors, the RADIUS message authenticator, and all connection metadata. From a security perspective, EID 4 is the most complete source of RADIUS request data and is used when a more granular attribute than those captured in EID 6272 or 6273 is needed for investigation. It is particularly useful for: (1) identifying unusual RADIUS attributes that may indicate a crafted or forged RADIUS request, (2) capturing VSAs from VPN concentrators or wireless controllers that encode additional context (session type, client OS, device posture), (3) forensic reconstruction of a RADIUS session when the access log was cleared but the operational log was not.",
+      "category": "Network Access Control",
+      "tags": [
+        "nps",
+        "radius",
+        "802.1x",
+        "audit",
+        "forensics"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 6272,
+          "log": "NPS"
+        },
+        {
+          "id": 6273,
+          "log": "NPS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "RADIUS requests containing unusual or unexpected VSA sets from a known NAS may indicate the NAS firmware was modified or a rogue device is impersonating a legitimate NAS using its shared secret",
+          "RADIUS requests with a missing or invalid Message-Authenticator attribute indicate the RADIUS client may not be enforcing RFC 3579 compliance — can indicate a spoofed RADIUS request",
+          "Use EID 4 to retrieve the full attribute set when investigating a specific session identified via EID 6272 or 6273, particularly to recover VSAs not shown in the higher-level events"
+        ],
+        "commonFalsePositives": [
+          "All RADIUS requests generate this event — volume matches EID 6272 and 6273 combined",
+          "Different NAS vendors use different VSA sets; unusual VSAs from known vendor equipment are expected"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/nps-top"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 2,
+      "log": "NPS",
+      "provider": "Microsoft-Windows-NetworkPolicyServer",
+      "channel": "Microsoft-Windows-NetworkPolicyServer/Operational",
+      "level": "Information",
+      "title": "NPS connection request policy matched",
+      "summary": "NPS evaluated a RADIUS request against its Connection Request Policy and identified the matching policy.",
+      "details": "Generated when NPS matches an incoming RADIUS connection request against a Connection Request Policy (CRP). CRPs determine how NPS handles the request: authenticate it locally, proxy it to a remote RADIUS server, or reject it outright. Key fields: the Connection Request Policy name matched, the RADIUS client, and the user identity. This event is earlier in the processing pipeline than EID 6272/6273 — it fires before Network Policy evaluation. From a security perspective, EID 2 is used to detect Connection Request Policy bypass attempts: if a request matches a less-restrictive CRP (e.g., a catch-all CRP rather than a specific NAS-IP-based CRP), the request may be evaluated by a broader policy than intended. An attacker who knows the NPS CRP configuration can craft RADIUS requests to match a weaker policy. Monitoring for requests matching the default CRP (rather than a specific CRP) from unexpected NAS IPs provides visibility into potential policy bypass attempts.",
+      "category": "Network Access Control",
+      "tags": [
+        "nps",
+        "radius",
+        "policy",
+        "network-access",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 6272,
+          "log": "NPS"
+        },
+        {
+          "id": 6273,
+          "log": "NPS"
+        },
+        {
+          "id": 4,
+          "log": "NPS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562",
+          "techniqueName": "Impair Defenses",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Requests matching the default or a catch-all CRP from a NAS IP not matching any specific CRP condition indicate the request bypassed NAS-specific policy controls",
+          "CRP policy name that should not apply to the authenticating user type or NAS (e.g., VPN policy matched for a wired Ethernet auth request) indicates misconfiguration or spoofed NAS attribute",
+          "Correlate CRP match with subsequent 6272/6273 to confirm whether the policy bypass led to a grant or denial"
+        ],
+        "commonFalsePositives": [
+          "All RADIUS requests generate this event as part of normal processing — volume is high",
+          "New NAS devices added to the network before the corresponding CRP condition is updated may match a broader CRP"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/nps-crp-reg-expressions"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "CRPolicyName",
+          "xpath": "EventData/Data[@Name='CRPolicyName']",
+          "description": "Connection Request Policy matched; unexpected policy names indicate the request did not follow the expected evaluation path"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

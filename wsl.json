@@ -1,0 +1,198 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Subsystem for Linux",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wsl.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1,
+      "log": "WSL",
+      "provider": "Microsoft-Windows-Windows Subsystem for Linux",
+      "channel": "Microsoft-Windows-Windows Subsystem for Linux/Operational",
+      "level": "Information",
+      "title": "WSL instance started",
+      "summary": "A Windows Subsystem for Linux instance was started.",
+      "details": "Generated when a WSL instance (Linux distribution) is started. Key fields: the distribution name and the invoking user context. WSL is increasingly exploited by threat actors as a living-off-the-land vector to execute Linux ELF binaries, bypass Windows EDR and AV solutions, and run tools such as nmap, curl, and Python scripts that have no Windows equivalent or are not subject to Windows AppLocker policies. WSL execution can bypass: (1) Windows Defender real-time scanning of Linux ELF binaries in the WSL file system, (2) AppLocker rules which apply to Windows PE files and scripts but not to ELF binaries executed within WSL, (3) many EDR user-mode hooks that operate on Windows PE processes. Detection relying solely on process creation (Sysmon EID 1 or Security EID 4688) may not capture WSL-internal execution. Identify WSL usage on endpoints where it is not expected in the application inventory, especially on servers or locked-down workstations. Correlate with Security EID 4688 for the wsl.exe or wslhost.exe parent process.",
+      "category": "WSL Execution",
+      "tags": [
+        "wsl",
+        "linux",
+        "lolbas",
+        "defense-evasion",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 2,
+          "log": "WSL"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1202",
+          "techniqueName": "Indirect Command Execution",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1059",
+          "techniqueName": "Command and Scripting Interpreter",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-Windows Subsystem for Linux/Operational log must be enabled. It may require manual enablement via wevtutil.",
+          "command": "wevtutil set-log \"Microsoft-Windows-Windows Subsystem for Linux/Operational\" /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "WSL on a server, kiosk, or locked-down workstation with no documented business need is high priority — WSL should be in the software inventory",
+          "Identify the invoking user and parent process — wsl.exe launched by cmd.exe, powershell.exe, or a scheduled task from a non-interactive account is anomalous",
+          "Correlate with Sysmon EID 1 for wsl.exe and wslhost.exe process creation — these are the Windows-side indicators of WSL activity",
+          "Check network connections from wslhost.exe or the WSL virtual network adapter (vEthernet WSL) for unexpected outbound traffic post-WSL start",
+          "Linux ELF binary execution within WSL will not appear in Windows process creation logs — the WSL start event is often the only Windows-layer indicator"
+        ],
+        "commonFalsePositives": [
+          "Developer workstations with WSL legitimately installed for software development (Node.js, Python, Docker, etc.)",
+          "IT teams using WSL for cross-platform scripting and tooling",
+          "Automated build pipelines on developer machines invoking WSL"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/wsl/about"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607 / Server 2019"
+      },
+      "keyFields": [
+        {
+          "name": "DistributionName",
+          "xpath": "EventData/Data[@Name='DistributionName']",
+          "description": "Linux distribution started (e.g., Ubuntu, Kali, Debian); Kali Linux or offensive distributions on non-pentester endpoints are high-risk"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "WSL Instance Started on Non-Developer Endpoint",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Subsystem for Linux\"\n| where EventID == 1\n// Replace with your known developer machine list\n| where Computer !in (\"dev01\", \"dev02\", \"build-server\")\n| project TimeGenerated, Computer, UserName, RenderedDescription",
+          "notes": "WSL on non-developer endpoints should be treated as suspicious. Build an allowlist of machines where WSL is expected and approved."
+        },
+        {
+          "platform": "Sigma",
+          "title": "WSL Instance Started",
+          "rule": "title: WSL Instance Started\nstatus: experimental\nlogsource:\n    product: windows\n    service: wsl\ndetection:\n    selection:\n        EventID: 1\n    condition: selection\nfalsepositives:\n    - Developer workstations with authorised WSL installation\n    - Build servers running cross-platform CI/CD pipelines\nlevel: medium",
+          "notes": "Use an allowlist of known-good computers or users to suppress FPs. Kali Linux distribution name is high confidence."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 2,
+      "log": "WSL",
+      "provider": "Microsoft-Windows-Windows Subsystem for Linux",
+      "channel": "Microsoft-Windows-Windows Subsystem for Linux/Operational",
+      "level": "Information",
+      "title": "WSL instance stopped",
+      "summary": "A Windows Subsystem for Linux instance was stopped.",
+      "details": "Generated when a WSL instance terminates. Pair with EID 1 to calculate WSL session duration. Anomalously short WSL sessions (seconds) may indicate one-liner Linux command execution or a scripted command-and-control check-in via curl or wget. The absence of a matching EID 2 after an EID 1 (e.g., if the WSL process was forcibly killed by a security tool or system) may indicate EDR intervention or a crash. In an investigation, the WSL session duration combined with Sysmon network connection events during the same window provides the key context for understanding what was executed within the WSL environment.",
+      "category": "WSL Execution",
+      "tags": [
+        "wsl",
+        "linux",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1,
+          "log": "WSL"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1202",
+          "techniqueName": "Indirect Command Execution",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The Microsoft-Windows-Windows Subsystem for Linux/Operational log must be enabled.",
+          "command": "wevtutil set-log \"Microsoft-Windows-Windows Subsystem for Linux/Operational\" /enabled:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 1 to calculate session duration — sessions under 30 seconds are characteristic of one-liner execution (curl, wget, python -c)",
+          "Network connections during the WSL session (Sysmon EID 3 from wslhost.exe) are key indicators of C2 or data exfiltration"
+        ],
+        "commonFalsePositives": [
+          "Short sessions are normal when running quick Linux commands from the terminal",
+          "Background WSL processes completing automatically"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/wsl/about"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607 / Server 2019"
+      },
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

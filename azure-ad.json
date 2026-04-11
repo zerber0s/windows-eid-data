@@ -1,0 +1,410 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Azure AD / Entra ID (Device-Side)",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/azure-ad.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1098,
+      "log": "AzureAD",
+      "provider": "Microsoft-Windows-AAD",
+      "channel": "Microsoft-Windows-AAD/Operational",
+      "level": "Error",
+      "title": "Primary Refresh Token operation failed",
+      "summary": "The device failed to acquire or refresh its Primary Refresh Token from Azure AD / Entra ID.",
+      "details": "Generated when the Microsoft-Windows-AAD (Azure AD/Entra ID) device authentication component fails to acquire or refresh the Primary Refresh Token (PRT). The PRT is the core credential for device-based SSO in Entra ID and hybrid-joined environments — it is issued to the device based on its Entra ID device registration certificate and is used to silently obtain access tokens for cloud resources. Key fields: the error code, the user UPN, and the operation type. Repeated PRT failures can indicate: (1) the device certificate used for PRT issuance is invalid, expired, or revoked (e.g., after device compliance violation or Intune non-compliance), (2) the device has been disabled in Entra ID, (3) a Conditional Access Policy is blocking device authentication, or (4) an attacker has corrupted or deleted the device certificate. From an attack perspective, an adversary who has extracted the PRT (e.g., via lsass memory access where the PRT is held by the AAD broker, or via Pass-the-PRT techniques) will cause the legitimate device to experience PRT failure because the token was used from an unexpected location — the cloud side invalidates the PRT on anomaly detection. EID 1098 on the victim device paired with Entra ID sign-in log anomalies is therefore a post-compromise indicator.",
+      "category": "Cloud Authentication",
+      "tags": [
+        "azure-ad",
+        "entra-id",
+        "prt",
+        "device-registration",
+        "credential-access",
+        "sso"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1104,
+          "log": "AzureAD"
+        },
+        {
+          "id": 6145,
+          "log": "AzureAD"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.001",
+          "techniqueName": "Use Alternate Authentication Material: Application Access Token",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1003",
+          "techniqueName": "OS Credential Dumping",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Repeated PRT failures on a device that was previously successfully acquiring PRTs may indicate the device certificate was tampered with or the device was disabled in Entra ID",
+          "Correlate with Entra ID sign-in logs for the same user — if there are successful sign-ins from a different device or location at the time of device PRT failure, suspect PRT theft",
+          "Error code 0xCAA50021 (device not compliant) indicates Conditional Access blocked the PRT; check device compliance status in Intune",
+          "Error codes indicating certificate issues (0xCAA5001C, 0xCAA90031) warrant examination of the device's Entra ID registration certificate in certlm.msc"
+        ],
+        "commonFalsePositives": [
+          "Device out of Intune compliance triggering CA policy that blocks PRT issuance",
+          "Hybrid-join misconfiguration preventing PRT acquisition on newly domain-joined devices",
+          "Network connectivity issues preventing the device from reaching Azure AD endpoints (login.microsoftonline.com)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/entra/identity/devices/troubleshoot-hybrid-join-windows-current"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607"
+      },
+      "keyFields": [
+        {
+          "name": "Error Code",
+          "xpath": "EventData/Data[@Name='ErrorCode']",
+          "description": "Hex error code indicating why the PRT operation failed; 0xCAA50021 = not compliant, 0xCAA5001C = certificate invalid"
+        },
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "UPN of the user whose PRT operation failed"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1104,
+      "log": "AzureAD",
+      "provider": "Microsoft-Windows-AAD",
+      "channel": "Microsoft-Windows-AAD/Operational",
+      "level": "Information",
+      "title": "Primary Refresh Token refreshed successfully",
+      "summary": "The device successfully refreshed its Primary Refresh Token from Azure AD / Entra ID.",
+      "details": "Generated when the device successfully acquires or refreshes the Primary Refresh Token (PRT) from Entra ID. In normal operation on Entra ID-joined or hybrid-joined devices, this event fires periodically as the PRT is refreshed (the PRT has a 14-day validity but is refreshed on each authentication). Key fields: user UPN and the device identifier. From a security perspective, this is a baseline event used to establish normal PRT refresh patterns per device. Anomalous patterns include: PRT refresh at unusual hours, PRT refresh for a privileged account on an unexpected device, or a PRT refresh occurring on a device that was recently reset or rebuilt. In a Pass-the-PRT attack investigation, correlating this event with Entra ID sign-in logs for the same time window can reveal whether the PRT was used from multiple locations simultaneously.",
+      "category": "Cloud Authentication",
+      "tags": [
+        "azure-ad",
+        "entra-id",
+        "prt",
+        "device-registration",
+        "sso"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1098,
+          "log": "AzureAD"
+        },
+        {
+          "id": 6144,
+          "log": "AzureAD"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.001",
+          "techniqueName": "Use Alternate Authentication Material: Application Access Token",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "PRT refreshed for a privileged account (Global Admin, Privileged Role Admin UPN) on an unmanaged or non-compliant device warrants investigation",
+          "Correlate with Entra ID sign-in logs — if the PRT was refreshed on the device but cloud sign-ins appear from a different IP/device simultaneously, suspect Pass-the-PRT",
+          "Unexpected PRT refresh after a period of device inactivity (e.g., device was thought to be decommissioned) indicates the device is still active and possibly under attacker control"
+        ],
+        "commonFalsePositives": [
+          "Normal periodic PRT refresh on active Entra ID-joined devices (occurs with each authentication)",
+          "PRT refresh after resume from sleep or hibernate on laptops",
+          "Device clock drift causing token expiry and immediate re-refresh"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607"
+      },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "UPN of the user whose PRT was refreshed"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 6144,
+      "log": "AzureAD",
+      "provider": "Microsoft-Windows-AAD",
+      "channel": "Microsoft-Windows-AAD/Operational",
+      "level": "Information",
+      "title": "SSO token silently issued for cloud resource",
+      "summary": "The WAM broker silently issued an access token for a cloud resource using the device PRT.",
+      "details": "Generated when the Web Account Manager (WAM) broker silently obtains an access token for a cloud resource using the device's Primary Refresh Token, without requiring user interaction. Key fields: the target resource URL or application ID, the user UPN, and the token type. This event documents silent SSO — the mechanism by which Windows silently authenticates users to cloud resources (Microsoft 365, Azure management, third-party SaaS apps) using the PRT. From a security perspective, EID 6144 for unexpected resources — particularly Azure management APIs (management.azure.com), Microsoft Graph (graph.microsoft.com), or security tooling APIs — from a non-admin user's device is a signal that an application on the device is accessing cloud resources beyond its expected scope. This can indicate OAuth token abuse, malicious application installation, or an attacker using existing legitimate OAuth tokens for cloud access.",
+      "category": "Cloud Authentication",
+      "tags": [
+        "azure-ad",
+        "entra-id",
+        "sso",
+        "wam",
+        "token-issuance",
+        "oauth"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1104,
+          "log": "AzureAD"
+        },
+        {
+          "id": 6145,
+          "log": "AzureAD"
+        },
+        {
+          "id": 1085,
+          "log": "AzureAD"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.001",
+          "techniqueName": "Use Alternate Authentication Material: Application Access Token",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Token issued silently for Azure management plane (management.azure.com) or Microsoft Graph from a standard user device indicates the user's account or a local application is accessing admin-tier cloud resources",
+          "Correlate with Sysmon EID 1 or Security EID 4688 on the same device to identify which process triggered the WAM broker request",
+          "Multiple silent tokens issued for different resources in rapid succession indicate a local application enumerating cloud resource access"
+        ],
+        "commonFalsePositives": [
+          "Microsoft 365 applications (Outlook, Teams, SharePoint) silently refreshing tokens for cloud resources is normal and generates high volume",
+          "Security and compliance agents (MCAS, Defender for Endpoint) silently authenticating to management APIs",
+          "Intune/MDM clients silently authenticating to management endpoints"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607"
+      },
+      "keyFields": [
+        {
+          "name": "Resource",
+          "xpath": "EventData/Data[@Name='Resource']",
+          "description": "Cloud resource or API for which the token was issued; management.azure.com or graph.microsoft.com from non-admin accounts is anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 6145,
+      "log": "AzureAD",
+      "provider": "Microsoft-Windows-AAD",
+      "channel": "Microsoft-Windows-AAD/Operational",
+      "level": "Warning",
+      "title": "SSO to cloud resource failed",
+      "summary": "The WAM broker failed to obtain a token for a cloud resource — denied by Entra ID or Conditional Access.",
+      "details": "Generated when the Web Account Manager (WAM) broker fails to silently obtain an access token for a cloud resource. The failure may be due to Conditional Access Policy (CAP) enforcement, device compliance requirements, MFA requirements, or token scope restrictions. Key fields: the target resource, the error code, and the user UPN. From a security perspective, EID 6145 for resources that the user was previously able to access silently may indicate: (1) a new Conditional Access Policy has been applied that the device does not satisfy, (2) the device compliance status changed (Intune non-compliance), (3) the user's PRT was revoked due to risk detection (Entra ID Identity Protection), or (4) an MFA requirement was added to the resource. In an investigation, a sudden pattern of 6145 events for a user who was previously successfully accessing resources silently — particularly if correlated with EID 1098 (PRT failure) — may indicate that Entra ID detected anomalous behavior (risk-based CA trigger) and is blocking the device.",
+      "category": "Cloud Authentication",
+      "tags": [
+        "azure-ad",
+        "entra-id",
+        "sso",
+        "conditional-access",
+        "token-denial"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1098,
+          "log": "AzureAD"
+        },
+        {
+          "id": 6144,
+          "log": "AzureAD"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078.004",
+          "techniqueName": "Valid Accounts: Cloud Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Sudden 6145 failures after a period of successful 6144 SSO events may indicate Entra ID Identity Protection flagged the account as risky — check Entra ID sign-in risk logs",
+          "Correlate with Intune device compliance status — non-compliant device triggering CA policy is the most common legitimate cause",
+          "Error codes indicating MFA required (AADSTS50076) when the user did not recently change their sign-in risk may indicate a new CA policy was applied to the resource"
+        ],
+        "commonFalsePositives": [
+          "Device compliance state changes (Intune check-in after non-compliance period)",
+          "Network connectivity issues preventing WAM from reaching Entra ID endpoints",
+          "New Conditional Access policies applied during an IT change window"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/entra/identity/devices/concept-primary-refresh-token"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607"
+      },
+      "keyFields": [
+        {
+          "name": "Resource",
+          "xpath": "EventData/Data[@Name='Resource']",
+          "description": "Target cloud resource that was denied"
+        },
+        {
+          "name": "Error Code",
+          "xpath": "EventData/Data[@Name='ErrorCode']",
+          "description": "Entra ID error code; AADSTS50076 = MFA required, AADSTS53003 = blocked by CA policy"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1085,
+      "log": "AzureAD",
+      "provider": "Microsoft-Windows-AAD",
+      "channel": "Microsoft-Windows-AAD/Operational",
+      "level": "Information",
+      "title": "WAM brokered authentication request",
+      "summary": "An application on this device requested authentication via the Web Account Manager (WAM) broker.",
+      "details": "Generated when an application invokes the Windows Web Account Manager (WAM) broker to request authentication tokens from Entra ID. WAM is the standard Windows authentication broker for modern applications — it intermediates between the application and Entra ID, using the device PRT to silently issue tokens. Key fields: the requesting application (App ID or executable), the user UPN, and the target resource. This event documents which applications on the device are requesting cloud authentication, providing a map of application-to-resource access. From a security perspective, unexpected applications (particularly newly installed software, scripts running via wscript/cscript/powershell, or applications with unusual App IDs) requesting WAM-brokered tokens for sensitive resources is an indicator of malicious OAuth application abuse. An attacker with code execution on the device can invoke WAM to silently obtain tokens for any resource the user has access to, without prompting for credentials.",
+      "category": "Cloud Authentication",
+      "tags": [
+        "azure-ad",
+        "entra-id",
+        "wam",
+        "oauth",
+        "token-issuance",
+        "application"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 6144,
+          "log": "AzureAD"
+        },
+        {
+          "id": 6145,
+          "log": "AzureAD"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1550.001",
+          "techniqueName": "Use Alternate Authentication Material: Application Access Token",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1528",
+          "techniqueName": "Steal Application Access Token",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Application ID not matching known enterprise applications or Microsoft first-party apps (Office, Teams, etc.) requesting WAM tokens is anomalous",
+          "PowerShell, wscript, or cmd process requesting WAM brokered auth for management-plane resources indicates malicious script abusing WAM for token theft",
+          "Correlate with Sysmon EID 1 (process creation) to identify the parent process chain for the WAM request — legitimate apps are typically signed, known binaries"
+        ],
+        "commonFalsePositives": [
+          "All modern Microsoft applications (Office 365, Teams, Edge, Outlook) use WAM for authentication — generates significant volume",
+          "Line-of-business applications integrated with Entra ID via MSAL making routine token requests",
+          "Third-party applications using MSAL (Microsoft Authentication Library) for Entra ID integration"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-acquire-token-wam"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1607"
+      },
+      "keyFields": [
+        {
+          "name": "App ID",
+          "xpath": "EventData/Data[@Name='AppId']",
+          "description": "Application requesting the token; unknown or unexpected App IDs are anomalous"
+        },
+        {
+          "name": "Resource",
+          "xpath": "EventData/Data[@Name='Resource']",
+          "description": "Cloud resource requested; management plane APIs from non-admin apps are high priority"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

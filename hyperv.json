@@ -1,0 +1,450 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Hyper-V",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/hyperv.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 13002,
+      "log": "HyperV",
+      "provider": "Microsoft-Windows-Hyper-V-VMMS",
+      "channel": "Microsoft-Windows-Hyper-V-VMMS/Admin",
+      "level": "Information",
+      "title": "Virtual machine started",
+      "summary": "A Hyper-V virtual machine was started by the Virtual Machine Management Service.",
+      "details": "Generated when a virtual machine transitions to the running state. Key fields: VmName (the VM name), VmId (the unique VM identifier). In a security context, this event tracks the lifecycle of virtual machines on a Hyper-V host. Unexpected VM starts — particularly outside of business hours, for VMs in unusual powered-off states, or for VMs the organisation does not actively use — may indicate an attacker leveraging dormant VMs for persistence or lateral movement. Attackers who compromise a Hyper-V host gain control over all guest VMs and can start, modify, or snapshot them without touching the guest OS security controls. This event should be baselined per VM and alerting configured for VMs not in the expected operational set. Correlate with Security EID 4688 on the host to identify the process that triggered the VM start (vmconnect.exe, powershell.exe, or unexpected processes are pivots).",
+      "category": "Virtual Machine Lifecycle",
+      "tags": [
+        "hyper-v",
+        "vm",
+        "virtualisation",
+        "lateral-movement",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 13003,
+          "log": "HyperV"
+        },
+        {
+          "id": 13004,
+          "log": "HyperV"
+        },
+        {
+          "id": 18512,
+          "log": "HyperV"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1564.006",
+          "techniqueName": "Hide Artifacts: Run Virtual Instance",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1021",
+          "techniqueName": "Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "VmName not in the expected inventory of active VMs is highest priority — dormant or unknown VMs being started indicates potential attacker activity",
+          "Unexpected start time (outside maintenance windows or business hours) for a production VM warrants review",
+          "Correlate VmId with Security EID 4688 on the host to identify the process and user that initiated the start",
+          "VM started from an unexpected host account (not a service account or admin) indicates privileged access by an attacker",
+          "Cluster of VM starts across multiple hosts in a short window may indicate ransomware operators preparing to deploy encryption in VMs"
+        ],
+        "commonFalsePositives": [
+          "Scheduled VM starts for automated batch processing workloads",
+          "Administrators starting VMs for maintenance or testing",
+          "Hyper-V host rebooting and automatically starting configured auto-start VMs"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/manage/about-hyper-v-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "VmName",
+          "xpath": "EventData/Data[@Name='VmName']",
+          "description": "Name of the virtual machine; compare against authorised active VM inventory"
+        },
+        {
+          "name": "VmId",
+          "xpath": "EventData/Data[@Name='VmId']",
+          "description": "Unique GUID of the VM; persistent across renames — use for cross-event correlation"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 13003,
+      "log": "HyperV",
+      "provider": "Microsoft-Windows-Hyper-V-VMMS",
+      "channel": "Microsoft-Windows-Hyper-V-VMMS/Admin",
+      "level": "Information",
+      "title": "Virtual machine stopped",
+      "summary": "A Hyper-V virtual machine was shut down or stopped.",
+      "details": "Generated when a virtual machine transitions to a stopped (powered off) state. Key fields: VmName, VmId. Unexpected VM shutdowns — especially for production systems during business hours — may indicate an attacker preparing to tamper with VM disk files offline, or ransomware shutting down VMs before encrypting VHDX files on the host storage. Modern ransomware targeting virtualised environments routinely stops all running VMs before encrypting VHDX/VHD files because open-disk encryption is blocked by Windows file locking. A wave of 13003 events across all VMs in rapid succession on a production Hyper-V cluster is a critical ransomware precursor indicator. Pair with EID 13002 for the full power-on/off cycle, and correlate with host file system activity for VHDX access after the VM stops.",
+      "category": "Virtual Machine Lifecycle",
+      "tags": [
+        "hyper-v",
+        "vm",
+        "virtualisation",
+        "ransomware",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 13002,
+          "log": "HyperV"
+        },
+        {
+          "id": 13004,
+          "log": "HyperV"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Bulk 13003 events (all or most VMs stopped within a short window) is a critical ransomware precursor — treat as P1 incident immediately",
+          "A VM stopping unexpectedly during business hours with no corresponding change management record should be investigated immediately",
+          "Correlate with host file system events — VHDX file access via Windows Explorer or robocopy.exe after a VM stop indicates data staging or encryption preparation",
+          "Identify the initiating user/process via Security EID 4688 on the host — unexpected initiating processes are red flags"
+        ],
+        "commonFalsePositives": [
+          "Scheduled VM shutdowns for maintenance windows",
+          "Administrator-initiated graceful shutdown for patching",
+          "Auto-shutdown policies on dev/test VMs based on schedule"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/manage/about-hyper-v-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "VmName",
+          "xpath": "EventData/Data[@Name='VmName']",
+          "description": "VM name; bulk stops across multiple VMs simultaneously is a ransomware indicator"
+        },
+        {
+          "name": "VmId",
+          "xpath": "EventData/Data[@Name='VmId']",
+          "description": "VM GUID; use to correlate with preceding EID 13002 for session duration"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Bulk Hyper-V VM Shutdown — Ransomware Precursor",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Hyper-V-VMMS\"\n| where EventID == 13003\n| summarize VMsStopped = dcount(RenderedDescription), VmList = make_set(RenderedDescription) by Computer, bin(TimeGenerated, 5m)\n| where VMsStopped >= 3",
+          "notes": "Three or more VMs stopped within 5 minutes on the same host is a high-confidence ransomware precursor. Tune threshold based on scheduled maintenance patterns."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Multiple Hyper-V VMs Stopped in Short Window",
+          "rule": "title: Multiple Hyper-V VMs Stopped in Short Window\nstatus: experimental\nlogsource:\n    product: windows\n    service: hyper-v-vmms\ndetection:\n    selection:\n        EventID: 13003\n    condition: selection | count() > 3\ntimeframe: 5m\nfalsepositives:\n    - Scheduled maintenance bulk shutdowns\n    - Host reboot causing all VMs to stop\nlevel: high",
+          "notes": "Must correlate with absence of change management to reduce false positives."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 13004,
+      "log": "HyperV",
+      "provider": "Microsoft-Windows-Hyper-V-VMMS",
+      "channel": "Microsoft-Windows-Hyper-V-VMMS/Admin",
+      "level": "Information",
+      "title": "Virtual machine saved to state",
+      "summary": "A Hyper-V virtual machine was saved to a saved-state file (hibernation).",
+      "details": "Generated when a VM is placed into a saved state (paused with state written to disk). This differs from shutdown (EID 13003) in that the VM memory is persisted to a .vsv file on the host storage. From a forensic perspective, the saved-state file contains a memory snapshot of the guest — including potentially active decryption keys, credential material, and in-memory process state. In an investigation, identifying and acquiring saved-state files for suspect VMs is a high-priority DFIR action. Adversaries may save a VM's state to access its VHDX file offline without triggering guest OS events, since the guest is frozen rather than shut down. Alternatively, sophisticated attackers may deliberately save state to preserve a foothold or tool state.",
+      "category": "Virtual Machine Lifecycle",
+      "tags": [
+        "hyper-v",
+        "vm",
+        "virtualisation",
+        "memory-forensics"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 13002,
+          "log": "HyperV"
+        },
+        {
+          "id": 13003,
+          "log": "HyperV"
+        },
+        {
+          "id": 18512,
+          "log": "HyperV"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1564.006",
+          "techniqueName": "Hide Artifacts: Run Virtual Instance",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Saved-state files (.vsv) are volatile forensic gold — they contain guest RAM including active credentials and encryption keys; acquire them immediately in an incident",
+          "Unexpected VM save outside of maintenance windows may indicate an attacker pausing a VM to manipulate its disk files without guest-level detection",
+          "Correlate with host file system activity on the .vsv file path to detect exfiltration or tampering of the saved state"
+        ],
+        "commonFalsePositives": [
+          "Host entering sleep/hibernate causing all VMs to be saved automatically",
+          "Cluster live migration triggering intermediate saved states",
+          "IT administrators saving VM state before performing host maintenance"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/manage/about-hyper-v-events"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "VmName",
+          "xpath": "EventData/Data[@Name='VmName']",
+          "description": "VM name; saved-state file on host storage is a forensic acquisition target"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 18512,
+      "log": "HyperV",
+      "provider": "Microsoft-Windows-Hyper-V-VMMS",
+      "channel": "Microsoft-Windows-Hyper-V-VMMS/Admin",
+      "level": "Information",
+      "title": "Virtual machine checkpoint created",
+      "summary": "A checkpoint (snapshot) was created for a Hyper-V virtual machine.",
+      "details": "Generated when a checkpoint is created for a VM. Checkpoints capture the complete VM state (memory, disk, device state) at a point in time. Key fields: VmName, VmId, CheckpointId (unique identifier for the checkpoint). From a security perspective, checkpoints are significant for two reasons: (1) Attackers may create a checkpoint to preserve a working malicious configuration as a rollback point — after defensive response, the attacker could revert the VM to the compromised pre-remediation state. (2) Ransomware operators may delete all checkpoints (observable by the absence of checkpoint events paired with disk file deletions) to prevent recovery. Unexplained checkpoint creation outside of backup windows, or creation followed by rapid deletion, are investigation triggers. Correlate with the checkpoint creation user/process via Security EID 4688 on the host.",
+      "category": "Virtual Machine Management",
+      "tags": [
+        "hyper-v",
+        "vm",
+        "checkpoint",
+        "snapshot",
+        "persistence",
+        "ransomware"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 13002,
+          "log": "HyperV"
+        },
+        {
+          "id": 13003,
+          "log": "HyperV"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1003",
+          "techniqueName": "OS Credential Dumping",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Checkpoint created outside of backup windows or by an unexpected user/process is anomalous",
+          "Checkpoint created for a DC VM may be used for offline credential extraction (the VHDX contains NTDS.dit) — high-severity indicator",
+          "Checkpoint creation followed by a 13003 (stop) and then VHDX file access by an unexpected process is a staged credential theft pattern",
+          "Absence of expected checkpoint events (where automated backups are configured) may indicate checkpoint deletion as part of ransomware preparation"
+        ],
+        "commonFalsePositives": [
+          "Automated backup solutions using Hyper-V snapshots (e.g., VEEAM, Windows Server Backup)",
+          "Administrator-created checkpoints before applying guest OS patches or software updates",
+          "Development environments with frequent checkpoint usage"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/manage/about-hyper-v-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "VmName",
+          "xpath": "EventData/Data[@Name='VmName']",
+          "description": "VM name; checkpoint on a DC is highest risk for credential theft"
+        },
+        {
+          "name": "VmId",
+          "xpath": "EventData/Data[@Name='VmId']",
+          "description": "VM GUID; correlate with VHDX file access events on the host"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 19050,
+      "log": "HyperV",
+      "provider": "Microsoft-Windows-Hyper-V-VMMS",
+      "channel": "Microsoft-Windows-Hyper-V-VMMS/Admin",
+      "level": "Information",
+      "title": "Virtual machine live migration initiated",
+      "summary": "A live migration was started to move a running VM from one Hyper-V host to another.",
+      "details": "Generated on the source host when a live migration of a running VM begins. Live migration transfers the VM's memory pages and device state to a destination host while keeping the guest running. Key fields: VmName, VmId, and the destination host name/IP. Live migration between authorised cluster nodes is a routine administrative operation; however, an adversary who has compromised a Hyper-V host may initiate an unauthorised live migration to move a VM to an attacker-controlled host, effectively stealing the guest OS and its data. Indicators of malicious migration include: destination host not in the authorised cluster, migration outside of maintenance windows, or migration of high-value VMs (DCs, database servers) by non-service accounts. Correlate with cluster management events and the destination host's 13002 event to confirm where the VM landed.",
+      "category": "Virtual Machine Lifecycle",
+      "tags": [
+        "hyper-v",
+        "vm",
+        "migration",
+        "lateral-movement",
+        "exfiltration"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 13002,
+          "log": "HyperV"
+        },
+        {
+          "id": 13003,
+          "log": "HyperV"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021",
+          "techniqueName": "Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1048",
+          "techniqueName": "Exfiltration Over Alternative Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0010",
+              "tacticName": "Exfiltration"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Destination host not matching any node in the authorised Hyper-V cluster is the primary indicator of malicious migration",
+          "Migration of a DC or other high-value VM by a non-cluster-service account is high priority",
+          "Correlate the destination IP with network traffic logs — live migration uses TCP 6600; unexpected external traffic to this port is a critical indicator",
+          "Verify migration was initiated by the expected cluster service account and not an interactive user account"
+        ],
+        "commonFalsePositives": [
+          "Routine load balancing via Hyper-V Dynamic Optimization or System Center VMM",
+          "Planned host maintenance requiring VM evacuation via Live Migration",
+          "Automated DR failover migrations in cluster-aware environments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/manage/about-hyper-v-events"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "VmName",
+          "xpath": "EventData/Data[@Name='VmName']",
+          "description": "VM being migrated; DC or sensitive-tier VMs are highest priority"
+        },
+        {
+          "name": "VmId",
+          "xpath": "EventData/Data[@Name='VmId']",
+          "description": "VM GUID; correlate with 13002 on the destination host to confirm where the VM was moved"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Network Profile",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/network-profile.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 10000,
+      "log": "NetworkProfile",
+      "provider": "Microsoft-Windows-NetworkProfile",
+      "channel": "Microsoft-Windows-NetworkProfile/Operational",
+      "level": "Information",
+      "title": "Network connected — category assigned",
+      "summary": "The machine connected to a network and Windows assigned it a network location category.",
+      "details": "Generated when Windows connects to a network and assigns it a location category. Key fields: Name (the network name), Category (0 = Public, 1 = Private, 2 = Domain), Description, and SubjectUserName. The Category assignment is critical from a security perspective because it determines which Windows Firewall profile is applied: Domain profile (Category 2) is typically most permissive for corporate tools; Public profile (Category 0) is most restrictive; Private profile (Category 1) is intermediate. Adversaries can manipulate the network category to force a switch away from the Domain profile, bypassing stricter domain-enforced firewall rules. A domain-joined machine assigned Category 0 (Public) instead of Category 2 (Domain) indicates it cannot reach a domain controller — potentially due to a network segmentation change, VPN misconfiguration, or deliberate manipulation. Category changes should be correlated with Firewall EID 2052 (profile switch) and DNS/DHCP events to understand the network state change.",
+      "category": "Network Configuration",
+      "tags": [
+        "network",
+        "firewall-profile",
+        "defense-evasion",
+        "domain"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 10001,
+          "log": "NetworkProfile"
+        },
+        {
+          "id": 2052,
+          "log": "Firewall"
+        },
+        {
+          "id": 8001,
+          "log": "WLAN"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.004",
+          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Category = 0 (Public) on a domain-joined machine indicates it cannot see a DC — verify network connectivity and investigate if intentional isolation is not expected",
+          "Category changes from 2 (Domain) to 0 (Public) on a DC-joined host during active use may indicate network coercion (e.g., LLMNR poisoning causing domain detection failure)",
+          "Name field showing an unknown network name on a managed endpoint warrants SSID/DNS investigation",
+          "Correlate with Firewall EID 2052 to confirm the firewall profile switched in lockstep with the category change"
+        ],
+        "commonFalsePositives": [
+          "Domain-joined laptops connecting to home or hotel networks that receive Public category legitimately",
+          "VPN connections and disconnections causing brief profile transitions before domain detection completes",
+          "New networks during site visits or remote working"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Name",
+          "xpath": "EventData/Data[@Name='Name']",
+          "description": "Network name assigned; compare against known authorised networks"
+        },
+        {
+          "name": "Category",
+          "xpath": "EventData/Data[@Name='Category']",
+          "description": "0 = Public (restrictive), 1 = Private (moderate), 2 = Domain (permissive); unexpected Public on domain-joined machine is high interest"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "User who triggered the network connection"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Domain-Joined Machine Assigned Public Network Profile",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-NetworkProfile\"\n| where EventID == 10000\n| parse EventData with * '<Data Name=\"Category\">' Category '</Data>' *\n| where Category == \"0\" // Public\n| project TimeGenerated, Computer, RenderedDescription",
+          "notes": "On domain-joined endpoints a Category 0 (Public) assignment means DC is unreachable. Alert if this occurs during active business hours on machines expected to be on corporate network."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Public Network Profile Assigned on Managed Endpoint",
+          "rule": "title: Public Network Profile Assigned on Managed Endpoint\nstatus: experimental\nlogsource:\n    product: windows\n    service: network-profile\ndetection:\n    selection:\n        EventID: 10000\n        Category: '0'\n    condition: selection\nfalsepositives:\n    - Remote workers connecting to home or public networks\n    - VPN connection establishment before domain detection completes\nlevel: low"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 10001,
+      "log": "NetworkProfile",
+      "provider": "Microsoft-Windows-NetworkProfile",
+      "channel": "Microsoft-Windows-NetworkProfile/Operational",
+      "level": "Information",
+      "title": "Network disconnected",
+      "summary": "The machine disconnected from a network and its associated profile was removed.",
+      "details": "Generated when Windows disconnects from a network. Key fields: Name (the network name) and SubjectUserName. From a forensic perspective, this event brackets the end of a network session. Unexpected disconnections from corporate networks during business hours — especially followed immediately by connection to an unknown network (EID 10000) — may indicate network spoofing, rogue DHCP, or a physical cable swap. In lateral movement scenarios, an attacker on a compromised endpoint may disconnect it from the corporate network to break monitoring or telemetry before executing destructive actions. Correlate with WLAN EID 8003 for the wireless layer disconnection (if applicable), and with Firewall EID 2052 for the resulting firewall profile change.",
+      "category": "Network Configuration",
+      "tags": [
+        "network",
+        "disconnection",
+        "firewall-profile"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 10000,
+          "log": "NetworkProfile"
+        },
+        {
+          "id": 8003,
+          "log": "WLAN"
+        },
+        {
+          "id": 2052,
+          "log": "Firewall"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Unexpected disconnection from a corporate domain network during active business hours is the primary pivot",
+          "10001 immediately followed by a 10000 for an unknown network indicates the interface was reconnected to a different (possibly rogue) network",
+          "Correlate with Firewall EID 2052 — if the firewall profile switches from Domain to Public simultaneously, security posture of the endpoint degraded"
+        ],
+        "commonFalsePositives": [
+          "User disconnecting a network cable or disabling Wi-Fi",
+          "Laptop suspended or closed causing network adapter to go offline",
+          "VPN disconnection or split-tunneling reconfiguration"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Name",
+          "xpath": "EventData/Data[@Name='Name']",
+          "description": "Name of the network disconnected from; pair with subsequent 10000 to detect network switching"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Active Directory Directory Service",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ad-ds.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1644,
+      "log": "ActiveDirectoryDS",
+      "provider": "Microsoft-Windows-ActiveDirectory_DomainService",
+      "channel": "Directory Service",
+      "level": "Information",
+      "title": "Expensive or inefficient LDAP query executed",
+      "summary": "A domain controller processed an LDAP query that exceeded the configured expensive-query threshold.",
+      "details": "Generated on domain controllers when an LDAP query exceeds the threshold defined in the 'Field Engineering' diagnostics registry key (HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics, value '15 Field Engineering' = 5). This is the primary server-side indicator for BloodHound/SharpHound and other AD enumeration tools. Unlike client-side EID 257 (LDAP-Client debug log), this event fires on the DC itself and therefore captures enumeration from any source — including remote attackers who have already obtained credentials. Key fields: Client IP Address (the querying machine), User Name (the account performing the query), Search Base, Search Filter, and Search Scope. Filters characteristic of BloodHound include (objectClass=user), (objectClass=computer), (objectClass=group), (objectClass=trustedDomain), servicePrincipalName=*, adminCount=1, and msDS-AllowedToDelegateTo=*. A single host performing dozens of expensive LDAP queries against a DC in a short window — especially using filters that enumerate all users, all computers, or ACL attributes — is the canonical BloodHound collection signature. The Field Engineering registry key must be set to 5 to enable these events; the default value is 0 (disabled). Correlate with LDAP-Client EID 257 on the source endpoint for end-to-end coverage.",
+      "category": "LDAP Enumeration",
+      "tags": [
+        "ldap",
+        "active-directory",
+        "enumeration",
+        "reconnaissance",
+        "bloodhound"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 257,
+          "log": "LDAPClient"
+        },
+        {
+          "id": 4928,
+          "log": "ActiveDirectoryDS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1087.002",
+          "techniqueName": "Account Discovery: Domain Account",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1069.002",
+          "techniqueName": "Permission Groups Discovery: Domain Groups",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1018",
+          "techniqueName": "Remote System Discovery",
+          "tactics": [
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "registry",
+          "description": "Set HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics '15 Field Engineering' DWORD = 5 on each DC. Default is 0 (disabled). The threshold for 'expensive' queries is controlled by the 'Search Time Threshold (msecs)' value (default 30ms) and 'Returned Entries Threshold' (default 10000).",
+          "command": "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics\" /v \"15 Field Engineering\" /t REG_DWORD /d 5 /f"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Client IP performing many expensive queries in a short window (dozens within seconds) is the primary BloodHound/SharpHound indicator",
+          "Search filters containing servicePrincipalName=*, adminCount=1, msDS-AllowedToDelegateTo, or (objectClass=trustedDomain) are strongly characteristic of AD attack tooling",
+          "Correlate the source IP with Security EID 4624 to confirm which account was authenticated and whether it is a privileged account",
+          "Queries originating from non-admin workstations or service accounts that do not normally perform directory reads are highest priority",
+          "Correlate with LDAP-Client EID 257 on the source host to identify the process performing the enumeration"
+        ],
+        "commonFalsePositives": [
+          "AD management tools (ADUC, Get-ADUser, Exchange, SCCM, Intune, identity governance platforms) perform frequent broad LDAP queries",
+          "Monitoring and compliance agents that enumerate AD object attributes for baselining",
+          "Legitimate PowerShell scripts using the AD module during login scripts or scheduled tasks"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/configure-ad-and-lds-event-logging"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2003"
+      },
+      "keyFields": [
+        {
+          "name": "Client IP Address",
+          "xpath": "EventData/Data[@Name='ClientIPAddress']",
+          "description": "IP address of the machine issuing the LDAP query; primary pivot for identifying the enumeration source"
+        },
+        {
+          "name": "Filter",
+          "xpath": "EventData/Data[@Name='Filter']",
+          "description": "LDAP search filter; BloodHound-characteristic: servicePrincipalName=*, adminCount=1, msDS-AllowedToDelegateTo"
+        },
+        {
+          "name": "User Name",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "Account performing the LDAP query; non-admin accounts performing ACL or delegation queries are anomalous"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "BloodHound-Characteristic Expensive LDAP Queries on DC",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-ActiveDirectory_DomainService\"\n| where EventID == 1644\n| parse EventData with * 'ClientIPAddress=\"' ClientIP '\"' * 'Filter=\"' Filter '\"' *\n| where Filter has_any (\"servicePrincipalName\", \"adminCount\", \"msDS-AllowedToDelegateTo\", \"trustedDomain\", \"userAccountControl\")\n| summarize QueryCount = count() by ClientIP, bin(TimeGenerated, 5m)\n| where QueryCount > 20\n| project TimeGenerated, ClientIP, QueryCount",
+          "notes": "Tune the QueryCount threshold to your environment baseline. Lower thresholds catch slower enumeration; BloodHound All collection typically fires 50-200 queries in seconds."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Expensive LDAP Query with BloodHound-Characteristic Filters",
+          "rule": "title: Expensive LDAP Query with BloodHound-Characteristic Filters\nstatus: experimental\nlogsource:\n    product: windows\n    service: ldap\ndetection:\n    selection:\n        EventID: 1644\n        Filter|contains:\n            - 'servicePrincipalName'\n            - 'adminCount'\n            - 'msDS-AllowedToDelegateTo'\n            - 'ms-DS-MachineAccountQuota'\n            - 'objectClass=trustedDomain'\n    condition: selection\nfalsepositives:\n    - AD management tools and authorised admin queries\n    - Identity governance platforms performing attribute collection\nlevel: medium"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4928,
+      "log": "ActiveDirectoryDS",
+      "provider": "Microsoft-Windows-ActiveDirectory_DomainService",
+      "channel": "Directory Service",
+      "level": "Information",
+      "title": "Replica source naming context established",
+      "summary": "A replication source naming context (NC) was established between two domain controllers.",
+      "details": "Generated when a replication source naming context is established — i.e., when one DC begins replicating a directory partition from another. In normal AD operation this fires during legitimate DC-to-DC replication cycles. Its primary security value is as a DCSync indicator: when an attacker with Replicating Directory Changes and Replicating Directory Changes All permissions (typically DA, EA, or Domain Controllers) calls the GetNCChanges RPC from a non-DC machine, this event fires on the targeted DC. The source address field will contain the attacker's IP address rather than a DC's IP. Key fields: Destination DSA Site Name and Address (should be a known DC), Source DSA Site Name and Address (should also be a known DC — alert if not). In a DCSync attack, the source address will be a workstation or server rather than a DC. Compare the source address against your DC inventory; any GetNCChanges from a non-DC IP is high confidence DCSync. Correlate with Security EID 4662 (operation performed on an object with DS-Replication-Get-Changes) and Security EID 4769 (Kerberos service ticket for DRSUAPI) on the same DC.",
+      "category": "AD Replication",
+      "tags": [
+        "active-directory",
+        "replication",
+        "dcsync",
+        "credential-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4929,
+          "log": "ActiveDirectoryDS"
+        },
+        {
+          "id": 4662,
+          "log": "Security"
+        },
+        {
+          "id": 4769,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.006",
+          "techniqueName": "OS Credential Dumping: DCSync",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Source DSA address not matching any DC in your inventory is the primary DCSync indicator — this is the machine performing GetNCChanges",
+          "Correlate with Security EID 4662 on the same DC for the Object Type containing DS-Replication-Get-Changes-All permission; non-DC accounts using this right are anomalous",
+          "Check the account in the replication request — Domain Admins and Domain Controllers are expected; regular user or service accounts are not",
+          "A 4928 without a preceding 4929 (no prior replication removal) may indicate a new, unexpected replication partnership was established"
+        ],
+        "commonFalsePositives": [
+          "Legitimate DC-to-DC replication occurs on schedules (default every 15 minutes intra-site, 3 hours inter-site) — these generate normal 4928/4929 pairs",
+          "Promoting new DCs generates replication events as they synchronize the directory",
+          "Azure AD Connect (AAD Sync) uses DS-Replication-Get-Changes but not DS-Replication-Get-Changes-All for password hash sync"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/monitoring-active-directory-for-signs-of-compromise"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2003"
+      },
+      "keyFields": [
+        {
+          "name": "Source DSA Address",
+          "xpath": "EventData/Data[@Name='SourceDSAAddress']",
+          "description": "IP or hostname of the machine requesting replication; non-DC addresses indicate DCSync attack"
+        },
+        {
+          "name": "Naming Context",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "Directory partition being replicated; DC=domain,DC=com is the primary domain NC"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 4929,
+      "log": "ActiveDirectoryDS",
+      "provider": "Microsoft-Windows-ActiveDirectory_DomainService",
+      "channel": "Directory Service",
+      "level": "Information",
+      "title": "Replica source naming context removed",
+      "summary": "A replication source naming context was removed — the replication session ended.",
+      "details": "Generated when a replication source naming context is removed, marking the end of a replication session. Pair with EID 4928 to bracket complete replication sessions. In DCSync attack investigation, the 4929 event confirms the replication session completed — meaning the attacker successfully retrieved the requested credentials. The absence of a 4929 after a suspicious 4928 (e.g., the session was interrupted by a security tool) is also investigatively relevant. Key fields mirror 4928: Source DSA Address and Naming Context. A DCSync attack pattern shows a 4928 immediately followed by 4929 from the same non-DC source, completing in seconds (full NTLM hash extraction via GetNCChanges is nearly instantaneous). Legitimate inter-DC replication sessions typically last longer and are from known DC addresses.",
+      "category": "AD Replication",
+      "tags": [
+        "active-directory",
+        "replication",
+        "dcsync",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4928,
+          "log": "ActiveDirectoryDS"
+        },
+        {
+          "id": 4662,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.006",
+          "techniqueName": "OS Credential Dumping: DCSync",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "A 4928/4929 pair from the same non-DC source IP completing within seconds is the DCSync signature",
+          "Pair with EID 4928 to calculate session duration — attacker DCSync sessions are typically under 5 seconds",
+          "The absence of 4929 after a suspicious 4928 may indicate the session was interrupted (EDR kill, network block)"
+        ],
+        "commonFalsePositives": [
+          "Legitimate DC replication removes source NCs during normal topology changes",
+          "DC demotion generates 4929 events as replication partnerships are torn down"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/monitoring-active-directory-for-signs-of-compromise"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2003"
+      },
+      "keyFields": [
+        {
+          "name": "Source DSA Address",
+          "xpath": "EventData/Data[@Name='SourceDSAAddress']",
+          "description": "IP or hostname of the machine that completed the replication session; non-DC addresses confirm DCSync"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1988,
+      "log": "ActiveDirectoryDS",
+      "provider": "Microsoft-Windows-ActiveDirectory_DomainService",
+      "channel": "Directory Service",
+      "level": "Warning",
+      "title": "Lingering object replication error",
+      "summary": "A domain controller attempted to replicate an object that exists as a lingering object on the source DC.",
+      "details": "Generated when a DC attempts to replicate an object whose tombstone lifetime has already expired on the destination DC but still exists on the source DC. Lingering objects arise when a DC is disconnected from the AD replication topology for longer than the tombstone lifetime (default 180 days) and then reconnected. From a security perspective, a DC that was offline for an extended period may represent: (1) a compromised DC that was air-gapped by defenders after detection and then reintroduced, (2) a DC restored from an old backup that reintroduces deleted accounts or credential objects, or (3) a clone or replica built from outdated media used in an attack. The presence of lingering objects on a DC that was not expected to be offline is a forensic indicator warranting investigation of the DC's history. Key fields: Source DC, object DN. Remediation requires either enabling Strict Replication Consistency or using repadmin /removelingeringobjects.",
+      "category": "AD Replication",
+      "tags": [
+        "active-directory",
+        "replication",
+        "integrity",
+        "forensics"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4928,
+          "log": "ActiveDirectoryDS"
+        },
+        {
+          "id": 2089,
+          "log": "ActiveDirectoryDS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078.002",
+          "techniqueName": "Valid Accounts: Domain Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify which DC was the source of lingering objects and determine how long it was disconnected from replication",
+          "If the DC was unexpectedly offline, investigate the reason — particularly whether it was isolated by defenders or attackers",
+          "Review the lingering objects themselves — deleted admin accounts or privileged group memberships being reintroduced may indicate backup-based persistence",
+          "Use repadmin /showrepl and repadmin /replsummary to map the full replication health picture"
+        ],
+        "commonFalsePositives": [
+          "DCs restored from old backups during disaster recovery",
+          "Branch office DCs that were offline during extended WAN outages",
+          "Lab or test DCs reintroduced to production after extended isolation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/lingering-objects-prevent-replication"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2003"
+      },
+      "keyFields": [
+        {
+          "name": "Source DC",
+          "xpath": "EventData/Data[@Name='SourceDC']",
+          "description": "DC that holds the lingering object; investigate its recent offline history"
+        },
+        {
+          "name": "Object DN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "Distinguished name of the lingering object; privileged account or group DNs are highest priority"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 2089,
+      "log": "ActiveDirectoryDS",
+      "provider": "Microsoft-Windows-ActiveDirectory_DomainService",
+      "channel": "Directory Service",
+      "level": "Warning",
+      "title": "Directory partition backup overdue",
+      "summary": "A directory partition on this domain controller has not been backed up within the backup latency interval.",
+      "details": "Generated when a directory partition has not been backed up within the configured backup latency threshold (default: tombstone lifetime / 2, typically 90 days). While primarily an operational health event, it is relevant to incident response because attackers deploying ransomware frequently delete or corrupt backups before initiating encryption. The presence of this event on multiple DCs shortly before a ransomware event indicates backup deletion or disruption as part of the attack chain. Conversely, the absence of this event on a well-managed DC that suddenly cannot be backed up may indicate an attacker has disrupted the backup agent or corrupted the backup target. Correlate with backup agent logs, VSS event log (EID 8193 from VSS, indicating shadow copy failures), and Task Scheduler events for backup task deletion.",
+      "category": "AD Operational Health",
+      "tags": [
+        "active-directory",
+        "backup",
+        "ransomware",
+        "integrity"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1988,
+          "log": "ActiveDirectoryDS"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1490",
+          "techniqueName": "Inhibit System Recovery",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Sudden appearance of 2089 on a DC that was previously backed up regularly indicates the backup process was disrupted",
+          "Correlate with VSS EID 8193 (shadow copy failure) and Task Scheduler events for deleted or disabled backup tasks",
+          "In ransomware pre-staging investigations, check if 2089 across multiple DCs coincides with other preparation activity (lateral movement, privilege escalation)"
+        ],
+        "commonFalsePositives": [
+          "DCs in small environments with ad-hoc backup schedules that do not meet the default threshold",
+          "New DCs that have not yet had their first backup completed",
+          "Backup infrastructure changes or maintenance windows that temporarily break backup jobs"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/ad-forest-recovery-backing-up-full-server"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2003"
+      },
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

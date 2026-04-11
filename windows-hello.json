@@ -1,0 +1,377 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Hello for Business",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/windows-hello.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 3010,
+      "log": "HelloForBusiness",
+      "provider": "Microsoft-Windows-HelloForBusiness",
+      "channel": "Microsoft-Windows-HelloForBusiness/Operational",
+      "level": "Information",
+      "title": "Windows Hello for Business provisioning started",
+      "summary": "A user initiated Windows Hello for Business provisioning to register a new credential with the identity provider.",
+      "details": "Generated when a user begins the Windows Hello for Business (WHfB) provisioning process — registering a new asymmetric key pair (PIN, fingerprint, or face) with Entra ID, Active Directory, or a hybrid identity provider. Provisioning creates a new device-bound credential: a private key protected by the TPM (or software, if no TPM) and a corresponding public key registered with the identity provider. Key fields: the user UPN, the device identifier, and the provisioning method (TPM vs software, cloud vs on-premises). From a security perspective, unexpected provisioning events are high-confidence IOCs: WHfB provisioning on a device where no WHfB credential previously existed — particularly for privileged accounts (Global Admin, Domain Admin) — may indicate an attacker with temporary access to the device is registering a persistent credential that will survive password resets. Provisioning also occurs when a device is rebuilt or when existing credentials are explicitly deleted. Pair with EID 3011 to confirm provisioning completed.",
+      "category": "Credential Management",
+      "tags": [
+        "windows-hello",
+        "credential-registration",
+        "mfa",
+        "persistence",
+        "tpm"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3011,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 1084,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 5308,
+          "log": "HelloForBusiness"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1556",
+          "techniqueName": "Modify Authentication Process",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Provisioning on a device not previously enrolled in WHfB for the given user, especially outside business hours, is high priority",
+          "Provisioning for privileged accounts (Global Admin, Privileged Role Administrator) should be logged and reviewed — a new WHfB credential survives password resets",
+          "Check whether provisioning used TPM (hardware-protected) or software key — software key provisioning may indicate the device lacks TPM or the provisioning was simulated",
+          "Correlate with Entra ID audit logs for 'Register device' and 'Add authentication method' operations to confirm the cloud-side registration event"
+        ],
+        "commonFalsePositives": [
+          "New device enrollment during onboarding (first-time setup for a new employee or rebuilt machine)",
+          "User explicitly re-enrolling after a PIN reset or credential loss",
+          "IT-driven WHfB rollout during a deployment project"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-event-300"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1703"
+      },
+      "keyFields": [
+        {
+          "name": "UserId",
+          "xpath": "EventData/Data[@Name='UserId']",
+          "description": "UPN or SID of the user provisioning WHfB credentials"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 3011,
+      "log": "HelloForBusiness",
+      "provider": "Microsoft-Windows-HelloForBusiness",
+      "channel": "Microsoft-Windows-HelloForBusiness/Operational",
+      "level": "Information",
+      "title": "Windows Hello for Business provisioning completed",
+      "summary": "Windows Hello for Business provisioning completed successfully — a new credential key pair was registered.",
+      "details": "Generated when WHfB provisioning completes successfully and the new key pair has been registered with the identity provider (Entra ID, AD, or hybrid). At this point the user can authenticate using the new WHfB gesture (PIN, fingerprint, face). Key fields: user UPN, device identifier. This is the confirmation event that provisioning succeeded — pair with EID 3010 to bracket the full provisioning workflow. From a security perspective, EID 3011 confirms that a new persistent credential now exists for the user on this device. In an attack scenario where an adversary completes provisioning using a compromised account and temporary device access, EID 3011 is the point at which the backdoor credential is fully established. The attacker can now authenticate as the user to cloud resources from this device even after the user's password is changed, as WHfB credentials are independent of password authentication.",
+      "category": "Credential Management",
+      "tags": [
+        "windows-hello",
+        "credential-registration",
+        "mfa",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3010,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 5308,
+          "log": "HelloForBusiness"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EID 3011 following a suspicious 3010 (unexpected provisioning) confirms the credential was successfully registered — immediate response should include revoking the registered device in Entra ID",
+          "Time between 3010 and 3011 — very short provisioning time may indicate a scripted or automated provisioning bypass rather than interactive user enrollment",
+          "Correlate with Entra ID audit logs to confirm the cloud-side registration and identify who authorized the device registration"
+        ],
+        "commonFalsePositives": [
+          "Expected completion of normal provisioning flows during device onboarding",
+          "Re-enrollment after credential expiry or reset"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-event-300"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1703"
+      },
+      "keyFields": [
+        {
+          "name": "UserId",
+          "xpath": "EventData/Data[@Name='UserId']",
+          "description": "UPN or SID of the user whose WHfB credential was registered"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 1084,
+      "log": "HelloForBusiness",
+      "provider": "Microsoft-Windows-HelloForBusiness",
+      "channel": "Microsoft-Windows-HelloForBusiness/Operational",
+      "level": "Error",
+      "title": "Windows Hello for Business provisioning failed",
+      "summary": "Windows Hello for Business provisioning failed and no new credential was registered.",
+      "details": "Generated when the WHfB provisioning process fails before completing. Key fields: the error code, the failure phase (MFA completion, TPM attestation, key registration, DC-side validation), and the user UPN. Provisioning failures are investigated in two contexts: (1) operationally, to identify misconfigured WHfB policy, TPM attestation failures, or certificate trust issues preventing rollout, and (2) from a security angle, repeated provisioning failures for the same user across multiple devices may indicate an attacker probing WHfB provisioning as a persistence mechanism but being blocked by policy (e.g., Intune compliance requirement, MFA requirement they cannot satisfy). Error codes mapping to TPM attestation failure (the TPM certificate cannot be validated by the enterprise attestation CA) should be monitored on managed devices, as they indicate the device may be using software keys rather than hardware-protected keys, reducing the security assurance of the WHfB credential.",
+      "category": "Credential Management",
+      "tags": [
+        "windows-hello",
+        "credential-registration",
+        "provisioning-failure",
+        "tpm"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 3010,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 3011,
+          "log": "HelloForBusiness"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Repeated provisioning failures for a privileged account across multiple devices indicate a possible attacker attempting to register a WHfB credential but being blocked by policy",
+          "TPM attestation failure error codes on machines that are supposed to have TPM 2.0 indicate the TPM may be disabled, non-functional, or the device is a VM without virtual TPM configured",
+          "MFA-related failure codes during provisioning indicate the user could not complete the MFA challenge — if the user was not attempting to enroll, this may indicate an attacker using stolen credentials"
+        ],
+        "commonFalsePositives": [
+          "Devices without TPM 2.0 attempting to provision WHfB when attestation is required by policy",
+          "Hybrid AD join issues causing provisioning to fail when the DC cannot validate the key registration request",
+          "Network issues preventing connectivity to Entra ID or the KDC during provisioning"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-event-300"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1703"
+      },
+      "keyFields": [
+        {
+          "name": "ErrorCode",
+          "xpath": "EventData/Data[@Name='ErrorCode']",
+          "description": "Hex error code indicating why provisioning failed; TPM attestation errors vs network/policy errors have different response paths"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 5308,
+      "log": "HelloForBusiness",
+      "provider": "Microsoft-Windows-HelloForBusiness",
+      "channel": "Microsoft-Windows-HelloForBusiness/Operational",
+      "level": "Information",
+      "title": "NGC key registered",
+      "summary": "A Next-Generation Credential (NGC) key was created and registered for this device and user.",
+      "details": "Generated when a Next-Generation Credential (NGC) key — the cryptographic key pair underlying Windows Hello for Business — is registered. The private key is bound to the device TPM (or stored in software if no TPM). Key fields: the key ID (a unique identifier for the registered key), the user UPN, and whether the key is TPM-backed (hardware) or software-backed. The key ID is a critical pivot for tracking credential lifecycle: correlate EID 5308 with EID 5309 (key deletion) to track full key lifetime. In an attack investigation, an unexpected 5308 for a privileged account on a device not associated with that user is an IOC. In Azure AD environments, the corresponding cloud event is an 'Add authentication method' operation in the Entra ID audit log with method type 'Windows Hello for Business'. An attacker who registers an NGC key gains the ability to authenticate to cloud and on-premises resources using a phishing-resistant credential that survives password resets.",
+      "category": "Credential Management",
+      "tags": [
+        "windows-hello",
+        "ngc-key",
+        "tpm",
+        "credential-registration",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5309,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 3011,
+          "log": "HelloForBusiness"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "NGC key registered for a user account on a device not in that user's normal device inventory warrants investigation",
+          "Software-backed key (no TPM) for a privileged account on a machine where TPM 2.0 should be present indicates either deliberate policy bypass or a VM without vTPM",
+          "Cross-reference the key ID with Entra ID 'Authentication Methods' for the user — the key should appear there; if it does not, the registration failed at the cloud side despite local success"
+        ],
+        "commonFalsePositives": [
+          "Expected during normal WHfB provisioning as the direct result of EID 3010/3011 provisioning workflow",
+          "Device rebuild generating a new NGC key for the same user"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-event-300"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1703"
+      },
+      "keyFields": [
+        {
+          "name": "KeyId",
+          "xpath": "EventData/Data[@Name='KeyId']",
+          "description": "Unique identifier of the registered NGC key; use to track key lifecycle (registration → deletion) and correlate with Entra ID authentication methods"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 5309,
+      "log": "HelloForBusiness",
+      "provider": "Microsoft-Windows-HelloForBusiness",
+      "channel": "Microsoft-Windows-HelloForBusiness/Operational",
+      "level": "Information",
+      "title": "NGC key deleted",
+      "summary": "A Next-Generation Credential (NGC) key was deleted from this device.",
+      "details": "Generated when an NGC key is deleted from the device. Key deletion occurs when: (1) the user explicitly resets or removes their Windows Hello for Business credential, (2) the device is reset or rebuilt, (3) an administrator remotely wipes the device credential, or (4) an attacker deletes existing credentials to force re-enrollment (potentially with attacker-controlled credentials). Key fields: the key ID (to correlate with the registration event EID 5308) and the user UPN. The primary security concern for EID 5309 is unexpected deletion of NGC keys — particularly if not followed by a new EID 5308 registration (indicating the credential was removed without replacement). An attacker may delete a user's existing WHfB credential to force fallback to password authentication, which is then more susceptible to credential theft. The deletion of credentials for multiple users in quick succession on a server is highly anomalous.",
+      "category": "Credential Management",
+      "tags": [
+        "windows-hello",
+        "ngc-key",
+        "credential-deletion",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 5308,
+          "log": "HelloForBusiness"
+        },
+        {
+          "id": 3010,
+          "log": "HelloForBusiness"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "NGC key deletion not followed by a new 5308 registration within a short time indicates the credential was removed without replacement — the user is now forced to use password authentication",
+          "Bulk deletion of NGC keys across multiple users on the same machine (e.g., a server managing WHfB credentials) indicates mass credential removal",
+          "Correlate the deleted key ID with EID 5308 to confirm the key that was deleted matches the expected key for that user on that device"
+        ],
+        "commonFalsePositives": [
+          "User explicitly removing their WHfB credential via Settings before re-enrolling",
+          "Device rebuild or Intune wipe triggering key deletion",
+          "IT administrator remotely resetting WHfB credentials via Intune or AD"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-event-300"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 10 1703"
+      },
+      "keyFields": [
+        {
+          "name": "KeyId",
+          "xpath": "EventData/Data[@Name='KeyId']",
+          "description": "Key ID of the deleted credential; correlate with EID 5308 to identify which registration event this key corresponds to"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

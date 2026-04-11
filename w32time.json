@@ -1,0 +1,377 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Windows Time Service",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/w32time.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 35,
+      "log": "System",
+      "provider": "Microsoft-Windows-Time-Service",
+      "channel": "System",
+      "level": "Information",
+      "title": "Time source synchronized successfully",
+      "summary": "The Windows Time Service (W32tm) successfully synchronized the local clock with a time source.",
+      "details": "Generated when the Windows Time Service successfully synchronizes the local clock against a configured NTP peer or domain hierarchy source. Key fields: the time source (NTP server address or DC name), the time offset corrected, and the poll interval. This event establishes the baseline for what normal time synchronization looks like on a given endpoint. From a forensic perspective, EID 35 is used to: (1) confirm that timestamps in logs are reliable and the clock was in sync at the time of relevant events, (2) identify the NTP source — unexpected NTP sources (IPs or FQDNs not matching the enterprise NTP hierarchy) are an IOC for NTP redirection attacks where an attacker inserts a rogue time server to manipulate clock values. The domain hierarchy for time synchronization is: domain-joined members sync to a DC, DCs sync to the PDC emulator, and the PDC emulator syncs to an external authoritative source. Any deviation from this hierarchy (e.g., a member machine syncing directly to an external NTP server or to an IP not matching any DC) warrants investigation.",
+      "category": "Time Synchronization",
+      "tags": [
+        "time",
+        "ntp",
+        "kerberos",
+        "integrity"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 36,
+          "log": "System"
+        },
+        {
+          "id": 37,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562",
+          "techniqueName": "Impair Defenses",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Source field showing an external NTP server IP on a domain-joined machine (which should sync to a DC) indicates the NTP hierarchy has been bypassed — investigate whether w32tm was reconfigured",
+          "Time source changing unexpectedly during an incident may indicate an attacker reconfigured NTP to prepare for Kerberos ticket manipulation",
+          "Correlate with EID 37 (significant time change) — if a large time jump immediately follows a source change, the new source is likely spoofed or manipulated"
+        ],
+        "commonFalsePositives": [
+          "Workgroup machines and Azure VMs syncing to public NTP pools (pool.ntp.org, time.windows.com) rather than domain DCs",
+          "DCs syncing to approved external NTP stratum 1/2 servers for the PDC emulator",
+          "Time sync after resume from sleep or hibernate as the clock catches up"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TimeSource",
+          "xpath": "EventData/Data[@Name='TimeSource']",
+          "description": "NTP server or DC providing the time; unexpected external IPs on domain-joined machines are anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 36,
+      "log": "System",
+      "provider": "Microsoft-Windows-Time-Service",
+      "channel": "System",
+      "level": "Warning",
+      "title": "Time service did not synchronize the clock",
+      "summary": "The Windows Time Service attempted clock synchronization but was unable to produce a valid time sample.",
+      "details": "Generated when the Windows Time Service fails to synchronize the clock because no valid NTP samples could be obtained. This differs from EID 38 (no reachable peers) — EID 36 may fire when peers respond but the responses are rejected (e.g., all samples exceed the spike threshold, stratum is too high, or the reference time is inconsistent). Key fields: the reason for sync failure. Sustained time desynchronization beyond the 5-minute Kerberos clock skew tolerance will cause Kerberos authentication failures (KRB_AP_ERR_SKEW), preventing domain logins, file share access, and all Kerberos-authenticated services. From a security standpoint, a machine that cannot keep accurate time is effectively isolated from the domain — which may be a deliberate attacker technique to prevent security tools from collecting logs with accurate timestamps or to break Kerberos sessions. Correlate with Security EID 4625 (logon failure, particularly Kerberos errors) after sustained EID 36 events.",
+      "category": "Time Synchronization",
+      "tags": [
+        "time",
+        "ntp",
+        "kerberos",
+        "availability"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 35,
+          "log": "System"
+        },
+        {
+          "id": 37,
+          "log": "System"
+        },
+        {
+          "id": 38,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1499",
+          "techniqueName": "Endpoint Denial of Service",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Sustained EID 36 events followed by Kerberos authentication failures (Security EID 4625 with error code 0x25 SKEW) indicate clock drift has exceeded the 5-minute tolerance",
+          "EID 36 appearing after a firewall rule change or network reconfiguration may indicate UDP port 123 (NTP) was blocked",
+          "Domain controllers experiencing EID 36 are highest priority as they propagate time to the entire domain — a DC with clock drift breaks authentication for all domain members"
+        ],
+        "commonFalsePositives": [
+          "Transient sync failure during network connectivity loss (VPN drops, DHCP renewal)",
+          "VM clock drift after host migration or snapshot restoration causing temporary sync failure",
+          "Firewall policy changes blocking UDP/123 to the configured NTP source"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 37,
+      "log": "System",
+      "provider": "Microsoft-Windows-Time-Service",
+      "channel": "System",
+      "level": "Warning",
+      "title": "Clock offset is too large — time adjustment required",
+      "summary": "The Windows Time Service detected a significant clock offset requiring a large time correction.",
+      "details": "Generated when the Windows Time Service detects a clock offset larger than the maximum phase correction limit (default 15 minutes in Windows Server) and applies or reports a large time adjustment. This indicates a significant divergence between the local clock and the NTP source. Key fields: the magnitude of the offset and the time source. Large, sudden time changes are security relevant because: (1) an attacker with local admin privileges may manipulate the system clock to extend the validity of Kerberos tickets beyond their configured lifetime, allowing continued use of a Golden Ticket or TGS beyond what the KDC would normally allow, (2) clock manipulation can invalidate log timestamps, making forensic timeline reconstruction difficult, (3) some ransomware variants manipulate the system clock to trigger time-locked ransoms or bypass time-based detection rules. A backward time jump (system clock moved backward) is particularly suspicious as it allows replaying previously valid authentication tokens. Correlate with Security EID 4616 (System time was changed) which records who changed the time.",
+      "category": "Time Synchronization",
+      "tags": [
+        "time",
+        "ntp",
+        "kerberos",
+        "forensics",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 35,
+          "log": "System"
+        },
+        {
+          "id": 36,
+          "log": "System"
+        },
+        {
+          "id": 4616,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070.006",
+          "techniqueName": "Indicator Removal: Timestomp",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558",
+          "techniqueName": "Steal or Forge Kerberos Tickets",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "A time jump larger than the Kerberos max clock skew (5 minutes) on a domain controller warrants immediate investigation — determine whether the change was from a legitimate NTP correction or deliberate manipulation",
+          "Correlate with Security EID 4616 (system time changed) — this event records the process and account that made the change. A user-mode process making the change rather than the Windows Time Service is anomalous",
+          "Backward time jumps (clock moved to an earlier time) are especially suspicious as they can extend Kerberos ticket validity",
+          "On VMs, large forward time jumps can occur after host maintenance or live migration — correlate with hypervisor events"
+        ],
+        "commonFalsePositives": [
+          "VM clock correction after live migration, snapshot restore, or host NTP adjustment",
+          "New machine first boot where the hardware RTC was significantly wrong",
+          "PDC emulator catching up after its upstream NTP source was unreachable for an extended period"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TimeSource",
+          "xpath": "EventData/Data[@Name='TimeSource']",
+          "description": "Source providing the corrected time; unexpected sources indicate NTP redirection"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "Large System Clock Offset Detected by Windows Time Service",
+          "rule": "title: Large System Clock Offset Detected by Windows Time Service\nstatus: experimental\nlogsource:\n    product: windows\n    service: system\n    definition: Provider must be Microsoft-Windows-Time-Service\ndetection:\n    selection:\n        EventID: 37\n        Provider: 'Microsoft-Windows-Time-Service'\n    condition: selection\nfalsepositives:\n    - VM clock drift after migration or snapshot restore\n    - New machine first boot with incorrect RTC\n    - PDC emulator NTP catch-up after source unavailability\nlevel: medium",
+          "notes": "Correlate with Security EID 4616 to determine whether the time change was performed by the Time Service (legitimate) or by a user process (suspicious)."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 38,
+      "log": "System",
+      "provider": "Microsoft-Windows-Time-Service",
+      "channel": "System",
+      "level": "Warning",
+      "title": "No NTP peers could be reached",
+      "summary": "The Windows Time Service could not contact any configured NTP time sources.",
+      "details": "Generated when the Windows Time Service cannot reach any of its configured NTP peers or the domain hierarchy source. Key fields: the list of peers attempted and the failure codes. On domain-joined machines, this typically means the machine cannot contact any domain controller (NTP uses the same DC locator as Kerberos). Sustained inability to reach NTP peers will result in clock drift and, after the 5-minute Kerberos skew threshold is exceeded, authentication failures. From a security perspective, EID 38 on multiple machines simultaneously indicates a network-layer disruption — either legitimate (network outage) or attacker-induced (DC isolation, DNS disruption preventing DC locator, or firewall rule changes blocking UDP/123). In a ransomware or network attack scenario, attackers may deliberately block NTP to disrupt authentication and prevent security tools from time-stamping events accurately. Correlate with network connectivity events and DNS resolution failures.",
+      "category": "Time Synchronization",
+      "tags": [
+        "time",
+        "ntp",
+        "kerberos",
+        "availability",
+        "network"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 36,
+          "log": "System"
+        },
+        {
+          "id": 35,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EID 38 on a domain-joined machine typically indicates it cannot reach its domain controllers — correlate with Netlogon events and Security EID 4625 for authentication failures",
+          "EID 38 appearing simultaneously across many endpoints in the same subnet indicates a network-layer issue affecting UDP/123 — check firewall rules and routing",
+          "EID 38 on the PDC emulator is highest priority as it is the root of the domain time hierarchy; failure here propagates time drift to all DCs and members"
+        ],
+        "commonFalsePositives": [
+          "Transient network outages causing brief NTP unreachability",
+          "VPN disconnection causing domain-joined laptops to lose DC connectivity and therefore NTP",
+          "Firewall policy updates temporarily blocking UDP/123"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 129,
+      "log": "System",
+      "provider": "Microsoft-Windows-Time-Service",
+      "channel": "System",
+      "level": "Warning",
+      "title": "NTP source authentication failure",
+      "summary": "The Windows Time Service rejected a time source due to NTP authentication failure.",
+      "details": "Generated when the Windows Time Service rejects a time sample from an NTP peer because the NTP authentication (MD5 or SHA1 symmetric key authentication, or Autokey) failed. This event is security relevant because it indicates either: (1) a legitimate NTP configuration error (key mismatch, key ID mismatch between the server and client), or (2) a rogue NTP server is attempting to impersonate a legitimate time source but cannot produce a valid authentication response. NTP spoofing — where an attacker injects false time responses to manipulate the system clock — is typically attempted without authentication, so a rejected authentication attempt from a new or unexpected source IP is a strong indicator of a rogue NTP injection attempt. Key fields: the source IP and the authentication error. Correlate with EID 37 (large time change) to determine whether the rogue source succeeded in manipulating the clock before being rejected.",
+      "category": "Time Synchronization",
+      "tags": [
+        "time",
+        "ntp",
+        "authentication",
+        "network",
+        "spoofing"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 37,
+          "log": "System"
+        },
+        {
+          "id": 35,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1557",
+          "techniqueName": "Adversary-in-the-Middle",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            },
+            {
+              "tacticId": "TA0009",
+              "tacticName": "Collection"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Authentication failure from an IP not matching any configured NTP server indicates a rogue NTP source on the network",
+          "Correlate with network capture or firewall logs to confirm the source IP sending NTP packets; an IP in the same subnet that is not a domain controller or approved NTP server is suspicious",
+          "Check whether EID 37 (large time change) follows the authentication failure — if the rogue source succeeded before authentication rejection, the clock may have been manipulated"
+        ],
+        "commonFalsePositives": [
+          "NTP key rotation where the server key was updated but the client was not yet updated — causes legitimate auth failures until client configuration is synchronized",
+          "Misconfigured NTP authentication on newly provisioned servers"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TimeSource",
+          "xpath": "EventData/Data[@Name='TimeSource']",
+          "description": "IP of the NTP source that failed authentication; unexpected IPs indicate rogue NTP server"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

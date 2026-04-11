@@ -1,0 +1,225 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Plug and Play / Device Installation",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/pnp.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 20001,
+      "log": "System",
+      "provider": "Microsoft-Windows-UserPnP",
+      "channel": "System",
+      "level": "Information",
+      "title": "Device driver successfully installed",
+      "summary": "Windows successfully installed device drivers for a new hardware device.",
+      "details": "Generated in the System event log by the Microsoft-Windows-UserPnP provider (source: Microsoft-Windows-UserPnP/DeviceInstall) when Windows completes the installation of drivers for a newly connected device. Key fields: DeviceInstanceId (encodes the device class, VID/PID, and serial number), DriverName (the installed INF/driver), DriverVersion, and DriverProvider. While USB devices generate corresponding events in the DriverFrameworks-UserMode log (see usb.json), this event covers all device classes including network adapters, Bluetooth controllers, PCIe cards, and other bus-connected hardware. From a BYOVD (Bring Your Own Vulnerable Driver) perspective, this event records driver installation for any device — including virtual devices or software-emulated devices. Malicious drivers installed via a kernel exploit or signed-driver abuse (e.g., a vulnerable legitimate driver signed with a stolen or test certificate) appear here. Key investigation pivots: DriverProvider should be a known hardware manufacturer (Intel, NVIDIA, Realtek, etc.); unknown or generic providers combined with an unusual DeviceInstanceId are suspicious. Unsigned or test-signed drivers (visible in DriverVersion details) on production systems indicate policy bypass. Correlate with System EID 7045 (new service installed) to confirm a kernel driver loaded as a service.",
+      "category": "Device / Driver Installation",
+      "tags": [
+        "pnp",
+        "driver",
+        "hardware",
+        "byovd",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 20003,
+          "log": "System"
+        },
+        {
+          "id": 7045,
+          "log": "System"
+        },
+        {
+          "id": 2003,
+          "log": "DriverFrameworks"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1014",
+          "techniqueName": "Rootkit",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1543.003",
+          "techniqueName": "Create or Modify System Process: Windows Service",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "DriverProvider not matching a known hardware manufacturer or not matching the DriverName vendor is a BYOVD indicator",
+          "Correlate with System EID 7045 — a new service appearing in close temporal proximity to this event indicates the driver loaded as a kernel service (common BYOVD pattern)",
+          "DeviceInstanceId containing 'ROOT\\' indicates a software-enumerated (non-physical) device — legitimate for virtual devices like VPN adapters, but unusual ROOT\\ devices from unknown providers are suspicious",
+          "Verify driver digital signature via Get-AuthenticodeSignature or signtool — test-signed drivers on production systems indicate Driver Signature Enforcement bypass",
+          "Cross-reference DriverName path with known-good driver paths; drivers installed to Temp, AppData, or other user-writable paths are high-confidence malicious indicators"
+        ],
+        "commonFalsePositives": [
+          "New legitimate hardware being connected for the first time",
+          "Driver updates via Windows Update or vendor update utilities",
+          "Virtual network adapters installed by VPN software, hypervisors (VMware, VirtualBox), or Docker",
+          "USB devices requiring driver installation on first connection (printer, scanner, webcam)"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/device-installation-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Full device instance identifier; ROOT\\ prefix indicates software/virtual device; encodes VID/PID for physical hardware"
+        },
+        {
+          "name": "DriverName",
+          "xpath": "EventData/Data[@Name='DriverName']",
+          "description": "INF file or driver path of the installed driver; unexpected paths in user-writable locations are high risk"
+        },
+        {
+          "name": "DriverProvider",
+          "xpath": "EventData/Data[@Name='DriverProvider']",
+          "description": "Vendor/publisher of the driver; unknown or generic publishers warrant review"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Driver Installed from Non-Standard Path",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-UserPnP\"\n| where EventID == 20001\n| where RenderedDescription has_any (\"\\\\AppData\\\\\", \"\\\\Temp\\\\\", \"\\\\Downloads\\\\\", \"\\\\Public\\\\\")\n| project TimeGenerated, Computer, RenderedDescription",
+          "notes": "Legitimate drivers install from Windows driver store or vendor installation directories. Drivers placed in user-writable paths are strong malicious indicators."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Device Driver Installed — Suspicious Provider or Path",
+          "rule": "title: Suspicious Device Driver Installation\nstatus: experimental\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        Source: 'Microsoft-Windows-UserPnP'\n        EventID: 20001\n    filter_standard:\n        DriverProvider|contains:\n            - 'Microsoft'\n            - 'Intel'\n            - 'NVIDIA'\n            - 'Realtek'\n            - 'AMD'\n            - 'Broadcom'\n            - 'Qualcomm'\n    condition: selection and not filter_standard\nfalsepositives:\n    - Legitimate third-party hardware drivers from smaller vendors\n    - Open-source driver projects\nlevel: medium",
+          "notes": "Filter list is illustrative. Expand with known driver publishers in your environment. Unknown publishers should be reviewed, not necessarily alerted on blindly."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 20003,
+      "log": "System",
+      "provider": "Microsoft-Windows-UserPnP",
+      "channel": "System",
+      "level": "Error",
+      "title": "Device driver installation failed",
+      "summary": "Windows failed to install device drivers for a new hardware device.",
+      "details": "Generated when Windows cannot successfully install drivers for a detected device. Key fields: DeviceInstanceId, DriverName (if a matching driver was found), and ErrorCode (the NTSTATUS or Win32 error code for the failure). Driver installation failures have two security-relevant scenarios: (1) A legitimate device failing to install due to driver compatibility or signing issues — common after Windows version upgrades. (2) A BYOVD attack where an attacker attempts to load a malicious or vulnerable driver but fails — this event records the failed attempt. ExceptionCode STATUS_INVALID_IMAGE_HASH (0xC0000428) indicates a driver signature verification failure, which on systems with Driver Signature Enforcement enabled means an unsigned or improperly signed driver was blocked. Multiple EID 20003 events with signing-related error codes followed eventually by EID 20001 may indicate an attacker iterating through driver signing bypass techniques until one succeeds. Correlate with Security log Policy Changes subcategory and Sysmon EID 6 (driver loaded) for the full driver installation picture.",
+      "category": "Device / Driver Installation",
+      "tags": [
+        "pnp",
+        "driver",
+        "hardware",
+        "byovd",
+        "blocked"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 20001,
+          "log": "System"
+        },
+        {
+          "id": 6,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1068",
+          "techniqueName": "Exploitation for Privilege Escalation",
+          "tactics": [
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Error code 0xC0000428 (STATUS_INVALID_IMAGE_HASH) indicates a blocked unsigned driver — check if the device was a software-enumerated (ROOT\\) device which would suggest a driver-loading exploit",
+          "Multiple 20003 failures from the same DeviceInstanceId followed by a 20001 success indicates a persistent attacker attempting to load a driver",
+          "ROOT\\ DeviceInstanceId on a machine without corresponding physical hardware indicates a virtual device being instantiated — common in BYOVD scenarios",
+          "Correlate with Sysmon EID 6 (DriverLoad) with Signature = 'Invalid' for a kernel-level view of blocked driver loads"
+        ],
+        "commonFalsePositives": [
+          "New hardware with no compatible in-box Windows driver (requires manual driver installation)",
+          "Unsigned hardware drivers from hobbyist or industrial equipment without WHQL certification",
+          "Test environments with Driver Signature Enforcement disabled generating expected failures when it is re-enabled"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/device-installation-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Device identifier; ROOT\\ prefix on non-physical device is a BYOVD indicator"
+        },
+        {
+          "name": "DriverName",
+          "xpath": "EventData/Data[@Name='DriverName']",
+          "description": "Driver INF path that failed to install; examine path and publisher"
+        },
+        {
+          "name": "InstallStatus",
+          "xpath": "EventData/Data[@Name='InstallStatus']",
+          "description": "Error code; 0xC0000428 = invalid image hash (unsigned driver blocked by DSE)"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
+    }
+  ]
+}

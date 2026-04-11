@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "1.8.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.9.0",
+    "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -729,6 +729,243 @@
         "minVersion": "Windows 7 / Server 2008 R2"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 40961,
+      "log": "PowerShell",
+      "provider": "Microsoft-Windows-PowerShell",
+      "channel": "Microsoft-Windows-PowerShell/Operational",
+      "level": "Information",
+      "title": "PowerShell console host is starting up",
+      "summary": "An interactive PowerShell console (ConsoleHost) session is initialising.",
+      "details": "Generated at the start of an interactive PowerShell console session (powershell.exe or pwsh.exe launched interactively). This event distinguishes interactive console sessions from non-interactive script execution — a 40961 event is expected for a human-operated terminal but should not appear for scripted automation, scheduled tasks, or WinRM-based remoting (which use the 'ServerRemoteHost' host rather than 'ConsoleHost'). The absence of 40961/40962 lifecycle events alongside 4103/4104 execution events indicates the PowerShell execution is non-interactive (automated or remote). Conversely, unexpected 40961 events from a service account, during off-hours, or on a server that has no expected interactive use indicate a human operator is present — potentially a threat actor. On servers, interactive PowerShell console sessions are high-fidelity indicators of hands-on keyboard activity. Correlate with Security EID 4688 (process creation) for powershell.exe to confirm the parent process context.",
+      "category": "PowerShell Execution",
+      "tags": [
+        "powershell",
+        "interactive",
+        "console-host",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 40962,
+          "log": "PowerShell"
+        },
+        {
+          "id": 400,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Interactive console (40961) on a server where no interactive admin activity is expected indicates hands-on attacker presence — treat as high priority",
+          "40961 from a service account or non-admin user account is anomalous — interactive PS sessions should only be started by authorised administrators",
+          "Absence of 40961/40962 alongside 4103/4104 execution events confirms non-interactive execution — correlate with EID 400 HostApplication for invocation method",
+          "Correlate timestamp with Security EID 4648 (explicit credential logon) — interactive sessions started using RunAs or explicit credentials are higher fidelity"
+        ],
+        "commonFalsePositives": [
+          "Administrators opening PowerShell consoles interactively for legitimate administrative work",
+          "Developers using interactive PS sessions on workstations",
+          "IT automation testing run interactively before productising as a scheduled task"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 7 / Server 2008 R2"
+      },
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 40962,
+      "log": "PowerShell",
+      "provider": "Microsoft-Windows-PowerShell",
+      "channel": "Microsoft-Windows-PowerShell/Operational",
+      "level": "Information",
+      "title": "PowerShell console host is ready for user input",
+      "summary": "An interactive PowerShell console (ConsoleHost) session is fully initialised and awaiting input.",
+      "details": "Generated when an interactive PowerShell ConsoleHost session completes initialisation and presents the prompt to the user. This event follows EID 40961 and confirms the interactive session is fully ready. Pair with EID 40961 to bracket the console session lifecycle, and with the classic Windows PowerShell log EID 403 to confirm when the session ended. The primary security value of this event is confirming hands-on keyboard activity: a 40962 event combined with subsequent 4103/4104 execution events and Sysmon network connections builds a complete picture of an interactive attacker session. The distinction between 40961 (starting) and 40962 (ready) is subtle but allows calculation of console initialisation time — unusually fast initialisation (near-simultaneous 40961 and 40962) can indicate a headless automation framework invoking PowerShell in a way that mimics interactive mode.",
+      "category": "PowerShell Execution",
+      "tags": [
+        "powershell",
+        "interactive",
+        "console-host",
+        "execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 40961,
+          "log": "PowerShell"
+        },
+        {
+          "id": 403,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4103,
+          "log": "PowerShell"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 40961 to confirm session lifecycle — an interactive console is open between these two events and EID 403",
+          "Correlate following 4103/4104 events with network connections (Sysmon EID 3) to build an attacker activity timeline",
+          "On servers, correlate with RDP session events (EID 4778/4779) to determine if the interactive PS session was opened over an RDP connection"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate interactive PowerShell console session opened by an administrator"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 7 / Server 2008 R2"
+      },
+      "lastReviewed": "2026-04-10"
+    },
+    {
+      "id": 53504,
+      "log": "PowerShell",
+      "provider": "Microsoft-Windows-PowerShell",
+      "channel": "Microsoft-Windows-PowerShell/Operational",
+      "level": "Information",
+      "title": "PowerShell is authenticating to remote server",
+      "summary": "PowerShell is performing a WSMan/WinRM authentication handshake to a remote host.",
+      "details": "Generated when Windows PowerShell authenticates to a remote server via WSMan (WinRM/PSRemoting). Key fields: Server (the remote host address or name), AuthMechanism (the authentication method — Kerberos, NTLM, Negotiate, Basic, CredSSP), and UserName (the account used). This event fires on the initiating (client) machine and records outbound PowerShell remoting connections before session establishment. Security relevance: (1) Lateral movement via PSRemoting generates this event — an attacker using Enter-PSSession, Invoke-Command, or PSRemoting-based tools to move laterally will produce 53504 on the source host. (2) The AuthMechanism field exposes credential handling: Basic sends credentials in cleartext and should never appear in production; CredSSP delegates full credentials to the remote host and enables credential theft from the remote host. (3) NTLM-based PSRemoting (AuthMechanism = NTLM) does not require Kerberos but is vulnerable to relay attacks — flag NTLM remoting to unusual targets. Correlate with WinRM EID 6 on the destination host (WSMan connection established) for the server-side view.",
+      "category": "PowerShell Execution",
+      "tags": [
+        "powershell",
+        "remoting",
+        "psremoting",
+        "winrm",
+        "wsman",
+        "lateral-movement",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4103,
+          "log": "PowerShell"
+        },
+        {
+          "id": 4104,
+          "log": "PowerShell"
+        },
+        {
+          "id": 6,
+          "log": "WinRM"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.006",
+          "techniqueName": "Remote Services: Windows Remote Management",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1059.001",
+          "techniqueName": "Command and Scripting Interpreter: PowerShell",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "AuthMechanism = 'Basic' indicates cleartext credential transmission — this should never occur on production systems and is a critical configuration finding",
+          "AuthMechanism = 'CredSSP' delegates full credentials to the remote host — the remote host can then impersonate the user to any resource; flag unexpected CredSSP usage",
+          "Server (destination host) not matching expected management targets for the user account indicates lateral movement",
+          "NTLM PSRemoting (AuthMechanism = NTLM) to external or DMZ hosts may indicate data exfiltration staging via PSRemoting",
+          "Correlate with WinRM EID 6 on the destination to confirm session establishment and identify what was executed remotely"
+        ],
+        "commonFalsePositives": [
+          "IT administrators using Enter-PSSession for legitimate remote management",
+          "Ansible, DSC, or other automation frameworks using PSRemoting for configuration management",
+          "Monitoring solutions polling remote systems via PSRemoting"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_troubleshooting"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 7 / Server 2008 R2"
+      },
+      "keyFields": [
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "Remote host being connected to; unexpected or external destinations are high risk"
+        },
+        {
+          "name": "AuthMechanism",
+          "xpath": "EventData/Data[@Name='AuthMechanism']",
+          "description": "Authentication method; Basic = cleartext (critical), CredSSP = credential delegation (high risk), NTLM = relay risk"
+        },
+        {
+          "name": "UserName",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "Account used for remote auth; service accounts or privileged accounts connecting to unusual hosts are anomalous"
+        }
+      ],
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "PowerShell Remoting with Basic or CredSSP Authentication",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-PowerShell\"\n| where EventID == 53504\n| where RenderedDescription has_any (\"Basic\", \"CredSSP\")\n| project TimeGenerated, Computer, UserName, RenderedDescription",
+          "notes": "Basic auth sends credentials in cleartext. CredSSP delegates credentials to the remote host. Both should be banned by policy and any occurrence investigated."
+        },
+        {
+          "platform": "Sigma",
+          "title": "PowerShell Remoting with Unsafe Authentication Method",
+          "rule": "title: PowerShell Remoting Using Basic or CredSSP Authentication\nstatus: stable\nlogsource:\n    product: windows\n    service: powershell\ndetection:\n    selection:\n        EventID: 53504\n        AuthMechanism:\n            - 'Basic'\n            - 'CredSSP'\n    condition: selection\nfalsepositives:\n    - Legacy management scripts not yet migrated to Kerberos\n    - Specific DSC pull server configurations using CredSSP\nlevel: high",
+          "notes": "Basic auth is cleartext and should alert as critical. CredSSP is high risk if used outside documented and approved scenarios."
+        }
+      ],
+      "lastReviewed": "2026-04-10"
     }
   ]
 }

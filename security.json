@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "1.12.1",
+    "version": "1.13.0",
     "generatedAt": "2026-04-07T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -6185,6 +6185,105 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 4985,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "Information",
+      "title": "The state of a transaction has changed",
+      "summary": "The Kernel Transaction Manager recorded a state change for a file system transaction.",
+      "details": "Generated when the state of a Kernel Transaction Manager (KTM) transaction changes. KTM enables Transactional NTFS (TxF), which allows file operations to be grouped into atomic transactions that either commit or roll back as a unit. Key fields: SubjectUserName, SubjectLogonId, TransactionId (a GUID uniquely identifying the transaction), ProcessId (the process that initiated the transaction). This event has limited volume in most environments because TxF is rarely used by mainstream applications. Security relevance: (1) Ransomware using TxF: Some ransomware families have used TxF transactions to atomically replace file contents before committing, reducing the number of file I/O events generated per encrypted file. A spike in 4985 events from an unusual process with high ProcessId churn across many files is a ransomware indicator. (2) Living-off-the-land persistence via TxF: KTM transactions can be used in DLL hijacking techniques (TxF-based DLL hijacking) where a DLL is transactionally replaced with a malicious version visible only within the transaction, allowing in-memory loading of the malicious DLL while the clean version remains on disk — evading AV file scanning. (3) Correlating with file system activity: TransactionId can be used to group related file operations into logical batches, useful in reconstructing what a process did during an incident.",
+      "category": "File System Activity",
+      "tags": [
+        "transactions",
+        "txf",
+        "ransomware",
+        "defense-evasion",
+        "file-system"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1574.001",
+          "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Object Access auditing must be enabled (specifically 'Audit File System' subcategory) for 4985 events to be generated."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume of 4985 events from a single ProcessId touching many different files in rapid succession is a ransomware pattern — correlate with Sysmon EID 11 file creation events",
+          "ProcessId for an unexpected or unsigned process generating TxF activity is anomalous — most legitimate TxF users are system components (Windows Installer, certain backup applications)",
+          "TransactionId can be used to group all file operations belonging to a single logical transaction — useful for reconstructing what files were touched in an incident",
+          "4985 events without corresponding file access events (4656/4663) may indicate the transaction was aborted — TxF DLL hijacking techniques sometimes abort transactions after loading their payload to clean up traces"
+        ],
+        "commonFalsePositives": [
+          "Windows Installer (msiexec.exe) uses TxF for atomic software installation operations — high volume during software installs and updates",
+          "Database engines and VSS writers using transactional file operations for consistency",
+          "Backup software employing TxF-based consistent snapshot operations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "User context of the transaction; SYSTEM or service accounts are expected; interactive user accounts are unusual"
+        },
+        {
+          "name": "TransactionId",
+          "xpath": "EventData/Data[@Name='TransactionId']",
+          "description": "GUID of the transaction; use to group all related 4985 events and file access events belonging to one logical operation"
+        },
+        {
+          "name": "ProcessId",
+          "xpath": "EventData/Data[@Name='ProcessId']",
+          "description": "Process that owns the transaction; unexpected processes using TxF are anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
     }
   ]
 }
