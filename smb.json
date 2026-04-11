@@ -70,7 +70,7 @@
         ],
         "commonFalsePositives": [
           "Legacy environments where older SMB clients cannot support signing",
-          "Misconfigured baseline policy \u2014 common in environments that have not hardened SMB"
+          "Misconfigured baseline policy — common in environments that have not hardened SMB"
         ]
       },
       "source": {
@@ -265,7 +265,7 @@
         "investigationPivots": [
           "Determine whether the disconnect follows a successful authentication and file access (use EID 5140 on the server)",
           "Correlate with Security log EID 4634 or 4779 on the server to understand the session lifecycle",
-          "A pattern of connect \u2192 brief activity \u2192 disconnect across multiple hosts suggests tool staging"
+          "A pattern of connect → brief activity → disconnect across multiple hosts suggests tool staging"
         ],
         "commonFalsePositives": [
           "Network instability or brief server unavailability",
@@ -336,7 +336,7 @@
         "investigationPivots": [
           "Multiple failures to different ServerName values from one source host indicate lateral movement scanning",
           "STATUS_LOGON_FAILURE vs STATUS_ACCOUNT_LOCKED_OUT help differentiate failed attempts from lockout conditions",
-          "Correlate UserName with known privileged accounts \u2014 failures with admin accounts are highest priority",
+          "Correlate UserName with known privileged accounts — failures with admin accounts are highest priority",
           "Compare with successful SMB authentications (EID 4624 on server) to identify eventual success after failures"
         ],
         "commonFalsePositives": [

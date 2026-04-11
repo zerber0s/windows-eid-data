@@ -27,7 +27,7 @@
       "level": "AuditSuccess",
       "title": "Backup of the DPAPI Master Key was attempted",
       "summary": "An attempt was made to back up the DPAPI Master Key.",
-      "details": "Generated when a DPAPI Master Key backup is attempted. DPAPI (Data Protection API) is used by Windows to encrypt sensitive data including saved browser credentials, Wi-Fi passwords, RDP saved credentials, and application secrets. Each user has a set of DPAPI Master Keys stored in their profile (AppData\\Roaming\\Microsoft\\Protect\\<SID>). Key fields: SubjectAccountName (who initiated the backup), SubjectLogonId (session), KeyIdentifier (GUID of the master key being backed up), BackupType (0=recovery agent backup, 1=domain backup via DC). Legitimate backups occur automatically when a new master key is created or when the domain controller performs a backup via DPAPI RPC. Adversarial use: `mimikatz dpapi::masterkey /rpc` forces a backup request to the DC and extracts the plaintext master key \u2014 this generates a 4692 event. SubjectAccountName backing up keys for a different user's SID (lateral path), or backup activity from unexpected processes/hosts, is suspicious.",
+      "details": "Generated when a DPAPI Master Key backup is attempted. DPAPI (Data Protection API) is used by Windows to encrypt sensitive data including saved browser credentials, Wi-Fi passwords, RDP saved credentials, and application secrets. Each user has a set of DPAPI Master Keys stored in their profile (AppData\\Roaming\\Microsoft\\Protect\\<SID>). Key fields: SubjectAccountName (who initiated the backup), SubjectLogonId (session), KeyIdentifier (GUID of the master key being backed up), BackupType (0=recovery agent backup, 1=domain backup via DC). Legitimate backups occur automatically when a new master key is created or when the domain controller performs a backup via DPAPI RPC. Adversarial use: `mimikatz dpapi::masterkey /rpc` forces a backup request to the DC and extracts the plaintext master key — this generates a 4692 event. SubjectAccountName backing up keys for a different user's SID (lateral path), or backup activity from unexpected processes/hosts, is suspicious.",
       "prerequisites": [
         {
           "type": "policy",
@@ -95,12 +95,12 @@
       "notesGuidance": {
         "investigationPivots": [
           "SubjectAccountName performing a backup for a KeyIdentifier belonging to a different user's profile (different SID path) indicates cross-user credential theft",
-          "Backup activity originating from an unusual process (check parent process via EID 4688) \u2014 legitimate DPAPI backups come from lsass.exe or the CryptProtectData API, not cmd.exe or PowerShell",
-          "Correlate with network connections (Sysmon EID 3) from the same host to a DC on port 135/RPC at the same time \u2014 mimikatz dpapi::masterkey /rpc initiates an RPC call to the DC",
+          "Backup activity originating from an unusual process (check parent process via EID 4688) — legitimate DPAPI backups come from lsass.exe or the CryptProtectData API, not cmd.exe or PowerShell",
+          "Correlate with network connections (Sysmon EID 3) from the same host to a DC on port 135/RPC at the same time — mimikatz dpapi::masterkey /rpc initiates an RPC call to the DC",
           "KeyIdentifier can be cross-referenced with the master key files in the user's Protect folder to identify which credentials are at risk"
         ],
         "commonFalsePositives": [
-          "Automatic domain backup of newly created master keys by the Windows DPAPI infrastructure \u2014 occurs periodically and is normal",
+          "Automatic domain backup of newly created master keys by the Windows DPAPI infrastructure — occurs periodically and is normal",
           "Backup during account migration or profile restoration by authorized IT staff"
         ]
       },
@@ -232,10 +232,10 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "RecoveryServer identifies which DC processed the recovery \u2014 an unexpected DC or a DC in a different site than the user's normal location is anomalous",
+          "RecoveryServer identifies which DC processed the recovery — an unexpected DC or a DC in a different site than the user's normal location is anomalous",
           "SubjectAccountName recovering keys for an account that has not recently had a password reset or profile issue is suspicious",
           "Recovery of keys for privileged accounts (Domain Admins, service accounts with broad access) from non-standard workstations is highest priority",
-          "Correlate with Sysmon EID 10 (ProcessAccess) targeting lsass.exe in the same timeframe \u2014 Mimikatz operations often touch LSASS before or after DPAPI recovery"
+          "Correlate with Sysmon EID 10 (ProcessAccess) targeting lsass.exe in the same timeframe — Mimikatz operations often touch LSASS before or after DPAPI recovery"
         ],
         "commonFalsePositives": [
           "Legitimate recovery after a user password reset that invalidates the existing master key",
@@ -276,7 +276,7 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "DPAPI Master Key Recovery \u2014 Suspicious Account or Timing",
+          "title": "DPAPI Master Key Recovery — Suspicious Account or Timing",
           "rule": "SecurityEvent\n| where EventID == 4693\n| where ReturnCode == \"0x0\"\n| where SubjectUserName != \"SYSTEM\"\n| project TimeGenerated, SubjectUserName, SubjectDomainName, MasterKeyId, RecoveryServer, Computer",
           "notes": "Successful DPAPI master key recovery by non-SYSTEM accounts. May indicate Mimikatz 'sekurlsa::dpapi' or manual credential extraction. Correlate with 4692 events for the same MasterKeyId."
         },
@@ -303,7 +303,7 @@
       "level": "AuditSuccess",
       "title": "Protection of auditable protected data was attempted",
       "summary": "An application attempted to encrypt data using DPAPI with auditing enabled on the data.",
-      "details": "Generated when CryptProtectData is called on data that was marked as auditable (using the CRYPTPROTECT_AUDIT flag). This is an application-level event \u2014 most DPAPI encryption operations do NOT generate this event unless the application explicitly opts into DPAPI auditing by setting the audit flag on the data. Key fields: SubjectAccountName, DataDescription (application-provided label for the protected data), ProcessName (which process called CryptProtectData). Applications that use auditable DPAPI include some credential managers, enterprise password vaults, and security-sensitive applications. In attack contexts, a malicious application masquerading as a legitimate one and calling CryptProtectData with audit flags may generate unexpected 4694 events for processes that should not be encrypting credentials. This event is rare in most environments \u2014 any unexpected source is worth investigating.",
+      "details": "Generated when CryptProtectData is called on data that was marked as auditable (using the CRYPTPROTECT_AUDIT flag). This is an application-level event — most DPAPI encryption operations do NOT generate this event unless the application explicitly opts into DPAPI auditing by setting the audit flag on the data. Key fields: SubjectAccountName, DataDescription (application-provided label for the protected data), ProcessName (which process called CryptProtectData). Applications that use auditable DPAPI include some credential managers, enterprise password vaults, and security-sensitive applications. In attack contexts, a malicious application masquerading as a legitimate one and calling CryptProtectData with audit flags may generate unexpected 4694 events for processes that should not be encrypting credentials. This event is rare in most environments — any unexpected source is worth investigating.",
       "prerequisites": [
         {
           "type": "policy",
@@ -342,8 +342,8 @@
       "notesGuidance": {
         "investigationPivots": [
           "ProcessName that is not a known credential manager or enterprise application encrypting data is anomalous",
-          "DataDescription field (set by the calling application) may reveal what data type is being protected \u2014 unexpected descriptions from unexpected processes are suspicious",
-          "Correlate SubjectAccountName with session activity \u2014 encryption by a background process in a logged-off user's context is unusual"
+          "DataDescription field (set by the calling application) may reveal what data type is being protected — unexpected descriptions from unexpected processes are suspicious",
+          "Correlate SubjectAccountName with session activity — encryption by a background process in a logged-off user's context is unusual"
         ],
         "commonFalsePositives": [
           "Legitimate credential manager applications that explicitly use the CRYPTPROTECT_AUDIT flag for compliance purposes",
@@ -368,7 +368,7 @@
       "level": "AuditSuccess",
       "title": "Unprotection of auditable protected data was attempted",
       "summary": "An application attempted to decrypt DPAPI-protected auditable data.",
-      "details": "The decryption counterpart to EID 4694 \u2014 generated when CryptUnprotectData is called on data that was originally protected with the CRYPTPROTECT_AUDIT flag. Key fields: SubjectAccountName, DataDescription (the label assigned when the data was originally encrypted), ProcessName. This event is more security-relevant than 4694 because decryption is the exfiltration step \u2014 an attacker who obtains DPAPI-protected credential blobs and can decrypt them (by recovering the master key first via 4692/4693) may trigger this event if the original encryption used the audit flag. The DataDescription field is particularly valuable: it may directly reveal what credential type is being decrypted (e.g., \"Windows Live\", \"IE/Edge credentials\", \"RDP password\"). ProcessName that is unexpected for the DataDescription type is a key pivot.",
+      "details": "The decryption counterpart to EID 4694 — generated when CryptUnprotectData is called on data that was originally protected with the CRYPTPROTECT_AUDIT flag. Key fields: SubjectAccountName, DataDescription (the label assigned when the data was originally encrypted), ProcessName. This event is more security-relevant than 4694 because decryption is the exfiltration step — an attacker who obtains DPAPI-protected credential blobs and can decrypt them (by recovering the master key first via 4692/4693) may trigger this event if the original encryption used the audit flag. The DataDescription field is particularly valuable: it may directly reveal what credential type is being decrypted (e.g., \"Windows Live\", \"IE/Edge credentials\", \"RDP password\"). ProcessName that is unexpected for the DataDescription type is a key pivot.",
       "prerequisites": [
         {
           "type": "policy",
@@ -438,7 +438,7 @@
           "DataDescription containing credential-related strings (browser names, 'RDP', 'password', application names) being decrypted by an unexpected ProcessName is a high-confidence credential theft indicator",
           "ProcessName that is powershell.exe, cmd.exe, or any non-browser/non-credential-manager process decrypting browser or application credentials is critical",
           "SubjectAccountName decrypting credentials belonging to a different user's data (cross-user decryption) indicates lateral credential theft",
-          "Correlate with EID 4693 (master key recovery) in the same session \u2014 recovery followed immediately by decryption indicates active credential extraction"
+          "Correlate with EID 4693 (master key recovery) in the same session — recovery followed immediately by decryption indicates active credential extraction"
         ],
         "commonFalsePositives": [
           "Legitimate applications decrypting their own credential stores during normal startup or authentication flows",

@@ -37,17 +37,32 @@
         "network"
       ],
       "relatedEventIds": [
-        { "id": 10016, "log": "DCOM" },
-        { "id": 10028, "log": "DCOM" },
-        { "id": 4624, "log": "Security" },
-        { "id": 3, "log": "Sysmon" }
+        {
+          "id": 10016,
+          "log": "DCOM"
+        },
+        {
+          "id": 10028,
+          "log": "DCOM"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 3,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.003",
           "techniqueName": "Remote Services: Distributed Component Object Model",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         }
       ],
@@ -110,27 +125,54 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 10009, "log": "DCOM" },
-        { "id": 1, "log": "Sysmon" },
-        { "id": 8, "log": "Sysmon" },
-        { "id": 12, "log": "Sysmon" },
-        { "id": 13, "log": "Sysmon" }
+        {
+          "id": 10009,
+          "log": "DCOM"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        },
+        {
+          "id": 8,
+          "log": "Sysmon"
+        },
+        {
+          "id": 12,
+          "log": "Sysmon"
+        },
+        {
+          "id": 13,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1546.015",
           "techniqueName": "Event Triggered Execution: Component Object Model Hijacking",
           "tactics": [
-            { "tacticId": "TA0003", "tacticName": "Persistence" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         },
         {
           "techniqueId": "T1055",
           "techniqueName": "Process Injection",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" },
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
           ]
         }
       ],
@@ -193,27 +235,54 @@
         "remote-execution"
       ],
       "relatedEventIds": [
-        { "id": 10009, "log": "DCOM" },
-        { "id": 4624, "log": "Security" },
-        { "id": 4625, "log": "Security" },
-        { "id": 4688, "log": "Security" },
-        { "id": 1, "log": "Sysmon" },
-        { "id": 3, "log": "Sysmon" }
+        {
+          "id": 10009,
+          "log": "DCOM"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        },
+        {
+          "id": 3,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.003",
           "techniqueName": "Remote Services: Distributed Component Object Model",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         },
         {
           "techniqueId": "T1548",
           "techniqueName": "Abuse Elevation Control Mechanism",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -291,23 +360,38 @@
         "reconnaissance"
       ],
       "relatedEventIds": [
-        { "id": 10009, "log": "DCOM" },
-        { "id": 10016, "log": "DCOM" },
-        { "id": 3, "log": "Sysmon" }
+        {
+          "id": 10009,
+          "log": "DCOM"
+        },
+        {
+          "id": 10016,
+          "log": "DCOM"
+        },
+        {
+          "id": 3,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1021.003",
           "techniqueName": "Remote Services: Distributed Component Object Model",
           "tactics": [
-            { "tacticId": "TA0008", "tacticName": "Lateral Movement" }
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
           ]
         },
         {
           "techniqueId": "T1018",
           "techniqueName": "Remote System Discovery",
           "tactics": [
-            { "tacticId": "TA0007", "tacticName": "Discovery" }
+            {
+              "tacticId": "TA0007",
+              "tacticName": "Discovery"
+            }
           ]
         }
       ],

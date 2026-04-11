@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Task instance started",
       "summary": "Task Scheduler launched an instance of a task.",
-      "details": "Generated when Task Scheduler starts a task instance. This is the task-level start event, distinct from EID 200 (action started), which fires when the specific executable or script within the task begins. Key fields: TaskName and the user context under which the task was launched. EID 100 precedes EID 200 in the execution sequence: 100 \u2192 200 \u2192 201 \u2192 102. Unexpected tasks launching \u2014 especially outside of normal business hours or for tasks not registered via standard software installers \u2014 warrant investigation.",
+      "details": "Generated when Task Scheduler starts a task instance. This is the task-level start event, distinct from EID 200 (action started), which fires when the specific executable or script within the task begins. Key fields: TaskName and the user context under which the task was launched. EID 100 precedes EID 200 in the execution sequence: 100 → 200 → 201 → 102. Unexpected tasks launching — especially outside of normal business hours or for tasks not registered via standard software installers — warrant investigation.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -101,7 +101,7 @@
       "level": "Error",
       "title": "Task instance failed to start",
       "summary": "Task Scheduler failed to launch a task instance.",
-      "details": "Generated when Task Scheduler fails to start a task instance. Key fields: TaskName, the user context, and the error code (ResultCode). Common failure causes include missing executables, insufficient privileges, or a corrupted task definition. From an attacker perspective, a task that fails to start may indicate a partially deployed persistence mechanism \u2014 the task was registered (EID 106) but the payload is absent or blocked. Correlate EID 101 with EID 106 using TaskName to determine when the task was created and whether the failure aligns with a security tool removing the payload.",
+      "details": "Generated when Task Scheduler fails to start a task instance. Key fields: TaskName, the user context, and the error code (ResultCode). Common failure causes include missing executables, insufficient privileges, or a corrupted task definition. From an attacker perspective, a task that fails to start may indicate a partially deployed persistence mechanism — the task was registered (EID 106) but the payload is absent or blocked. Correlate EID 101 with EID 106 using TaskName to determine when the task was created and whether the failure aligns with a security tool removing the payload.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -206,7 +206,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Pair with EID 100 using TaskName to calculate instance duration \u2014 suspiciously short durations may indicate termination",
+          "Pair with EID 100 using TaskName to calculate instance duration — suspiciously short durations may indicate termination",
           "Non-zero ResultCode after a recently registered task may indicate a security tool blocked execution",
           "Correlate with EID 201 ResultCode to compare action-level and instance-level outcomes"
         ],
@@ -280,7 +280,7 @@
         "investigationPivots": [
           "Tasks in the root scheduler namespace (no subfolder) warrant closer inspection",
           "Correlate TaskName with Security EID 4698 TaskContent XML to review the full task definition",
-          "Check the registering user context \u2014 SYSTEM-registered tasks created outside of normal software installs are suspicious"
+          "Check the registering user context — SYSTEM-registered tasks created outside of normal software installs are suspicious"
         ],
         "commonFalsePositives": [
           "Software installers and updaters registering scheduled tasks",
@@ -342,7 +342,7 @@
       "level": "Warning",
       "title": "Task terminated",
       "summary": "A running task instance was terminated.",
-      "details": "Generated when a task instance is terminated \u2014 either forcibly by Task Scheduler (e.g., execution time limit exceeded), by a user, or due to an error condition. Key fields: TaskName and the instance GUID. From a DFIR perspective, a malicious task that was caught and terminated by a security tool will produce this event. Correlate with EID 100 using TaskName and the instance GUID to determine how long the task ran before termination and whether any follow-on activity (EID 200) occurred during that window.",
+      "details": "Generated when a task instance is terminated — either forcibly by Task Scheduler (e.g., execution time limit exceeded), by a user, or due to an error condition. Key fields: TaskName and the instance GUID. From a DFIR perspective, a malicious task that was caught and terminated by a security tool will produce this event. Correlate with EID 100 using TaskName and the instance GUID to determine how long the task ran before termination and whether any follow-on activity (EID 200) occurred during that window.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -475,7 +475,7 @@
       "level": "Information",
       "title": "Task updated",
       "summary": "An existing scheduled task was updated.",
-      "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log \u2014 correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
+      "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log — correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
       "category": "Task Lifecycle",
       "tags": [
         "scheduled-task",
@@ -628,15 +628,15 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "Scheduled Task Deleted \u2014 Potential Attacker Cleanup",
+          "title": "Scheduled Task Deleted — Potential Attacker Cleanup",
           "rule": "let TaskCreations = Event\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 106\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), CreateTime = TimeGenerated, CreateUser = UserName;\nEvent\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 141\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), DeleteTime = TimeGenerated, DeleteUser = UserName, Computer\n| join kind=inner TaskCreations on TaskName\n| where DeleteTime - CreateTime < 1h",
-          "notes": "Correlates task creation with deletion within 1 hour \u2014 characteristic of attacker-created persistence tasks that are cleaned up post-exploitation."
+          "notes": "Correlates task creation with deletion within 1 hour — characteristic of attacker-created persistence tasks that are cleaned up post-exploitation."
         },
         {
           "platform": "Splunk",
           "title": "Scheduled Task Deletion After Recent Creation",
           "rule": "index=wineventlog (EventCode=106 OR EventCode=141)\n| eval action=if(EventCode=106, \"created\", \"deleted\")\n| stats list(action) as actions list(_time) as times by Task_Name\n| where mvcount(actions) > 1\n| where abs(mvindex(times,0) - mvindex(times,-1)) < 3600",
-          "notes": "Finds tasks created and deleted within an hour \u2014 attacker cleanup pattern."
+          "notes": "Finds tasks created and deleted within an hour — attacker cleanup pattern."
         },
         {
           "platform": "Sigma",
@@ -702,7 +702,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ActionName is the key field \u2014 inspect the full executable path and any arguments",
+          "ActionName is the key field — inspect the full executable path and any arguments",
           "Correlate TaskName with EID 106 to determine how long the task existed before execution",
           "Cross-reference ActionName with Security EID 4688 CommandLine for full argument visibility (if command-line auditing is enabled)",
           "Execution from temp directories, user profile paths, or with encoded/obfuscated arguments is a strong malicious indicator"
@@ -770,7 +770,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Pair with EID 200 using TaskName to calculate execution duration",
-          "Non-zero ResultCode may indicate the process was killed or failed \u2014 correlate with Defender or EDR telemetry",
+          "Non-zero ResultCode may indicate the process was killed or failed — correlate with Defender or EDR telemetry",
           "Very short durations (sub-second) combined with non-zero result codes may indicate security tool intervention"
         ],
         "commonFalsePositives": [

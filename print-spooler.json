@@ -96,7 +96,7 @@
       "level": "Information",
       "title": "Document printed",
       "summary": "A document was sent to a printer and spooled.",
-      "details": "Generated when a document is submitted to the print spooler. Key fields: Param1 (document name), Param2 (UserName who printed), Param3 (ClientMachine \u2014 the machine that sent the job), Param4 (printer name), and Param5 (printer port/path). In DFIR contexts this event is useful for detecting data staging and exfiltration via printing: an unusual document name printed by an unexpected user to a network printer or virtual printer (PDF/XPS) immediately before an incident may indicate deliberate data extraction. The ClientMachine field reveals whether the job was submitted locally or from a remote host, which is significant when investigating unauthorized access to shared printers.",
+      "details": "Generated when a document is submitted to the print spooler. Key fields: Param1 (document name), Param2 (UserName who printed), Param3 (ClientMachine — the machine that sent the job), Param4 (printer name), and Param5 (printer port/path). In DFIR contexts this event is useful for detecting data staging and exfiltration via printing: an unusual document name printed by an unexpected user to a network printer or virtual printer (PDF/XPS) immediately before an incident may indicate deliberate data extraction. The ClientMachine field reveals whether the job was submitted locally or from a remote host, which is significant when investigating unauthorized access to shared printers.",
       "category": "Print Spooler",
       "tags": [
         "print-spooler",
@@ -126,10 +126,10 @@
         "investigationPivots": [
           "Document names containing sensitive terms (financials, HR, confidential, passwords) warrant review",
           "Param4 (printer name) pointing to a PDF, XPS, or network-redirected printer can indicate digital document copying",
-          "ClientMachine different from the local hostname indicates a remote print job \u2014 verify authorization"
+          "ClientMachine different from the local hostname indicates a remote print job — verify authorization"
         ],
         "commonFalsePositives": [
-          "Any legitimate document printing \u2014 this event fires for all print jobs and must be contextualized",
+          "Any legitimate document printing — this event fires for all print jobs and must be contextualized",
           "Automated reporting systems that print or PDF-export documents on a schedule"
         ]
       },
@@ -206,7 +206,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "DriverName should match a known printer vendor (HP, Canon, Lexmark, etc.) \u2014 generic or randomized names are critical indicators",
+          "DriverName should match a known printer vendor (HP, Canon, Lexmark, etc.) — generic or randomized names are critical indicators",
           "Correlate with Sysmon EID 7 (image load) to capture the DLL path and hash at the exact same timestamp",
           "Check the spool drivers directory for recently dropped DLLs: C:\\Windows\\System32\\spool\\drivers\\",
           "On servers with no printers or no printing role, any driver installation is anomalous"
@@ -264,7 +264,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "A cluster of EID 808 events followed by a successful EID 316 indicates a PrintNightmare exploit sequence",
-          "Check the driver path referenced in the failure \u2014 attacker-controlled UNC paths (\\\\attacker\\share\\malicious.dll) are high fidelity",
+          "Check the driver path referenced in the failure — attacker-controlled UNC paths (\\\\attacker\\share\\malicious.dll) are high fidelity",
           "Correlate with network connection events to detect outbound SMB connections to unusual hosts around the same time"
         ],
         "commonFalsePositives": [

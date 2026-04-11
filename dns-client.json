@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "DNS query initiated",
       "summary": "The DNS client sent a query to resolve a name.",
-      "details": "Generated when the Windows DNS client initiates a query to resolve a hostname or other DNS record type. Key fields: QueryName (the name being resolved), QueryType (record type: A, AAAA, TXT, MX, etc.), and ServerList (the DNS server the query was sent to). This event provides full DNS query visibility at the host level, making it the primary data source for DNS-based C2 and tunneling detection (T1071.004). Indicators of compromise in DNS queries include: excessively long subdomains (>50 characters) indicating DNS tunneling, high-frequency queries to a single parent domain, queries for domains with high entropy names (DGA patterns \u2014 T1568.002), and TXT or NULL record queries from non-mail applications. Note: this channel is disabled by default and must be enabled via wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true or Group Policy. Volume can be extremely high on active endpoints.",
+      "details": "Generated when the Windows DNS client initiates a query to resolve a hostname or other DNS record type. Key fields: QueryName (the name being resolved), QueryType (record type: A, AAAA, TXT, MX, etc.), and ServerList (the DNS server the query was sent to). This event provides full DNS query visibility at the host level, making it the primary data source for DNS-based C2 and tunneling detection (T1071.004). Indicators of compromise in DNS queries include: excessively long subdomains (>50 characters) indicating DNS tunneling, high-frequency queries to a single parent domain, queries for domains with high entropy names (DGA patterns — T1568.002), and TXT or NULL record queries from non-mail applications. Note: this channel is disabled by default and must be enabled via wevtutil sl Microsoft-Windows-DNS-Client/Operational /e:true or Group Policy. Volume can be extremely high on active endpoints.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -85,13 +85,13 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Flag QueryName values with subdomains longer than 50 characters \u2014 this is a strong DNS tunneling indicator",
+          "Flag QueryName values with subdomains longer than 50 characters — this is a strong DNS tunneling indicator",
           "High-frequency queries (>100/min) to a single parent domain from a single process indicate beaconing or tunneling",
           "TXT or NULL record queries (QueryType) from non-mail, non-internal processes are anomalous",
-          "Calculate entropy of QueryName \u2014 high entropy base domains with many unique subdomains indicate DGA activity"
+          "Calculate entropy of QueryName — high entropy base domains with many unique subdomains indicate DGA activity"
         ],
         "commonFalsePositives": [
-          "Any legitimate DNS resolution \u2014 this event fires for all name lookups and must be filtered by anomaly patterns",
+          "Any legitimate DNS resolution — this event fires for all name lookups and must be filtered by anomaly patterns",
           "CDN and cloud services that use long subdomain-encoded parameters in their hostnames",
           "Security tools that perform DNS lookups for threat intelligence enrichment"
         ]
@@ -114,7 +114,7 @@
       "level": "Warning",
       "title": "DNS query failed",
       "summary": "The DNS client failed to resolve a name (NXDOMAIN, timeout, or server error).",
-      "details": "Generated when the Windows DNS client receives a failure response or times out when resolving a name. Key fields: QueryName, QueryType, QueryStatus (error code \u2014 NXDOMAIN, SERVFAIL, timeout, etc.), and ServerList. Failed DNS queries are significant for two detection scenarios: (1) DGA-based C2 malware generates large volumes of NXDOMAIN failures as it cycles through generated domain names looking for a live C2 domain \u2014 a high rate of NXDOMAIN failures from a single process is a strong DGA indicator; (2) DNS tunneling failures may indicate an endpoint attempting to reach a tunneling server that has been taken down. The QueryName field on failed queries retains the full lookup target, preserving the name even when no answer was returned. Note: requires DNS Client operational log to be enabled.",
+      "details": "Generated when the Windows DNS client receives a failure response or times out when resolving a name. Key fields: QueryName, QueryType, QueryStatus (error code — NXDOMAIN, SERVFAIL, timeout, etc.), and ServerList. Failed DNS queries are significant for two detection scenarios: (1) DGA-based C2 malware generates large volumes of NXDOMAIN failures as it cycles through generated domain names looking for a live C2 domain — a high rate of NXDOMAIN failures from a single process is a strong DGA indicator; (2) DNS tunneling failures may indicate an endpoint attempting to reach a tunneling server that has been taken down. The QueryName field on failed queries retains the full lookup target, preserving the name even when no answer was returned. Note: requires DNS Client operational log to be enabled.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -169,7 +169,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "High volume NXDOMAIN failures from a single process over a short period is the primary DGA indicator",
-          "Collect all failed QueryName values and calculate n-gram frequency \u2014 DGA names have low n-gram frequency compared to legitimate English names",
+          "Collect all failed QueryName values and calculate n-gram frequency — DGA names have low n-gram frequency compared to legitimate English names",
           "A sudden spike in NXDOMAIN failures followed by a successful resolution (EID 3010) to an unusual domain indicates DGA C2 check-in"
         ],
         "commonFalsePositives": [
@@ -247,12 +247,12 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "QueryResults (resolved IP) is the pivot to network connection logs \u2014 look for outbound connections to the IP immediately after this event",
+          "QueryResults (resolved IP) is the pivot to network connection logs — look for outbound connections to the IP immediately after this event",
           "Repeated successful resolutions of the same domain to different IPs may indicate fast-flux C2 infrastructure",
           "TXT record QueryResults containing high-entropy data are a DNS tunneling indicator"
         ],
         "commonFalsePositives": [
-          "All successful DNS lookups generate this event \u2014 filter by anomalous QueryName patterns to reduce noise"
+          "All successful DNS lookups generate this event — filter by anomalous QueryName patterns to reduce noise"
         ]
       },
       "source": {
@@ -320,12 +320,12 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Compare QueryResults IP against the expected IP for the domain \u2014 unexpected IPs indicate cache poisoning",
+          "Compare QueryResults IP against the expected IP for the domain — unexpected IPs indicate cache poisoning",
           "A cache hit with no preceding EID 3010 in the relevant time window is anomalous and may indicate injected cache entries",
           "Run ipconfig /displaydns to inspect the full cache state if poisoning is suspected"
         ],
         "commonFalsePositives": [
-          "Any repeated DNS resolution within the cache TTL \u2014 the vast majority of cache hits are legitimate"
+          "Any repeated DNS resolution within the cache TTL — the vast majority of cache hits are legitimate"
         ]
       },
       "source": {

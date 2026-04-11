@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "BITS job created",
       "summary": "A new BITS transfer job was created.",
-      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot \u2014 legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBAS abuse \u2014 bitsadmin.exe is a LOLBin (binary), while PowerShell's Start-BitsTransfer and wscript.exe represent the Scripts category of LOLBAS. Correlate jobId with EID 59 and 60 to track what was transferred.",
+      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot — legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBAS abuse — bitsadmin.exe is a LOLBin (binary), while PowerShell's Start-BitsTransfer and wscript.exe represent the Scripts category of LOLBAS. Correlate jobId with EID 59 and 60 to track what was transferred.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
@@ -71,7 +71,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ProcessPath identifies what created the job \u2014 flag anything outside of known system or software update processes",
+          "ProcessPath identifies what created the job — flag anything outside of known system or software update processes",
           "Correlate jobId with EID 59 to identify the download URL",
           "jobOwner reveals the account context under which the transfer was initiated"
         ],
@@ -98,7 +98,7 @@
       "level": "Information",
       "title": "BITS job modified",
       "summary": "An existing BITS transfer job was modified.",
-      "details": "Generated when an existing BITS job is modified \u2014 for example, when a file is added to or removed from the job, the priority changes, or the transfer URL is updated. Key fields: jobId, jobName, jobOwner, and the type of modification. Adversaries using BITS for persistence or staged downloads often modify existing jobs to update C2 URLs, change destination paths, or re-add files after completion. A sequence of EID 3 (job created) followed by multiple EID 4 (modifications) for the same jobId \u2014 especially modifications that change the remote URL to an external address \u2014 warrants investigation.",
+      "details": "Generated when an existing BITS job is modified — for example, when a file is added to or removed from the job, the priority changes, or the transfer URL is updated. Key fields: jobId, jobName, jobOwner, and the type of modification. Adversaries using BITS for persistence or staged downloads often modify existing jobs to update C2 URLs, change destination paths, or re-add files after completion. A sequence of EID 3 (job created) followed by multiple EID 4 (modifications) for the same jobId — especially modifications that change the remote URL to an external address — warrants investigation.",
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
@@ -140,7 +140,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Repeated URL modifications to a single jobId suggest a rotating C2 infrastructure",
-          "Correlate jobOwner with expected service accounts \u2014 BITS job modifications by SYSTEM or a user-context process are both valid but serve different attack patterns",
+          "Correlate jobOwner with expected service accounts — BITS job modifications by SYSTEM or a user-context process are both valid but serve different attack patterns",
           "Check if the modified destination path points to a startup folder, scheduled task directory, or script location"
         ],
         "commonFalsePositives": [
@@ -166,7 +166,7 @@
       "level": "Information",
       "title": "BITS service stopped",
       "summary": "The Background Intelligent Transfer Service stopped.",
-      "details": "Generated when the BITS service (Background Intelligent Transfer Service) stops. The BITS service stopping unexpectedly or being explicitly stopped is a potential defense evasion or anti-forensic indicator \u2014 some malware stops BITS after using it for staging to remove the transfer evidence, or stops it to prevent legitimate Windows Update transfers while maintaining persistence. Key fields: the reason for the service stop. Unexpected BITS service stops outside of Windows maintenance windows warrant investigation, particularly when correlated with BITS job creation events earlier in the timeline.",
+      "details": "Generated when the BITS service (Background Intelligent Transfer Service) stops. The BITS service stopping unexpectedly or being explicitly stopped is a potential defense evasion or anti-forensic indicator — some malware stops BITS after using it for staging to remove the transfer evidence, or stops it to prevent legitimate Windows Update transfers while maintaining persistence. Key fields: the reason for the service stop. Unexpected BITS service stops outside of Windows maintenance windows warrant investigation, particularly when correlated with BITS job creation events earlier in the timeline.",
       "category": "BITS Service Lifecycle",
       "tags": [
         "bits",
@@ -199,11 +199,11 @@
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with EID 3/60 from earlier in the same session to determine if BITS was used before stopping",
-          "Check if the stop was triggered by an sc.exe, net.exe, or PowerShell Stop-Service command \u2014 use process creation logs",
+          "Check if the stop was triggered by an sc.exe, net.exe, or PowerShell Stop-Service command — use process creation logs",
           "Repeated BITS start/stop cycles correlated with file staging events suggest automated malware cleanup"
         ],
         "commonFalsePositives": [
-          "Normal Windows service lifecycle \u2014 BITS stops when idle and restarts when needed",
+          "Normal Windows service lifecycle — BITS stops when idle and restarts when needed",
           "Scheduled system maintenance or Windows Update completion stopping BITS"
         ]
       },
@@ -225,7 +225,7 @@
       "level": "Information",
       "title": "BITS job transfer started",
       "summary": "A BITS job began transferring data; URL recorded.",
-      "details": "Generated when a BITS job begins actively transferring data. Key fields: jobTitle, jobId, jobOwner, bytesTotal, fileCount, and url (the remote URL being downloaded from or uploaded to). The url field is the highest-value forensic artifact in the BITS log \u2014 it reveals the C2 server, staging server, or exfiltration endpoint. Attackers commonly use bitsadmin.exe or PowerShell's Start-BitsTransfer to download payloads from attacker-controlled infrastructure. Correlate jobId with EID 3 to identify the creating process.",
+      "details": "Generated when a BITS job begins actively transferring data. Key fields: jobTitle, jobId, jobOwner, bytesTotal, fileCount, and url (the remote URL being downloaded from or uploaded to). The url field is the highest-value forensic artifact in the BITS log — it reveals the C2 server, staging server, or exfiltration endpoint. Attackers commonly use bitsadmin.exe or PowerShell's Start-BitsTransfer to download payloads from attacker-controlled infrastructure. Correlate jobId with EID 3 to identify the creating process.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
@@ -265,7 +265,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The url field reveals the download source or upload destination \u2014 check against threat intel",
+          "The url field reveals the download source or upload destination — check against threat intel",
           "Correlate jobId with EID 3 (ProcessPath) to identify what initiated the transfer",
           "External URLs (non-Microsoft, non-CDN) from unexpected processes are high-fidelity malicious indicators"
         ],
@@ -357,7 +357,7 @@
       "level": "Warning",
       "title": "BITS job error",
       "summary": "A BITS transfer job encountered an error.",
-      "details": "Generated when a BITS job fails or is cancelled due to an error. Key fields: jobId, jobName, jobOwner, the file URL that failed, the destination path, and the error code (HRESULT or HTTP status). This event is forensically valuable even when the transfer ultimately fails \u2014 it records the remote URL and local destination that were attempted, revealing C2 infrastructure or staging paths. Repeated BITS errors against the same external host from multiple endpoints is a lateral movement or beaconing indicator. HTTP 403/404/401 error codes indicate the attacker's infrastructure was reachable but the specific resource was unavailable or access-controlled.",
+      "details": "Generated when a BITS job fails or is cancelled due to an error. Key fields: jobId, jobName, jobOwner, the file URL that failed, the destination path, and the error code (HRESULT or HTTP status). This event is forensically valuable even when the transfer ultimately fails — it records the remote URL and local destination that were attempted, revealing C2 infrastructure or staging paths. Repeated BITS errors against the same external host from multiple endpoints is a lateral movement or beaconing indicator. HTTP 403/404/401 error codes indicate the attacker's infrastructure was reachable but the specific resource was unavailable or access-controlled.",
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
@@ -398,8 +398,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The URL in the error event is the primary pivot \u2014 extract the domain/IP and check against threat intelligence",
-          "Destination path reveals where the payload would have landed \u2014 check if it is a persistence location",
+          "The URL in the error event is the primary pivot — extract the domain/IP and check against threat intelligence",
+          "Destination path reveals where the payload would have landed — check if it is a persistence location",
           "Multiple hosts failing to reach the same external URL in the same time window suggests a coordinated staged download campaign"
         ],
         "commonFalsePositives": [

@@ -37,19 +37,40 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 5, "log": "UAC" },
-        { "id": 4688, "log": "Security" },
-        { "id": 4703, "log": "Security" },
-        { "id": 1, "log": "Sysmon" },
-        { "id": 13, "log": "Sysmon" }
+        {
+          "id": 5,
+          "log": "UAC"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 4703,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        },
+        {
+          "id": 13,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1548.002",
           "techniqueName": "Abuse Elevation Control Mechanism: Bypass User Account Control",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -127,18 +148,36 @@
         "elevation"
       ],
       "relatedEventIds": [
-        { "id": 4, "log": "UAC" },
-        { "id": 4688, "log": "Security" },
-        { "id": 4703, "log": "Security" },
-        { "id": 1, "log": "Sysmon" }
+        {
+          "id": 4,
+          "log": "UAC"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 4703,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1548.002",
           "techniqueName": "Abuse Elevation Control Mechanism: Bypass User Account Control",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -213,19 +252,40 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 34, "log": "UAC" },
-        { "id": 4, "log": "UAC" },
-        { "id": 5, "log": "UAC" },
-        { "id": 7036, "log": "System" },
-        { "id": 4688, "log": "Security" }
+        {
+          "id": 34,
+          "log": "UAC"
+        },
+        {
+          "id": 4,
+          "log": "UAC"
+        },
+        {
+          "id": 5,
+          "log": "UAC"
+        },
+        {
+          "id": 7036,
+          "log": "System"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1548.002",
           "techniqueName": "Abuse Elevation Control Mechanism: Bypass User Account Control",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],
@@ -291,26 +351,50 @@
         "privilege-escalation"
       ],
       "relatedEventIds": [
-        { "id": 33, "log": "UAC" },
-        { "id": 4, "log": "UAC" },
-        { "id": 5, "log": "UAC" },
-        { "id": 7036, "log": "System" },
-        { "id": 4688, "log": "Security" }
+        {
+          "id": 33,
+          "log": "UAC"
+        },
+        {
+          "id": 4,
+          "log": "UAC"
+        },
+        {
+          "id": 5,
+          "log": "UAC"
+        },
+        {
+          "id": 7036,
+          "log": "System"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1548.002",
           "techniqueName": "Abuse Elevation Control Mechanism: Bypass User Account Control",
           "tactics": [
-            { "tacticId": "TA0004", "tacticName": "Privilege Escalation" },
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         },
         {
           "techniqueId": "T1562.001",
           "techniqueName": "Impair Defenses: Disable or Modify Tools",
           "tactics": [
-            { "tacticId": "TA0005", "tacticName": "Defense Evasion" }
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
           ]
         }
       ],

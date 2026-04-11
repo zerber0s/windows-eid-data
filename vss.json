@@ -37,18 +37,36 @@
         "data-protection"
       ],
       "relatedEventIds": [
-        { "id": 8193, "log": "VSS" },
-        { "id": 8224, "log": "VSS" },
-        { "id": 8229, "log": "VSS" },
-        { "id": 4688, "log": "Security" },
-        { "id": 1, "log": "Sysmon" }
+        {
+          "id": 8193,
+          "log": "VSS"
+        },
+        {
+          "id": 8224,
+          "log": "VSS"
+        },
+        {
+          "id": 8229,
+          "log": "VSS"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1490",
           "techniqueName": "Inhibit System Recovery",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -108,18 +126,36 @@
         "anti-forensics"
       ],
       "relatedEventIds": [
-        { "id": 25, "log": "VSS" },
-        { "id": 8224, "log": "VSS" },
-        { "id": 8229, "log": "VSS" },
-        { "id": 4688, "log": "Security" },
-        { "id": 1, "log": "Sysmon" }
+        {
+          "id": 25,
+          "log": "VSS"
+        },
+        {
+          "id": 8224,
+          "log": "VSS"
+        },
+        {
+          "id": 8229,
+          "log": "VSS"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1490",
           "techniqueName": "Inhibit System Recovery",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -187,25 +223,46 @@
         "defense-evasion"
       ],
       "relatedEventIds": [
-        { "id": 25, "log": "VSS" },
-        { "id": 8193, "log": "VSS" },
-        { "id": 8229, "log": "VSS" },
-        { "id": 4688, "log": "Security" },
-        { "id": 7036, "log": "System" }
+        {
+          "id": 25,
+          "log": "VSS"
+        },
+        {
+          "id": 8193,
+          "log": "VSS"
+        },
+        {
+          "id": 8229,
+          "log": "VSS"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 7036,
+          "log": "System"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1490",
           "techniqueName": "Inhibit System Recovery",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         },
         {
           "techniqueId": "T1489",
           "techniqueName": "Service Stop",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
@@ -264,18 +321,36 @@
         "impact"
       ],
       "relatedEventIds": [
-        { "id": 25, "log": "VSS" },
-        { "id": 8193, "log": "VSS" },
-        { "id": 8224, "log": "VSS" },
-        { "id": 4688, "log": "Security" },
-        { "id": 7036, "log": "System" }
+        {
+          "id": 25,
+          "log": "VSS"
+        },
+        {
+          "id": 8193,
+          "log": "VSS"
+        },
+        {
+          "id": 8224,
+          "log": "VSS"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 7036,
+          "log": "System"
+        }
       ],
       "mitreAttack": [
         {
           "techniqueId": "T1490",
           "techniqueName": "Inhibit System Recovery",
           "tactics": [
-            { "tacticId": "TA0040", "tacticName": "Impact" }
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
           ]
         }
       ],
