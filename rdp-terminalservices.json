@@ -1,0 +1,1089 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Remote Desktop Services (Terminal Services)",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/rdp-terminalservices.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 21,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+      "channel": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: Session logon succeeded",
+      "summary": "RDP session logon succeeded on the target host.",
+      "details": "Generated on the target host when a user successfully logs on via RDP. Key fields: User (DOMAIN\\username), SessionID, and Address (source IP of the connecting client). This is one of the most reliable indicators of a completed RDP interactive logon and should be correlated with Security 4624 LogonType 10 using the same username and timestamp. The Address field is critical for attribution and is present even when NLA is used.",
+      "category": "RDP Session",
+      "tags": [
+        "rdp",
+        "logon",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 22,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 23,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 24,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 25,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pivot on User and Address to trace who connected from where",
+          "Correlate SessionID with EID 23/24/25 to track full session lifecycle",
+          "Correlate with Security EID 4624 LogonType 10 using username and timestamp"
+        ],
+        "commonFalsePositives": [
+          "Legitimate admin activity via RDP",
+          "Jump server or bastion host connections"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "RDP Session Logon from External or Unexpected Source",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-TerminalServices-LocalSessionManager\"\n| where EventID == 21\n| parse EventData with * '<Data Name=\"User\">' User '</Data>' *\n| parse EventData with * '<Data Name=\"Address\">' Address '</Data>' *\n| parse EventData with * '<Data Name=\"SessionID\">' SessionID '</Data>' *\n| where Address !startswith \"10.\" and Address !startswith \"192.168.\" and Address !startswith \"172.\" and Address != \"LOCAL\"\n| project TimeGenerated, Computer, User, Address, SessionID\n| order by TimeGenerated desc",
+          "notes": "Correlate with Security EID 4624 LogonType 10 for the same User and timestamp. Adjust the IP filter to match your internal network ranges."
+        },
+        {
+          "platform": "Sigma",
+          "title": "RDP Session Logon",
+          "rule": "title: RDP Session Logon\nstatus: stable\nlogsource:\n  product: windows\n  service: terminalservices-localsessionmanager\ndetection:\n  selection:\n    EventID: 21\n  condition: selection\nfalsepositives:\n  - Legitimate administrator RDP access\n  - Bastion host connections\nlevel: low"
+        }
+      ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-05"
+    },
+    {
+      "id": 22,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+      "channel": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: Shell start notification received",
+      "summary": "RDP session shell successfully started.",
+      "details": "Generated immediately after EID 21 when the user's shell (explorer.exe or equivalent) starts within the RDP session. Confirms that the logon progressed to a full interactive desktop, not just an authentication handshake. Key fields: User and SessionID. Absence of this event after EID 21 may indicate session was terminated before the desktop initialized.",
+      "category": "RDP Session",
+      "tags": [
+        "rdp",
+        "logon",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 23,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 24,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 21 using SessionID to confirm full desktop initialization",
+          "Missing EID 22 after EID 21 may indicate a failed or aborted session"
+        ],
+        "commonFalsePositives": [
+          "Normal RDP logon activity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 23,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+      "channel": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: Session logoff succeeded",
+      "summary": "RDP session logoff completed successfully.",
+      "details": "Generated when a user fully logs off from an RDP session (session is destroyed). Key fields: User and SessionID. Distinguish from EID 24 (disconnect): a logoff terminates the session and releases all resources, whereas a disconnect leaves the session running on the server. Correlate with EID 21 using SessionID to measure full session duration.",
+      "category": "RDP Session",
+      "tags": [
+        "rdp",
+        "logoff",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 22,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 24,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4634,
+          "log": "Security"
+        },
+        {
+          "id": 4647,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate SessionID with EID 21 to calculate total session duration",
+          "Absence of EID 23 with EID 24 present means the session is still running disconnected"
+        ],
+        "commonFalsePositives": [
+          "Normal end-of-session activity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 24,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+      "channel": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: Session has been disconnected",
+      "summary": "RDP session disconnected but not logged off.",
+      "details": "Generated when the RDP client disconnects without logging off — the session remains running on the server and can be reconnected. Key fields: User, SessionID, and Address (source IP of the disconnecting client). A session in the disconnected state is still accessible via the console or a reconnecting RDP client. Monitor for long-lived disconnected sessions as they may persist attacker access.",
+      "category": "RDP Session",
+      "tags": [
+        "rdp",
+        "disconnect",
+        "remote-access",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 23,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 25,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate SessionID with EID 25 to detect reconnection to this disconnected session",
+          "Long-lived disconnected sessions with no subsequent EID 23 may indicate persistent attacker access",
+          "Address field captures the client IP at time of disconnect"
+        ],
+        "commonFalsePositives": [
+          "Network interruption causing unintended RDP disconnect",
+          "Users who close the RDP window without formally logging off"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 25,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+      "channel": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: Session reconnection succeeded",
+      "summary": "RDP client reconnected to an existing disconnected session.",
+      "details": "Generated when an RDP client successfully reconnects to a previously disconnected session (a session that was preserved after EID 24). Key fields: User, SessionID, and Address (source IP of the reconnecting client). Unlike EID 21 (new logon), EID 25 indicates resumption of an existing session without a fresh authentication. Monitor for reconnections from a different source IP than the original session to detect session hijacking or unauthorized access to abandoned sessions.",
+      "category": "RDP Session",
+      "tags": [
+        "rdp",
+        "reconnect",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 24,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Reconnections from a different IP than the original session (EID 24 Address) may indicate session hijacking",
+          "Correlate SessionID with EID 24 to determine how long the session was disconnected before reconnection"
+        ],
+        "commonFalsePositives": [
+          "Legitimate user reconnecting after a network drop",
+          "Admin resuming an existing session from a different workstation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 101,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Information",
+      "title": "RD Gateway service started",
+      "summary": "The Remote Desktop Gateway service started successfully.",
+      "details": "Generated when the Remote Desktop Gateway service starts. This event confirms the RD Gateway is operational. From a security monitoring perspective, unexpected restarts of the RD Gateway service — particularly outside maintenance windows or following configuration changes — may indicate tampering with the gateway infrastructure or a response to an attack. Correlate with System log EID 7036 (service state change) for the same service and with any preceding errors or configuration change events.",
+      "category": "RD Gateway Service",
+      "tags": [
+        "rdp",
+        "gateway",
+        "service-start",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
+      ],
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753352(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 200,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Information",
+      "title": "RD Gateway connection authorized (CAP passed)",
+      "summary": "A user met the connection authorization policy and was permitted to connect through the RD Gateway.",
+      "details": "Generated when a user successfully passes the Connection Authorization Policy (CAP) evaluation at the RD Gateway. CAP controls who is allowed to connect through the gateway (authentication, group membership, device health). Key fields: Username, ClientAddress (external source IP), and the CAP name that was satisfied. This event represents successful external authentication to the RD Gateway and is the primary event for baselining who is accessing the gateway. Every EID 200 event should be expected — unexpected usernames, off-hours connections, or connections from unusual geographic locations or IP ranges warrant investigation. Correlate with EID 302 to confirm the user also reached an internal resource.",
+      "category": "RD Gateway Authorization",
+      "tags": [
+        "rdp",
+        "gateway",
+        "cap",
+        "authentication",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 201,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1133",
+          "techniqueName": "External Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Compare ClientAddress against known VPN egress IPs, corporate office IPs, and user's historical connection locations",
+          "Off-hours connections (outside business hours) from unfamiliar IPs for privileged accounts warrant immediate review",
+          "High volume of EID 200 events from a single ClientAddress across multiple usernames may indicate credential stuffing success"
+        ],
+        "commonFalsePositives": [
+          "Legitimate remote workers connecting from home or travel — ClientAddress will vary"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 201,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Error",
+      "title": "RD Gateway connection denied (CAP failed)",
+      "summary": "A user failed the connection authorization policy and was denied access through the RD Gateway.",
+      "details": "Generated when a user fails the Connection Authorization Policy evaluation at the RD Gateway. CAP failure can occur due to authentication failure (wrong credentials), lack of group membership in the allowed user group, or device health policy failure. Key fields: Username, ClientAddress (external source IP), and the reason for denial. This is the primary event for detecting brute-force and credential stuffing attacks against the RD Gateway from the internet. High volumes of EID 201 events from a single ClientAddress or targeting a single Username indicate an active attack. Unlike Security log EID 4625 (which logs failed logons on the internal host), EID 201 is logged on the gateway itself — visible before authentication reaches any internal system.",
+      "category": "RD Gateway Authorization",
+      "tags": [
+        "rdp",
+        "gateway",
+        "cap",
+        "authentication-failure",
+        "brute-force",
+        "credential-stuffing"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 301,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4625,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1110",
+          "techniqueName": "Brute Force",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1133",
+          "techniqueName": "External Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Count EID 201 events per ClientAddress per hour — thresholds above 10-20 per hour from one IP indicate automated spraying",
+          "Multiple usernames targeted from a single ClientAddress = credential spray; single username from multiple IPs = distributed brute-force",
+          "A sequence of EID 201 events followed by a single EID 200 from the same ClientAddress confirms a successful attack after failures"
+        ],
+        "commonFalsePositives": [
+          "Users with expired passwords or recently changed passwords attempting to connect before updating credentials",
+          "Misconfigured RD Gateway client software sending incorrect authentication material"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 204,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Error",
+      "title": "RD Gateway connection denied (NAP health policy failed)",
+      "summary": "A user was denied access through the RD Gateway because their device failed the Network Access Protection health policy.",
+      "details": "Generated when a user passes authentication but is denied access because their device fails the Network Access Protection (NAP) health policy check configured at the RD Gateway. NAP checks can enforce requirements such as firewall status, AV signature currency, OS patch level, or custom health validators. Key fields: Username, ClientAddress, and the health policy that failed. NAP failures can indicate a user is connecting from an unmanaged or out-of-compliance device. From a security perspective, this event can also flag compromised devices that have had security controls (AV, firewall) disabled — an attacker accessing a victim account from their own device will fail NAP checks enforced by the organization.",
+      "category": "RD Gateway Authorization",
+      "tags": [
+        "rdp",
+        "gateway",
+        "nap",
+        "health-policy",
+        "device-compliance"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 201,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1133",
+          "techniqueName": "External Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Identify the health policy that failed — AV disabled or firewall off on a remote device is a significant indicator",
+          "Correlate the Username with the device the user normally connects from — a NAP failure from a new device may indicate account compromise",
+          "Repeated NAP failures followed by a NAP success from the same ClientAddress may indicate policy bypass attempts"
+        ],
+        "commonFalsePositives": [
+          "Legitimate users connecting from personal or unmanaged devices not enrolled in MDM",
+          "Devices with temporarily expired AV signatures or pending Windows updates"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc727350(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 261,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Listener RDP-Tcp received a connection",
+      "summary": "RDP listener received an inbound TCP connection.",
+      "details": "Generated when the RDP listener (RDP-Tcp) accepts an inbound TCP connection on the target host. This is the earliest indicator in the RemoteConnectionManager log that a connection attempt is in progress — it fires before authentication. The event records the source IP of the connecting client. Because it precedes authentication, it will be generated for both successful and failed connection attempts; correlate with EID 1149 on the same source IP to confirm authentication succeeded.",
+      "category": "RDP Connection",
+      "tags": [
+        "rdp",
+        "network",
+        "remote-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1149,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1158,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate source IP with EID 1149 to confirm the connection resulted in successful authentication",
+          "EID 261 without a subsequent EID 1149 from the same IP may indicate a port scan, failed NLA negotiation, or brute-force attempt"
+        ],
+        "commonFalsePositives": [
+          "Legitimate RDP connections from admin hosts",
+          "RDP health checks from monitoring infrastructure"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 301,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Error",
+      "title": "RD Gateway resource access denied (RAP failed)",
+      "summary": "A user passed connection authorization but was denied access to the requested internal resource by the resource authorization policy.",
+      "details": "Generated when a user passes the CAP (connection authorization) but is denied access to a specific internal resource by the Resource Authorization Policy (RAP). RAP controls which internal hosts a user is permitted to reach through the gateway — limiting lateral movement potential even for authenticated users. Key fields: Username, ClientAddress, and the internal resource (TargetServer) that was denied. EID 301 is significant because it logs the specific internal host the user attempted to reach, making it a reconnaissance and lateral movement detection event. An attacker who has compromised an account and authenticated through the gateway (EID 200) may then attempt to reach internal hosts beyond their authorized scope, generating EID 301.",
+      "category": "RD Gateway Authorization",
+      "tags": [
+        "rdp",
+        "gateway",
+        "rap",
+        "lateral-movement",
+        "resource-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 302,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetServer reveals which internal host was probed — attempts to reach domain controllers, file servers, or security tools by non-privileged accounts are critical",
+          "A sequence of EID 200 (CAP pass) → multiple EID 301 (RAP denies to different hosts) from the same session indicates internal reconnaissance via the gateway",
+          "Compare TargetServer against the user's role — accessing systems outside their normal work scope warrants review"
+        ],
+        "commonFalsePositives": [
+          "Users who have legitimate access to a system but the RAP was not updated to include their new access requirement",
+          "IT administrators testing connectivity to new systems before RAP policies are updated"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775279(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 302,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-Gateway",
+      "channel": "Microsoft-Windows-TerminalServices-Gateway/Operational",
+      "level": "Information",
+      "title": "RD Gateway resource connection succeeded (RAP passed)",
+      "summary": "A user passed the resource authorization policy and successfully connected to an internal resource through the RD Gateway.",
+      "details": "Generated when a user passes both the CAP (EID 200) and the RAP, and successfully establishes a connection to an internal resource through the gateway. This is the end-to-end success event: the user authenticated, was authorized by connection policy, authorized by resource policy, and reached their destination host. Key fields: Username, ClientAddress (external source IP), and TargetServer (the internal host reached). This event pair — EID 200 + EID 302 — is the primary baseline for RD Gateway activity. Every session should produce both. Anomalies: unexpected TargetServer values, connections outside business hours, or new ClientAddress IPs for a user all warrant investigation.",
+      "category": "RD Gateway Authorization",
+      "tags": [
+        "rdp",
+        "gateway",
+        "rap",
+        "remote-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 200,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 301,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1133",
+          "techniqueName": "External Remote Services",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetServer identifies which internal host was accessed — combine with TerminalServices-LocalSessionManager EID 21 on the target host to confirm session establishment",
+          "Build a baseline of {Username → TargetServer} pairs; connections to new TargetServers for an account indicate scope expansion",
+          "ClientAddress pivot: the same external IP connecting as multiple different users is a strong credential sharing or compromise indicator"
+        ],
+        "commonFalsePositives": [
+          "Legitimate remote work generating connections outside normal business hours",
+          "IT staff accessing multiple servers through the gateway during incident response"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775263(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-04"
+    },
+    {
+      "id": 1024,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RDPClient",
+      "channel": "Microsoft-Windows-TerminalServices-RDPClient/Operational",
+      "level": "Information",
+      "title": "RDP ClientActiveX is trying to connect to the server",
+      "summary": "Outbound RDP connection attempt initiated from this host.",
+      "details": "Generated on the source (client) machine when an outbound RDP connection attempt is initiated. Key field: server (the target hostname or IP address). This is a source-side artifact — it records where this machine connected to, making it critical for tracing lateral movement chains. During an investigation of a compromised host, EID 1024 entries reveal which other systems were targeted for RDP from this machine. Correlate the target value with LocalSessionManager EID 21 on the destination host to confirm the connection was successful.",
+      "category": "RDP Client",
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1025,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1102,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "The server field identifies the RDP target — pivot to that host's LocalSessionManager and RemoteConnectionManager logs",
+          "Multiple EID 1024 entries to different targets from the same host indicate lateral movement",
+          "Correlate timestamp with LocalSessionManager EID 21 on the target host to confirm a successful session was established"
+        ],
+        "commonFalsePositives": [
+          "Legitimate admin activity from IT or helpdesk machines",
+          "Jump server connections to managed endpoints"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1025,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RDPClient",
+      "channel": "Microsoft-Windows-TerminalServices-RDPClient/Operational",
+      "level": "Information",
+      "title": "RDP ClientActiveX has been disconnected",
+      "summary": "Outbound RDP session ended or was disconnected.",
+      "details": "Generated on the source (client) machine when an RDP session is disconnected. Key fields: server (the target host) and the disconnect reason code. Common reason codes: 0 (local disconnect/user closed), 1 (remote disconnection by server), 2 (transport-level error), 3 (connection lost/network issue), 260 (DNS name lookup failed). Correlate with EID 1024 to calculate the session duration and determine whether the disconnect was user-initiated or unexpected.",
+      "category": "RDP Client",
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1024,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1102,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pair with EID 1024 using the server field to calculate session duration",
+          "Reason code 2 or 3 (transport error / network loss) may indicate the connection was forcibly terminated",
+          "Reason code 260 (DNS failure) following EID 1024 indicates the target hostname did not resolve"
+        ],
+        "commonFalsePositives": [
+          "Normal end-of-session disconnects by legitimate users"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1102,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RDPClient",
+      "channel": "Microsoft-Windows-TerminalServices-RDPClient/Operational",
+      "level": "Information",
+      "title": "The client has initiated a multi-transport connection to the server",
+      "summary": "RDP multi-transport connection established; target IP recorded.",
+      "details": "Generated on the source (client) machine when an RDP multi-transport connection is initiated. Key field: server (IP address of the target). Unlike EID 1024 which may contain a hostname, EID 1102 typically records the resolved IP address, making it useful for cases where EID 1024 only logged a hostname. Not generated for all RDP connections — depends on whether multi-transport (UDP or additional TCP channels) is negotiated. Correlate with EID 1024 to link hostname to IP when both events are present.",
+      "category": "RDP Client",
+      "tags": [
+        "rdp",
+        "lateral-movement",
+        "remote-access",
+        "network"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 1024,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1025,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Use the IP address in the server field when EID 1024 only recorded a hostname — helps correlate with network logs",
+          "Not all RDP sessions generate this event — absence does not rule out an RDP connection",
+          "Correlate IP with network flow data or firewall logs to confirm the connection"
+        ],
+        "commonFalsePositives": [
+          "Any legitimate RDP session that uses multi-transport"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1149,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services: User authentication succeeded",
+      "summary": "RDP user authentication succeeded; source IP recorded.",
+      "details": "Generated on the target host when a user successfully authenticates to RDP, including via Network Level Authentication (NLA). Key fields: Param1 (username), Param2 (domain), Param3 (source IP address of the client). This event is one of the most valuable for RDP forensics because it captures the source IP even when NLA is used and the connection precedes an interactive logon. The absence of a domain (Param2 is blank) may indicate a local account logon. Correlate with LocalSessionManager EID 21 using username and timestamp to confirm the session was fully established.",
+      "category": "RDP Authentication",
+      "tags": [
+        "rdp",
+        "authentication",
+        "lateral-movement",
+        "remote-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 261,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1158,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 21,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 4624,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Pivot on Param3 (source IP) to identify the origin of the RDP connection",
+          "Blank Param2 (domain) indicates a local account; non-blank indicates a domain account",
+          "Correlate Param1 (username) and timestamp with LocalSessionManager EID 21 to confirm session establishment",
+          "EID 1149 without a subsequent LocalSessionManager EID 21 may indicate authentication succeeded but the session was not fully initialized"
+        ],
+        "commonFalsePositives": [
+          "Legitimate admin or user RDP sessions",
+          "Jump server or bastion host activity"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 1158,
+      "log": "TerminalServices",
+      "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+      "channel": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+      "level": "Information",
+      "title": "Remote Desktop Services accepted a new TCP connection from client",
+      "summary": "RDP service accepted and assigned an incoming TCP connection.",
+      "details": "Generated when the Remote Desktop Services stack accepts a new inbound TCP connection and assigns it to a connection handler. Key field: ClientIP (source IP and ephemeral port of the connecting client, e.g., 192.168.1.10:54321). This event fires in the same flow as EID 261 but is generated by a different component and provides the full IP:port tuple. Useful for correlating RDP traffic to network flow logs. Correlate with EID 1149 on the same source IP to confirm authentication was completed.",
+      "category": "RDP Connection",
+      "tags": [
+        "rdp",
+        "network",
+        "remote-access",
+        "lateral-movement"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 261,
+          "log": "TerminalServices"
+        },
+        {
+          "id": 1149,
+          "log": "TerminalServices"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1021.001",
+          "techniqueName": "Remote Services: Remote Desktop Protocol",
+          "tactics": [
+            {
+              "tacticId": "TA0008",
+              "tacticName": "Lateral Movement"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ClientIP field includes the ephemeral port — strip the port to get the source IP for correlation with EID 1149",
+          "Cross-reference source IP with network flow data (e.g., firewall or NetFlow logs) to build a full connection picture"
+        ],
+        "commonFalsePositives": [
+          "Legitimate RDP connections",
+          "Network scanner probing TCP 3389"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-03-29"
+    }
+  ]
+}
