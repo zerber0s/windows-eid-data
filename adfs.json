@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Federation Services",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/adfs.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
