@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows OpenSSH Server",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/openssh.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "SSH authentication event",
       "summary": "The Windows OpenSSH server processed an authentication or session lifecycle event — accepted, failed, or session open/close.",
-      "details": "The Windows built-in OpenSSH server (available since Windows 10 1809 / Server 2019 as an optional feature) logs all authentication and session events to the Application log under the source 'OpenSSH SSH Server', all sharing EID 4. The event sub-type is determined by the message text:\n\n**Accepted publickey**: Public key authentication succeeded. Message format: 'Accepted publickey for <user> from <ip> port <port> ssh2: <keytype> <fingerprint>'. Unexpected key fingerprints (not matching your authorized_keys inventory) are high-confidence IOCs indicating a backdoored authorized_keys file or a stolen private key.\n\n**Accepted password**: Password authentication succeeded. Message format: 'Accepted password for <user> from <ip> port <port> ssh2'. Password auth should be disabled (PasswordAuthentication no in sshd_config) on hardened hosts; its presence indicates misconfiguration or deliberate re-enablement by an attacker.\n\n**Failed password / publickey**: Authentication failed. Message format: 'Failed password for <user> from <ip> port <port> ssh2' or 'Failed publickey for...'. High volume from a single source IP or against multiple usernames indicates brute-force or credential spray. 'Invalid user <username>' prefix indicates the username does not exist on the system.\n\n**Session opened**: A shell or subsystem session started post-authentication. Message format: 'session opened for user <user> by (uid=0)'. Marks the beginning of interactive or SFTP session activity.\n\n**Session closed**: Session ended. Message format: 'session closed for user <user>'. Pair with session opened to calculate session duration. Very short sessions (seconds) may indicate scripted command execution or C2 check-ins.\n\nNote: All sub-types share EID 4 in the Application log. Parse the message field to extract the sub-type, source IP, username, and authentication method. The source IP is the critical pivot for lateral movement and external access investigation.",
+      "details": "Logged by the OpenSSH SSH Server provider in the Application log for all SSH authentication and session lifecycle events. All sub-types share EID 4; the specific event is identified by parsing the Message field. Sub-types: 'Accepted publickey', 'Accepted password', 'Failed password', 'Failed publickey', 'session opened for user <user>', and 'session closed for user <user>'. Key field: Message (contains sub-type, username, source IP, port, and authentication method — parse to extract all individual values). 'Invalid user <username>' prefix on a failed event indicates the username does not exist on the system.",
       "category": "Remote Access",
       "tags": [
         "ssh",
