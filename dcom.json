@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DCOM",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dcom.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -85,6 +85,9 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/application-management/dcom-errors-troubleshoot"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "param1",
@@ -195,6 +198,9 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/application-management/dcom-errors-troubleshoot"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "param1",
@@ -305,6 +311,9 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/application-management/dcom-errors-troubleshoot"
       },
       "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "param3",
@@ -412,6 +421,9 @@
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/application-management/dcom-errors-troubleshoot"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "param1",

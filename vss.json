@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Volume Shadow Copy Service",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/vss.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -87,6 +87,9 @@
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",
@@ -178,6 +181,9 @@
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",
@@ -282,6 +288,9 @@
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",
@@ -371,6 +380,9 @@
         "url": "https://learn.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service"
       },
       "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",

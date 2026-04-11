@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "EID Quick Reference - User Account Control",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "generatedAt": "2026-04-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/uac.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
@@ -99,6 +99,9 @@
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works"
       },
       "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "ExePath",
@@ -206,6 +209,9 @@
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works"
       },
       "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "ExePath",
@@ -312,6 +318,9 @@
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works"
       },
       "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",
@@ -421,6 +430,9 @@
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works"
       },
       "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
       "keyFields": [
         {
           "name": "Message",
