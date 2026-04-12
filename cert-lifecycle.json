@@ -1,0 +1,480 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Certificate Services Client Lifecycle",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/cert-lifecycle.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 1003,
+      "log": "CertLifecycle",
+      "provider": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User",
+      "channel": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational",
+      "level": "Information",
+      "title": "Certificate enrollment initiated",
+      "summary": "The Certificate Services client initiated auto-enrollment for a certificate.",
+      "details": "Generated when the Certificate Services client begins the auto-enrollment process for a certificate template. Auto-enrollment fires when a user logs on or Group Policy refreshes and the client determines that a certificate matching an assigned template is not yet present in the user's certificate store. Key fields: the certificate template name and the requesting user context. This event is the client-side counterpart to the CA-side Security EID 4886 (certificate request received). In ADCS attack detection, EID 1003 establishes the baseline of normal auto-enrollment activity per user and template — unexpected enrollment initiations for sensitive templates (authentication, code signing, EFS) from users who do not normally use those templates may indicate an ESC exploitation attempt. Correlate with EID 1004 (enrollment succeeded) or EID 1005 (enrollment failed) to determine the outcome.",
+      "category": "Certificate Lifecycle",
+      "tags": ["certificate", "auto-enrollment", "pki", "adcs"],
+      "relatedEventIds": [
+        {
+          "id": 1004,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1005,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CertificateServicesClient-Lifecycle-User/Operational log is disabled by default and must be enabled on endpoints.",
+          "command": "wevtutil sl Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational /e:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Certificate template name is the primary pivot — enrollment initiation for templates with Client Authentication or Smart Card Logon EKU by accounts that should not be enrolling in those templates is suspicious",
+          "Correlate the requesting user context with EID 4624 logon type — auto-enrollment via a type 3 (network) logon is anomalous and may indicate credential relay or automated ADCS exploitation",
+          "Correlate with CA-side Security EID 4886 using the template name and timestamp to verify the request reached the CA"
+        ],
+        "commonFalsePositives": [
+          "Normal certificate auto-enrollment that fires at every logon for users assigned certificate templates via Group Policy",
+          "MDM-managed devices enrolling device certificates as part of attestation workflows"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-propagation-service"
+      },
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TemplateName",
+          "xpath": "EventData/Data[@Name='TemplateName']",
+          "description": "The certificate template being requested; sensitive templates (Client Authentication, Code Signing, EFS Recovery) are highest priority"
+        },
+        {
+          "name": "SubjectName",
+          "xpath": "EventData/Data[@Name='SubjectName']",
+          "description": "The subject name being requested in the certificate; a subject UPN different from the logged-on user is an ESC1 indicator"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 1004,
+      "log": "CertLifecycle",
+      "provider": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User",
+      "channel": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational",
+      "level": "Information",
+      "title": "Certificate issued and installed",
+      "summary": "A certificate was successfully issued by the CA and installed into the user's certificate store.",
+      "details": "Generated when the Certificate Services client successfully receives an issued certificate from the CA and installs it into the user's certificate store. This is the client-side confirmation of a successful certificate issuance — the CA-side confirmation is Security EID 4887 (certificate issued). Key fields: certificate template name, thumbprint, subject name, subject alternative name(s), issuing CA, and validity period. From a DFIR perspective, this event establishes the endpoint record of certificate installation. Correlate EID 1004 with CA EID 4887 using the thumbprint to complete the certificate lifecycle chain. An unexpected certificate with a Client Authentication or Smart Card Logon EKU installed into the user store — especially for a template the user was not assigned — confirms a successful ADCS ESC exploitation. The thumbprint from this event can be used to track subsequent PKINIT authentications via KDC EID 27.",
+      "category": "Certificate Lifecycle",
+      "tags": ["certificate", "issuance", "pki", "adcs", "credential-access"],
+      "relatedEventIds": [
+        {
+          "id": 1003,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1006,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        },
+        {
+          "id": 27,
+          "log": "KDC"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1552.004",
+          "techniqueName": "Unsecured Credentials: Private Keys",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CertificateServicesClient-Lifecycle-User/Operational log is disabled by default and must be enabled on endpoints.",
+          "command": "wevtutil sl Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational /e:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Certificate thumbprint is the primary correlation key — use it to link this event to CA EID 4887, KDC EID 27 (PKINIT success), and subsequent Kerberos authentication events",
+          "Subject Alternative Name (SAN) containing a different UPN than the user who received the certificate is a definitive ESC1 indicator",
+          "Certificates with Client Authentication or Smart Card Logon EKU installed for accounts or on machines where certificate-based authentication is not expected warrant immediate review",
+          "Validity period: unusually long certificate validity (years rather than months) may indicate a persistence certificate intended for long-term use"
+        ],
+        "commonFalsePositives": [
+          "Normal certificate auto-enrollment completing successfully for users with assigned templates",
+          "Device certificates issued during Azure AD Join or Hybrid Join enrollment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-propagation-service"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Certificate with Authentication EKU Installed for Unexpected Account",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-CertificateServicesClient-Lifecycle-User\"\n| where EventID == 1004\n| where RenderedDescription has_any (\"Client Authentication\", \"Smart Card Logon\", \"KDC Authentication\")\n| project TimeGenerated, Computer, UserName, RenderedDescription\n| order by TimeGenerated desc",
+          "notes": "Filter on templates with authentication EKU. Correlate with CA EID 4887 using certificate thumbprint to identify the requester and template used."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Certificate Installed on Endpoint",
+          "rule": "title: Certificate Installed on Endpoint\nstatus: experimental\nlogsource:\n    product: windows\n    service: certificateservicesclient-lifecycle-user\ndetection:\n    selection:\n        EventID: 1004\n    condition: selection\nfalsepositives:\n    - Normal certificate auto-enrollment completions\n    - MDM device certificate enrollments\nlevel: informational",
+          "notes": "Increase to high if the certificate contains a SAN UPN different from the requesting user or has an authentication EKU outside of expected templates."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Thumbprint",
+          "xpath": "EventData/Data[@Name='Thumbprint']",
+          "description": "SHA-1 thumbprint of the installed certificate; primary correlation key to CA EID 4887 and KDC EID 27"
+        },
+        {
+          "name": "SubjectName",
+          "xpath": "EventData/Data[@Name='SubjectName']",
+          "description": "Subject name of the issued certificate; a SAN containing another user's UPN confirms ESC1 exploitation"
+        },
+        {
+          "name": "TemplateName",
+          "xpath": "EventData/Data[@Name='TemplateName']",
+          "description": "Certificate template used; authentication templates (Client Authentication, Smart Card Logon) are highest priority for ADCS abuse detection"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 1005,
+      "log": "CertLifecycle",
+      "provider": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User",
+      "channel": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational",
+      "level": "Error",
+      "title": "Certificate auto-enrollment failed",
+      "summary": "The Certificate Services client failed to complete certificate auto-enrollment.",
+      "details": "Generated when certificate auto-enrollment fails on the client side. Key fields: certificate template name, error code, and the reason for failure. Common failure causes include: the user lacks enrollment permissions for the template, the CA is unavailable, the certificate request was denied by the CA (generates CA-side EID 4888), or a certificate policy module rejected the request. From a DFIR perspective, repeated EID 1005 failures for authentication templates from an unexpected account context may indicate an attacker probing ADCS enrollment permissions or attempting to exploit a misconfigured template that is denying requests due to a policy guard. Correlate with CA-side EID 4888 (request denied) for the full request-to-denial chain.",
+      "category": "Certificate Lifecycle",
+      "tags": ["certificate", "auto-enrollment", "failure", "pki", "adcs"],
+      "relatedEventIds": [
+        {
+          "id": 1003,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1004,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CertificateServicesClient-Lifecycle-User/Operational log is disabled by default and must be enabled on endpoints.",
+          "command": "wevtutil sl Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational /e:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Error code identifies why enrollment failed — access denied errors from an account that should have enrollment rights may indicate template permission tampering",
+          "Repeated failures for the same template from the same user across multiple machines may indicate an attacker iterating through enrollment endpoints looking for one where the policy guard is misconfigured",
+          "Correlate with CA EID 4888 (denied) to determine whether the request reached the CA and was denied there, or failed before submission"
+        ],
+        "commonFalsePositives": [
+          "Users without enrollment permissions for a template that is assigned to their OU via Group Policy but not their specific account",
+          "CA availability issues causing transient enrollment failures that resolve automatically",
+          "Certificate template version mismatches between the client and CA"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-propagation-service"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TemplateName",
+          "xpath": "EventData/Data[@Name='TemplateName']",
+          "description": "The certificate template for which enrollment failed"
+        },
+        {
+          "name": "ErrorCode",
+          "xpath": "EventData/Data[@Name='ErrorCode']",
+          "description": "Numeric error code indicating why enrollment failed; access denied codes warrant investigation of template permissions"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 1006,
+      "log": "CertLifecycle",
+      "provider": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User",
+      "channel": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational",
+      "level": "Information",
+      "title": "Certificate removed from the certificate store",
+      "summary": "A certificate was removed from the user's certificate store.",
+      "details": "Generated when a certificate is removed from the user's certificate store. Key fields: certificate thumbprint, subject name, issuer, and the reason for removal (e.g., expiry, manual deletion, superseded by renewal). Certificate removal events can indicate: (1) attacker cleanup — removing a certificate that was used for authentication after an ESC attack to destroy evidence; (2) defensive response — security tooling or an incident responder removing a malicious certificate; (3) legitimate renewal — an expiring certificate being replaced by a new one. Correlate EID 1006 with EID 1004 using the thumbprint to establish the full install-to-removal lifecycle. A certificate that was installed via an unexpected template (flagged by EID 1004) and then removed shortly after a PKINIT authentication (KDC EID 27) is strong evidence of ADCS exploitation followed by cleanup.",
+      "category": "Certificate Lifecycle",
+      "tags": ["certificate", "removal", "pki", "adcs", "defense-evasion"],
+      "relatedEventIds": [
+        {
+          "id": 1004,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1003,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 27,
+          "log": "KDC"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CertificateServicesClient-Lifecycle-User/Operational log is disabled by default and must be enabled on endpoints.",
+          "command": "wevtutil sl Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational /e:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Thumbprint links EID 1006 to EID 1004 (installation) and KDC EID 27 (PKINIT use) — a certificate installed, used for Kerberos authentication, and then removed is a strong ESC attack and cleanup pattern",
+          "Time between EID 1004 (installed) and EID 1006 (removed) — a very short window (minutes to hours) indicates intentional cleanup rather than expiry-driven removal",
+          "Reason for removal: manual deletion by an unexpected process or user context is more suspicious than expiry-driven removal"
+        ],
+        "commonFalsePositives": [
+          "Normal certificate lifecycle — expired certificates being automatically removed from the store",
+          "Certificate renewal replacing an expiring certificate with a new one (generates 1004 followed by 1006 for the old cert)",
+          "Security tooling revoking and removing certificates as part of an automated response"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-propagation-service"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Certificate Installed and Removed in Short Window",
+          "rule": "let Installed = Event\n| where Source == \"Microsoft-Windows-CertificateServicesClient-Lifecycle-User\" and EventID == 1004\n| parse RenderedDescription with * \"Thumbprint: \" Thumbprint \"\\n\" *\n| project Thumbprint, InstallTime = TimeGenerated, Computer, UserName;\nEvent\n| where Source == \"Microsoft-Windows-CertificateServicesClient-Lifecycle-User\" and EventID == 1006\n| parse RenderedDescription with * \"Thumbprint: \" Thumbprint \"\\n\" *\n| project Thumbprint, RemoveTime = TimeGenerated\n| join kind=inner Installed on Thumbprint\n| where RemoveTime - InstallTime < 1h\n| project Computer, UserName, Thumbprint, InstallTime, RemoveTime",
+          "notes": "Certificates installed and removed within an hour indicate intentional cleanup rather than normal lifecycle management. Correlate Thumbprint with KDC EID 27 to confirm whether the certificate was used for Kerberos authentication in the same window."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Certificate Removed from User Store",
+          "rule": "title: Certificate Removed from User Store\nstatus: experimental\nlogsource:\n    product: windows\n    service: certificateservicesclient-lifecycle-user\ndetection:\n    selection:\n        EventID: 1006\n    condition: selection\nfalsepositives:\n    - Normal certificate expiry and renewal cycles\n    - Automated certificate management tools\nlevel: low",
+          "notes": "Increase to high when Thumbprint matches a certificate previously flagged as suspicious in EID 1004, or when the removal follows closely after a KDC EID 27 (PKINIT success)."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Thumbprint",
+          "xpath": "EventData/Data[@Name='Thumbprint']",
+          "description": "SHA-1 thumbprint of the removed certificate; primary correlation key to EID 1004 (installation) and KDC EID 27 (PKINIT use)"
+        },
+        {
+          "name": "SubjectName",
+          "xpath": "EventData/Data[@Name='SubjectName']",
+          "description": "Subject name of the removed certificate"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 20,
+      "log": "CertLifecycle",
+      "provider": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User",
+      "channel": "Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational",
+      "level": "Warning",
+      "title": "Certificate is expiring soon",
+      "summary": "A certificate in the user's store is approaching its expiration date.",
+      "details": "Generated when the Certificate Services client detects that a certificate in the user's store is nearing its expiration date and triggers an auto-renewal attempt or notification. Key fields: certificate thumbprint, subject name, issuer, and expiration date. While primarily a certificate management health event, EID 20 has forensic utility: an expiration warning for a certificate that was not previously observed in EID 1003/1004 events (i.e., it was installed outside of normal auto-enrollment) indicates a certificate that may have been manually imported or installed by an attacker. Correlate with EID 1004 to verify whether the certificate's installation was logged. A certificate present in the store with no corresponding EID 1004 may indicate it was imported directly (e.g., from a stolen PFX file) rather than enrolled through normal channels.",
+      "category": "Certificate Lifecycle",
+      "tags": ["certificate", "expiry", "pki", "anomaly-detection"],
+      "relatedEventIds": [
+        {
+          "id": 1003,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1004,
+          "log": "CertLifecycle"
+        },
+        {
+          "id": 1006,
+          "log": "CertLifecycle"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1552.004",
+          "techniqueName": "Unsecured Credentials: Private Keys",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The CertificateServicesClient-Lifecycle-User/Operational log is disabled by default and must be enabled on endpoints.",
+          "command": "wevtutil sl Microsoft-Windows-CertificateServicesClient-Lifecycle-User/Operational /e:true"
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Certificate with no corresponding EID 1003/1004 in the log history indicates it was imported rather than enrolled — review how the certificate arrived in the store",
+          "Expiration date pivot: certificates expiring in the near future with authentication EKU that were not enrolled through auto-enrollment should be inventoried and reviewed",
+          "Issuer pivot: expiration warnings for certificates from unknown or non-enterprise CAs indicate certificates imported from external sources"
+        ],
+        "commonFalsePositives": [
+          "Normal certificate expiry notifications for legitimately enrolled certificates approaching renewal time",
+          "Smart card and Windows Hello for Business certificates nearing their validity end date"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-propagation-service"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "Thumbprint",
+          "xpath": "EventData/Data[@Name='Thumbprint']",
+          "description": "SHA-1 thumbprint of the expiring certificate; use to check for a corresponding EID 1004 installation event"
+        },
+        {
+          "name": "ExpirationDate",
+          "xpath": "EventData/Data[@Name='ExpirationDate']",
+          "description": "The date on which the certificate expires; long-lived certificates (years) imported outside of auto-enrollment are suspicious"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    }
+  ]
+}

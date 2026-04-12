@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Security",
-    "version": "1.13.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.14.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -685,6 +685,181 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 4658,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A handle to an object was closed",
+      "summary": "An open object handle was closed, completing the handle lifecycle.",
+      "details": "Generated when a handle opened with auditing (EID 4656) is closed. Completes the 4656 (handle opened) → 4663 (object accessed) → 4658 (handle closed) lifecycle chain critical for LSASS credential-dumping detection. In LSASS-dump scenarios the sequence is: 4656 (handle to lsass.exe requested with PROCESS_VM_READ), 4663 (memory read performed), 4658 (handle closed). Without 4658 the handle lifecycle is incomplete and the time window of access cannot be determined. Key fields: HandleId (links to the matching 4656), SubjectUserName, ProcessId, and ObjectType. This event is generated for every audited handle close and can be high volume if object access auditing is broadly enabled — focus monitoring on HandleId values that appeared in 4656 events on sensitive objects (lsass.exe, SAM, NTDS).",
+      "category": "Object Access",
+      "tags": [
+        "handle",
+        "object-access",
+        "lsass",
+        "credential-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        },
+        {
+          "id": 4690,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.001",
+          "techniqueName": "OS Credential Dumping: LSASS Memory",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Handle Manipulation must be enabled under Advanced Audit Policy > Object Access. The target object must also have a SACL configured to audit handle open/close operations."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Link HandleId to EID 4656 to determine which object the handle was opened on — LSASS, SAM database, or NTDS are highest priority",
+          "Calculate the time between EID 4656 (open) and EID 4658 (close) to determine how long access was held",
+          "Presence of EID 4663 between the matching 4656 and 4658 events confirms that actual access (read/write) occurred during the open window"
+        ],
+        "commonFalsePositives": [
+          "Every legitimate handle close on objects with SACL auditing configured — extremely high volume in environments with broad object access auditing"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4658"
+      },
+      "volumeIndicator": "high",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "HandleId",
+          "xpath": "EventData/Data[@Name='HandleId']",
+          "description": "Handle identifier — correlate with EID 4656 HandleId to identify which object was opened and then closed"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that closed the handle"
+        },
+        {
+          "name": "ProcessId",
+          "xpath": "EventData/Data[@Name='ProcessId']",
+          "description": "Process that held and released the handle; cross-reference with EID 4688 ProcessId for process identification"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 4660,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An object was deleted",
+      "summary": "An audited file, registry key, or other object was deleted.",
+      "details": "Generated when a file, registry key, or other auditable object is deleted, provided the object has a SACL granting audit access on the DELETE operation. Completes the object access triad alongside EID 4656 (handle opened) and EID 4663 (access performed). Key fields: HandleId (links to the matching 4656), SubjectUserName, ObjectType, and ProcessId. DFIR relevance: attackers deleting evidence files, removing registry persistence keys, or wiping staging areas will generate this event if the targeted objects have SACLs. Note that HandleId links to the earlier 4656 event that identifies ObjectName, since EID 4660 itself does not include the object path.",
+      "category": "Object Access",
+      "tags": [
+        "file-access",
+        "object-access",
+        "defense-evasion",
+        "indicator-removal"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        },
+        {
+          "id": 4658,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070.004",
+          "techniqueName": "Indicator Removal: File Deletion",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1112",
+          "techniqueName": "Modify Registry",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Object Access must be enabled under Advanced Audit Policy. The target object must have a SACL configured to audit DELETE access operations."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "HandleId must be correlated with EID 4656 to retrieve ObjectName — EID 4660 alone does not include the deleted object's path",
+          "SubjectUserName and ProcessId identify who deleted the object and what process performed the deletion",
+          "Deletion of objects in sensitive paths (\\Registry\\Machine\\SYSTEM, staging temp directories) shortly after creation is a strong indicator of attacker cleanup"
+        ],
+        "commonFalsePositives": [
+          "Normal file and registry deletions on objects with broad SACL configurations — filter by sensitive paths to reduce noise"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4660"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "HandleId",
+          "xpath": "EventData/Data[@Name='HandleId']",
+          "description": "Correlate with EID 4656 to retrieve ObjectName — EID 4660 does not include the object path"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that deleted the object"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4662,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -1225,6 +1400,108 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-07"
+    },
+    {
+      "id": 4690,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "An attempt was made to duplicate a handle to an object",
+      "summary": "A process attempted to duplicate an object handle into another process.",
+      "details": "Generated when a handle to an object is duplicated from one process into another, provided Audit Handle Manipulation is enabled. Key fields: SourceHandleId, SourceProcessId, TargetHandleId, TargetProcessId, and SubjectUserName. This event is a key indicator for LSASS credential-dumping techniques that use handle duplication rather than a direct process-open call. Tools like ProcDump and custom malware may obtain an LSASS handle by duplicating an existing handle from a trusted process (such as a security product or svchost.exe that already holds an LSASS handle), bypassing direct-open detection at EID 4656. The attack pattern: SourceProcessId is the trusted process with an existing LSASS handle; TargetProcessId is the attacker process. Correlate TargetProcessId with EID 4688 CommandLine to identify the receiving process.",
+      "category": "Credential Access",
+      "tags": [
+        "handle",
+        "lsass",
+        "credential-dumping",
+        "process-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        },
+        {
+          "id": 4658,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 10,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1003.001",
+          "techniqueName": "OS Credential Dumping: LSASS Memory",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Handle Manipulation must be enabled under Advanced Audit Policy > Object Access."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SourceProcessId and TargetProcessId are the critical fields — if either resolves to lsass.exe or the source handle maps to an LSASS object (per EID 4656), treat as a high-priority credential access indicator",
+          "Correlate TargetProcessId with EID 4688 to identify the receiving process's full command line and parent process",
+          "A non-security-product process duplicating a handle from LSASS is a strong ProcDump or manual-dump indicator — check SubjectUserName and the requesting process path against known tooling"
+        ],
+        "commonFalsePositives": [
+          "Security products and EDR agents that legitimately duplicate handles as part of process monitoring",
+          "Debugging tools duplicating handles for diagnostic purposes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4690"
+      },
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "LSASS Handle Duplication via Object Access Audit",
+          "rule": "title: LSASS Handle Duplication via Object Access Audit\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4690\n  condition: selection\nfalsepositives:\n  - Security products and EDR agents performing legitimate handle operations\n  - Debugging tools\nlevel: medium",
+          "notes": "Requires correlation with EID 4656 on lsass.exe to confirm LSASS involvement. Sysmon EID 10 (ProcessAccess with TargetImage lsass.exe) provides higher-fidelity detection for the same technique with less prerequisite configuration."
+        }
+      ],
+      "volumeIndicator": "medium",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SourceHandleId",
+          "xpath": "EventData/Data[@Name='SourceHandleId']",
+          "description": "Handle being duplicated — correlate with EID 4656 to identify the original object"
+        },
+        {
+          "name": "SourceProcessId",
+          "xpath": "EventData/Data[@Name='SourceProcessId']",
+          "description": "Process that currently holds the handle being duplicated"
+        },
+        {
+          "name": "TargetProcessId",
+          "xpath": "EventData/Data[@Name='TargetProcessId']",
+          "description": "Process receiving the duplicated handle — the likely attacker process; correlate with EID 4688"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
     },
     {
       "id": 4692,
@@ -1795,6 +2072,123 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 4701,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A scheduled task was disabled",
+      "summary": "A scheduled task was disabled.",
+      "details": "Generated every time a scheduled task is disabled. Key fields: SubjectUserName and TaskName. Attackers disable scheduled tasks to suppress security tool operations — common targets include Windows Defender definition update tasks, antivirus scan schedules, backup tasks, and security monitoring agents that rely on scheduled tasks for their update or health-check cycle. An unexpected task disablement, especially targeting tasks in \\Microsoft\\Windows\\Windows Defender\\ or security vendor paths, is a defense evasion indicator. Correlate with EID 4700 (task enabled) and Task Scheduler EID 200 (task action) to determine the before/after execution state.",
+      "category": "Defense Evasion",
+      "tags": [
+        "scheduled-task",
+        "defense-evasion",
+        "persistence"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4700,
+          "log": "Security"
+        },
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4699,
+          "log": "Security"
+        },
+        {
+          "id": 4702,
+          "log": "Security"
+        },
+        {
+          "id": 141,
+          "log": "TaskScheduler"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.001",
+          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Other Object Access Events must be enabled under Advanced Audit Policy > Object Access."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TaskName in \\Microsoft\\Windows\\Windows Defender\\ or security product paths is the highest-priority indicator",
+          "SubjectUserName identifies who disabled the task — unexpected accounts or service accounts performing this action are suspicious",
+          "Correlate with EID 4698 to review the task definition and determine whether the task was performing security-critical functions",
+          "Pair with EID 4700 re-enablement events to identify the window during which the task was suppressed"
+        ],
+        "commonFalsePositives": [
+          "IT administrators temporarily disabling tasks for maintenance or troubleshooting",
+          "Software update processes temporarily disabling and re-enabling their own tasks"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4701"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Security Tool Scheduled Task Disabled",
+          "rule": "SecurityEvent\n| where EventID == 4701\n| where TaskName has_any (\"Defender\", \"WindowsDefender\", \"MsMpEng\", \"Antivirus\", \"EDR\")\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, TaskName\n| order by TimeGenerated desc",
+          "notes": "Tune the has_any list to include your environment's security tool task names. All matches should be reviewed regardless of actor."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Disabled",
+          "rule": "title: Scheduled Task Disabled\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4701\n  condition: selection\nfalsepositives:\n  - IT administrators disabling tasks for maintenance\n  - Software update processes temporarily disabling their own tasks\nlevel: low",
+          "notes": "Increase to high when TaskName matches known security tool paths."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the disabled task; tasks in \\Microsoft\\Windows\\Windows Defender\\ or security product namespaces are highest priority"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "Account that disabled the task"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4702,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -2262,6 +2656,75 @@
       "lastReviewed": "2026-04-04"
     },
     {
+      "id": 4715,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "The audit policy (SACL) on an object was changed",
+      "summary": "The SACL governing auditing on a specific object was modified.",
+      "details": "Generated when the SACL (System Access Control List) portion of an object's security descriptor is changed, specifically when the auditing rules controlling which access operations generate audit events are modified. This is distinct from EID 4719 (system-wide audit policy change) and EID 4907 (auditing settings changed on an open handle): EID 4715 records direct changes to an object's SACL. Attackers with write permissions to an object may modify its SACL to remove auditing entries, preventing future access from generating EID 4656, 4663, or 4660. Key fields: SubjectUserName, ObjectName, ObjectType, OldSd (old security descriptor), and NewSd (new security descriptor). SACL removal from sensitive objects such as NTDS.dit, SAM, or LSASS may be a precursor to credential access operations.",
+      "category": "Defense Evasion",
+      "tags": [
+        "audit-policy",
+        "sacl",
+        "defense-evasion",
+        "tamper"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4719,
+          "log": "Security"
+        },
+        {
+          "id": 4907,
+          "log": "Security"
+        },
+        {
+          "id": 4656,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Policy Change > Audit Audit Policy Change must be enabled under Advanced Audit Policy."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ObjectName identifies which object's SACL was changed — changes to sensitive objects (lsass.exe, SAM database, NTDS.dit, privileged registry hives) are high priority",
+          "Compare OldSd and NewSd to determine what auditing entries were added or removed — removal of SACL entries is the attacker action",
+          "SACL changes outside change management windows or from unexpected accounts are suspicious"
+        ],
+        "commonFalsePositives": [
+          "Security policy tools (CIS, STIG) modifying SACLs to match a hardening baseline",
+          "Authorized IT changes to audit policy as part of approved configuration management"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4715"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4719,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -2689,6 +3152,83 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 4727,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A security-enabled global group was created",
+      "summary": "A new security-enabled global group was created.",
+      "details": "Generated when a security-enabled global group is created in Active Directory or locally. Global security groups are the primary group type for organizing users and assigning permissions within a domain. Attackers who establish a foothold in Active Directory may create new global security groups to aggregate compromised accounts, establish persistent privilege structures, or build a shadow administration infrastructure. Key fields: SubjectUserName (account that created the group), TargetUserName (new group name), and TargetSid (newly assigned SID). Correlate with subsequent EID 4728 events to detect rapid population of the newly created group.",
+      "category": "Group Management",
+      "tags": [
+        "group-created",
+        "active-directory",
+        "persistence",
+        "privilege-escalation"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4729,
+          "log": "Security"
+        },
+        {
+          "id": 4730,
+          "log": "Security"
+        },
+        {
+          "id": 4731,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1136",
+          "techniqueName": "Create Account",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4728 to detect rapid member additions immediately after group creation — a group created and immediately populated is a strong attacker persistence indicator",
+          "TargetUserName (group name) should be scrutinized for names that mimic legitimate built-in groups (e.g., 'Domain Admins ' with a trailing space, or Unicode lookalikes)",
+          "SubjectUserName creating groups outside of provisioning systems or during off-hours warrants review"
+        ],
+        "commonFalsePositives": [
+          "IT creating new security groups as part of role provisioning or project access management",
+          "Automated provisioning systems creating groups for application deployments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4728,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -2819,6 +3359,82 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 4730,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A security-enabled global group was deleted",
+      "summary": "A security-enabled global group was deleted.",
+      "details": "Generated when a security-enabled global group is deleted. Deletion may indicate attacker cleanup of a previously created persistence group, or a disruptive action targeting legitimate groups used by security tooling or service accounts. Key fields: SubjectUserName and TargetUserName (deleted group name). Correlate EID 4730 with EID 4727 to detect groups created and subsequently deleted within a short timeframe — a creation-then-deletion pattern is characteristic of attacker cleanup. Deletion of groups that service accounts or applications depend on for permissions causes downstream authentication failures.",
+      "category": "Defense Evasion",
+      "tags": [
+        "group-deleted",
+        "active-directory",
+        "defense-evasion"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4727,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4729,
+          "log": "Security"
+        },
+        {
+          "id": 4734,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4727 — groups created and deleted in a short window indicate attacker-created temporary groups being cleaned up",
+          "Deletion of groups that are referenced in Group Policy objects, service account configurations, or application roles causes downstream access failures — correlate with authentication failures (EID 4625)",
+          "SubjectUserName deleting groups outside of deprovisioning workflows should be reviewed"
+        ],
+        "commonFalsePositives": [
+          "IT deprovisioning project or temporary access groups after project completion",
+          "Automated provisioning systems removing groups during application decommissioning"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
     },
     {
       "id": 4731,
@@ -3498,6 +4114,90 @@
       "lastReviewed": "2026-04-02"
     },
     {
+      "id": 4754,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A security-enabled universal group was created",
+      "summary": "A new security-enabled universal group was created.",
+      "details": "Generated when a security-enabled universal group is created. Universal security groups can contain members from any domain in the forest and can be assigned permissions in any domain, making them the broadest-scope group type in Active Directory. Attacker-created universal groups may be used to establish persistent forest-wide privilege without appearing in domain-specific group membership reviews. Key fields: SubjectUserName and TargetUserName (new group name). Universal group creation by non-admin accounts or during off-hours is anomalous. Correlate with subsequent EID 4756 events to detect rapid population.",
+      "category": "Group Management",
+      "tags": [
+        "group-created",
+        "active-directory",
+        "persistence",
+        "privilege-escalation",
+        "forest"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4756,
+          "log": "Security"
+        },
+        {
+          "id": 4757,
+          "log": "Security"
+        },
+        {
+          "id": 4758,
+          "log": "Security"
+        },
+        {
+          "id": 4727,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1136",
+          "techniqueName": "Create Account",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Must be collected from a domain controller. Universal groups are only available in domain functional level Windows 2000 native mode or higher."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4756 to detect rapid member additions following group creation — forest-wide attacker groups populated immediately after creation indicate an established persistence structure",
+          "Universal group creation on a domain controller by a non-admin account is anomalous",
+          "Groups with names mimicking built-in forest-wide groups (e.g., 'Enterprise Admins' with Unicode lookalikes) should be investigated immediately"
+        ],
+        "commonFalsePositives": [
+          "IT creating universal groups for cross-domain resource access assignments",
+          "Application provisioning systems creating universal groups for multi-domain deployments"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4756,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -3624,6 +4324,149 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 4758,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A security-enabled universal group was deleted",
+      "summary": "A security-enabled universal group was deleted.",
+      "details": "Generated when a security-enabled universal group is deleted. Because universal groups span all domains in the forest, deletion of a widely-used universal group can cause broad authentication and access failures across the entire forest. Key fields: SubjectUserName and TargetUserName (deleted group name). Correlate with EID 4754 (group created) to detect creation-then-deletion cleanup patterns. Deletion of built-in universal groups such as Enterprise Admins is a critical indicator — these groups should never be deleted in production environments.",
+      "category": "Defense Evasion",
+      "tags": [
+        "group-deleted",
+        "active-directory",
+        "defense-evasion",
+        "forest"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4754,
+          "log": "Security"
+        },
+        {
+          "id": 4756,
+          "log": "Security"
+        },
+        {
+          "id": 4757,
+          "log": "Security"
+        },
+        {
+          "id": 4730,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1070",
+          "techniqueName": "Indicator Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1531",
+          "techniqueName": "Account Access Removal",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with EID 4754 — universal groups created and deleted in a short window indicate attacker infrastructure cleanup",
+          "Deletion of Enterprise Admins or equivalent forest-wide privileged groups is a critical indicator — these should never be deleted in production",
+          "SubjectUserName performing the deletion and the time of day are important pivot points"
+        ],
+        "commonFalsePositives": [
+          "IT deprovisioning cross-domain project groups after project completion",
+          "Forest restructuring operations removing universal groups as part of authorized consolidation"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 4764,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "A group's type was changed",
+      "summary": "The scope or type of an Active Directory group was modified.",
+      "details": "Generated when the type or scope of an Active Directory group is changed — for example, converting a distribution group to a security group, or changing a global group to a universal group. Group type conversions are a subtle privilege manipulation technique: attackers may convert a distribution group (which cannot be used for permission assignments) to a security group to make it usable in ACLs, or convert an existing global group to universal scope to enable forest-wide access. Key fields: SubjectUserName, TargetUserName (group name), and GroupTypeChange (shows old and new type values). The conversion of a distribution group containing privileged users into a security group is particularly high-risk as it silently grants those users new access rights corresponding to the group's ACL memberships.",
+      "category": "Privilege Escalation",
+      "tags": [
+        "group-management",
+        "privilege-escalation",
+        "active-directory"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4727,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        },
+        {
+          "id": 4754,
+          "log": "Security"
+        },
+        {
+          "id": 4756,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1098",
+          "techniqueName": "Account Manipulation",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "GroupTypeChange field shows what changed — distribution-to-security conversions are the highest-risk type as they enable new permission assignments",
+          "Pivot on TargetUserName and review current group membership (via EID 4728/4756) to identify who gains new access rights from the conversion",
+          "SubjectUserName and timing: group type changes by unexpected accounts or outside change management windows are suspicious"
+        ],
+        "commonFalsePositives": [
+          "IT converting groups as part of AD restructuring or migration projects",
+          "Administrative tools (e.g., Exchange, Azure AD Connect) converting group types as part of their provisioning workflows"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-security-group-management"
+      },
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "lastReviewed": "2026-04-11"
     },
     {
       "id": 4765,
@@ -4578,6 +5421,139 @@
       "lastReviewed": "2026-04-04"
     },
     {
+      "id": 4826,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Boot Configuration Data loaded",
+      "summary": "The Boot Configuration Data (BCD) store was loaded at system startup.",
+      "details": "Generated at every system boot when the Boot Configuration Data (BCD) store is loaded. The BCD store contains the boot configuration — boot entries, bootloader settings, and feature flags — that governs how the OS starts. This event is used to detect boot-level persistence and pre-OS tampering. Key fields include flags for KernelDebugEnabled, HypervisorDebugEnabled, CodeIntegrityEnabled, TestSigningEnabled, and WinPEEnabled. An attacker who modifies BCD to enable test-signing mode (TestSigningEnabled: Yes) can load unsigned kernel drivers, effectively bypassing driver signature enforcement. Disabling CodeIntegrity (CodeIntegrityEnabled: No) removes kernel module signing checks. Enabling KernelDebugging exposes the kernel to debugger-level manipulation. Establish a BCD baseline from initial boot events and alert on any deviation. Correlate with preceding bcdedit.exe process creation events (EID 4688) by unexpected accounts before the BCD change took effect.",
+      "category": "Persistence/Defense Evasion",
+      "tags": [
+        "boot",
+        "bcd",
+        "persistence",
+        "defense-evasion",
+        "bootkit",
+        "driver-loading"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 6005,
+          "log": "System"
+        },
+        {
+          "id": 12,
+          "log": "System"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1542.001",
+          "techniqueName": "Pre-OS Boot: System Firmware",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1542.003",
+          "techniqueName": "Pre-OS Boot: Bootkit",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1014",
+          "techniqueName": "Rootkit",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Other Policy Change Events must be enabled under Advanced Audit Policy > Policy Change."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TestSigningEnabled: Yes is a critical indicator — it allows loading of unsigned kernel drivers and is rarely set in production environments",
+          "CodeIntegrityEnabled: No disables kernel code integrity enforcement — combined with test signing, this enables arbitrary driver loading",
+          "KernelDebugEnabled: Yes enables kernel debugging which can be exploited for kernel-level manipulation",
+          "Establish a BCD baseline from the first boot event in your log history — any subsequent change in BCD values warrants investigation",
+          "Look for preceding bcdedit.exe process creation events (EID 4688) by unexpected accounts before the BCD change took effect on the next boot"
+        ],
+        "commonFalsePositives": [
+          "Developer machines with test signing enabled for driver development",
+          "VMs and lab environments with kernel debugging configured",
+          "Dual-boot systems with multiple boot entries"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4826"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "BCD Test Signing or Code Integrity Disabled",
+          "rule": "SecurityEvent\n| where EventID == 4826\n| project TimeGenerated, Computer, ExtendedProperties\n| where ExtendedProperties has \"Yes\" or ExtendedProperties has \"No\"\n| order by TimeGenerated desc",
+          "notes": "Parse the ExtendedProperties field for TestSigningEnabled, CodeIntegrityEnabled, and KernelDebugEnabled values. Alert on any host where TestSigningEnabled == Yes or CodeIntegrityEnabled == No compared to the established baseline."
+        },
+        {
+          "platform": "Sigma",
+          "title": "BCD Test Signing Enabled at Boot",
+          "rule": "title: BCD Test Signing Enabled at Boot\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4826\n  condition: selection\nfalsepositives:\n  - Developer workstations with driver development workflows\n  - Lab and test environments\nlevel: medium",
+          "notes": "Requires parsing ExtendedProperties to check TestSigningEnabled. Baseline BCD values per host and alert on deviation from baseline rather than all occurrences."
+        }
+      ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TestSigningEnabled",
+          "xpath": "EventData/Data[@Name='TestSigningEnabled']",
+          "description": "Whether test-signing mode is enabled; Yes allows unsigned kernel drivers to load"
+        },
+        {
+          "name": "CodeIntegrityEnabled",
+          "xpath": "EventData/Data[@Name='CodeIntegrityEnabled']",
+          "description": "Whether kernel code integrity enforcement is active; No disables driver signing checks"
+        },
+        {
+          "name": "KernelDebugEnabled",
+          "xpath": "EventData/Data[@Name='KernelDebugEnabled']",
+          "description": "Whether kernel debugging is enabled; Yes exposes the kernel to debugger-level manipulation"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4886,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -4826,6 +5802,199 @@
       "lastReviewed": "2026-04-04"
     },
     {
+      "id": 4907,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Auditing settings on an object were changed",
+      "summary": "The SACL on an audited object was modified.",
+      "details": "Generated when the auditing settings (SACL) of an object are changed while the object is being accessed under an active handle. Complements EID 4715 (SACL changed via a security descriptor write) and records in-session modifications to object-level audit policy. Key fields: SubjectUserName, ObjectName, ObjectType, OldSd (old SACL), and NewSd (new SACL). Attackers who remove SACL entries from sensitive files or registry keys mid-session effectively blind audit logging for subsequent operations on those objects. Removing the SACL from NTDS.dit, the SAM database, or LSASS before performing a credential access operation is a documented defense evasion technique.",
+      "category": "Defense Evasion",
+      "tags": [
+        "audit-policy",
+        "sacl",
+        "defense-evasion",
+        "tamper"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4715,
+          "log": "Security"
+        },
+        {
+          "id": 4719,
+          "log": "Security"
+        },
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Policy Change must be enabled under Advanced Audit Policy. The object must have an existing SACL; this event fires when that SACL is modified."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ObjectName identifies which object's auditing settings were modified — focus on sensitive objects: SAM, NTDS.dit, LSASS memory sections, privileged registry hives (HKLM\\SECURITY, HKLM\\SAM)",
+          "Compare OldSd and NewSd to determine which SACL ACEs were removed — removal of all SACL entries (empty SACL in NewSd) is the highest-confidence indicator",
+          "Correlate with subsequent EID 4656/4663 events on the same ObjectName — SACL removal followed by access to the same object indicates the change was made to suppress audit evidence"
+        ],
+        "commonFalsePositives": [
+          "Security hardening tools modifying SACLs as part of applying a CIS or STIG baseline",
+          "Backup software modifying SACL entries on files it needs to access without generating audit noise"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4907"
+      },
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "Auditing Settings Removed from Object",
+          "rule": "title: Auditing Settings Removed from Object\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4907\n  condition: selection\nfalsepositives:\n  - Security hardening tools applying STIG/CIS baselines\n  - Authorized IT SACL management operations\nlevel: medium",
+          "notes": "Parse OldSd and NewSd to detect removal of SACL entries. Alert at high level when ObjectName matches sensitive paths (SAM, NTDS, SECURITY hive) or when the NewSd contains an empty SACL."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "ObjectName",
+          "xpath": "EventData/Data[@Name='ObjectName']",
+          "description": "The object whose SACL was changed — sensitive paths (SAM, NTDS.dit, SECURITY registry hive) are highest priority"
+        },
+        {
+          "name": "OldSd",
+          "xpath": "EventData/Data[@Name='OldSd']",
+          "description": "Old security descriptor in SDDL format; contains the previous SACL entries before modification"
+        },
+        {
+          "name": "NewSd",
+          "xpath": "EventData/Data[@Name='NewSd']",
+          "description": "New security descriptor in SDDL format; an empty SACL in NewSd confirms all auditing was removed"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 4912,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Per User Audit Policy was changed",
+      "summary": "The per-user audit policy for a specific account was modified.",
+      "details": "Generated when the per-user audit policy is changed for a specific user account. Windows supports granular per-user audit policies that override the system-wide audit policy for individual accounts. Attackers with administrative privileges may use per-user audit policy to exempt their own account (or a compromised service account) from auditing, suppressing events like EID 4624 (logon), EID 4688 (process creation), and EID 4663 (object access) for that specific account. Key fields: SubjectUserName (who made the change), TargetUserName (the account whose audit policy was modified), CategoryId (which audit category was changed), and AuditPolicyChanges (old and new settings). Per-user audit policies are rarely used in production environments — any occurrence outside of documented security engineering work warrants immediate investigation.",
+      "category": "Defense Evasion",
+      "tags": [
+        "audit-policy",
+        "defense-evasion",
+        "tamper",
+        "per-user-audit"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4719,
+          "log": "Security"
+        },
+        {
+          "id": 4715,
+          "log": "Security"
+        },
+        {
+          "id": 1102,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1562.002",
+          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "tactics": [
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Audit Policy Change > Audit Audit Policy Change must be enabled under Advanced Audit Policy."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "TargetUserName is the critical field — a per-user audit exemption set on a privileged or service account by an unexpected SubjectUserName is a strong defense evasion indicator",
+          "AuditPolicyChanges shows which category was changed to No Auditing — suppressing Account Logon, Logon/Logoff, or Object Access for a specific account is the most impactful exemption",
+          "Per-user audit policies are rarely used in production environments — any occurrence outside of documented security engineering work should be investigated"
+        ],
+        "commonFalsePositives": [
+          "Security engineering teams implementing per-user audit policies as part of a targeted monitoring configuration",
+          "Automated compliance tools adjusting per-user audit settings for specific service accounts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4912"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Per-User Audit Policy Set to No Auditing",
+          "rule": "SecurityEvent\n| where EventID == 4912\n| where AuditPolicyChanges has \"No Auditing\"\n| project TimeGenerated, Computer, SubjectUserName, TargetUserName, AuditPolicyChanges\n| order by TimeGenerated desc",
+          "notes": "Per-user audit exemptions are extremely rare in production. Any No Auditing setting for a specific user should be investigated immediately."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Per User Audit Policy Modified",
+          "rule": "title: Per User Audit Policy Modified\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4912\n  condition: selection\nfalsepositives:\n  - Authorized security engineering changes\n  - Compliance tool configurations\nlevel: medium",
+          "notes": "Increase to high when AuditPolicyChanges contains 'No Auditing'. Correlate TargetUserName with privileged account lists."
+        }
+      ],
+      "volumeIndicator": "rare",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TargetUserName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "The account whose per-user audit policy was modified"
+        },
+        {
+          "name": "AuditPolicyChanges",
+          "xpath": "EventData/Data[@Name='AuditPolicyChanges']",
+          "description": "The audit category and new setting; 'No Auditing' indicates the audit was suppressed for this user"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 4946,
       "log": "Security",
       "provider": "Microsoft-Windows-Security-Auditing",
@@ -4998,6 +6167,213 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-03-29"
+    },
+    {
+      "id": 4964,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "AuditSuccess",
+      "title": "Special groups have been assigned to a new logon",
+      "summary": "A logon matched the Special Groups monitoring list.",
+      "details": "Generated when a user logs on and is a member of one or more groups listed in the Special Groups registry value (HKLM\\System\\CurrentControlSet\\Control\\Lsa\\Audit\\SpecialGroups). This event provides targeted high-value account monitoring: administrators configure SpecialGroups with the SIDs of privileged or sensitive groups, and Windows generates EID 4964 whenever a member of those groups logs on. Unlike broad group monitoring via EID 4728, this event fires at logon time and directly correlates group membership with an active session. Key fields: SubjectUserName (the user logging on), SubjectLogonId (links to EID 4624), and SidList (the matched special group SIDs). Especially useful for monitoring accounts with Domain Admin, Enterprise Admin, or other privileged memberships to detect unexpected or anomalous privileged logons.",
+      "category": "Authentication/Privilege Escalation",
+      "tags": [
+        "authentication",
+        "privileged-account",
+        "logon",
+        "monitoring"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4624,
+          "log": "Security"
+        },
+        {
+          "id": 4672,
+          "log": "Security"
+        },
+        {
+          "id": 4728,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1078",
+          "techniqueName": "Valid Accounts",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            },
+            {
+              "tacticId": "TA0005",
+              "tacticName": "Defense Evasion"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "registry",
+          "description": "The SpecialGroups registry value must be configured at HKLM\\System\\CurrentControlSet\\Control\\Lsa\\Audit\\SpecialGroups with a multi-string list of group SIDs to monitor. Audit Special Logon must also be enabled under Advanced Audit Policy > Logon/Logoff."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "SidList reveals which monitored group SID the logon matched — correlate against your privileged group inventory",
+          "Correlate SubjectLogonId with EID 4624 to find the corresponding logon event and extract source IP, logon type, and workstation name",
+          "Logons from unexpected source hosts or using interactive logon type (2) for normally non-interactive privileged accounts are high priority",
+          "This event does not fire if SpecialGroups is not configured — absence of EID 4964 does not mean no privileged logons occurred"
+        ],
+        "commonFalsePositives": [
+          "Routine logons by privileged admins performing expected administrative tasks during business hours",
+          "Service account logons (logon type 5) for accounts that are members of monitored groups"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4964"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Privileged Account Logon via Special Groups",
+          "rule": "SecurityEvent\n| where EventID == 4964\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, SubjectLogonId, SidList\n| join kind=inner (\n    SecurityEvent\n    | where EventID == 4624\n    | project LogonId, IpAddress, LogonType, WorkstationName\n  ) on $left.SubjectLogonId == $right.LogonId\n| project TimeGenerated, Computer, SubjectUserName, SubjectDomainName, SidList, IpAddress, LogonType, WorkstationName\n| order by TimeGenerated desc",
+          "notes": "Requires SpecialGroups registry configuration. Join with EID 4624 to enrich with source IP and logon type. Alert on logon type 3 (network) from unexpected source IPs or outside business hours."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Special Group Logon Detected",
+          "rule": "title: Special Group Logon Detected\nstatus: experimental\nlogsource:\n  product: windows\n  service: security\ndetection:\n  selection:\n    EventID: 4964\n  condition: selection\nfalsepositives:\n  - Routine administrative logons by authorized privileged users\nlevel: medium",
+          "notes": "Requires SpecialGroups registry to be pre-configured with target group SIDs. Correlate with EID 4624 for full logon context."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SidList",
+          "xpath": "EventData/Data[@Name='SidList']",
+          "description": "SIDs of the matched special groups; resolve to group names for context"
+        },
+        {
+          "name": "SubjectLogonId",
+          "xpath": "EventData/Data[@Name='SubjectLogonId']",
+          "description": "Logon session ID — correlate with EID 4624 LogonId to retrieve source IP, workstation, and logon type"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 4985,
+      "log": "Security",
+      "provider": "Microsoft-Windows-Security-Auditing",
+      "channel": "Security",
+      "level": "Information",
+      "title": "The state of a transaction has changed",
+      "summary": "The Kernel Transaction Manager recorded a state change for a file system transaction.",
+      "details": "Generated when the state of a Kernel Transaction Manager (KTM) transaction changes. KTM enables Transactional NTFS (TxF), which allows file operations to be grouped into atomic transactions that either commit or roll back as a unit. Key fields: SubjectUserName, SubjectLogonId, TransactionId (a GUID uniquely identifying the transaction), ProcessId (the process that initiated the transaction). This event has limited volume in most environments because TxF is rarely used by mainstream applications. Security relevance: (1) Ransomware using TxF: Some ransomware families have used TxF transactions to atomically replace file contents before committing, reducing the number of file I/O events generated per encrypted file. A spike in 4985 events from an unusual process with high ProcessId churn across many files is a ransomware indicator. (2) Living-off-the-land persistence via TxF: KTM transactions can be used in DLL hijacking techniques (TxF-based DLL hijacking) where a DLL is transactionally replaced with a malicious version visible only within the transaction, allowing in-memory loading of the malicious DLL while the clean version remains on disk — evading AV file scanning. (3) Correlating with file system activity: TransactionId can be used to group related file operations into logical batches, useful in reconstructing what a process did during an incident.",
+      "category": "File System Activity",
+      "tags": [
+        "transactions",
+        "txf",
+        "ransomware",
+        "defense-evasion",
+        "file-system"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 4656,
+          "log": "Security"
+        },
+        {
+          "id": 4663,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1486",
+          "techniqueName": "Data Encrypted for Impact",
+          "tactics": [
+            {
+              "tacticId": "TA0040",
+              "tacticName": "Impact"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1574.001",
+          "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Object Access auditing must be enabled (specifically 'Audit File System' subcategory) for 4985 events to be generated."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "High volume of 4985 events from a single ProcessId touching many different files in rapid succession is a ransomware pattern — correlate with Sysmon EID 11 file creation events",
+          "ProcessId for an unexpected or unsigned process generating TxF activity is anomalous — most legitimate TxF users are system components (Windows Installer, certain backup applications)",
+          "TransactionId can be used to group all file operations belonging to a single logical transaction — useful for reconstructing what files were touched in an incident",
+          "4985 events without corresponding file access events (4656/4663) may indicate the transaction was aborted — TxF DLL hijacking techniques sometimes abort transactions after loading their payload to clean up traces"
+        ],
+        "commonFalsePositives": [
+          "Windows Installer (msiexec.exe) uses TxF for atomic software installation operations — high volume during software installs and updates",
+          "Database engines and VSS writers using transactional file operations for consistency",
+          "Backup software employing TxF-based consistent snapshot operations"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "User context of the transaction; SYSTEM or service accounts are expected; interactive user accounts are unusual"
+        },
+        {
+          "name": "TransactionId",
+          "xpath": "EventData/Data[@Name='TransactionId']",
+          "description": "GUID of the transaction; use to group all related 4985 events and file access events belonging to one logical operation"
+        },
+        {
+          "name": "ProcessId",
+          "xpath": "EventData/Data[@Name='ProcessId']",
+          "description": "Process that owns the transaction; unexpected processes using TxF are anomalous"
+        }
+      ],
+      "lastReviewed": "2026-04-10"
     },
     {
       "id": 5136,
@@ -6185,105 +7561,6 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-04"
-    },
-    {
-      "id": 4985,
-      "log": "Security",
-      "provider": "Microsoft-Windows-Security-Auditing",
-      "channel": "Security",
-      "level": "Information",
-      "title": "The state of a transaction has changed",
-      "summary": "The Kernel Transaction Manager recorded a state change for a file system transaction.",
-      "details": "Generated when the state of a Kernel Transaction Manager (KTM) transaction changes. KTM enables Transactional NTFS (TxF), which allows file operations to be grouped into atomic transactions that either commit or roll back as a unit. Key fields: SubjectUserName, SubjectLogonId, TransactionId (a GUID uniquely identifying the transaction), ProcessId (the process that initiated the transaction). This event has limited volume in most environments because TxF is rarely used by mainstream applications. Security relevance: (1) Ransomware using TxF: Some ransomware families have used TxF transactions to atomically replace file contents before committing, reducing the number of file I/O events generated per encrypted file. A spike in 4985 events from an unusual process with high ProcessId churn across many files is a ransomware indicator. (2) Living-off-the-land persistence via TxF: KTM transactions can be used in DLL hijacking techniques (TxF-based DLL hijacking) where a DLL is transactionally replaced with a malicious version visible only within the transaction, allowing in-memory loading of the malicious DLL while the clean version remains on disk — evading AV file scanning. (3) Correlating with file system activity: TransactionId can be used to group related file operations into logical batches, useful in reconstructing what a process did during an incident.",
-      "category": "File System Activity",
-      "tags": [
-        "transactions",
-        "txf",
-        "ransomware",
-        "defense-evasion",
-        "file-system"
-      ],
-      "relatedEventIds": [
-        {
-          "id": 4656,
-          "log": "Security"
-        },
-        {
-          "id": 4663,
-          "log": "Security"
-        }
-      ],
-      "mitreAttack": [
-        {
-          "techniqueId": "T1486",
-          "techniqueName": "Data Encrypted for Impact",
-          "tactics": [
-            {
-              "tacticId": "TA0040",
-              "tacticName": "Impact"
-            }
-          ]
-        },
-        {
-          "techniqueId": "T1574.001",
-          "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
-          "tactics": [
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
-            },
-            {
-              "tacticId": "TA0004",
-              "tacticName": "Privilege Escalation"
-            }
-          ]
-        }
-      ],
-      "prerequisites": [
-        {
-          "type": "policy",
-          "description": "Object Access auditing must be enabled (specifically 'Audit File System' subcategory) for 4985 events to be generated."
-        }
-      ],
-      "notesGuidance": {
-        "investigationPivots": [
-          "High volume of 4985 events from a single ProcessId touching many different files in rapid succession is a ransomware pattern — correlate with Sysmon EID 11 file creation events",
-          "ProcessId for an unexpected or unsigned process generating TxF activity is anomalous — most legitimate TxF users are system components (Windows Installer, certain backup applications)",
-          "TransactionId can be used to group all file operations belonging to a single logical transaction — useful for reconstructing what files were touched in an incident",
-          "4985 events without corresponding file access events (4656/4663) may indicate the transaction was aborted — TxF DLL hijacking techniques sometimes abort transactions after loading their payload to clean up traces"
-        ],
-        "commonFalsePositives": [
-          "Windows Installer (msiexec.exe) uses TxF for atomic software installation operations — high volume during software installs and updates",
-          "Database engines and VSS writers using transactional file operations for consistency",
-          "Backup software employing TxF-based consistent snapshot operations"
-        ]
-      },
-      "source": {
-        "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4985"
-      },
-      "volumeIndicator": "low",
-      "windowsVersions": {
-        "minVersion": "Windows Vista / Server 2008"
-      },
-      "keyFields": [
-        {
-          "name": "SubjectUserName",
-          "xpath": "EventData/Data[@Name='SubjectUserName']",
-          "description": "User context of the transaction; SYSTEM or service accounts are expected; interactive user accounts are unusual"
-        },
-        {
-          "name": "TransactionId",
-          "xpath": "EventData/Data[@Name='TransactionId']",
-          "description": "GUID of the transaction; use to group all related 4985 events and file access events belonging to one logical operation"
-        },
-        {
-          "name": "ProcessId",
-          "xpath": "EventData/Data[@Name='ProcessId']",
-          "description": "Process that owns the transaction; unexpected processes using TxF are anomalous"
-        }
-      ],
-      "lastReviewed": "2026-04-10"
     }
   ]
 }

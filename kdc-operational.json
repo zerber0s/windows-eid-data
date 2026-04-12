@@ -1,0 +1,464 @@
+{
+  "dataset": {
+    "name": "EID Quick Reference - Kerberos Key Distribution Center (KDC) Operational",
+    "version": "1.0.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
+    "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/kdc-operational.json",
+    "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
+    "license": {
+      "name": "Creative Commons Attribution 4.0 International",
+      "spdx": "CC-BY-4.0",
+      "notice": "Event descriptions are paraphrased summaries written for this dataset. Source links point to authoritative references."
+    },
+    "sources": [
+      {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/",
+        "type": "primary"
+      }
+    ]
+  },
+  "entries": [
+    {
+      "id": 14,
+      "log": "KDC",
+      "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+      "channel": "Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational",
+      "level": "Warning",
+      "title": "KDC encountered an error while validating a certificate during PKINIT",
+      "summary": "The KDC failed to validate a client certificate presented during PKINIT (certificate-based Kerberos) authentication.",
+      "details": "Generated on a Domain Controller when the KDC encounters an error while validating a certificate submitted for PKINIT (Public Key Initial Authentication) Kerberos authentication. PKINIT allows clients to authenticate to Kerberos using X.509 certificates instead of passwords — this is the mechanism used by smart cards, Windows Hello for Business, and ADCS-based Kerberos authentication. Key fields: AccountName (client attempting authentication), CertSubject, CertIssuer, CertSerialNumber, and FailureCode. From a DFIR perspective, EID 14 surfaces ADCS attack failures: ESC attacks (e.g., ESC1, ESC8) that request a certificate with another user's UPN will generate this event at the KDC if the certificate fails chain validation, template authorization, or SAN matching. Also relevant for detecting Shadow Credentials abuse (T1649) where an attacker-written msDS-KeyCredentialLink certificate is rejected by the KDC. Correlate with Security EID 4768 (TGT request) failures and AD CS EID 4886/4888 (certificate request/denied) on the CA.",
+      "category": "Kerberos/Authentication",
+      "tags": ["kerberos", "pkinit", "adcs", "certificate", "authentication-failure", "shadow-credentials"],
+      "relatedEventIds": [
+        {
+          "id": 16,
+          "log": "KDC"
+        },
+        {
+          "id": 21,
+          "log": "KDC"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4886,
+          "log": "Security"
+        },
+        {
+          "id": 4888,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558",
+          "techniqueName": "Steal or Forge Kerberos Tickets",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The KDC Operational log is disabled by default and must be enabled on Domain Controllers. Enable via Event Viewer (Applications and Services Logs > Microsoft > Windows > Kerberos-Key-Distribution-Center > Operational) or via wevtutil.",
+          "command": "wevtutil sl Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational /e:true"
+        },
+        {
+          "type": "collection",
+          "description": "Must be collected from Domain Controllers only — this log does not exist on non-DC systems."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "AccountName identifies the account attempting certificate-based authentication — correlate with AD CS EID 4886/4887 to find the certificate request that produced the presented certificate",
+          "CertSubject and CertIssuer identify the certificate — check whether the issuing CA is a legitimate enterprise CA or a rogue CA",
+          "FailureCode indicates why validation failed — 'certificate not trusted' may indicate a self-signed or attacker-generated certificate; 'UPN mismatch' may indicate an ESC1 attack where the SAN does not match an existing account",
+          "Repeated EID 14 failures from the same AccountName over a short period may indicate an attacker probing for a valid certificate template or testing a forged certificate"
+        ],
+        "commonFalsePositives": [
+          "Expired smart card certificates or Windows Hello for Business enrollment certificates that have not been renewed",
+          "Certificate trust chain issues after a CA certificate renewal where the new CA certificate has not propagated to all DCs",
+          "Misconfigured certificate templates with incorrect EKU or SAN settings causing legitimate enrollment failures"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "PKINIT Certificate Validation Failure on KDC",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Kerberos-Key-Distribution-Center\"\n| where EventID == 14\n| parse RenderedDescription with * \"Account Name: \" AccountName \"\\n\" *\n| summarize FailureCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by AccountName, Computer\n| where FailureCount > 3\n| project Computer, AccountName, FailureCount, FirstSeen, LastSeen",
+          "notes": "Correlate AccountName with AD CS EID 4886/4887 to identify which certificates were requested. Multiple failures from the same account over a short period indicate an attacker probing certificate templates."
+        },
+        {
+          "platform": "Sigma",
+          "title": "KDC PKINIT Certificate Validation Failure",
+          "rule": "title: KDC PKINIT Certificate Validation Failure\nstatus: experimental\nlogsource:\n    product: windows\n    service: kerberos-key-distribution-center\ndetection:\n    selection:\n        EventID: 14\n    condition: selection\nfalsepositives:\n    - Expired smart card or WHfB certificates awaiting renewal\n    - CA certificate rollover propagation delays\nlevel: medium",
+          "notes": "Requires enabling the KDC Operational log on all DCs. Correlate with AD CS logs to trace the certificate lifecycle."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "The account attempting PKINIT authentication with the invalid certificate"
+        },
+        {
+          "name": "CertSubject",
+          "xpath": "EventData/Data[@Name='CertSubject']",
+          "description": "Subject distinguished name of the presented certificate; compare against known legitimate certificate subjects"
+        },
+        {
+          "name": "CertIssuer",
+          "xpath": "EventData/Data[@Name='CertIssuer']",
+          "description": "Issuer of the presented certificate; unknown or self-signed issuers indicate attacker-forged certificates"
+        },
+        {
+          "name": "FailureCode",
+          "xpath": "EventData/Data[@Name='FailureCode']",
+          "description": "Reason for certificate validation failure; guides investigation toward specific attack types (trust failure vs. SAN mismatch vs. revocation)"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 16,
+      "log": "KDC",
+      "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+      "channel": "Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational",
+      "level": "Error",
+      "title": "KDC encountered a certificate that could not be mapped to a user account",
+      "summary": "The KDC could not map a client certificate to an Active Directory user account during PKINIT authentication.",
+      "details": "Generated on a Domain Controller when the KDC receives a certificate-based Kerberos authentication request (PKINIT) but cannot map the certificate to a valid user account in Active Directory. Mapping failures occur when: (1) the certificate's Subject Alternative Name (SAN) UPN does not match any UPN in AD; (2) the certificate's subject does not match any account via altSecurityIdentities; or (3) the certificate was issued for an account that no longer exists. Key fields: AccountName, CertSubject, and CertIssuer. DFIR relevance: This event is a critical indicator for ADCS ESC attacks where an attacker-obtained certificate contains a forged or non-existent UPN. It also surfaces Shadow Credentials (T1649) attacks where the msDS-KeyCredentialLink certificate belongs to a deleted or mismatched account. An attacker iterating through forged certificates to find a valid mapping will generate a series of EID 16 failures followed eventually by a successful EID 27 (or Security EID 4768 with success).",
+      "category": "Kerberos/Authentication",
+      "tags": ["kerberos", "pkinit", "adcs", "certificate", "shadow-credentials", "mapping-failure"],
+      "relatedEventIds": [
+        {
+          "id": 14,
+          "log": "KDC"
+        },
+        {
+          "id": 21,
+          "log": "KDC"
+        },
+        {
+          "id": 27,
+          "log": "KDC"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.004",
+          "techniqueName": "Steal or Forge Kerberos Tickets: AS-REP Roasting",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The KDC Operational log is disabled by default and must be enabled on Domain Controllers.",
+          "command": "wevtutil sl Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational /e:true"
+        },
+        {
+          "type": "collection",
+          "description": "Must be collected from Domain Controllers only."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CertSubject and the UPN embedded in the certificate SAN are the primary artifacts — check whether the UPN exists in AD and whether it was recently modified",
+          "Correlate with AD CS EID 4887 (certificate issued) to trace which CA issued the certificate and which requester obtained it",
+          "Multiple EID 16 failures followed by a successful EID 4768 (TGT issued) using PKINIT is the clearest ESC attack success indicator",
+          "For Shadow Credentials: check the target account's msDS-KeyCredentialLink attribute — the presence of unexpected entries indicates an attacker added their own credential link"
+        ],
+        "commonFalsePositives": [
+          "Stale altSecurityIdentities mappings for users who changed their UPN or were migrated between domains",
+          "Smart card certificates issued for accounts that were deleted or moved after certificate issuance",
+          "Test certificates issued during AD CS template evaluation that reference non-existent test accounts"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview"
+      },
+      "detectionRules": [
+        {
+          "platform": "Sigma",
+          "title": "KDC Certificate Account Mapping Failure",
+          "rule": "title: KDC Certificate Account Mapping Failure\nstatus: experimental\nlogsource:\n    product: windows\n    service: kerberos-key-distribution-center\ndetection:\n    selection:\n        EventID: 16\n    condition: selection\nfalsepositives:\n    - Stale UPN mappings from account migrations\n    - Deleted accounts with outstanding certificates\nlevel: medium",
+          "notes": "Correlate with EID 4887 (AD CS certificate issued) and Security EID 4768 to identify successful PKINIT authentication following failures. A pattern of 16 failures then 4768 success indicates a successful ESC attack."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "CertSubject",
+          "xpath": "EventData/Data[@Name='CertSubject']",
+          "description": "Subject DN of the certificate whose account mapping failed"
+        },
+        {
+          "name": "CertIssuer",
+          "xpath": "EventData/Data[@Name='CertIssuer']",
+          "description": "Issuing CA — trace through AD CS logs to identify the certificate request origin"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 21,
+      "log": "KDC",
+      "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+      "channel": "Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational",
+      "level": "Warning",
+      "title": "KDC PKINIT certificate validation failed due to policy or trust",
+      "summary": "A certificate presented for PKINIT Kerberos authentication was rejected due to policy or trust constraints.",
+      "details": "Generated when the KDC rejects a certificate during PKINIT authentication specifically because of a policy or trust constraint — such as the certificate not being issued by a trusted CA, failing CRL/OCSP revocation checking, or not meeting the domain's PKINIT certificate requirements. Key fields: AccountName, CertSubject, CertIssuer, and FailureCode. Distinguished from EID 14 (general PKINIT error) by its focus on policy and trust failures rather than structural certificate errors. This event may surface: (1) attacker-forged certificates issued by a rogue CA not in the NTAuth store; (2) revoked certificates from a legitimate CA being used after compromise; (3) certificates from an expired or untrusted CA. Correlate with AD CS EID 4886 (request) and EID 4887 (issued) on the CA, and with the domain's NTAuth certificate store to assess CA trust status.",
+      "category": "Kerberos/Authentication",
+      "tags": ["kerberos", "pkinit", "certificate", "trust", "policy", "adcs"],
+      "relatedEventIds": [
+        {
+          "id": 14,
+          "log": "KDC"
+        },
+        {
+          "id": 16,
+          "log": "KDC"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4886,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The KDC Operational log is disabled by default and must be enabled on Domain Controllers.",
+          "command": "wevtutil sl Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational /e:true"
+        },
+        {
+          "type": "collection",
+          "description": "Must be collected from Domain Controllers only."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CertIssuer is the primary pivot — if the issuing CA is not in the domain's NTAuth store, the certificate was issued by an untrusted or rogue CA",
+          "Revocation check failures may indicate the certificate was revoked after a key compromise and an attacker is attempting to use it post-revocation",
+          "Cross-reference CertSerialNumber with the issuing CA's certificate database to confirm whether the certificate was ever legitimately issued or is entirely forged"
+        ],
+        "commonFalsePositives": [
+          "CRL/OCSP network connectivity issues causing revocation check timeouts on air-gapped or isolated DCs",
+          "CA certificate rollover where the new root CA has not been fully distributed to all DCs",
+          "Expired OCSP stapling on the issuing CA server"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "CertIssuer",
+          "xpath": "EventData/Data[@Name='CertIssuer']",
+          "description": "Issuing CA of the rejected certificate; compare against the domain NTAuth store to assess trust status"
+        },
+        {
+          "name": "FailureCode",
+          "xpath": "EventData/Data[@Name='FailureCode']",
+          "description": "Specific reason for the policy/trust rejection; revocation failures vs. trust failures point to different attacker scenarios"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 27,
+      "log": "KDC",
+      "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+      "channel": "Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational",
+      "level": "Information",
+      "title": "Kerberos authentication succeeded using a certificate (PKINIT)",
+      "summary": "A client successfully authenticated to Kerberos using a certificate via PKINIT.",
+      "details": "Generated on a Domain Controller when a client successfully authenticates to Kerberos using a certificate (PKINIT). This is the success counterpart to EIDs 14, 16, and 21. Key fields: AccountName, CertSubject, CertIssuer, CertSerialNumber, and CertThumbprint. Successful PKINIT authentications are normal in environments using smart cards or Windows Hello for Business, but EID 27 also records successful certificate-based Kerberos authentication from ADCS ESC attacks. A TGT obtained via PKINIT grants all the privileges of the impersonated account. Baseline PKINIT authentication patterns per account and alert on: (1) accounts that do not normally use certificate authentication; (2) PKINIT success from unexpected source hosts; (3) certificate thumbprints not matching known enrolled certificates. Correlate with Security EID 4768 (TGT issued) immediately following to confirm the TGT was issued and identify the client IP address.",
+      "category": "Kerberos/Authentication",
+      "tags": ["kerberos", "pkinit", "certificate", "authentication", "adcs"],
+      "relatedEventIds": [
+        {
+          "id": 14,
+          "log": "KDC"
+        },
+        {
+          "id": 16,
+          "log": "KDC"
+        },
+        {
+          "id": 4768,
+          "log": "Security"
+        },
+        {
+          "id": 4887,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1649",
+          "techniqueName": "Steal or Forge Authentication Certificates",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1558.001",
+          "techniqueName": "Steal or Forge Kerberos Tickets: Golden Ticket",
+          "tactics": [
+            {
+              "tacticId": "TA0006",
+              "tacticName": "Credential Access"
+            }
+          ]
+        }
+      ],
+      "prerequisites": [
+        {
+          "type": "log-enablement",
+          "description": "The KDC Operational log is disabled by default and must be enabled on Domain Controllers.",
+          "command": "wevtutil sl Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational /e:true"
+        },
+        {
+          "type": "collection",
+          "description": "Must be collected from Domain Controllers only."
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "CertThumbprint is the primary artifact for baselining — maintain an inventory of enrolled certificate thumbprints and alert on unknown thumbprints",
+          "AccountName authenticating via PKINIT when the account is not enrolled in smart card or WHfB programs is anomalous",
+          "Correlate CertSubject with AD CS EID 4887 to determine when and how this certificate was issued — a certificate issued shortly before a PKINIT success may indicate an ESC attack",
+          "Source host (from correlating EID 4768 client IP) authenticating for a high-privilege account from an unexpected workstation is suspicious"
+        ],
+        "commonFalsePositives": [
+          "Normal smart card logons and Windows Hello for Business authentications in environments where these are deployed",
+          "Azure AD Hybrid Join and device certificate-based authentication",
+          "Service accounts configured with certificate-based Kerberos authentication"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "PKINIT Success for Account Without Certificate Enrollment",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-Kerberos-Key-Distribution-Center\"\n| where EventID == 27\n| parse RenderedDescription with * \"Account Name: \" AccountName \"\\n\" *\n| parse RenderedDescription with * \"Certificate Thumbprint: \" CertThumbprint \"\\n\" *\n| join kind=leftanti (\n    // Replace with your known certificate thumbprint inventory\n    datatable(KnownThumbprint: string) []\n  ) on $left.CertThumbprint == $right.KnownThumbprint\n| project TimeGenerated, Computer, AccountName, CertThumbprint",
+          "notes": "Populate the known thumbprint inventory from your AD CS issued certificate database. Any PKINIT success with an unknown thumbprint warrants immediate investigation."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Successful PKINIT Kerberos Authentication",
+          "rule": "title: Successful PKINIT Kerberos Authentication\nstatus: experimental\nlogsource:\n    product: windows\n    service: kerberos-key-distribution-center\ndetection:\n    selection:\n        EventID: 27\n    condition: selection\nfalsepositives:\n    - Smart card logons in environments with deployed smart card programs\n    - Windows Hello for Business enrollments\n    - Azure AD Hybrid Join device authentication\nlevel: informational",
+          "notes": "Use this as a baseline-and-alert rule: collect all occurrences and build a whitelist of known certificate thumbprints and expected accounts. Alert when AccountName or CertThumbprint falls outside the baseline."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "The account that successfully authenticated via PKINIT; correlate against enrolled certificate inventory"
+        },
+        {
+          "name": "CertThumbprint",
+          "xpath": "EventData/Data[@Name='CertThumbprint']",
+          "description": "SHA-1 thumbprint of the authenticating certificate; maintain a known-good inventory and alert on unknown thumbprints"
+        },
+        {
+          "name": "CertSubject",
+          "xpath": "EventData/Data[@Name='CertSubject']",
+          "description": "Subject DN of the authenticating certificate; unexpected subjects (e.g., admin UPNs from non-admin requesters) indicate ADCS abuse"
+        },
+        {
+          "name": "CertIssuer",
+          "xpath": "EventData/Data[@Name='CertIssuer']",
+          "description": "Issuing CA; verify against the domain NTAuth store to confirm the CA is trusted and authorized for Kerberos authentication certificates"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    }
+  ]
+}

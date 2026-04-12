@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - AppLocker",
-    "version": "1.3.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/applocker.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -430,6 +430,186 @@
         "minVersion": "Windows 7 / Server 2008 R2"
       },
       "lastReviewed": "2026-04-03"
+    },
+    {
+      "id": 8022,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/Packaged app-Deployment",
+      "level": "Warning",
+      "title": "AppLocker audited packaged app installation (audit mode)",
+      "summary": "A packaged (UWP/MSIX) app installation was allowed but would have been blocked in enforcement mode.",
+      "details": "Generated when AppLocker is in audit mode and a UWP or MSIX packaged application installation would have been blocked by the active rule set but was permitted to proceed. Key fields: FileName (package name or path), UserName, and RuleId. This event is distinct from EID 8020 (execution audited) — EID 8022 fires at installation time, while EID 8020 fires when the already-installed app runs. Malicious MSIX packages have been widely used as phishing delivery vectors (MSIX AppInstaller abuse, CVE-2021-43890). EID 8022 captures the installation of packages that fall outside the allow policy before they are executed. Correlate with EID 8020 to track when an audited-but-installed package is subsequently launched.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "AppLocker must be configured via Group Policy and set to audit mode for packaged app deployment rules. The Microsoft-Windows-AppLocker/Packaged app-Deployment log channel must be enabled."
+        }
+      ],
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "audit-mode",
+        "packaged-app",
+        "uwp",
+        "msix",
+        "application-control",
+        "initial-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 8020,
+          "log": "AppLocker"
+        },
+        {
+          "id": 8021,
+          "log": "AppLocker"
+        },
+        {
+          "id": 8023,
+          "log": "AppLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1204.002",
+          "techniqueName": "User Execution: Malicious File",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1566.002",
+          "techniqueName": "Phishing: Spearphishing Link",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FileName (package name or path) — check the package publisher certificate; self-signed or unknown publishers are suspicious",
+          "Correlate with browser download history and EID 4688 (AppInstaller.exe process creation) to determine how the package arrived on the system",
+          "Cross-reference with EID 8020 to confirm whether the installed package was subsequently executed",
+          "Package installation from AppInstaller URI handler (via a browser redirect) is a common phishing delivery pattern"
+        ],
+        "commonFalsePositives": [
+          "Legitimate Store apps sideloaded for enterprise deployment not yet added to the AppLocker allow policy",
+          "Developer machines installing test packages before they are submitted to the allow policy"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8 / Server 2012"
+      },
+      "lastReviewed": "2026-04-11"
+    },
+    {
+      "id": 8023,
+      "log": "AppLocker",
+      "provider": "Microsoft-Windows-AppLocker",
+      "channel": "Microsoft-Windows-AppLocker/Packaged app-Deployment",
+      "level": "Error",
+      "title": "AppLocker blocked packaged app installation (enforcement mode)",
+      "summary": "A packaged (UWP/MSIX) app installation was blocked by AppLocker policy.",
+      "details": "Generated when AppLocker actively blocks the installation of a UWP or MSIX packaged application in enforcement mode. Key fields: FileName (package name or path), UserName, and RuleId. This event captures blocked package installation attempts before execution, making it the earliest detection point in the MSIX phishing kill chain. Malicious MSIX packages delivered via phishing links (AppInstaller abuse) will generate EID 8023 if the AppLocker packaged app deployment policy is in enforcement mode, providing a block-and-alert before the payload runs. The combination of this event and EID 8021 (execution blocked) indicates that both installation and execution of the package were successfully prevented. Investigate the delivery method by correlating with browser activity and any AppInstaller.exe process creation events.",
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "AppLocker must be configured via Group Policy and set to enforcement mode for packaged app deployment rules. The Microsoft-Windows-AppLocker/Packaged app-Deployment log channel must be enabled."
+        }
+      ],
+      "category": "Application Control",
+      "tags": [
+        "applocker",
+        "enforcement",
+        "blocked",
+        "packaged-app",
+        "msix",
+        "application-control",
+        "initial-access"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 8021,
+          "log": "AppLocker"
+        },
+        {
+          "id": 8022,
+          "log": "AppLocker"
+        },
+        {
+          "id": 8020,
+          "log": "AppLocker"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1204.002",
+          "techniqueName": "User Execution: Malicious File",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        },
+        {
+          "techniqueId": "T1566.002",
+          "techniqueName": "Phishing: Spearphishing Link",
+          "tactics": [
+            {
+              "tacticId": "TA0001",
+              "tacticName": "Initial Access"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "FileName identifies the blocked package — submit the package name to threat intelligence; known malicious packages have well-documented IOCs",
+          "Investigate how the user attempted to install the package — browser history, ms-appinstaller URI handler invocations, and email attachments are the common delivery vectors",
+          "Correlate with EID 4688 for any AppInstaller.exe or winget.exe process creation preceding the block",
+          "A block followed immediately by an EID 8021 (execution blocked) for the same package indicates the payload may have been partially staged but was denied execution"
+        ],
+        "commonFalsePositives": [
+          "Enterprise LOB apps deployed before being added to the AppLocker allow policy",
+          "IT teams installing packages for testing or evaluation purposes"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/applocker/applocker-overview"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Packaged App Installation Blocked by AppLocker",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-AppLocker\"\n| where EventID == 8023\n| project TimeGenerated, Computer, UserName, RenderedDescription\n| order by TimeGenerated desc",
+          "notes": "Combine with EID 8021 (execution block) for the same package to confirm full kill chain prevention. Investigate delivery method via browser history and AppInstaller.exe process creation events."
+        },
+        {
+          "platform": "Sigma",
+          "title": "AppLocker Blocked Packaged App Installation",
+          "rule": "title: AppLocker Blocked Packaged App Installation\nstatus: experimental\nlogsource:\n    product: windows\n    service: applocker\ndetection:\n    selection:\n        EventID: 8023\n    condition: selection\nfalsepositives:\n    - Enterprise apps not yet in the AppLocker allow policy\n    - IT testing and evaluation of packages\nlevel: medium",
+          "notes": "Escalate to high if the package name matches known malicious MSIX payload names or is delivered via an ms-appinstaller URI handler from an external URL."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows 8 / Server 2012"
+      },
+      "lastReviewed": "2026-04-11"
     }
   ]
 }

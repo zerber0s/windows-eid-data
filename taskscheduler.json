@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Task Scheduler",
-    "version": "1.6.2",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.7.0",
+    "generatedAt": "2026-04-11T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -335,6 +335,102 @@
       "lastReviewed": "2026-03-29"
     },
     {
+      "id": 107,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Information",
+      "title": "Task triggered on registration",
+      "summary": "A scheduled task executed immediately upon being registered.",
+      "details": "Generated when a newly registered task is configured to run immediately at registration time (i.e., the task has a registration trigger). This is a distinct and high-value event: most legitimate software uses time-based or event-based triggers, not registration triggers. Attackers commonly use registration triggers to execute a payload immediately upon task creation, combining the persistence mechanism with instant execution in a single operation. This pattern avoids the need to wait for a scheduled time or trigger event. Key fields: TaskName. Correlate EID 107 with the immediately preceding EID 106 (task registered) using TaskName to identify the task definition. Then correlate with EID 200 (action started) and EID 4688 (process created) to trace what was executed.",
+      "category": "Task Execution",
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence",
+        "immediate-execution"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 200,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4698,
+          "log": "Security"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
+        },
+        {
+          "id": 1,
+          "log": "Sysmon"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "EID 107 immediately following EID 106 for the same TaskName is the primary detection pattern — this combination means the task ran the moment it was created",
+          "Correlate with EID 200 (action started) to identify the executable that was launched and with EID 4688 to capture the full CommandLine",
+          "Registration-triggered tasks created outside of known software installation windows or by unexpected accounts are high priority"
+        ],
+        "commonFalsePositives": [
+          "Some legitimate software installers create registration-triggered tasks to perform post-install initialization steps",
+          "IT management tools that run a configuration task immediately upon deployment"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Task Executed Immediately on Registration",
+          "rule": "let Registered = Event\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 106\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), RegisterTime = TimeGenerated;\nEvent\n| where Source == \"Microsoft-Windows-TaskScheduler\" and EventID == 107\n| project TaskName = extract(@'Task Name:\\s+(.+)', 1, RenderedDescription), TriggerTime = TimeGenerated\n| join kind=inner Registered on TaskName\n| where abs(datetime_diff('second', TriggerTime, RegisterTime)) < 10",
+          "notes": "Tasks that execute within 10 seconds of registration indicate a registration trigger. Correlate TaskName with EID 200 to identify the executed action."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Triggered Immediately on Registration",
+          "rule": "title: Scheduled Task Triggered Immediately on Registration\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 107\n    condition: selection\nfalsepositives:\n    - Legitimate software post-install initialization tasks\n    - IT deployment tools running configuration tasks on deployment\nlevel: medium",
+          "notes": "Correlate with EID 106 for the same TaskName to confirm the task was just registered. EID 107 alone is low-fidelity; the 106+107 combination within seconds is the detection signal."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the task that was triggered on registration; correlate with EID 106 to retrieve the full task definition and action"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
+    },
+    {
       "id": 111,
       "log": "TaskScheduler",
       "provider": "Microsoft-Windows-TaskScheduler",
@@ -466,6 +562,105 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "lastReviewed": "2026-04-02"
+    },
+    {
+      "id": 126,
+      "log": "TaskScheduler",
+      "provider": "Microsoft-Windows-TaskScheduler",
+      "channel": "Microsoft-Windows-TaskScheduler/Operational",
+      "level": "Warning",
+      "title": "Task action failed to start: executable not found",
+      "summary": "A scheduled task's action could not start because the target executable was not found.",
+      "details": "Generated when Task Scheduler attempts to run a task but cannot locate the executable specified in the task's action. Key fields: TaskName, ActionName (the missing executable path), and ResultCode. This event surfaces residual persistence artifacts: malware that installs a scheduled task pointing to a dropped payload may have the payload removed by a security tool or defender while the task itself remains in the scheduler. Repeated EID 126 events for the same TaskName over an extended period indicate a persistence task that is still registered even though its payload has been eliminated. This event is a useful starting point for cleaning up stale attacker-created tasks that security tools have defanged but not fully removed. Correlate with EID 106 to retrieve the original task definition and the account that created it.",
+      "category": "Task Execution",
+      "tags": [
+        "scheduled-task",
+        "execution",
+        "persistence",
+        "residual-artifact"
+      ],
+      "relatedEventIds": [
+        {
+          "id": 101,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 106,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 141,
+          "log": "TaskScheduler"
+        },
+        {
+          "id": 4698,
+          "log": "Security"
+        }
+      ],
+      "mitreAttack": [
+        {
+          "techniqueId": "T1053.005",
+          "techniqueName": "Scheduled Task/Job: Scheduled Task",
+          "tactics": [
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
+            },
+            {
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
+            }
+          ]
+        }
+      ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "ActionName (missing executable path) is the primary artifact — paths in Temp, AppData, or ProgramData that no longer exist indicate a payload that was cleaned up by a security tool",
+          "Correlate TaskName with EID 106 to retrieve the original task definition and identify when it was created and by which account",
+          "Repeated failures for the same task over days or weeks indicate a stale attacker task that should be manually reviewed and removed",
+          "The task itself (EID 106 registered but no EID 141 deletion) may still be a persistence risk if the attacker can re-drop the payload"
+        ],
+        "commonFalsePositives": [
+          "Software that registers tasks before fully deploying its binaries",
+          "Tasks that reference paths moved or renamed during a software update or uninstall",
+          "Portable applications removed by the user without unregistering their scheduled tasks"
+        ]
+      },
+      "source": {
+        "name": "Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
+      },
+      "detectionRules": [
+        {
+          "platform": "KQL",
+          "title": "Scheduled Task Failing with Missing Executable",
+          "rule": "Event\n| where Source == \"Microsoft-Windows-TaskScheduler\"\n| where EventID == 126\n| parse RenderedDescription with * \"Task Name: \" TaskName \"\\n\" *\n| summarize FailureCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by TaskName, Computer\n| where FailureCount > 3\n| project Computer, TaskName, FailureCount, FirstSeen, LastSeen",
+          "notes": "Tasks that repeatedly fail over multiple days indicate a stale persistence mechanism whose payload was removed but whose task definition was not cleaned up."
+        },
+        {
+          "platform": "Sigma",
+          "title": "Scheduled Task Action Executable Not Found",
+          "rule": "title: Scheduled Task Action Executable Not Found\nstatus: experimental\nlogsource:\n    product: windows\n    service: taskscheduler\ndetection:\n    selection:\n        EventID: 126\n    condition: selection\nfalsepositives:\n    - Software deploying tasks before binaries are fully installed\n    - Stale tasks from uninstalled software\nlevel: low",
+          "notes": "Correlate with EID 106 to determine when the task was created and by which account. Recurring failures for the same task over multiple days warrant manual investigation and task removal."
+        }
+      ],
+      "volumeIndicator": "low",
+      "windowsVersions": {
+        "minVersion": "Windows Vista / Server 2008"
+      },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the task whose action failed; correlate with EID 106 to review the original task definition"
+        },
+        {
+          "name": "ActionName",
+          "xpath": "EventData/Data[@Name='ActionName']",
+          "description": "Path of the executable that could not be found; paths in user-writable directories that no longer exist indicate a cleaned-up attacker payload"
+        }
+      ],
+      "lastReviewed": "2026-04-11"
     },
     {
       "id": 140,
