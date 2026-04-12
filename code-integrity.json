@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Code Integrity",
-    "version": "1.3.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/code-integrity.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Warning",
       "title": "Unsigned kernel module loaded",
       "summary": "An unsigned or untrusted kernel module was detected loading.",
-      "details": "Generated when the Windows Code Integrity component detects that a kernel module (driver) that does not meet signing requirements has been loaded. Key fields: FileName (the module path) and ProcessNameBuffer (the process attempting the load). This event does not necessarily mean the load was blocked — it indicates detection. This is the primary detection signal for Bring Your Own Vulnerable Driver (BYOVD) attacks (T1068), where adversaries load a signed but vulnerable driver to exploit it for privilege escalation or to disable security tools. The FileName path is the highest-value pivot — evaluate against known vulnerable driver lists (e.g., LOLDrivers).",
+      "details": "Generated when the Windows Code Integrity component detects that a kernel module (driver) that does not meet signing requirements has been loaded. This event does not necessarily mean the load was blocked -- it indicates detection. It is the primary detection signal for Bring Your Own Vulnerable Driver (BYOVD) attacks, where adversaries load a signed but vulnerable driver to exploit it for privilege escalation or to disable security tools.",
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -84,6 +84,18 @@
           "Kernel debugging environments with test signing mode enabled"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the kernel module that was detected loading"
+        },
+        {
+          "name": "ProcessNameBuffer",
+          "xpath": "EventData/Data[@Name='ProcessNameBuffer']",
+          "description": "Process that attempted to load the kernel module"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -102,7 +114,7 @@
       "level": "Warning",
       "title": "File integrity check failed",
       "summary": "Code Integrity could not verify the integrity of a file.",
-      "details": "Generated when Code Integrity is unable to verify the integrity of a file (e.g., due to a missing or inaccessible catalog, corrupted signature, or hash mismatch). Key fields: FileName and the error code. This event differs from EID 3033 (policy block) in that it indicates a verification failure rather than a policy decision. File integrity check failures on system binaries or security tools may indicate tampering, binary replacement, or in-memory patching. Repeated failures on a specific file path warrant inspection of the file's hash and signature.",
+      "details": "Generated when Code Integrity is unable to verify the integrity of a file (e.g., due to a missing or inaccessible catalog, corrupted signature, or hash mismatch). This event differs from EID 3033 (policy block) in that it indicates a verification failure rather than a policy decision. File integrity check failures on system binaries or security tools may indicate tampering, binary replacement, or in-memory patching.",
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -143,6 +155,13 @@
           "Corrupted Windows Update leaving some files with mismatched catalog entries"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file that failed integrity verification"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -161,7 +180,7 @@
       "level": "Warning",
       "title": "File hash not found in trusted catalog",
       "summary": "The hash of a file was not found in any trusted catalog.",
-      "details": "Generated when Code Integrity cannot find the hash of a file in any trusted catalog file (.cat), meaning the file cannot be verified as genuine. Key fields: FileName. Unlike a signature failure, this indicates the file is not catalogued at all — it may be a novel file (malware), a renamed legitimate binary, or a file from a software package whose catalog has not been installed. This event is commonly seen with user-mode binaries in WDAC enforcement environments. For kernel-mode drivers, this is a strong indicator the driver is not part of any trusted package.",
+      "details": "Generated when Code Integrity cannot find the hash of a file in any trusted catalog file (.cat), meaning the file cannot be verified as genuine. Unlike a signature failure, this indicates the file is not catalogued at all -- it may be a novel file, a renamed legitimate binary, or a file from a software package whose catalog has not been installed. This event is commonly seen with user-mode binaries in WDAC enforcement environments. For kernel-mode drivers, it is a strong indicator the driver is not part of any trusted package.",
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -202,6 +221,13 @@
           "Developer tools and test binaries not included in any published catalog"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file whose hash was not found in any trusted catalog"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -220,7 +246,7 @@
       "level": "Warning",
       "title": "Code Integrity blocked unsigned file (enforcement)",
       "summary": "Code Integrity blocked a file from loading because it did not meet signing level requirements.",
-      "details": "Generated when Code Integrity actively blocks a file from loading because it does not meet the required signing level. Key fields: FileName, ProcessNameBuffer, and RequestedPolicy. This is the enforcement-mode counterpart to EID 3034 (audit). This event fires for both kernel-mode (driver) and user-mode (DLL/EXE) blocks depending on the active policy. For BYOVD investigation, a block on a kernel driver is the critical signal — it indicates the attacker attempted to load a driver and was stopped by Code Integrity or WDAC. Correlate with EID 3001 to determine whether an earlier detection event preceded the block.",
+      "details": "Generated when Code Integrity actively blocks a file from loading because it does not meet the required signing level. This is the enforcement-mode counterpart to EID 3034 (audit). This event fires for both kernel-mode (driver) and user-mode (DLL/EXE) blocks depending on the active policy. For BYOVD scenarios, a block on a kernel driver indicates the system prevented an unsigned or improperly signed driver load.",
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -281,6 +307,23 @@
           "Development or test environments where drivers are built locally without valid signatures"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file that was blocked from loading"
+        },
+        {
+          "name": "ProcessNameBuffer",
+          "xpath": "EventData/Data[@Name='ProcessNameBuffer']",
+          "description": "Process that attempted to load the blocked file"
+        },
+        {
+          "name": "RequestedPolicy",
+          "xpath": "EventData/Data[@Name='RequestedPolicy']",
+          "description": "The signing level required by the active policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -299,7 +342,7 @@
       "level": "Information",
       "title": "Code Integrity audit: file would have been blocked",
       "summary": "In audit mode, Code Integrity detected a file that would have been blocked under enforcement.",
-      "details": "Generated in audit mode (WDAC policy set to Audit Only) when Code Integrity detects a file that would have been blocked if enforcement were active. Key fields: FileName and ProcessNameBuffer. This event is used during WDAC policy deployment to identify what would break before switching to enforcement mode. In an incident response context, the presence of EID 3034 entries for suspicious files reveals that Code Integrity was in audit mode when an attacker loaded unsigned code — the load was not blocked. This event is critical for understanding WDAC posture gaps.",
+      "details": "Generated in audit mode (WDAC policy set to Audit Only) when Code Integrity detects a file that would have been blocked if enforcement were active. This event is used during WDAC policy deployment to identify what would break before switching to enforcement mode. Unlike EID 3033, the file load was permitted because enforcement was not active.",
       "prerequisites": [
         {
           "type": "policy",
@@ -355,6 +398,18 @@
           "Internally developed software not yet added to the WDAC allow list"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file that would have been blocked under enforcement"
+        },
+        {
+          "name": "ProcessNameBuffer",
+          "xpath": "EventData/Data[@Name='ProcessNameBuffer']",
+          "description": "Process that loaded the file"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -373,7 +428,7 @@
       "level": "Warning",
       "title": "WHQL policy violation",
       "summary": "A file failed the Windows Hardware Quality Labs signing policy check.",
-      "details": "Generated when a kernel-mode driver fails the WHQL (Windows Hardware Quality Labs) signing enforcement check. WHQL signing is required for kernel drivers on Windows and indicates the driver has passed Microsoft hardware certification. A WHQL policy violation means the driver either lacks WHQL certification, has an expired signature, or uses a signing certificate not trusted for kernel code. This event is directly relevant to BYOVD attacks — adversaries frequently use drivers with expired or revoked WHQL certificates. Key field: FileName. Correlate with EID 3001 and EID 3033 for the same file path.",
+      "details": "Generated when a kernel-mode driver fails the WHQL (Windows Hardware Quality Labs) signing enforcement check. WHQL signing is required for kernel drivers on Windows and indicates the driver has passed Microsoft hardware certification. A WHQL policy violation means the driver either lacks WHQL certification, has an expired signature, or uses a signing certificate not trusted for kernel code. This event is directly relevant to BYOVD attacks, as adversaries frequently use drivers with expired or revoked WHQL certificates.",
       "category": "Code Integrity",
       "tags": [
         "code-integrity",
@@ -415,6 +470,13 @@
           "Hardware manufacturer drivers not submitted for WHQL certification (common with less mainstream devices)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the driver that failed the WHQL signing check"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -433,7 +495,7 @@
       "level": "Information",
       "title": "WDAC policy audit event",
       "summary": "Windows Defender Application Control detected a file that would be blocked by the active policy (audit mode).",
-      "details": "Generated when a Windows Defender Application Control (WDAC) policy in audit mode detects a file that would be blocked if enforcement were active. Key fields: FileName, ProcessNameBuffer, PolicyName, and PolicyId. EID 3076 is the WDAC-specific audit event, whereas EID 3034 is the general Code Integrity audit event. In environments with named WDAC policies, PolicyName helps attribute the detection to the relevant rule set. This event is commonly used for WDAC policy tuning but in IR contexts reveals unsigned or untrusted code that executed while WDAC was not enforcing.",
+      "details": "Generated when a Windows Defender Application Control (WDAC) policy in audit mode detects a file that would be blocked if enforcement were active. EID 3076 is the WDAC-specific audit event, whereas EID 3034 is the general Code Integrity audit event. In environments with named WDAC policies, the PolicyName field helps attribute the detection to the relevant rule set. This event is commonly used for WDAC policy tuning.",
       "prerequisites": [
         {
           "type": "policy",
@@ -485,6 +547,28 @@
           "Scripting interpreters (python.exe, node.exe) executing user scripts not yet in the allow list"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file detected in audit mode"
+        },
+        {
+          "name": "ProcessNameBuffer",
+          "xpath": "EventData/Data[@Name='ProcessNameBuffer']",
+          "description": "Process that loaded the file"
+        },
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "Name of the WDAC policy that triggered the audit event"
+        },
+        {
+          "name": "PolicyId",
+          "xpath": "EventData/Data[@Name='PolicyId']",
+          "description": "Identifier of the WDAC policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -503,7 +587,7 @@
       "level": "Warning",
       "title": "WDAC policy enforcement block",
       "summary": "Windows Defender Application Control blocked a file from executing under the active enforcement policy.",
-      "details": "Generated when a Windows Defender Application Control (WDAC) policy in enforcement mode blocks a file from loading or executing. Key fields: FileName, ProcessNameBuffer, PolicyName, and PolicyId. This is the enforcement-mode counterpart to EID 3076. EID 3077 indicates the file was actually blocked — unlike audit mode, the load did not succeed. In an attacker context, repeated EID 3077 events for the same file indicate the attacker is hitting WDAC policy repeatedly — they may subsequently attempt T1553.006 (Code Signing Policy Modification) to disable or bypass the active policy. Correlate with EID 3089 for full event correlation.",
+      "details": "Generated when a Windows Defender Application Control (WDAC) policy in enforcement mode blocks a file from loading or executing. This is the enforcement-mode counterpart to EID 3076. EID 3077 indicates the file was actually blocked -- unlike audit mode, the load did not succeed. Repeated events for the same file indicate persistent load attempts against the active WDAC policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -565,6 +649,28 @@
           "Portable applications or scripts that are not signed and not yet catalogued"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file that was blocked"
+        },
+        {
+          "name": "ProcessNameBuffer",
+          "xpath": "EventData/Data[@Name='ProcessNameBuffer']",
+          "description": "Process that attempted to load the blocked file"
+        },
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "Name of the WDAC policy that blocked the file"
+        },
+        {
+          "name": "PolicyId",
+          "xpath": "EventData/Data[@Name='PolicyId']",
+          "description": "Identifier of the WDAC policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -583,7 +689,7 @@
       "level": "Information",
       "title": "WDAC correlated event",
       "summary": "A correlated WDAC event providing supplemental context for a policy audit or enforcement event.",
-      "details": "Generated alongside EID 3076 (audit) or EID 3077 (enforcement) events to provide supplemental information about the WDAC policy decision. Key fields: FileName, PolicyName, PolicyId, and additional signing or hash details not included in the primary event. EID 3089 is typically generated in a 1:1 ratio with EID 3076/3077 and provides additional forensic context for the same file load. When investigating WDAC events, always review the correlated EID 3089 event for complete information about the file, signing state, and applicable policy.",
+      "details": "Generated alongside EID 3076 (audit) or EID 3077 (enforcement) events to provide supplemental information about the WDAC policy decision. Includes additional signing or hash details not included in the primary event. EID 3089 is typically generated in a 1:1 ratio with EID 3076/3077 and provides additional context for the same file load.",
       "category": "WDAC Policy",
       "tags": [
         "code-integrity",
@@ -623,6 +729,23 @@
           "Generated as a side-effect of any EID 3076/3077 event — treat as supplemental data, not an independent alert"
         ]
       },
+      "keyFields": [
+        {
+          "name": "FileName",
+          "xpath": "EventData/Data[@Name='FileName']",
+          "description": "Path of the file from the correlated event"
+        },
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "Name of the WDAC policy"
+        },
+        {
+          "name": "PolicyId",
+          "xpath": "EventData/Data[@Name='PolicyId']",
+          "description": "Identifier linking to the specific WDAC policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"
@@ -641,7 +764,7 @@
       "level": "Information",
       "title": "Code Integrity policy activated or deactivated",
       "summary": "A Code Integrity or WDAC policy was loaded, refreshed, or deactivated.",
-      "details": "Generated when a Code Integrity or Windows Defender Application Control (WDAC) policy is activated, refreshed, or deactivated on the system. Key fields: PolicyNameBuffer, PolicyId, and whether the policy is being enabled or disabled. Adversaries may attempt to disable or replace WDAC policies as part of T1553.006 (Code Signing Policy Modification) to allow unsigned or malicious code to run. A policy deactivation event — especially if followed immediately by EID 3034/3076 audit events that previously would have been enforced blocks — is a high-confidence indicator of intentional defense impairment. This event should also fire after legitimate policy deployments.",
+      "details": "Generated when a Code Integrity or Windows Defender Application Control (WDAC) policy is activated, refreshed, or deactivated on the system. Records the policy name, ID, and whether the policy is being enabled or disabled. This event fires after both legitimate policy deployments and unauthorized policy changes.",
       "category": "WDAC Policy",
       "tags": [
         "code-integrity",
@@ -682,6 +805,18 @@
           "Group Policy refresh applying a new WDAC policy to managed endpoints"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PolicyNameBuffer",
+          "xpath": "EventData/Data[@Name='PolicyNameBuffer']",
+          "description": "Name of the policy that was activated, refreshed, or deactivated"
+        },
+        {
+          "name": "PolicyId",
+          "xpath": "EventData/Data[@Name='PolicyId']",
+          "description": "Identifier of the policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/windows-defender-application-control/"

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WinRM",
-    "version": "1.5.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.6.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/winrm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "WSMan session initialized",
       "summary": "A WinRM/WSMan session was created on this host.",
-      "details": "Generated on the destination host when a WSMan (WinRM) session is successfully initialized. This is the primary inbound WinRM connection indicator. Key fields: connection URI (identifies the endpoint being accessed, e.g., wsman://hostname/wsman) and the user context. WinRM is the transport layer for PowerShell remoting (Enter-PSSession, Invoke-Command), remote CIM/WMI operations, and tools such as evil-winrm. An inbound EID 6 on a non-management host from an unexpected source is a strong lateral movement indicator. Correlate with Security EID 4624 LogonType 3 (network logon) on the same host to confirm authentication.",
+      "details": "Generated on the destination host when a WSMan (WinRM) session is successfully initialized. This is the primary inbound WinRM connection indicator. WinRM is the transport layer for PowerShell remoting (Enter-PSSession, Invoke-Command), remote CIM/WMI operations, and tools such as evil-winrm. An inbound EID 6 on a non-management host from an unexpected source is a strong lateral movement indicator.",
       "category": "WinRM Session",
       "tags": [
         "winrm",
@@ -76,6 +76,13 @@
           "Ansible, DSC, or other configuration management tools using WinRM"
         ]
       },
+      "keyFields": [
+        {
+          "name": "connectionURI",
+          "xpath": "EventData/Data[@Name='connectionURI']",
+          "description": "WinRM endpoint being accessed (e.g., wsman://hostname/wsman)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
@@ -94,7 +101,7 @@
       "level": "Information",
       "title": "WSMan session deinitialized",
       "summary": "A WinRM/WSMan session was closed on this host.",
-      "details": "Generated when an established WSMan session ends. Correlate with EID 6 using the session identifier to calculate session duration. A session that was opened (EID 6) but shows no corresponding EID 8 may indicate an abnormally terminated or still-active connection. Session duration can help distinguish interactive lateral movement (longer sessions) from automated one-shot command execution (very short sessions).",
+      "details": "Generated when an established WSMan session ends. A session that was opened (EID 6) but shows no corresponding EID 8 may indicate an abnormally terminated or still-active connection. Session duration can help distinguish interactive lateral movement (longer sessions) from automated one-shot command execution (very short sessions).",
       "category": "WinRM Session",
       "tags": [
         "winrm",
@@ -150,7 +157,7 @@
       "level": "Information",
       "title": "WSMan session created",
       "summary": "A WinRM shell session was created on this host.",
-      "details": "Generated when a WSMan shell is created within an established WinRM session. Represents the creation of an interactive or scripted shell environment over WinRM, as opposed to just a transport session (EID 6). Tools such as evil-winrm and PowerShell's Enter-PSSession will generate this event. Key field: the ResourceUri, which indicates the type of shell created (e.g., http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd for a command shell, or a PowerShell endpoint URI).",
+      "details": "Generated when a WSMan shell is created within an established WinRM session. Represents the creation of an interactive or scripted shell environment over WinRM, as opposed to just a transport session (EID 6). Tools such as evil-winrm and PowerShell's Enter-PSSession will generate this event.",
       "category": "WinRM Session",
       "tags": [
         "winrm",
@@ -199,6 +206,13 @@
           "Automation tools creating WinRM shells for remote task execution"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ResourceUri",
+          "xpath": "EventData/Data[@Name='ResourceUri']",
+          "description": "Type of shell created (e.g., cmd shell URI or PowerShell endpoint URI)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
@@ -217,7 +231,7 @@
       "level": "Error",
       "title": "WSMan authentication failed",
       "summary": "WinRM authentication attempt failed on this host.",
-      "details": "Generated on the destination host when a WinRM authentication attempt fails. Key fields: the username that failed, the authentication mechanism attempted (Kerberos, NTLM, Basic, CredSSP), and the source. Multiple EID 132 events from the same source indicate credential spraying or brute-force attempts over WinRM. NTLM authentication failures may indicate a pass-the-hash attempt where the supplied hash did not match. Correlate with EID 168 (successful authentication) to determine whether a subsequent attempt succeeded — a 132 followed closely by a 168 from the same source may indicate a successful brute-force.",
+      "details": "Generated on the destination host when a WinRM authentication attempt fails. Multiple EID 132 events from the same source indicate credential spraying or brute-force attempts over WinRM. NTLM authentication failures may indicate a pass-the-hash attempt where the supplied hash did not match.",
       "category": "WinRM Authentication",
       "tags": [
         "winrm",
@@ -273,6 +287,18 @@
           "Service accounts with expired passwords triggering auth failures"
         ]
       },
+      "keyFields": [
+        {
+          "name": "UserName",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "Account that failed authentication"
+        },
+        {
+          "name": "AuthenticationMechanism",
+          "xpath": "EventData/Data[@Name='AuthenticationMechanism']",
+          "description": "Authentication method attempted (Kerberos, NTLM, Basic, CredSSP)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
@@ -291,7 +317,7 @@
       "level": "Error",
       "title": "WSMan operation failed",
       "summary": "A WinRM/WSMan operation failed on this host.",
-      "details": "Generated when a WSMan operation fails, such as a shell creation failure, a command execution error, or a transport-level problem. This event is distinct from authentication failures (EID 132) and records operational errors after a session may already be established. Key fields: the operation type and error code. Frequent EID 142 events from a single source may indicate a tool attempting to interact with WinRM using an incorrect configuration, or a network-level issue affecting an active lateral movement session.",
+      "details": "Generated when a WSMan operation fails, such as a shell creation failure, a command execution error, or a transport-level problem. This event is distinct from authentication failures (EID 132) and records operational errors after a session may already be established. Frequent EID 142 events from a single source may indicate a tool attempting to interact with WinRM using an incorrect configuration, or a network-level issue affecting an active lateral movement session.",
       "category": "WinRM Session",
       "tags": [
         "winrm",
@@ -336,6 +362,18 @@
           "Misconfigured WinRM listeners or firewall rules on the target host"
         ]
       },
+      "keyFields": [
+        {
+          "name": "OperationType",
+          "xpath": "EventData/Data[@Name='OperationType']",
+          "description": "Type of WSMan operation that failed"
+        },
+        {
+          "name": "ErrorCode",
+          "xpath": "EventData/Data[@Name='ErrorCode']",
+          "description": "Error code indicating the failure reason"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"
@@ -354,7 +392,7 @@
       "level": "Information",
       "title": "WSMan user authentication succeeded",
       "summary": "WinRM user authentication was successful.",
-      "details": "Generated on the destination host when a user successfully authenticates to WinRM. Key fields: the authenticated username and authentication mechanism (e.g., Kerberos, NTLM, Basic, CredSSP). CredSSP authentication is particularly noteworthy as it delegates full credentials to the remote host, making it a target for credential theft. NTLM authentication in environments that should use Kerberos may indicate pass-the-hash or a non-domain-joined source. Correlate with EID 6 and Security EID 4624 to build the full authentication and session picture.",
+      "details": "Generated on the destination host when a user successfully authenticates to WinRM. CredSSP authentication is particularly noteworthy as it delegates full credentials to the remote host, making it a target for credential theft. NTLM authentication in environments that should use Kerberos may indicate pass-the-hash or a non-domain-joined source.",
       "category": "WinRM Authentication",
       "tags": [
         "winrm",
@@ -399,6 +437,18 @@
           "Service accounts used by configuration management tools"
         ]
       },
+      "keyFields": [
+        {
+          "name": "UserName",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "Account that successfully authenticated"
+        },
+        {
+          "name": "AuthenticationMechanism",
+          "xpath": "EventData/Data[@Name='AuthenticationMechanism']",
+          "description": "Authentication method used (Kerberos, NTLM, Basic, CredSSP)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/winrm/portal"

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Remote Desktop Services (Terminal Services)",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-11T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/rdp-terminalservices.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: Session logon succeeded",
       "summary": "RDP session logon succeeded on the target host.",
-      "details": "Generated on the target host when a user successfully logs on via RDP. Key fields: User (DOMAIN\\username), SessionID, and Address (source IP of the connecting client). This is one of the most reliable indicators of a completed RDP interactive logon and should be correlated with Security 4624 LogonType 10 using the same username and timestamp. The Address field is critical for attribution and is present even when NLA is used.",
+      "details": "Generated on the target host when a user successfully logs on via RDP. This is one of the most reliable indicators of a completed RDP interactive logon. The Address field is present even when NLA is used.",
       "category": "RDP Session",
       "tags": [
         "rdp",
@@ -80,6 +80,23 @@
           "Jump server or bastion host connections"
         ]
       },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "The DOMAIN\\username of the user who logged on."
+        },
+        {
+          "name": "SessionID",
+          "xpath": "EventData/Data[@Name='SessionID']",
+          "description": "The session identifier for the RDP session."
+        },
+        {
+          "name": "Address",
+          "xpath": "EventData/Data[@Name='Address']",
+          "description": "Source IP address of the connecting client."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -111,7 +128,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: Shell start notification received",
       "summary": "RDP session shell successfully started.",
-      "details": "Generated immediately after EID 21 when the user's shell (explorer.exe or equivalent) starts within the RDP session. Confirms that the logon progressed to a full interactive desktop, not just an authentication handshake. Key fields: User and SessionID. Absence of this event after EID 21 may indicate session was terminated before the desktop initialized.",
+      "details": "Generated immediately after EID 21 when the user's shell (explorer.exe or equivalent) starts within the RDP session. Confirms that the logon progressed to a full interactive desktop, not just an authentication handshake. Absence of this event after EID 21 may indicate the session was terminated before the desktop initialized.",
       "category": "RDP Session",
       "tags": [
         "rdp",
@@ -153,6 +170,18 @@
           "Normal RDP logon activity"
         ]
       },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "The user whose shell started."
+        },
+        {
+          "name": "SessionID",
+          "xpath": "EventData/Data[@Name='SessionID']",
+          "description": "The session identifier."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -171,7 +200,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: Session logoff succeeded",
       "summary": "RDP session logoff completed successfully.",
-      "details": "Generated when a user fully logs off from an RDP session (session is destroyed). Key fields: User and SessionID. Distinguish from EID 24 (disconnect): a logoff terminates the session and releases all resources, whereas a disconnect leaves the session running on the server. Correlate with EID 21 using SessionID to measure full session duration.",
+      "details": "Generated when a user fully logs off from an RDP session (session is destroyed). Distinct from EID 24 (disconnect): a logoff terminates the session and releases all resources, whereas a disconnect leaves the session running on the server.",
       "category": "RDP Session",
       "tags": [
         "rdp",
@@ -221,6 +250,18 @@
           "Normal end-of-session activity"
         ]
       },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "The user who logged off."
+        },
+        {
+          "name": "SessionID",
+          "xpath": "EventData/Data[@Name='SessionID']",
+          "description": "The session identifier."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -239,7 +280,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: Session has been disconnected",
       "summary": "RDP session disconnected but not logged off.",
-      "details": "Generated when the RDP client disconnects without logging off — the session remains running on the server and can be reconnected. Key fields: User, SessionID, and Address (source IP of the disconnecting client). A session in the disconnected state is still accessible via the console or a reconnecting RDP client. Monitor for long-lived disconnected sessions as they may persist attacker access.",
+      "details": "Generated when the RDP client disconnects without logging off -- the session remains running on the server and can be reconnected. A session in the disconnected state is still accessible via the console or a reconnecting RDP client.",
       "category": "RDP Session",
       "tags": [
         "rdp",
@@ -284,6 +325,23 @@
           "Users who close the RDP window without formally logging off"
         ]
       },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "The user whose session was disconnected."
+        },
+        {
+          "name": "SessionID",
+          "xpath": "EventData/Data[@Name='SessionID']",
+          "description": "The session identifier."
+        },
+        {
+          "name": "Address",
+          "xpath": "EventData/Data[@Name='Address']",
+          "description": "Source IP of the disconnecting client."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -302,7 +360,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: Session reconnection succeeded",
       "summary": "RDP client reconnected to an existing disconnected session.",
-      "details": "Generated when an RDP client successfully reconnects to a previously disconnected session (a session that was preserved after EID 24). Key fields: User, SessionID, and Address (source IP of the reconnecting client). Unlike EID 21 (new logon), EID 25 indicates resumption of an existing session without a fresh authentication. Monitor for reconnections from a different source IP than the original session to detect session hijacking or unauthorized access to abandoned sessions.",
+      "details": "Generated when an RDP client successfully reconnects to a previously disconnected session (a session that was preserved after EID 24). Unlike EID 21 (new logon), EID 25 indicates resumption of an existing session without a fresh authentication.",
       "category": "RDP Session",
       "tags": [
         "rdp",
@@ -346,6 +404,23 @@
           "Admin resuming an existing session from a different workstation"
         ]
       },
+      "keyFields": [
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "The user who reconnected."
+        },
+        {
+          "name": "SessionID",
+          "xpath": "EventData/Data[@Name='SessionID']",
+          "description": "The session identifier being reconnected."
+        },
+        {
+          "name": "Address",
+          "xpath": "EventData/Data[@Name='Address']",
+          "description": "Source IP of the reconnecting client."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -364,7 +439,7 @@
       "level": "Information",
       "title": "RD Gateway service started",
       "summary": "The Remote Desktop Gateway service started successfully.",
-      "details": "Generated when the Remote Desktop Gateway service starts. This event confirms the RD Gateway is operational. From a security monitoring perspective, unexpected restarts of the RD Gateway service — particularly outside maintenance windows or following configuration changes — may indicate tampering with the gateway infrastructure or a response to an attack. Correlate with System log EID 7036 (service state change) for the same service and with any preceding errors or configuration change events.",
+      "details": "Generated when the Remote Desktop Gateway service starts. This event confirms the RD Gateway is operational. Unexpected restarts of the RD Gateway service -- particularly outside maintenance windows or following configuration changes -- may indicate tampering with the gateway infrastructure.",
       "category": "RD Gateway Service",
       "tags": [
         "rdp",
@@ -382,6 +457,11 @@
           "log": "TerminalServices"
         }
       ],
+      "notesGuidance": {
+        "investigationPivots": [
+          "Correlate with System log EID 7036 (service state change) for the same service and with any preceding errors or configuration change events"
+        ]
+      },
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753352(v=ws.10)"
@@ -400,7 +480,7 @@
       "level": "Information",
       "title": "RD Gateway connection authorized (CAP passed)",
       "summary": "A user met the connection authorization policy and was permitted to connect through the RD Gateway.",
-      "details": "Generated when a user successfully passes the Connection Authorization Policy (CAP) evaluation at the RD Gateway. CAP controls who is allowed to connect through the gateway (authentication, group membership, device health). Key fields: Username, ClientAddress (external source IP), and the CAP name that was satisfied. This event represents successful external authentication to the RD Gateway and is the primary event for baselining who is accessing the gateway. Every EID 200 event should be expected — unexpected usernames, off-hours connections, or connections from unusual geographic locations or IP ranges warrant investigation. Correlate with EID 302 to confirm the user also reached an internal resource.",
+      "details": "Generated when a user successfully passes the Connection Authorization Policy (CAP) evaluation at the RD Gateway. CAP controls who is allowed to connect through the gateway (authentication, group membership, device health). This event represents successful external authentication to the RD Gateway and is the primary event for baselining who is accessing the gateway.",
       "category": "RD Gateway Authorization",
       "tags": [
         "rdp",
@@ -442,9 +522,26 @@
           "High volume of EID 200 events from a single ClientAddress across multiple usernames may indicate credential stuffing success"
         ],
         "commonFalsePositives": [
-          "Legitimate remote workers connecting from home or travel — ClientAddress will vary"
+          "Legitimate remote workers connecting from home or travel \u2014 ClientAddress will vary"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Username",
+          "xpath": "EventData/Data[@Name='Username']",
+          "description": "The authenticated username."
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "External source IP of the connecting client."
+        },
+        {
+          "name": "CAPName",
+          "xpath": "EventData/Data[@Name='CAPName']",
+          "description": "The Connection Authorization Policy that was satisfied."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
@@ -463,7 +560,7 @@
       "level": "Error",
       "title": "RD Gateway connection denied (CAP failed)",
       "summary": "A user failed the connection authorization policy and was denied access through the RD Gateway.",
-      "details": "Generated when a user fails the Connection Authorization Policy evaluation at the RD Gateway. CAP failure can occur due to authentication failure (wrong credentials), lack of group membership in the allowed user group, or device health policy failure. Key fields: Username, ClientAddress (external source IP), and the reason for denial. This is the primary event for detecting brute-force and credential stuffing attacks against the RD Gateway from the internet. High volumes of EID 201 events from a single ClientAddress or targeting a single Username indicate an active attack. Unlike Security log EID 4625 (which logs failed logons on the internal host), EID 201 is logged on the gateway itself — visible before authentication reaches any internal system.",
+      "details": "Generated when a user fails the Connection Authorization Policy evaluation at the RD Gateway. CAP failure can occur due to authentication failure (wrong credentials), lack of group membership in the allowed user group, or device health policy failure. This is the primary event for detecting brute-force and credential stuffing attacks against the RD Gateway from the internet. Unlike Security log EID 4625 (which logs failed logons on the internal host), EID 201 is logged on the gateway itself -- visible before authentication reaches any internal system.",
       "category": "RD Gateway Authorization",
       "tags": [
         "rdp",
@@ -511,7 +608,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Count EID 201 events per ClientAddress per hour — thresholds above 10-20 per hour from one IP indicate automated spraying",
+          "Count EID 201 events per ClientAddress per hour \u2014 thresholds above 10-20 per hour from one IP indicate automated spraying",
           "Multiple usernames targeted from a single ClientAddress = credential spray; single username from multiple IPs = distributed brute-force",
           "A sequence of EID 201 events followed by a single EID 200 from the same ClientAddress confirms a successful attack after failures"
         ],
@@ -520,6 +617,23 @@
           "Misconfigured RD Gateway client software sending incorrect authentication material"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Username",
+          "xpath": "EventData/Data[@Name='Username']",
+          "description": "The username that failed authentication."
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "External source IP of the connection attempt."
+        },
+        {
+          "name": "DenialReason",
+          "xpath": "EventData/Data[@Name='DenialReason']",
+          "description": "The reason the connection was denied."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775130(v=ws.10)"
@@ -538,7 +652,7 @@
       "level": "Error",
       "title": "RD Gateway connection denied (NAP health policy failed)",
       "summary": "A user was denied access through the RD Gateway because their device failed the Network Access Protection health policy.",
-      "details": "Generated when a user passes authentication but is denied access because their device fails the Network Access Protection (NAP) health policy check configured at the RD Gateway. NAP checks can enforce requirements such as firewall status, AV signature currency, OS patch level, or custom health validators. Key fields: Username, ClientAddress, and the health policy that failed. NAP failures can indicate a user is connecting from an unmanaged or out-of-compliance device. From a security perspective, this event can also flag compromised devices that have had security controls (AV, firewall) disabled — an attacker accessing a victim account from their own device will fail NAP checks enforced by the organization.",
+      "details": "Generated when a user passes authentication but is denied access because their device fails the Network Access Protection (NAP) health policy check configured at the RD Gateway. NAP checks can enforce requirements such as firewall status, AV signature currency, OS patch level, or custom health validators. NAP failures can indicate a user connecting from an unmanaged or out-of-compliance device, or a compromised device that has had security controls (AV, firewall) disabled.",
       "category": "RD Gateway Authorization",
       "tags": [
         "rdp",
@@ -571,8 +685,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the health policy that failed — AV disabled or firewall off on a remote device is a significant indicator",
-          "Correlate the Username with the device the user normally connects from — a NAP failure from a new device may indicate account compromise",
+          "Identify the health policy that failed \u2014 AV disabled or firewall off on a remote device is a significant indicator",
+          "Correlate the Username with the device the user normally connects from \u2014 a NAP failure from a new device may indicate account compromise",
           "Repeated NAP failures followed by a NAP success from the same ClientAddress may indicate policy bypass attempts"
         ],
         "commonFalsePositives": [
@@ -580,6 +694,23 @@
           "Devices with temporarily expired AV signatures or pending Windows updates"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Username",
+          "xpath": "EventData/Data[@Name='Username']",
+          "description": "The authenticated username."
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "External source IP of the connection."
+        },
+        {
+          "name": "HealthPolicy",
+          "xpath": "EventData/Data[@Name='HealthPolicy']",
+          "description": "The NAP health policy that the device failed."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc727350(v=ws.10)"
@@ -598,7 +729,7 @@
       "level": "Information",
       "title": "Listener RDP-Tcp received a connection",
       "summary": "RDP listener received an inbound TCP connection.",
-      "details": "Generated when the RDP listener (RDP-Tcp) accepts an inbound TCP connection on the target host. This is the earliest indicator in the RemoteConnectionManager log that a connection attempt is in progress — it fires before authentication. The event records the source IP of the connecting client. Because it precedes authentication, it will be generated for both successful and failed connection attempts; correlate with EID 1149 on the same source IP to confirm authentication succeeded.",
+      "details": "Generated when the RDP listener (RDP-Tcp) accepts an inbound TCP connection on the target host. This is the earliest indicator in the RemoteConnectionManager log that a connection attempt is in progress -- it fires before authentication. The event records the source IP of the connecting client. Because it precedes authentication, it will be generated for both successful and failed connection attempts.",
       "category": "RDP Connection",
       "tags": [
         "rdp",
@@ -638,6 +769,13 @@
           "RDP health checks from monitoring infrastructure"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ClientIP",
+          "xpath": "EventData/Data[@Name='ClientIP']",
+          "description": "Source IP address of the connecting client."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -656,7 +794,7 @@
       "level": "Error",
       "title": "RD Gateway resource access denied (RAP failed)",
       "summary": "A user passed connection authorization but was denied access to the requested internal resource by the resource authorization policy.",
-      "details": "Generated when a user passes the CAP (connection authorization) but is denied access to a specific internal resource by the Resource Authorization Policy (RAP). RAP controls which internal hosts a user is permitted to reach through the gateway — limiting lateral movement potential even for authenticated users. Key fields: Username, ClientAddress, and the internal resource (TargetServer) that was denied. EID 301 is significant because it logs the specific internal host the user attempted to reach, making it a reconnaissance and lateral movement detection event. An attacker who has compromised an account and authenticated through the gateway (EID 200) may then attempt to reach internal hosts beyond their authorized scope, generating EID 301.",
+      "details": "Generated when a user passes the CAP (connection authorization) but is denied access to a specific internal resource by the Resource Authorization Policy (RAP). RAP controls which internal hosts a user is permitted to reach through the gateway -- limiting lateral movement potential even for authenticated users. This event logs the specific internal host the user attempted to reach, making it a reconnaissance and lateral movement detection event.",
       "category": "RD Gateway Authorization",
       "tags": [
         "rdp",
@@ -689,15 +827,32 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetServer reveals which internal host was probed — attempts to reach domain controllers, file servers, or security tools by non-privileged accounts are critical",
-          "A sequence of EID 200 (CAP pass) → multiple EID 301 (RAP denies to different hosts) from the same session indicates internal reconnaissance via the gateway",
-          "Compare TargetServer against the user's role — accessing systems outside their normal work scope warrants review"
+          "TargetServer reveals which internal host was probed \u2014 attempts to reach domain controllers, file servers, or security tools by non-privileged accounts are critical",
+          "A sequence of EID 200 (CAP pass) \u2192 multiple EID 301 (RAP denies to different hosts) from the same session indicates internal reconnaissance via the gateway",
+          "Compare TargetServer against the user's role \u2014 accessing systems outside their normal work scope warrants review"
         ],
         "commonFalsePositives": [
           "Users who have legitimate access to a system but the RAP was not updated to include their new access requirement",
           "IT administrators testing connectivity to new systems before RAP policies are updated"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Username",
+          "xpath": "EventData/Data[@Name='Username']",
+          "description": "The authenticated username."
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "External source IP."
+        },
+        {
+          "name": "TargetServer",
+          "xpath": "EventData/Data[@Name='TargetServer']",
+          "description": "The internal host the user attempted to reach."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775279(v=ws.10)"
@@ -716,7 +871,7 @@
       "level": "Information",
       "title": "RD Gateway resource connection succeeded (RAP passed)",
       "summary": "A user passed the resource authorization policy and successfully connected to an internal resource through the RD Gateway.",
-      "details": "Generated when a user passes both the CAP (EID 200) and the RAP, and successfully establishes a connection to an internal resource through the gateway. This is the end-to-end success event: the user authenticated, was authorized by connection policy, authorized by resource policy, and reached their destination host. Key fields: Username, ClientAddress (external source IP), and TargetServer (the internal host reached). This event pair — EID 200 + EID 302 — is the primary baseline for RD Gateway activity. Every session should produce both. Anomalies: unexpected TargetServer values, connections outside business hours, or new ClientAddress IPs for a user all warrant investigation.",
+      "details": "Generated when a user passes both the CAP (EID 200) and the RAP, and successfully establishes a connection to an internal resource through the gateway. This is the end-to-end success event: the user authenticated, was authorized by connection policy, authorized by resource policy, and reached their destination host. This event pair -- EID 200 + EID 302 -- is the primary baseline for RD Gateway activity.",
       "category": "RD Gateway Authorization",
       "tags": [
         "rdp",
@@ -767,8 +922,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "TargetServer identifies which internal host was accessed — combine with TerminalServices-LocalSessionManager EID 21 on the target host to confirm session establishment",
-          "Build a baseline of {Username → TargetServer} pairs; connections to new TargetServers for an account indicate scope expansion",
+          "TargetServer identifies which internal host was accessed \u2014 combine with TerminalServices-LocalSessionManager EID 21 on the target host to confirm session establishment",
+          "Build a baseline of {Username \u2192 TargetServer} pairs; connections to new TargetServers for an account indicate scope expansion",
           "ClientAddress pivot: the same external IP connecting as multiple different users is a strong credential sharing or compromise indicator"
         ],
         "commonFalsePositives": [
@@ -776,6 +931,23 @@
           "IT staff accessing multiple servers through the gateway during incident response"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Username",
+          "xpath": "EventData/Data[@Name='Username']",
+          "description": "The authenticated username."
+        },
+        {
+          "name": "ClientAddress",
+          "xpath": "EventData/Data[@Name='ClientAddress']",
+          "description": "External source IP of the connecting client."
+        },
+        {
+          "name": "TargetServer",
+          "xpath": "EventData/Data[@Name='TargetServer']",
+          "description": "The internal host successfully reached through the gateway."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc775263(v=ws.10)"
@@ -794,7 +966,7 @@
       "level": "Information",
       "title": "RDP ClientActiveX is trying to connect to the server",
       "summary": "Outbound RDP connection attempt initiated from this host.",
-      "details": "Generated on the source (client) machine when an outbound RDP connection attempt is initiated. Key field: server (the target hostname or IP address). This is a source-side artifact — it records where this machine connected to, making it critical for tracing lateral movement chains. During an investigation of a compromised host, EID 1024 entries reveal which other systems were targeted for RDP from this machine. Correlate the target value with LocalSessionManager EID 21 on the destination host to confirm the connection was successful.",
+      "details": "Generated on the source (client) machine when an outbound RDP connection attempt is initiated. This is a source-side artifact -- it records where this machine connected to, making it critical for tracing lateral movement chains. During an investigation of a compromised host, EID 1024 entries reveal which other systems were targeted for RDP from this machine.",
       "category": "RDP Client",
       "tags": [
         "rdp",
@@ -825,7 +997,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The server field identifies the RDP target — pivot to that host's LocalSessionManager and RemoteConnectionManager logs",
+          "The server field identifies the RDP target \u2014 pivot to that host's LocalSessionManager and RemoteConnectionManager logs",
           "Multiple EID 1024 entries to different targets from the same host indicate lateral movement",
           "Correlate timestamp with LocalSessionManager EID 21 on the target host to confirm a successful session was established"
         ],
@@ -834,6 +1006,13 @@
           "Jump server connections to managed endpoints"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "The target hostname or IP address of the RDP connection."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -852,7 +1031,7 @@
       "level": "Information",
       "title": "RDP ClientActiveX has been disconnected",
       "summary": "Outbound RDP session ended or was disconnected.",
-      "details": "Generated on the source (client) machine when an RDP session is disconnected. Key fields: server (the target host) and the disconnect reason code. Common reason codes: 0 (local disconnect/user closed), 1 (remote disconnection by server), 2 (transport-level error), 3 (connection lost/network issue), 260 (DNS name lookup failed). Correlate with EID 1024 to calculate the session duration and determine whether the disconnect was user-initiated or unexpected.",
+      "details": "Generated on the source (client) machine when an RDP session is disconnected. Common reason codes: 0 (local disconnect/user closed), 1 (remote disconnection by server), 2 (transport-level error), 3 (connection lost/network issue), 260 (DNS name lookup failed).",
       "category": "RDP Client",
       "tags": [
         "rdp",
@@ -891,6 +1070,18 @@
           "Normal end-of-session disconnects by legitimate users"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "The target host of the disconnected RDP session."
+        },
+        {
+          "name": "ReasonCode",
+          "xpath": "EventData/Data[@Name='ReasonCode']",
+          "description": "Disconnect reason code indicating how the session ended."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -909,7 +1100,7 @@
       "level": "Information",
       "title": "The client has initiated a multi-transport connection to the server",
       "summary": "RDP multi-transport connection established; target IP recorded.",
-      "details": "Generated on the source (client) machine when an RDP multi-transport connection is initiated. Key field: server (IP address of the target). Unlike EID 1024 which may contain a hostname, EID 1102 typically records the resolved IP address, making it useful for cases where EID 1024 only logged a hostname. Not generated for all RDP connections — depends on whether multi-transport (UDP or additional TCP channels) is negotiated. Correlate with EID 1024 to link hostname to IP when both events are present.",
+      "details": "Generated on the source (client) machine when an RDP multi-transport connection is initiated. Unlike EID 1024 which may contain a hostname, EID 1102 typically records the resolved IP address, making it useful for cases where EID 1024 only logged a hostname. Not generated for all RDP connections -- depends on whether multi-transport (UDP or additional TCP channels) is negotiated.",
       "category": "RDP Client",
       "tags": [
         "rdp",
@@ -941,14 +1132,21 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Use the IP address in the server field when EID 1024 only recorded a hostname — helps correlate with network logs",
-          "Not all RDP sessions generate this event — absence does not rule out an RDP connection",
+          "Use the IP address in the server field when EID 1024 only recorded a hostname \u2014 helps correlate with network logs",
+          "Not all RDP sessions generate this event \u2014 absence does not rule out an RDP connection",
           "Correlate IP with network flow data or firewall logs to confirm the connection"
         ],
         "commonFalsePositives": [
           "Any legitimate RDP session that uses multi-transport"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Server",
+          "xpath": "EventData/Data[@Name='Server']",
+          "description": "IP address of the RDP target server."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -967,7 +1165,7 @@
       "level": "Information",
       "title": "Remote Desktop Services: User authentication succeeded",
       "summary": "RDP user authentication succeeded; source IP recorded.",
-      "details": "Generated on the target host when a user successfully authenticates to RDP, including via Network Level Authentication (NLA). Key fields: Param1 (username), Param2 (domain), Param3 (source IP address of the client). This event is one of the most valuable for RDP forensics because it captures the source IP even when NLA is used and the connection precedes an interactive logon. The absence of a domain (Param2 is blank) may indicate a local account logon. Correlate with LocalSessionManager EID 21 using username and timestamp to confirm the session was fully established.",
+      "details": "Generated on the target host when a user successfully authenticates to RDP, including via Network Level Authentication (NLA). This event is one of the most valuable for RDP forensics because it captures the source IP even when NLA is used and the connection precedes an interactive logon. The absence of a domain (Param2 is blank) may indicate a local account logon.",
       "category": "RDP Authentication",
       "tags": [
         "rdp",
@@ -1017,6 +1215,23 @@
           "Jump server or bastion host activity"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Param1",
+          "xpath": "EventData/Data[@Name='Param1']",
+          "description": "The username that authenticated."
+        },
+        {
+          "name": "Param2",
+          "xpath": "EventData/Data[@Name='Param2']",
+          "description": "The domain of the authenticating user (blank for local accounts)."
+        },
+        {
+          "name": "Param3",
+          "xpath": "EventData/Data[@Name='Param3']",
+          "description": "Source IP address of the connecting client."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"
@@ -1035,7 +1250,7 @@
       "level": "Information",
       "title": "Remote Desktop Services accepted a new TCP connection from client",
       "summary": "RDP service accepted and assigned an incoming TCP connection.",
-      "details": "Generated when the Remote Desktop Services stack accepts a new inbound TCP connection and assigns it to a connection handler. Key field: ClientIP (source IP and ephemeral port of the connecting client, e.g., 192.168.1.10:54321). This event fires in the same flow as EID 261 but is generated by a different component and provides the full IP:port tuple. Useful for correlating RDP traffic to network flow logs. Correlate with EID 1149 on the same source IP to confirm authentication was completed.",
+      "details": "Generated when the Remote Desktop Services stack accepts a new inbound TCP connection and assigns it to a connection handler. This event fires in the same flow as EID 261 but is generated by a different component and provides the full IP:port tuple. Not all connection attempts produce this event.",
       "category": "RDP Connection",
       "tags": [
         "rdp",
@@ -1067,7 +1282,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ClientIP field includes the ephemeral port — strip the port to get the source IP for correlation with EID 1149",
+          "ClientIP field includes the ephemeral port \u2014 strip the port to get the source IP for correlation with EID 1149",
           "Cross-reference source IP with network flow data (e.g., firewall or NetFlow logs) to build a full connection picture"
         ],
         "commonFalsePositives": [
@@ -1075,6 +1290,13 @@
           "Network scanner probing TCP 3389"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ClientIP",
+          "xpath": "EventData/Data[@Name='ClientIP']",
+          "description": "Source IP and ephemeral port of the connecting client (e.g., 192.168.1.10:54321)."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-r2-and-2008/ee891289(v=ws.10)"

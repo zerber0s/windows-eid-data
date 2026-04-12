@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WMI Activity",
-    "version": "1.6.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.7.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wmi.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "WMI provider host started",
       "summary": "WMI provider DLL loaded into a provider host process.",
-      "details": "Generated when a WMI provider host (WmiPrvSE.exe) successfully loads a provider. Key fields: ProviderName, ProviderPath (full DLL path), and HostProcess. Most legitimate WMI providers load from System32 or known application directories. A ProviderPath pointing to a temp directory, user profile, or uncommon location is a strong indicator of a malicious WMI provider registered for persistence or lateral movement.",
+      "details": "Generated when a WMI provider host (WmiPrvSE.exe) successfully loads a provider. Most legitimate WMI providers load from System32 or known application directories. A provider loading from a temp directory, user profile, or uncommon location is a strong indicator of a malicious WMI provider registered for persistence or lateral movement.",
       "category": "WMI Provider",
       "tags": [
         "wmi",
@@ -76,6 +76,23 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "ProviderName",
+          "xpath": "EventData/Data[@Name='ProviderName']",
+          "description": "Name of the WMI provider loaded"
+        },
+        {
+          "name": "ProviderPath",
+          "xpath": "EventData/Data[@Name='ProviderPath']",
+          "description": "Full DLL path of the provider; paths outside System32 are anomalous"
+        },
+        {
+          "name": "HostProcess",
+          "xpath": "EventData/Data[@Name='HostProcess']",
+          "description": "PID of the WmiPrvSE.exe host process"
+        }
+      ],
       "lastReviewed": "2026-04-10"
     },
     {
@@ -86,7 +103,7 @@
       "level": "Error",
       "title": "WMI operation failed",
       "summary": "A WMI provider or client operation returned an error.",
-      "details": "Generated when a WMI operation fails, including provider load errors, query execution failures, and access denied results. Key fields: ClientMachine, ClientProcessId, User, and the HRESULT error code. Isolated errors are common in legitimate management software, but clusters of errors from a single process — especially access denied results on sensitive WMI classes (Win32_Process, Win32_NetworkAdapter, Win32_ShadowCopy) — may indicate failed WMI-based enumeration or exploitation. Correlate ClientProcessId with Security EID 4688 to identify the responsible process.",
+      "details": "Generated when a WMI operation fails, including provider load errors, query execution failures, and access denied results. Isolated errors are common in legitimate management software, but clusters of errors from a single process — especially access denied results on sensitive WMI classes (Win32_Process, Win32_NetworkAdapter, Win32_ShadowCopy) — may indicate failed WMI-based enumeration or exploitation.",
       "category": "WMI Error",
       "tags": [
         "wmi",
@@ -101,6 +118,10 @@
         {
           "id": 5861,
           "log": "WMI"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -144,6 +165,28 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "ClientMachine",
+          "xpath": "EventData/Data[@Name='ClientMachine']",
+          "description": "Machine that initiated the WMI operation"
+        },
+        {
+          "name": "ClientProcessId",
+          "xpath": "EventData/Data[@Name='ClientProcessId']",
+          "description": "PID of the process that initiated the WMI operation"
+        },
+        {
+          "name": "User",
+          "xpath": "EventData/Data[@Name='User']",
+          "description": "User account under which the WMI operation was attempted"
+        },
+        {
+          "name": "ResultCode",
+          "xpath": "EventData/Data[@Name='ResultCode']",
+          "description": "HRESULT error code for the failed operation"
+        }
+      ],
       "lastReviewed": "2026-04-02"
     },
     {
@@ -154,7 +197,7 @@
       "level": "Information",
       "title": "WMI ESS subscription notification fired",
       "summary": "A WMI Event Subscription System (ESS) notification was triggered.",
-      "details": "Generated when a WMI ESS (Eventing Sub-System) subscription fires — that is, when an event filter condition is met and a bound event consumer is invoked. This event confirms that a WMI subscription has actively triggered, as opposed to EID 5860 (temporary registration) and EID 5861 (permanent registration) which only record creation. Key fields: the triggering query and the consumer that was invoked. A 5859 on a system where the corresponding 5861 registration appeared recently, or where the subscription references an unexpected executable, is a strong lateral movement or persistence-execution indicator.",
+      "details": "Generated when a WMI ESS (Eventing Sub-System) subscription fires — that is, when an event filter condition is met and a bound event consumer is invoked. This event confirms that a WMI subscription has actively triggered, as opposed to EID 5860 (temporary registration) and EID 5861 (permanent registration) which only record creation.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -229,6 +272,18 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "Query",
+          "xpath": "EventData/Data[@Name='Query']",
+          "description": "The WMI event filter query that triggered"
+        },
+        {
+          "name": "Consumer",
+          "xpath": "EventData/Data[@Name='Consumer']",
+          "description": "The event consumer that was invoked"
+        }
+      ],
       "lastReviewed": "2026-04-10"
     },
     {
@@ -239,7 +294,7 @@
       "level": "Information",
       "title": "WMI temporary event subscription registered",
       "summary": "A temporary (non-persistent) WMI event subscription was registered.",
-      "details": "Generated when a temporary WMI event subscription is created. Temporary subscriptions exist only in memory and do not survive a reboot, unlike permanent subscriptions (EID 5861). Key fields: NamespaceName, Query (the WMI event filter query), and the registering process. While less commonly used for persistence than permanent subscriptions, temporary subscriptions can be used for in-session lateral movement triggers or to respond to specific system conditions during an active intrusion.",
+      "details": "Generated when a temporary WMI event subscription is created. Temporary subscriptions exist only in memory and do not survive a reboot, unlike permanent subscriptions (EID 5861). While less commonly used for persistence than permanent subscriptions, temporary subscriptions can be used for in-session lateral movement triggers or to respond to specific system conditions during an active intrusion.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -294,6 +349,18 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "NamespaceName",
+          "xpath": "EventData/Data[@Name='NamespaceName']",
+          "description": "WMI namespace where the subscription was registered"
+        },
+        {
+          "name": "Query",
+          "xpath": "EventData/Data[@Name='Query']",
+          "description": "The WMI event filter query for the subscription"
+        }
+      ],
       "lastReviewed": "2026-03-29"
     },
     {
@@ -304,7 +371,7 @@
       "level": "Information",
       "title": "WMI permanent event subscription registered",
       "summary": "A persistent WMI event subscription was registered.",
-      "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). Key fields: NamespaceName, Query (the filter), and Consumer (the consumer name and type). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution. Query values targeting __InstanceCreationEvent on Win32_Process or specific process names are a strong persistence indicator.",
+      "details": "Generated when a permanent WMI event subscription is created — the most forensically significant WMI event for DFIR. Permanent subscriptions survive reboots and consist of three components: an EventFilter (defines the trigger condition), an EventConsumer (defines the action to execute), and a FilterToConsumerBinding (links them). CommandLineEventConsumer and ActiveScriptEventConsumer are the two consumer types most commonly abused for code execution.",
       "category": "WMI Subscription",
       "tags": [
         "wmi",
@@ -389,6 +456,23 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "NamespaceName",
+          "xpath": "EventData/Data[@Name='NamespaceName']",
+          "description": "WMI namespace where the subscription was registered"
+        },
+        {
+          "name": "Query",
+          "xpath": "EventData/Data[@Name='Query']",
+          "description": "The event filter query defining the trigger condition"
+        },
+        {
+          "name": "Consumer",
+          "xpath": "EventData/Data[@Name='Consumer']",
+          "description": "The event consumer name and type (CommandLineEventConsumer and ActiveScriptEventConsumer are most commonly abused)"
+        }
+      ],
       "lastReviewed": "2026-04-10"
     }
   ]

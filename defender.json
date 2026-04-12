@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Defender",
-    "version": "1.8.1",
-    "generatedAt": "2026-04-08T00:00:00Z",
+    "version": "1.9.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/defender.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Windows Defender protection history deleted",
       "summary": "A history item was removed from the Windows Defender protection history.",
-      "details": "Generated when an item is removed from Windows Defender's protection history. Protection history records past detections, quarantine actions, and remediation events. Deletion of history items — particularly around the timeframe of a compromise — can obscure the record of what was detected and what actions were taken. Correlate with EID 1116 and EID 1117 entries in the same timeframe to determine whether history deletion follows a detection event, which is a strong anti-forensic indicator.",
+      "details": "Generated when an item is removed from Windows Defender's protection history. Protection history records past detections, quarantine actions, and remediation events. Deletion of history items -- particularly around the timeframe of a compromise -- can obscure the record of what was detected and what actions were taken.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -67,7 +67,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate the deletion timestamp with nearby EID 1116/1117 events — deletion shortly after a detection is a strong cleanup indicator",
+          "Correlate the deletion timestamp with nearby EID 1116/1117 events \u2014 deletion shortly after a detection is a strong cleanup indicator",
           "Identify what process or user account triggered the history deletion via Security EID 4688/4624 correlation",
           "Consider retrieving Defender history from alternate sources (MDE portal, SIEM) if local history was deleted"
         ],
@@ -94,7 +94,7 @@
       "level": "Warning",
       "title": "Suspicious behavior detected",
       "summary": "Windows Defender detected a potentially suspicious behavior.",
-      "details": "Generated when Windows Defender's behavioral monitoring detects a suspicious activity pattern. Unlike EID 1116 (signature-based detection), EID 1015 fires on behavioral heuristics — such as a process performing operations characteristic of credential dumping, code injection, or persistence installation — even if no known malware signature matches. Key fields: Process Name, the behavior type or category, and the affected resource. Behavioral detections that do not result in a subsequent EID 1116/1117 (no signature match) may represent novel or fileless threats.",
+      "details": "Generated when Windows Defender's behavioral monitoring detects a suspicious activity pattern. Unlike EID 1116 (signature-based detection), EID 1015 fires on behavioral heuristics -- such as a process performing operations characteristic of credential dumping, code injection, or persistence installation -- even if no known malware signature matches. Behavioral detections that do not result in a subsequent EID 1116/1117 (no signature match) may represent novel or fileless threats.",
       "category": "Threat Detection",
       "tags": [
         "defender",
@@ -143,15 +143,32 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Process Name is the primary pivot — behavioral detections in LOLBAS tools (LOLBins: mshta.exe; LOLBAS Scripts: powershell.exe, wscript.exe) or Office applications are high priority",
+          "Process Name is the primary pivot \u2014 behavioral detections in LOLBAS tools (LOLBins: mshta.exe; LOLBAS Scripts: powershell.exe, wscript.exe) or Office applications are high priority",
           "Correlate with Security EID 4688 to review the full process ancestry and command line",
-          "A 1015 with no subsequent 1117 may mean Defender flagged but did not remediate — the activity may still be active"
+          "A 1015 with no subsequent 1117 may mean Defender flagged but did not remediate \u2014 the activity may still be active"
         ],
         "commonFalsePositives": [
           "Security testing and red team tools triggering behavioral heuristics",
           "Legitimate software performing unusual but benign operations (e.g., custom backup tools, scripting automation)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that triggered the behavioral detection."
+        },
+        {
+          "name": "Behavior Type",
+          "xpath": "EventData/Data[@Name='Behavior Type']",
+          "description": "The category of suspicious behavior detected."
+        },
+        {
+          "name": "Affected Resource",
+          "xpath": "EventData/Data[@Name='Affected Resource']",
+          "description": "The resource affected by the suspicious activity."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -170,7 +187,7 @@
       "level": "Warning",
       "title": "Malware or unwanted software detected",
       "summary": "Windows Defender detected a threat.",
-      "details": "Generated when Windows Defender detects malware or potentially unwanted software. Key fields: Threat Name, Category, Severity Level, Detection Source (real-time, on-access, scheduled scan, etc.), Process Name (the process associated with the detection), and Path (the file or object flagged). Correlate Threat Name against the detection timeline to identify what the attacker was running when Defender fired. Process Name is especially valuable — detections attributed to LOLBAS tools (e.g., powershell.exe and wscript.exe as LOLBAS Scripts; mshta.exe, certutil.exe, and rundll32.exe as LOLBins) are higher priority than detections in temp directories.",
+      "details": "Generated when Windows Defender detects malware or potentially unwanted software. This event fires on signature-based detection and records the threat identity, the file or object flagged, and the process associated with the detection.",
       "category": "Threat Detection",
       "tags": [
         "defender",
@@ -203,6 +220,38 @@
           "Packed or obfuscated legitimate software triggering heuristic detections"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Threat Name",
+          "xpath": "EventData/Data[@Name='Threat Name']",
+          "description": "The name of the detected malware or unwanted software."
+        },
+        {
+          "name": "Category",
+          "xpath": "EventData/Data[@Name='Category']",
+          "description": "The threat category classification."
+        },
+        {
+          "name": "Severity Level",
+          "xpath": "EventData/Data[@Name='Severity Level']",
+          "description": "The severity rating assigned to the detection."
+        },
+        {
+          "name": "Detection Source",
+          "xpath": "EventData/Data[@Name='Detection Source']",
+          "description": "How the threat was detected (real-time, on-access, scheduled scan, etc.)."
+        },
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process associated with the detection."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The file or object that was flagged."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -234,7 +283,7 @@
       "level": "Information",
       "title": "Antivirus took action to protect machine from malware",
       "summary": "Windows Defender took a remediation action on a detected threat.",
-      "details": "Generated when Windows Defender performs a remediation action following a detection (EID 1116). Key fields: Threat Name, Action (Quarantine, Remove, Allow, Block, Clean), Action Status (success or failure), and ThreatID. Action Status of failure means the threat was detected but not successfully remediated — the file or process may still be active. Correlate ThreatID with EID 1116 to link detection and response. An action of 'Allow' or 'No Action Taken' may indicate the threat was excluded or the user overrode the detection.",
+      "details": "Generated when Windows Defender performs a remediation action following a detection (EID 1116). An Action Status of failure means the threat was detected but not successfully remediated -- the file or process may still be active. An Action of 'Allow' or 'No Action Taken' may indicate the threat was excluded or the user overrode the detection.",
       "category": "Threat Detection",
       "tags": [
         "defender",
@@ -258,7 +307,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Action Status failure means the file or process may still be present — escalate immediately",
+          "Action Status failure means the file or process may still be present \u2014 escalate immediately",
           "Action of 'Allow' or 'No Action Taken' warrants investigation into whether an exclusion was in place",
           "Correlate ThreatID with EID 1116 to get the full detection context including file path and process"
         ],
@@ -267,6 +316,28 @@
           "Security tooling excluded from scanning triggering no-action outcomes"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Threat Name",
+          "xpath": "EventData/Data[@Name='Threat Name']",
+          "description": "The name of the remediated threat."
+        },
+        {
+          "name": "Action",
+          "xpath": "EventData/Data[@Name='Action']",
+          "description": "The remediation action taken (Quarantine, Remove, Allow, Block, Clean)."
+        },
+        {
+          "name": "Action Status",
+          "xpath": "EventData/Data[@Name='Action Status']",
+          "description": "Whether the action succeeded or failed."
+        },
+        {
+          "name": "ThreatID",
+          "xpath": "EventData/Data[@Name='ThreatID']",
+          "description": "Identifier linking this action to the corresponding EID 1116 detection."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -298,7 +369,7 @@
       "level": "Warning",
       "title": "Attack Surface Reduction rule triggered in block mode",
       "summary": "An ASR rule blocked a potentially malicious operation.",
-      "details": "Generated when an Attack Surface Reduction (ASR) rule fires in block mode and prevents an operation. Key fields: the rule GUID (identifies which ASR rule triggered), Process Name (the process that attempted the blocked operation), and Path (the target file or object). Each ASR rule GUID maps to a specific rule such as 'Block Office applications from creating executable content' or 'Block credential stealing from Windows LSASS'. An ASR block during an incident is a high-confidence signal that an attacker technique was attempted and stopped.",
+      "details": "Generated when an Attack Surface Reduction (ASR) rule fires in block mode and prevents an operation. Each ASR rule GUID maps to a specific rule such as 'Block Office applications from creating executable content' or 'Block credential stealing from Windows LSASS'. An ASR block during an incident is a high-confidence signal that an attacker technique was attempted and stopped.",
       "category": "Attack Surface Reduction",
       "tags": [
         "defender",
@@ -315,7 +386,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Map the rule GUID to a specific ASR rule using Microsoft's ASR rule reference to understand what technique was blocked",
-          "Process Name reveals what attempted the blocked operation — flag Office apps or LOLBAS tools (scripting engines such as wscript.exe, cscript.exe, powershell.exe; LOLBins such as mshta.exe, regsvr32.exe, rundll32.exe)",
+          "Process Name reveals what attempted the blocked operation \u2014 flag Office apps or LOLBAS tools (scripting engines such as wscript.exe, cscript.exe, powershell.exe; LOLBins such as mshta.exe, regsvr32.exe, rundll32.exe)",
           "Correlate timestamp and process with Security EID 4688 to build the full execution chain"
         ],
         "commonFalsePositives": [
@@ -323,6 +394,23 @@
           "Developer tools triggering code-execution ASR rules"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Rule GUID",
+          "xpath": "EventData/Data[@Name='Rule GUID']",
+          "description": "The GUID identifying which ASR rule triggered."
+        },
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that attempted the blocked operation."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The target file or object."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
@@ -341,13 +429,7 @@
       "level": "Information",
       "title": "Attack Surface Reduction rule triggered in audit mode",
       "summary": "An ASR rule would have blocked an operation but is in audit mode.",
-      "details": "Generated when an ASR rule fires in audit mode — the operation was allowed to proceed but would have been blocked in enforcement mode. Key fields are identical to EID 1121: rule GUID, Process Name, and Path. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement. Treat audit events from known-bad processes with the same urgency as block events.",
-      "prerequisites": [
-        {
-          "type": "policy",
-          "description": "Attack Surface Reduction (ASR) rules must be enabled and configured in audit mode via Microsoft Defender, Intune, or Group Policy."
-        }
-      ],
+      "details": "Generated when an ASR rule fires in audit mode -- the operation was allowed to proceed but would have been blocked in enforcement mode. Audit mode events are valuable during incident investigations to identify attacker techniques that were attempted but not blocked, particularly in environments where ASR rules have not yet been moved to enforcement.",
       "category": "Attack Surface Reduction",
       "tags": [
         "defender",
@@ -360,16 +442,39 @@
           "log": "WindowsDefender"
         }
       ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Attack Surface Reduction (ASR) rules must be enabled and configured in audit mode via Microsoft Defender, Intune, or Group Policy."
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
-          "Audit mode means the operation succeeded — treat as executed attacker activity, not just an attempt",
+          "Audit mode means the operation succeeded \u2014 treat as executed attacker activity, not just an attempt",
           "Same pivot fields as EID 1121: rule GUID, Process Name, Path",
           "Use audit events to identify which ASR rules should be promoted to block mode"
         ],
         "commonFalsePositives": [
-          "Same as EID 1121 — audit mode means no blocking occurred, so false positive impact is limited to alert noise"
+          "Same as EID 1121 \u2014 audit mode means no blocking occurred, so false positive impact is limited to alert noise"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Rule GUID",
+          "xpath": "EventData/Data[@Name='Rule GUID']",
+          "description": "The GUID identifying which ASR rule triggered."
+        },
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that performed the flagged operation."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The target file or object."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
@@ -388,7 +493,7 @@
       "level": "Information",
       "title": "Security intelligence update succeeded",
       "summary": "Windows Defender security intelligence (signatures) updated successfully.",
-      "details": "Generated when Windows Defender successfully updates its security intelligence (antimalware signatures). Key fields: the new signature version and the update source. Monitoring the cadence of EID 2001 events is useful for establishing a baseline — a host that suddenly stops receiving updates (no 2001 events for an extended period) may be isolated from update sources, have update mechanisms disabled, or be experiencing network-level blocking of update traffic consistent with a compromised host trying to avoid signature-based detection of its malware.",
+      "details": "Generated when Windows Defender successfully updates its security intelligence (antimalware signatures). A host that suddenly stops receiving updates (no 2001 events for an extended period) may be isolated from update sources, have update mechanisms disabled, or be experiencing network-level blocking of update traffic.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -412,6 +517,18 @@
           "Hosts on metered connections with update scheduling configured to minimize bandwidth"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Signature Version",
+          "xpath": "EventData/Data[@Name='Signature Version']",
+          "description": "The new security intelligence version installed."
+        },
+        {
+          "name": "Update Source",
+          "xpath": "EventData/Data[@Name='Update Source']",
+          "description": "The source from which the update was downloaded."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -430,7 +547,7 @@
       "level": "Warning",
       "title": "Security intelligence update failed",
       "summary": "Windows Defender failed to update its security intelligence.",
-      "details": "Generated when a Windows Defender security intelligence update fails. Key fields: error code and the update source that was attempted. Repeated EID 2002 failures on an otherwise internet-connected host may indicate that the host cannot reach Microsoft update servers — potentially because an attacker has modified the hosts file, DNS, firewall rules, or proxy settings to block updates and prevent new signatures from detecting their tools. Correlate with network log sources to determine whether update traffic is being blocked at the host or network level.",
+      "details": "Generated when a Windows Defender security intelligence update fails. Repeated failures on an otherwise internet-connected host may indicate that the host cannot reach Microsoft update servers -- potentially because an attacker has modified the hosts file, DNS, firewall rules, or proxy settings to block updates and prevent new signatures from detecting their tools.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -462,7 +579,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Persistent update failures on an internet-connected host may indicate blocked update traffic — investigate hosts file, DNS, and firewall rules",
+          "Persistent update failures on an internet-connected host may indicate blocked update traffic \u2014 investigate hosts file, DNS, and firewall rules",
           "Correlate with EID 5007 to check whether proxy or update server configuration was recently changed",
           "An update failure immediately preceding a malware execution event indicates the host may have been left intentionally unprotected"
         ],
@@ -471,6 +588,18 @@
           "Proxy or firewall misconfiguration blocking Windows Update traffic"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Error Code",
+          "xpath": "EventData/Data[@Name='Error Code']",
+          "description": "The error code describing why the update failed."
+        },
+        {
+          "name": "Update Source",
+          "xpath": "EventData/Data[@Name='Update Source']",
+          "description": "The update source that was attempted."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -489,7 +618,7 @@
       "level": "Warning",
       "title": "Real-time protection is disabled",
       "summary": "Windows Defender real-time protection was turned off.",
-      "details": "Generated when Windows Defender real-time protection is disabled. This is a high-priority alert during an incident — disabling real-time protection is a common attacker technique to prevent detection of subsequent payloads. Correlate the timestamp with process creation and logon events to identify what account or process disabled protection. Legitimate causes include Group Policy-managed AV exclusions, third-party AV coexistence, and IT administrative actions; these should be validated against change management records.",
+      "details": "Generated when Windows Defender real-time protection is disabled. This is a high-priority alert during an incident -- disabling real-time protection is a common attacker technique to prevent detection of subsequent payloads. Legitimate causes include Group Policy-managed AV exclusions, third-party AV coexistence, and IT administrative actions.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -556,7 +685,7 @@
       "level": "Warning",
       "title": "Real-time protection configuration changed",
       "summary": "A Windows Defender real-time protection setting was modified.",
-      "details": "Generated when a real-time protection-specific configuration setting is changed. While EID 5007 captures all configuration changes, EID 5004 specifically flags modifications to real-time protection settings such as monitoring scope, behavior monitoring, network protection, or on-access scanning. These changes are higher priority than generic configuration changes because they directly affect the ability to detect active threats. Key field: the specific real-time protection setting that was changed and its new value.",
+      "details": "Generated when a real-time protection-specific configuration setting is changed. While EID 5007 captures all configuration changes, EID 5004 specifically flags modifications to real-time protection settings such as monitoring scope, behavior monitoring, network protection, or on-access scanning. These changes are higher priority than generic configuration changes because they directly affect the ability to detect active threats.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -588,7 +717,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The changed setting and its new value are the key pivot — changes reducing scan coverage or disabling behavioral monitoring are high priority",
+          "The changed setting and its new value are the key pivot \u2014 changes reducing scan coverage or disabling behavioral monitoring are high priority",
           "Correlate with Security EID 4688 and 4624 to identify the process and account that made the change",
           "EID 5004 paired with EID 5001 in close succession confirms real-time protection was both reconfigured and disabled"
         ],
@@ -597,6 +726,18 @@
           "Third-party AV management tools modifying Defender real-time settings for coexistence"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Setting Changed",
+          "xpath": "EventData/Data[@Name='Setting Changed']",
+          "description": "The specific real-time protection setting that was modified."
+        },
+        {
+          "name": "New Value",
+          "xpath": "EventData/Data[@Name='New Value']",
+          "description": "The new value of the changed setting."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -615,7 +756,7 @@
       "level": "Information",
       "title": "Antimalware platform configuration changed",
       "summary": "A Windows Defender configuration setting was modified.",
-      "details": "Generated when any Windows Defender configuration setting changes. Key field: the old and new configuration values, recorded in the format 'HKLM\\...\\value = old value -> new value'. Configuration changes of particular interest include additions to ExclusionPath, ExclusionProcess, or ExclusionExtension (attackers add exclusions to prevent detection of their tools), and changes to DisableRealtimeMonitoring, DisableBehaviorMonitoring, or DisableIOAVProtection. Exclusion additions should be correlated against known software deployments.",
+      "details": "Generated when any Windows Defender configuration setting changes. The old and new configuration values are recorded in the format 'HKLM\\...\\value = old value -> new value'. Configuration changes of particular interest include additions to ExclusionPath, ExclusionProcess, or ExclusionExtension (attackers add exclusions to prevent detection of their tools), and changes to DisableRealtimeMonitoring, DisableBehaviorMonitoring, or DisableIOAVProtection.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -643,7 +784,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Changes to ExclusionPath or ExclusionProcess are the highest-priority — they may be hiding attacker tooling",
+          "Changes to ExclusionPath or ExclusionProcess are the highest-priority \u2014 they may be hiding attacker tooling",
           "Correlate the changed value with the file or directory path to determine what is being excluded",
           "Correlate timestamp with Security EID 4688 and 4624 to identify what made the configuration change"
         ],
@@ -652,6 +793,18 @@
           "Group Policy or MDM pushing exclusion policies to managed endpoints"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Old Value",
+          "xpath": "EventData/Data[@Name='Old Value']",
+          "description": "The previous configuration value."
+        },
+        {
+          "name": "New Value",
+          "xpath": "EventData/Data[@Name='New Value']",
+          "description": "The new configuration value."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -683,7 +836,7 @@
       "level": "Error",
       "title": "Antimalware engine failure",
       "summary": "The Windows Defender antimalware engine encountered an error and failed.",
-      "details": "Generated when the Windows Defender antimalware engine encounters a fatal error and fails. While engine failures can be caused by resource constraints or software bugs, they can also result from deliberate interference — an attacker crashing or corrupting the Defender engine to prevent detection of subsequent activity. Key field: the error code. Correlate the engine failure timestamp with nearby process creation events, network connections, or file writes to identify whether the failure coincides with attacker activity.",
+      "details": "Generated when the Windows Defender antimalware engine encounters a fatal error and fails. While engine failures can be caused by resource constraints or software bugs, they can also result from deliberate interference -- an attacker crashing or corrupting the Defender engine to prevent detection of subsequent activity.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -720,10 +873,17 @@
           "Check whether the engine failure was followed by a recovery (EID 5001 state change) or left the system unprotected"
         ],
         "commonFalsePositives": [
-          "Engine crashes due to bugs in specific Defender versions — check for pending updates",
+          "Engine crashes due to bugs in specific Defender versions \u2014 check for pending updates",
           "Resource exhaustion on underpowered systems causing engine failures"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Error Code",
+          "xpath": "EventData/Data[@Name='Error Code']",
+          "description": "The error code describing the engine failure."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/troubleshoot-microsoft-defender-antivirus"
@@ -742,7 +902,7 @@
       "level": "Warning",
       "title": "Scanning for malware and unwanted software is disabled",
       "summary": "Windows Defender malware and PUP scanning was disabled.",
-      "details": "Generated when scanning for malware and potentially unwanted programs (PUP) is disabled. This is distinct from EID 5001 (real-time protection disabled) — scanning can be selectively disabled while real-time protection remains nominally enabled. Disabling malware scanning creates a window during which new files can be written to disk and executed without signature-based detection. Treat this event with the same urgency as EID 5001 during an active incident.",
+      "details": "Generated when scanning for malware and potentially unwanted programs (PUP) is disabled. This is distinct from EID 5001 (real-time protection disabled) -- scanning can be selectively disabled while real-time protection remains nominally enabled. Disabling malware scanning creates a window during which new files can be written to disk and executed without signature-based detection.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -805,7 +965,7 @@
       "level": "Warning",
       "title": "Controlled Folder Access blocked an application",
       "summary": "Controlled Folder Access prevented an application from modifying a protected folder.",
-      "details": "Generated when Controlled Folder Access (CFA) blocks an application from writing to a protected folder. CFA is designed to protect high-value locations (Documents, Desktop, Pictures, and custom paths) from unauthorized modification — primarily ransomware encrypting files. Key fields: the blocked application path and the folder it attempted to modify. An unknown or unsigned process attempting to modify protected folders is a high-confidence ransomware or data tampering indicator. Correlate with Security EID 4688 and Sysmon EID 1 to review the full ancestry of the blocked process. A CFA block event that is not explained by known software is a tier-1 incident response trigger.",
+      "details": "Generated when Controlled Folder Access (CFA) blocks an application from writing to a protected folder. CFA is designed to protect high-value locations (Documents, Desktop, Pictures, and custom paths) from unauthorized modification -- primarily ransomware encrypting files.",
       "category": "Controlled Folder Access",
       "tags": [
         "defender",
@@ -854,15 +1014,27 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The blocked application path is the primary pivot — flag anything in temp directories, AppData, or user-writable paths",
+          "The blocked application path is the primary pivot \u2014 flag anything in temp directories, AppData, or user-writable paths",
           "Correlate with Sysmon EID 1 to identify the full process tree that spawned the blocked application",
-          "A CFA block from a known-good application may indicate process injection — the legitimate process may have been hijacked to deliver the write"
+          "A CFA block from a known-good application may indicate process injection \u2014 the legitimate process may have been hijacked to deliver the write"
         ],
         "commonFalsePositives": [
           "Legitimate applications not on the CFA allowlist attempting to write to monitored folders (e.g., backup tools, syncing utilities)",
           "IT-deployed software that was not added to the CFA allowed applications list"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The application that was blocked from writing."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The protected folder the application attempted to modify."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/controlled-folders"
@@ -894,7 +1066,7 @@
       "level": "Information",
       "title": "Controlled Folder Access audited an application write attempt",
       "summary": "Controlled Folder Access detected a protected folder write attempt but allowed it (audit mode).",
-      "details": "Generated when Controlled Folder Access (CFA) is in audit mode and detects an application attempting to write to a protected folder. Unlike EID 1123 (block mode), the write was permitted to proceed — this event is a detection-without-prevention signal. Audit mode CFA events carry the same investigative weight as block events: an unknown process writing to protected folders in audit mode may be actively encrypting or tampering with data. Key fields are identical to EID 1123: blocked application path and target folder. Treat audit events from unknown or unsigned processes as incidents in progress, not hypothetical detections.",
+      "details": "Generated when Controlled Folder Access (CFA) is in audit mode and detects an application attempting to write to a protected folder. Unlike EID 1123 (block mode), the write was permitted to proceed -- this event is a detection-without-prevention signal. Audit mode CFA events carry the same investigative weight as block events.",
       "category": "Controlled Folder Access",
       "tags": [
         "defender",
@@ -916,14 +1088,26 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Audit mode means the write succeeded — if the triggering process is malicious, data may already be modified or encrypted",
+          "Audit mode means the write succeeded \u2014 if the triggering process is malicious, data may already be modified or encrypted",
           "Same pivots as EID 1123: application path, process ancestry, target folder",
           "Use audit events to identify which applications need to be added to the CFA allowlist, and which should be promoted to block"
         ],
         "commonFalsePositives": [
-          "Same as EID 1123 — legitimate software writing to protected folders without being on the allowlist"
+          "Same as EID 1123 \u2014 legitimate software writing to protected folders without being on the allowlist"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The application that attempted the write."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The protected folder the application wrote to."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/controlled-folders"
@@ -942,7 +1126,7 @@
       "level": "Information",
       "title": "Network Protection audited a connection to a malicious URL or IP",
       "summary": "Network Protection detected a connection to a malicious or untrusted destination (audit mode).",
-      "details": "Generated when Microsoft Defender Network Protection detects a process attempting to connect to a URL or IP address that is classified as malicious, phishing, or untrusted, and is in audit mode. The connection was permitted to proceed. Key fields: the process name initiating the connection and the destination URL or IP. Audit mode Network Protection events are detection-without-prevention and indicate that the host reached or attempted to reach attacker-controlled infrastructure. Correlate the destination with threat intelligence. Common triggering scenarios include: browser-based phishing page loads, malware C2 beacon attempts, and drive-by download connections. Network Protection operates at the kernel level (HTTP.sys) and covers both browser and non-browser processes.",
+      "details": "Generated when Microsoft Defender Network Protection detects a process attempting to connect to a URL or IP address classified as malicious, phishing, or untrusted, and is in audit mode. The connection was permitted to proceed. Network Protection operates at the kernel level (HTTP.sys) and covers both browser and non-browser processes. Common triggering scenarios include browser-based phishing page loads, malware C2 beacon attempts, and drive-by download connections.",
       "category": "Network Protection",
       "tags": [
         "defender",
@@ -965,15 +1149,27 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "The destination URL or IP is the primary pivot — correlate against threat intelligence for C2 infrastructure, phishing domains, or known malware distribution hosts",
-          "Process Name identifies what initiated the connection — browser processes suggest phishing or drive-by; non-browser processes suggest malware beaconing",
-          "Audit mode means the connection succeeded — check DNS logs and proxy logs for the actual data exchanged"
+          "The destination URL or IP is the primary pivot \u2014 correlate against threat intelligence for C2 infrastructure, phishing domains, or known malware distribution hosts",
+          "Process Name identifies what initiated the connection \u2014 browser processes suggest phishing or drive-by; non-browser processes suggest malware beaconing",
+          "Audit mode means the connection succeeded \u2014 check DNS logs and proxy logs for the actual data exchanged"
         ],
         "commonFalsePositives": [
           "Legitimate software connecting to a host that was recently classified as malicious by Microsoft's threat intelligence",
           "Testing environments visiting known-bad URLs intentionally"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that initiated the connection."
+        },
+        {
+          "name": "Detection URL",
+          "xpath": "EventData/Data[@Name='Detection URL']",
+          "description": "The destination URL or IP address classified as malicious."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/network-protection"
@@ -992,7 +1188,7 @@
       "level": "Warning",
       "title": "Network Protection blocked a connection to a malicious URL or IP",
       "summary": "Network Protection prevented a connection to a malicious or untrusted destination.",
-      "details": "Generated when Microsoft Defender Network Protection blocks a process from connecting to a URL or IP address classified as malicious, phishing, or untrusted, and is in block mode. The connection was prevented. Key fields: the process name and the blocked destination URL or IP. A Network Protection block is a high-fidelity indicator — it means a process on the host actively attempted to reach known-malicious infrastructure and was stopped. Common scenarios: malware attempting C2 communication, ransomware reaching its key server, or a phishing page redirecting to an exploit kit. The block may indicate active malware on the host even if no EID 1116 (Defender detection) has fired yet — some malware evades signature detection but still triggers URL-based blocking.",
+      "details": "Generated when Microsoft Defender Network Protection blocks a process from connecting to a URL or IP address classified as malicious, phishing, or untrusted, and is in block mode. The connection was prevented. A Network Protection block is a high-fidelity indicator -- it means a process on the host actively attempted to reach known-malicious infrastructure and was stopped. The block may indicate active malware on the host even if no EID 1116 (Defender detection) has fired yet -- some malware evades signature detection but still triggers URL-based blocking.",
       "category": "Network Protection",
       "tags": [
         "defender",
@@ -1009,12 +1205,6 @@
         {
           "id": 1116,
           "log": "WindowsDefender"
-        }
-      ],
-      "prerequisites": [
-        {
-          "type": "policy",
-          "description": "Microsoft Defender Network Protection must be enabled and set to block mode via Group Policy, Intune, or PowerShell (Set-MpPreference -EnableNetworkProtection Enabled). Requires Microsoft Defender Antivirus with real-time protection enabled."
         }
       ],
       "mitreAttack": [
@@ -1039,11 +1229,17 @@
           ]
         }
       ],
+      "prerequisites": [
+        {
+          "type": "policy",
+          "description": "Microsoft Defender Network Protection must be enabled and set to block mode via Group Policy, Intune, or PowerShell (Set-MpPreference -EnableNetworkProtection Enabled). Requires Microsoft Defender Antivirus with real-time protection enabled."
+        }
+      ],
       "notesGuidance": {
         "investigationPivots": [
-          "The blocked destination URL or IP is the primary pivot — query threat intelligence for attribution, infrastructure clusters, and related IOCs",
+          "The blocked destination URL or IP is the primary pivot \u2014 query threat intelligence for attribution, infrastructure clusters, and related IOCs",
           "Process Name is critical: a browser process suggests a user-facing phishing or drive-by scenario; a system or background process is likely active malware beaconing",
-          "A block without a corresponding EID 1116 means the file evaded signature scanning — treat as active malware until ruled out",
+          "A block without a corresponding EID 1116 means the file evaded signature scanning \u2014 treat as active malware until ruled out",
           "Correlate with Sysmon EID 3 (network connection) if available to capture the full connection attempt including source port"
         ],
         "commonFalsePositives": [
@@ -1051,6 +1247,18 @@
           "False positive Microsoft threat intelligence classifications for legitimate CDN or cloud infrastructure"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that attempted the blocked connection."
+        },
+        {
+          "name": "Detection URL",
+          "xpath": "EventData/Data[@Name='Detection URL']",
+          "description": "The blocked destination URL or IP address."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/network-protection"
@@ -1058,7 +1266,7 @@
       "detectionRules": [
         {
           "platform": "KQL",
-          "title": "Network Protection Block — Malicious URL or IP",
+          "title": "Network Protection Block \u2014 Malicious URL or IP",
           "rule": "Event\n| where Source == \"Microsoft-Windows-Windows Defender\"\n| where EventID == 1126\n| parse EventData with * '<Data Name=\"Process Name\">' ProcessName '</Data>' *\n| parse EventData with * '<Data Name=\"Detection URL\">' BlockedURL '</Data>' *\n| project TimeGenerated, Computer, ProcessName, BlockedURL\n| order by TimeGenerated desc",
           "notes": "Any occurrence from a non-browser process is high priority. For browser-sourced blocks, triage based on whether the user clicked a link vs. automated background request."
         },
@@ -1082,7 +1290,7 @@
       "level": "Warning",
       "title": "Controlled Folder Access blocked a sector write (ransomware MBR protection)",
       "summary": "Controlled Folder Access blocked a process from performing a raw sector write to a protected disk volume.",
-      "details": "Generated when Controlled Folder Access (CFA) blocks a process from writing directly to disk sectors — a technique used by ransomware and wipers to encrypt or destroy the Master Boot Record (MBR), partition tables, or volume boot records, making the system unbootable. This is distinct from EID 1123 (file-level write block) — EID 1127 fires on raw sector-level writes that bypass the filesystem. This event should be treated as an active ransomware or wiper attack in progress. The most well-known scenario is BootLocker/NotPetya-style ransomware overwriting the MBR to replace it with a custom bootloader that demands ransom. Immediate isolation of the affected host is warranted.",
+      "details": "Generated when Controlled Folder Access (CFA) blocks a process from writing directly to disk sectors -- a technique used by ransomware and wipers to encrypt or destroy the Master Boot Record (MBR), partition tables, or volume boot records, making the system unbootable. This is distinct from EID 1123 (file-level write block) -- EID 1127 fires on raw sector-level writes that bypass the filesystem. The most well-known scenario is BootLocker/NotPetya-style ransomware overwriting the MBR to replace it with a custom bootloader.",
       "category": "Controlled Folder Access",
       "tags": [
         "defender",
@@ -1132,7 +1340,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "This event is a tier-1 incident trigger — immediate host isolation is the first response action",
+          "This event is a tier-1 incident trigger \u2014 immediate host isolation is the first response action",
           "Identify the process attempting the sector write via the event's process field and correlate with Security EID 4688 and Sysmon EID 1 for ancestry",
           "Check whether the MBR or VBR has already been modified by booting from external media or using forensic disk imaging tools",
           "Correlate with concurrent file encryption activity (EID 1123 across multiple directories) to assess full ransomware scope"
@@ -1142,6 +1350,13 @@
           "Virtualization or backup software that writes directly to disk images"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that attempted the raw sector write."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/controlled-folders"
@@ -1160,7 +1375,7 @@
       "level": "Information",
       "title": "Controlled Folder Access audited a sector write attempt",
       "summary": "Controlled Folder Access detected a raw sector write to a protected volume but allowed it (audit mode).",
-      "details": "Generated when Controlled Folder Access (CFA) is in audit mode and detects a raw sector write to a protected volume. The write was permitted to proceed. This is the audit mode counterpart to EID 1127. If this event fires from an unexpected process, the MBR or volume boot record may already have been modified. Audit mode sector write events from unknown processes warrant immediate forensic investigation of disk structures. Check the MBR integrity immediately if this event fires from a non-whitelisted disk utility.",
+      "details": "Generated when Controlled Folder Access (CFA) is in audit mode and detects a raw sector write to a protected volume. The write was permitted to proceed. This is the audit mode counterpart to EID 1127. If this event fires from an unexpected process, the MBR or volume boot record may already have been modified.",
       "category": "Controlled Folder Access",
       "tags": [
         "defender",
@@ -1189,14 +1404,21 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Audit mode means the sector write succeeded — verify MBR/VBR integrity immediately using bootrec or offline forensic tooling",
-          "Same investigation steps as EID 1127 — identify the writing process and assess whether it is legitimate disk tooling",
+          "Audit mode means the sector write succeeded \u2014 verify MBR/VBR integrity immediately using bootrec or offline forensic tooling",
+          "Same investigation steps as EID 1127 \u2014 identify the writing process and assess whether it is legitimate disk tooling",
           "Multiple EID 1128 events targeting the same volume from an unknown process confirm an active wiper or ransomware attack"
         ],
         "commonFalsePositives": [
-          "Same as EID 1127 — disk utilities and backup tools performing legitimate sector writes"
+          "Same as EID 1127 \u2014 disk utilities and backup tools performing legitimate sector writes"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that performed the raw sector write."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/controlled-folders"
@@ -1213,9 +1435,9 @@
       "provider": "Microsoft-Windows-Windows Defender",
       "channel": "Microsoft-Windows-Windows Defender/Operational",
       "level": "Information",
-      "title": "Attack Surface Reduction rule — user overrode a warn-mode block",
+      "title": "Attack Surface Reduction rule \u2014 user overrode a warn-mode block",
       "summary": "A user explicitly allowed an operation that an ASR rule flagged in warn mode.",
-      "details": "Generated when an ASR rule is configured in warn mode and the user chooses to dismiss the warning and allow the blocked operation to proceed. Warn mode presents a notification to the user explaining that the operation was flagged, and gives them the option to allow it. This event records that the user made that choice. Key fields: the ASR rule GUID (identifies which rule warned), the process name, and the path. From a security operations perspective, user override events are significant — they reveal which users are bypassing ASR controls, for which operations, and how often. Repeated overrides by the same user for the same rule may indicate social engineering (an attacker coached a user to click through a warning), or may indicate the rule is generating high false positives in warn mode and should be tuned.",
+      "details": "Generated when an ASR rule is configured in warn mode and the user chooses to dismiss the warning and allow the blocked operation to proceed. Warn mode presents a notification to the user explaining that the operation was flagged, and gives them the option to allow it. This event records that the user made that choice.",
       "category": "Attack Surface Reduction",
       "tags": [
         "defender",
@@ -1241,15 +1463,32 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the user who clicked through the warning — repeated overrides by a single user warrant a conversation with them about what they were doing",
-          "The ASR rule GUID identifies which protection was overridden — map it to the rule name using Microsoft's ASR GUID reference",
-          "Process Name and Path reveal what was allowed — flag Office applications allowing executable creation or LSASS-access operations that the user permitted"
+          "Identify the user who clicked through the warning \u2014 repeated overrides by a single user warrant a conversation with them about what they were doing",
+          "The ASR rule GUID identifies which protection was overridden \u2014 map it to the rule name using Microsoft's ASR GUID reference",
+          "Process Name and Path reveal what was allowed \u2014 flag Office applications allowing executable creation or LSASS-access operations that the user permitted"
         ],
         "commonFalsePositives": [
           "IT administrators legitimately dismissing ASR warnings for known-good software during deployment",
           "End users clicking through warnings for legitimate productivity software that triggers ASR rules (common for custom macros or scripting tools)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "Rule GUID",
+          "xpath": "EventData/Data[@Name='Rule GUID']",
+          "description": "The GUID identifying which ASR rule warned."
+        },
+        {
+          "name": "Process Name",
+          "xpath": "EventData/Data[@Name='Process Name']",
+          "description": "The process that was allowed to proceed."
+        },
+        {
+          "name": "Path",
+          "xpath": "EventData/Data[@Name='Path']",
+          "description": "The target file or object."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
@@ -1268,7 +1507,7 @@
       "level": "Warning",
       "title": "Scanning for viruses is disabled",
       "summary": "Windows Defender virus scanning was disabled.",
-      "details": "Generated when scanning specifically for viruses is disabled. Related to but distinct from EID 5010 (malware/PUP scanning disabled) — Windows Defender distinguishes between virus scanning and the broader malware/PUP scanning category. Disabling virus scanning leaves the system without signature-based detection for executable threats. Correlate with EID 5007 to identify the configuration change, and with Security EID 4688 to identify what process initiated the change.",
+      "details": "Generated when scanning specifically for viruses is disabled. Related to but distinct from EID 5010 (malware/PUP scanning disabled) -- Windows Defender distinguishes between virus scanning and the broader malware/PUP scanning category. Disabling virus scanning leaves the system without signature-based detection for executable threats.",
       "category": "Defender Configuration",
       "tags": [
         "defender",
@@ -1305,7 +1544,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Correlate with Security EID 4688 to identify the process that disabled virus scanning",
-          "Pair with EID 5010 — if both fire around the same time, most active threat detection has been disabled",
+          "Pair with EID 5010 \u2014 if both fire around the same time, most active threat detection has been disabled",
           "Check whether any files were written or processes executed in the window between EID 5012 and scanning being re-enabled"
         ],
         "commonFalsePositives": [

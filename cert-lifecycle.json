@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Certificate Services Client Lifecycle",
-    "version": "1.0.1",
-    "generatedAt": "2026-04-11T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/cert-lifecycle.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -230,7 +230,7 @@
       "level": "Error",
       "title": "Certificate auto-enrollment failed",
       "summary": "The Certificate Services client failed to complete certificate auto-enrollment.",
-      "details": "Generated when certificate auto-enrollment fails on the client side. Common causes: missing enrollment permissions, CA unavailability, policy module rejection, or an explicit CA denial (generates CA-side EID 4888). Correlate with CA-side EID 4888 for the full request-to-denial chain.",
+      "details": "Generated when certificate auto-enrollment fails on the client side. Common causes include missing enrollment permissions, CA unavailability, policy module rejection, or an explicit CA denial (which generates CA-side EID 4888).",
       "category": "Certificate Lifecycle",
       "tags": [
         "certificate",
@@ -318,7 +318,7 @@
       "level": "Information",
       "title": "Certificate removed from the certificate store",
       "summary": "A certificate was removed from the user's certificate store.",
-      "details": "Generated when a certificate is removed from the user's certificate store. Correlate with EID 1004 using the thumbprint to establish the full install-to-removal lifecycle.",
+      "details": "Generated when a certificate is removed from the user's certificate store. Removal can be triggered by expiry, manual deletion, renewal replacement, or automated security response.",
       "category": "Certificate Lifecycle",
       "tags": [
         "certificate",

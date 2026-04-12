@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Firewall",
-    "version": "1.2.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/windows-firewall.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Windows Firewall setting changed",
       "summary": "A Windows Defender Firewall profile-level setting was modified.",
-      "details": "Generated when a Windows Defender Firewall profile setting is changed (e.g., default inbound/outbound action, notifications, unicast responses to multicast/broadcast). Key fields: ProfileChanged (Public, Private, or Domain), NewSettingValue, and ModifiedBy (the process or policy source). Changes delivered by Group Policy are expected; changes originating from interactive sessions or unexpected processes warrant investigation. Correlate with Security log EID 4950 for individual setting changes and EID 4954 for Group Policy-driven changes.",
+      "details": "Generated when a Windows Defender Firewall profile setting is changed (e.g., default inbound/outbound action, notifications, unicast responses to multicast/broadcast). Records which profile was changed, the new setting value, and the process or policy source responsible for the change.",
       "category": "Firewall Configuration",
       "tags": [
         "firewall",
@@ -68,6 +68,23 @@
           "OS installation or major feature updates resetting profile defaults"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ProfileChanged",
+          "xpath": "EventData/Data[@Name='ProfileChanged']",
+          "description": "The firewall profile that was modified (Public, Private, or Domain)"
+        },
+        {
+          "name": "NewSettingValue",
+          "xpath": "EventData/Data[@Name='NewSettingValue']",
+          "description": "The new value applied to the profile setting"
+        },
+        {
+          "name": "ModifiedBy",
+          "xpath": "EventData/Data[@Name='ModifiedBy']",
+          "description": "The process or policy source that made the change"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
@@ -86,7 +103,7 @@
       "level": "Information",
       "title": "Firewall rule added",
       "summary": "A new inbound or outbound firewall rule was added to the exception list.",
-      "details": "Generated when a rule is added to the Windows Defender Firewall exception list. Key fields: RuleName, RuleId, ApplicationPath, Protocol, LocalPorts, RemotePorts, Direction (inbound/outbound), Action (allow/block), and ModifiedBy. Adversaries commonly add allow rules to permit C2 traffic, enable remote access, or expose backdoor services. High-fidelity indicators include inbound allow rules on uncommon ports, rules with a wildcard ApplicationPath, and rules added by unexpected processes (cmd.exe, powershell.exe, mshta.exe). Correlate with Security log EID 4946.",
+      "details": "Generated when a rule is added to the Windows Defender Firewall exception list. Records the rule name, ID, application path, protocol, ports, direction (inbound/outbound), action (allow/block), and the process or policy source that added it.",
       "category": "Firewall Rule Change",
       "tags": [
         "firewall",
@@ -133,6 +150,38 @@
           "Windows components and services adding rules during initial setup or update"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RuleName",
+          "xpath": "EventData/Data[@Name='RuleName']",
+          "description": "Name of the firewall rule added"
+        },
+        {
+          "name": "RuleId",
+          "xpath": "EventData/Data[@Name='RuleId']",
+          "description": "Unique identifier for the rule"
+        },
+        {
+          "name": "ApplicationPath",
+          "xpath": "EventData/Data[@Name='ApplicationPath']",
+          "description": "Path of the binary allowed by the rule"
+        },
+        {
+          "name": "Direction",
+          "xpath": "EventData/Data[@Name='Direction']",
+          "description": "Whether the rule applies to inbound or outbound traffic"
+        },
+        {
+          "name": "Action",
+          "xpath": "EventData/Data[@Name='Action']",
+          "description": "Whether the rule allows or blocks traffic"
+        },
+        {
+          "name": "ModifiedBy",
+          "xpath": "EventData/Data[@Name='ModifiedBy']",
+          "description": "Process or policy source that added the rule"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
@@ -151,7 +200,7 @@
       "level": "Information",
       "title": "Firewall rule modified",
       "summary": "An existing firewall rule was modified.",
-      "details": "Generated when an existing Windows Defender Firewall rule is changed. Key fields: RuleName, RuleId, ApplicationPath, Protocol, LocalPorts, RemotePorts, and ModifiedBy. Adversaries may modify existing legitimate-looking rules rather than creating new ones to avoid detection heuristics that alert only on rule creation. Modifications that broaden scope (e.g., changing a specific-port allow to any-port, removing application path restrictions, switching Action from block to allow) are indicators of firewall tampering. Correlate with Security log EID 4947.",
+      "details": "Generated when an existing Windows Defender Firewall rule is changed. Records the rule name, ID, application path, protocol, ports, and the process or policy source responsible. Adversaries may modify existing legitimate-looking rules rather than creating new ones to avoid detection heuristics that alert only on rule creation.",
       "category": "Firewall Rule Change",
       "tags": [
         "firewall",
@@ -196,6 +245,28 @@
           "Administrative tools adjusting rules during maintenance windows"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RuleName",
+          "xpath": "EventData/Data[@Name='RuleName']",
+          "description": "Name of the modified firewall rule"
+        },
+        {
+          "name": "RuleId",
+          "xpath": "EventData/Data[@Name='RuleId']",
+          "description": "Unique identifier for the rule; compare with EID 2004 to see before/after state"
+        },
+        {
+          "name": "ApplicationPath",
+          "xpath": "EventData/Data[@Name='ApplicationPath']",
+          "description": "Binary path associated with the rule"
+        },
+        {
+          "name": "ModifiedBy",
+          "xpath": "EventData/Data[@Name='ModifiedBy']",
+          "description": "Process or policy source that modified the rule"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
@@ -214,7 +285,7 @@
       "level": "Information",
       "title": "Firewall rule deleted",
       "summary": "A firewall rule was removed from the exception list.",
-      "details": "Generated when a Windows Defender Firewall rule is deleted. Key fields: RuleName, RuleId, Direction, and ModifiedBy. Deletion of inbound block rules on high-risk services (RDP port 3389, SMB port 445, WMI port 135) is a strong indicator of adversarial preparation before lateral movement or remote access. Adversaries may also delete rules to clean up previously added attacker-created allow rules after completing an objective (anti-forensics). Correlate with Security log EID 4948 and review prior EID 2004 to determine if the deleted rule was originally attacker-created.",
+      "details": "Generated when a Windows Defender Firewall rule is deleted. Records the rule name, ID, direction, and the process or policy source responsible for the deletion.",
       "category": "Firewall Rule Change",
       "tags": [
         "firewall",
@@ -261,6 +332,28 @@
           "Group Policy removing rules superseded by a newer baseline"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RuleName",
+          "xpath": "EventData/Data[@Name='RuleName']",
+          "description": "Name of the deleted firewall rule"
+        },
+        {
+          "name": "RuleId",
+          "xpath": "EventData/Data[@Name='RuleId']",
+          "description": "Unique identifier of the deleted rule"
+        },
+        {
+          "name": "Direction",
+          "xpath": "EventData/Data[@Name='Direction']",
+          "description": "Whether the deleted rule applied to inbound or outbound traffic"
+        },
+        {
+          "name": "ModifiedBy",
+          "xpath": "EventData/Data[@Name='ModifiedBy']",
+          "description": "Process or policy source that deleted the rule"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/"
@@ -334,7 +427,7 @@
       "level": "Information",
       "title": "All firewall rules deleted",
       "summary": "All rules in the Windows Defender Firewall exception list were deleted.",
-      "details": "Generated when all rules are removed from the Windows Defender Firewall exception list for a profile. Bulk rule deletion effectively removes all traffic filtering for the affected profile, leaving the system exposed. This can be achieved via netsh advfirewall reset, PowerShell Remove-NetFirewallRule -All, or direct registry manipulation. Adversaries use this technique to open all ports and remove blocking rules before deploying backdoors, reverse shells, or ransomware. Treat this event as critical unless it can be tied to an authorized, documented administrative action. Correlate with Security log EID 4949.",
+      "details": "Generated when all rules are removed from the Windows Defender Firewall exception list for a profile. Bulk rule deletion effectively removes all traffic filtering for the affected profile. This can be achieved via netsh advfirewall reset, PowerShell Remove-NetFirewallRule -All, or direct registry manipulation.",
       "category": "Firewall Configuration",
       "tags": [
         "firewall",

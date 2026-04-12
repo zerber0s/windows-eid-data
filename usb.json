@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - USB / DriverFrameworks",
-    "version": "1.4.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.5.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/usb.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Device instance detected",
       "summary": "A USB device was connected and detected by Windows.",
-      "details": "Generated when Windows detects a new device instance, typically when a USB device is physically connected. Key field: the device instance ID, which encodes the device class, vendor ID (VID), product ID (PID), and serial number (if the device has one). The VID and PID can be used to identify the device type and manufacturer. Devices without a serial number will share an instance ID across connections, making per-connection attribution harder. Correlate with EID 2004 to confirm the device was successfully initialized, and with System log EID 20001 for driver installation events.",
+      "details": "Generated when Windows detects a new device instance, typically when a USB device is physically connected. The device instance ID encodes the device class, vendor ID (VID), product ID (PID), and serial number (if the device has one). Devices without a serial number share an instance ID across connections, making per-connection attribution harder.",
       "category": "USB Device",
       "tags": [
         "usb",
@@ -47,6 +47,10 @@
         {
           "id": 2101,
           "log": "DriverFrameworks"
+        },
+        {
+          "id": 20001,
+          "log": "System"
         }
       ],
       "mitreAttack": [
@@ -79,7 +83,8 @@
         "investigationPivots": [
           "Extract VID and PID from the device instance ID to identify the device class (storage, input, network adapter, etc.)",
           "Serial number presence in the instance ID enables per-device tracking across multiple connection events",
-          "Correlate connection timestamps with user logon events (Security EID 4624) to attribute the device connection to a specific user session"
+          "Correlate connection timestamps with user logon events (Security EID 4624) to attribute the device connection to a specific user session",
+          "Correlate with EID 2004 to confirm the device was successfully initialized, and with System log EID 20001 for driver installation events"
         ],
         "commonFalsePositives": [
           "Any routine USB device connection (keyboards, mice, headsets, hubs)",
@@ -94,7 +99,14 @@
       "windowsVersions": {
         "minVersion": "Windows 8 / Server 2012"
       },
-      "lastReviewed": "2026-03-29"
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Unique device identifier encoding device class, VID, PID, and serial number"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 2004,
@@ -104,7 +116,7 @@
       "level": "Information",
       "title": "Device instance enumerated",
       "summary": "A detected USB device was successfully enumerated by Windows.",
-      "details": "Generated when Windows successfully enumerates a device instance following detection (EID 2003). Enumeration confirms the device was recognized and its properties read by the driver framework. Correlate with EID 2003 using the device instance ID to confirm the full connection sequence. A device that generates EID 2003 but not EID 2004 may indicate a driver failure or an unsupported device class.",
+      "details": "Generated when Windows successfully enumerates a device instance following detection (EID 2003). Enumeration confirms the device was recognized and its properties read by the driver framework. A device that generates EID 2003 but not EID 2004 may indicate a driver failure or an unsupported device class.",
       "category": "USB Device",
       "tags": [
         "usb",
@@ -168,7 +180,14 @@
       "windowsVersions": {
         "minVersion": "Windows 8 / Server 2012"
       },
-      "lastReviewed": "2026-03-29"
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Device instance identifier matching the EID 2003 detection event"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 2100,
@@ -178,7 +197,7 @@
       "level": "Information",
       "title": "Device connection attempt initiated",
       "summary": "The driver framework is initiating a connection with a device instance.",
-      "details": "Generated when the user-mode driver framework (UMDF) begins establishing a connection to a device instance. This event is part of the same connection sequence as EID 2003 and 2004, providing an additional timestamp reference for when driver-level communication with the device began. Key field: the device instance ID. Useful for establishing precise connection timing when correlating USB events with other log sources such as file system activity or user logon events.",
+      "details": "Generated when the user-mode driver framework (UMDF) begins establishing a connection to a device instance. This event is part of the same connection sequence as EID 2003 and 2004, providing an additional timestamp reference for when driver-level communication with the device began.",
       "category": "USB Device",
       "tags": [
         "usb",
@@ -242,7 +261,14 @@
       "windowsVersions": {
         "minVersion": "Windows 8 / Server 2012"
       },
-      "lastReviewed": "2026-03-29"
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Device instance identifier for the device being connected"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 2101,
@@ -252,7 +278,7 @@
       "level": "Information",
       "title": "Device connection established",
       "summary": "The driver framework successfully established a connection with the device.",
-      "details": "Generated when the user-mode driver framework (UMDF) successfully completes connection to a device instance. This confirms the device is fully operational and ready for use — for USB storage devices, this is the point at which the volume becomes accessible to the file system. Correlate with EID 2100 to measure driver initialization time. For insider threat and data exfiltration investigations, EID 2101 combined with subsequent file system events provides the clearest evidence that a storage device was connected and used.",
+      "details": "Generated when the user-mode driver framework (UMDF) successfully completes connection to a device instance. This confirms the device is fully operational and ready for use — for USB storage devices, this is the point at which the volume becomes accessible to the file system.",
       "category": "USB Device",
       "tags": [
         "usb",
@@ -304,7 +330,8 @@
         "investigationPivots": [
           "For USB storage, this event marks when the volume became accessible — correlate with file copy events immediately following this timestamp",
           "Correlate with Security EID 4663 (object access) on removable drive paths to identify what files were accessed or copied",
-          "Device connection near the end of an employee's last working day is a common insider threat indicator"
+          "Device connection near the end of an employee's last working day is a common insider threat indicator",
+          "Correlate with EID 2100 to measure driver initialization time"
         ],
         "commonFalsePositives": [
           "Any routine USB device connection completing initialization"
@@ -318,7 +345,14 @@
       "windowsVersions": {
         "minVersion": "Windows 8 / Server 2012"
       },
-      "lastReviewed": "2026-03-29"
+      "keyFields": [
+        {
+          "name": "DeviceInstanceId",
+          "xpath": "EventData/Data[@Name='DeviceInstanceId']",
+          "description": "Device instance identifier for the fully connected device"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

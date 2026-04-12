@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows OpenSSH Server",
-    "version": "1.0.1",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/openssh.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "SSH authentication event",
       "summary": "The Windows OpenSSH server processed an authentication or session lifecycle event — accepted, failed, or session open/close.",
-      "details": "Logged by the OpenSSH SSH Server provider in the Application log for all SSH authentication and session lifecycle events. All sub-types share EID 4; the specific event is identified by parsing the Message field. Sub-types: 'Accepted publickey', 'Accepted password', 'Failed password', 'Failed publickey', 'session opened for user <user>', and 'session closed for user <user>'. Key field: Message (contains sub-type, username, source IP, port, and authentication method — parse to extract all individual values). 'Invalid user <username>' prefix on a failed event indicates the username does not exist on the system.",
+      "details": "Logged by the OpenSSH SSH Server provider in the Application log for all SSH authentication and session lifecycle events. All sub-types share EID 4; the specific event is identified by the Message field content. Sub-types include 'Accepted publickey', 'Accepted password', 'Failed password', 'Failed publickey', 'session opened for user <user>', and 'session closed for user <user>'. An 'Invalid user <username>' prefix on a failed event indicates the username does not exist on the system.",
       "category": "Remote Access",
       "tags": [
         "ssh",

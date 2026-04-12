@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - VPN / Remote Access Service",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/vpn-ras.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "VPN connection successfully established",
       "summary": "The Remote Access Service client successfully established a VPN connection to a remote server.",
-      "details": "Generated in the Application event log by the RasClient provider when a VPN connection is successfully established. Key fields: ConnectionName (the VPN profile name configured on the client), RasError (0 = success), and the server address embedded in the message text. This event marks the precise moment a VPN tunnel is up and authenticated. In a DFIR context, this event is used to reconstruct a user's remote access history — correlate with Security EID 4624 (logon) and the user account to attribute VPN sessions to specific identities. Unexpected VPN connections from unusual source IPs, outside business hours, or from endpoints not previously used for VPN access warrant investigation. On a server-side RRAS deployment, pair with EID 6272/6273 in the Security log for the corresponding NPS authentication decision. The Connection Name field reflects the user-defined VPN profile — attackers who configure a new VPN profile will have a profile name not matching IT-managed standards.",
+      "details": "Generated in the Application event log by the RasClient provider when a VPN connection is successfully established. This event marks the precise moment a VPN tunnel is up and authenticated. On a server-side RRAS deployment, the corresponding NPS authentication decision is recorded in Security log EID 6272/6273.",
       "category": "VPN / Remote Access",
       "tags": [
         "vpn",
@@ -106,7 +106,17 @@
         {
           "name": "ConnectionName",
           "xpath": "EventData/Data[@Name='ConnectionName']",
-          "description": "VPN profile name; IT-managed profiles have standardised names — atypical names indicate user-created or attacker-configured connections"
+          "description": "VPN profile name configured on the client"
+        },
+        {
+          "name": "RasError",
+          "xpath": "EventData/Data[@Name='RasError']",
+          "description": "RAS error code; 0 indicates successful connection"
+        },
+        {
+          "name": "ServerAddress",
+          "xpath": "EventData/Data[@Name='ServerAddress']",
+          "description": "Address of the VPN server the client connected to"
         }
       ],
       "detectionRules": [
@@ -123,7 +133,7 @@
           "notes": "Use as a baseline collector rather than a direct alert. Correlate with time-of-day, user, and device context for meaningful detection."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 20222,
@@ -133,7 +143,7 @@
       "level": "Information",
       "title": "VPN connection terminated",
       "summary": "The Remote Access Service client disconnected from a VPN connection.",
-      "details": "Generated when a VPN connection is terminated, either by the user, the OS, or due to network interruption. Key fields: ConnectionName, and the disconnect reason embedded in the message. Pair with EID 20221 to calculate VPN session duration. Anomalously short sessions (seconds to a few minutes) may indicate failed lateral movement attempts or scripted connection testing. A 20222 without a preceding 20221 (e.g., if the log was cleared) can indicate log tampering. In large organisations, building a baseline of typical session durations per user allows statistical detection of outliers. Server-side, correlate with Security EID 6274 (NPS revoked access) or Security EID 4647 (logoff) on the remote host to understand the full session lifecycle.",
+      "details": "Generated when a VPN connection is terminated, either by the user, the OS, or due to network interruption. Pair with EID 20221 to calculate VPN session duration.",
       "category": "VPN / Remote Access",
       "tags": [
         "vpn",
@@ -148,6 +158,10 @@
         },
         {
           "id": 4647,
+          "log": "Security"
+        },
+        {
+          "id": 6274,
           "log": "Security"
         }
       ],
@@ -167,7 +181,8 @@
         "investigationPivots": [
           "Pair with EID 20221 to calculate session duration — sessions under 60 seconds that do not correspond to a user-initiated disconnect are anomalous",
           "Missing EID 20221 preceding a 20222 may indicate log tampering or log rotation",
-          "Correlate with Security EID 4647 on the VPN server to confirm logoff was clean vs. abrupt"
+          "Correlate with Security EID 4647 on the VPN server to confirm logoff was clean vs. abrupt",
+          "Correlate with Security EID 6274 (NPS revoked access) on the remote host for full session lifecycle"
         ],
         "commonFalsePositives": [
           "User-initiated disconnects after completing remote work",
@@ -187,10 +202,15 @@
         {
           "name": "ConnectionName",
           "xpath": "EventData/Data[@Name='ConnectionName']",
-          "description": "VPN profile name; pair with EID 20221 to bracket session duration"
+          "description": "VPN profile name of the terminated connection"
+        },
+        {
+          "name": "DisconnectReason",
+          "xpath": "EventData/Data[@Name='DisconnectReason']",
+          "description": "Reason for the disconnection (user-initiated, timeout, network error)"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 20223,
@@ -200,7 +220,7 @@
       "level": "Error",
       "title": "VPN connection failed",
       "summary": "The Remote Access Service client failed to establish a VPN connection.",
-      "details": "Generated when a VPN connection attempt fails. Key fields: ConnectionName and ErrorCode (the RAS error code, e.g., 691 = authentication failure, 619 = port disconnected, 789 = L2TP/IPsec pre-shared key mismatch, 868 = DNS resolution failure for server). Error 691 (authentication failure) is the most security-relevant code — repeated 20223 events with error 691 from the same device targeting the same VPN profile indicates credential brute force or password spray. A cluster of 20223 events from many different source devices targeting the same VPN infrastructure (observable on the server side) indicates a distributed credential attack. Error 789 (IPsec pre-shared key mismatch) against a site-to-site VPN may indicate an attacker probing with an incorrect key. Correlate with Security EID 6273 on the NPS server for server-side authentication rejection detail.",
+      "details": "Generated when a VPN connection attempt fails. Common error codes include: 691 (authentication failure), 619 (port disconnected), 789 (L2TP/IPsec pre-shared key mismatch), and 868 (DNS resolution failure for server).",
       "category": "VPN / Remote Access",
       "tags": [
         "vpn",
@@ -246,7 +266,8 @@
           "ErrorCode 691 (authentication failure) repeated from the same device indicates credential stuffing or brute force",
           "ErrorCode 691 across many different devices in a short window is a password spray indicator — pivot to the server-side NPS EID 6273 for the requesting IP",
           "ErrorCode 789 (L2TP/IPsec pre-shared key failure) is unusual and may indicate misconfiguration or an attacker testing credentials",
-          "A 20223 immediately followed by a successful 20221 from the same device may indicate a retry after a transient error — verify the connection was legitimate"
+          "A 20223 immediately followed by a successful 20221 from the same device may indicate a retry after a transient error — verify the connection was legitimate",
+          "A cluster of 20223 events from many different source devices targeting the same VPN infrastructure (observable on the server side) indicates a distributed credential attack"
         ],
         "commonFalsePositives": [
           "User entering an incorrect VPN password — typically 1-2 failures before successful auth",
@@ -271,7 +292,7 @@
         {
           "name": "ErrorCode",
           "xpath": "EventData/Data[@Name='ErrorCode']",
-          "description": "RAS error code; 691 = auth failure (credential attack), 789 = IPsec key mismatch, 868 = DNS failure"
+          "description": "RAS error code; 691 = auth failure, 789 = IPsec key mismatch, 868 = DNS failure"
         }
       ],
       "detectionRules": [
@@ -282,7 +303,7 @@
           "notes": "Error 691 is authentication failure. Threshold of 5 in 10 minutes catches automated credential testing. Adjust per environment."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

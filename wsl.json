@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Subsystem for Linux",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wsl.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "WSL instance started",
       "summary": "A Windows Subsystem for Linux instance was started.",
-      "details": "Generated when a WSL instance (Linux distribution) is started. Key fields: the distribution name and the invoking user context. WSL is increasingly exploited by threat actors as a living-off-the-land vector to execute Linux ELF binaries, bypass Windows EDR and AV solutions, and run tools such as nmap, curl, and Python scripts that have no Windows equivalent or are not subject to Windows AppLocker policies. WSL execution can bypass: (1) Windows Defender real-time scanning of Linux ELF binaries in the WSL file system, (2) AppLocker rules which apply to Windows PE files and scripts but not to ELF binaries executed within WSL, (3) many EDR user-mode hooks that operate on Windows PE processes. Detection relying solely on process creation (Sysmon EID 1 or Security EID 4688) may not capture WSL-internal execution. Identify WSL usage on endpoints where it is not expected in the application inventory, especially on servers or locked-down workstations. Correlate with Security EID 4688 for the wsl.exe or wslhost.exe parent process.",
+      "details": "Generated when a WSL instance (Linux distribution) is started. WSL can be used as a living-off-the-land vector to execute Linux ELF binaries that bypass Windows Defender real-time scanning, AppLocker rules (which apply to Windows PE files but not ELF binaries), and many EDR user-mode hooks that operate on Windows PE processes. Detection relying solely on process creation (Sysmon EID 1 or Security EID 4688) may not capture WSL-internal execution.",
       "category": "WSL Execution",
       "tags": [
         "wsl",
@@ -142,7 +142,7 @@
       "level": "Information",
       "title": "WSL instance stopped",
       "summary": "A Windows Subsystem for Linux instance was stopped.",
-      "details": "Generated when a WSL instance terminates. Pair with EID 1 to calculate WSL session duration. Anomalously short WSL sessions (seconds) may indicate one-liner Linux command execution or a scripted command-and-control check-in via curl or wget. The absence of a matching EID 2 after an EID 1 (e.g., if the WSL process was forcibly killed by a security tool or system) may indicate EDR intervention or a crash. In an investigation, the WSL session duration combined with Sysmon network connection events during the same window provides the key context for understanding what was executed within the WSL environment.",
+      "details": "Generated when a WSL instance terminates. Pairs with EID 1 to bracket WSL session duration. Anomalously short sessions (seconds) may indicate one-liner Linux command execution or a scripted command-and-control check-in. The absence of a matching EID 2 after an EID 1 may indicate EDR intervention or a crash.",
       "category": "WSL Execution",
       "tags": [
         "wsl",

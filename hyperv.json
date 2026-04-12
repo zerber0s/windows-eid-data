@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Hyper-V",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/hyperv.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Virtual machine started",
       "summary": "A Hyper-V virtual machine was started by the Virtual Machine Management Service.",
-      "details": "Generated when a virtual machine transitions to the running state. Key fields: VmName (the VM name), VmId (the unique VM identifier). In a security context, this event tracks the lifecycle of virtual machines on a Hyper-V host. Unexpected VM starts — particularly outside of business hours, for VMs in unusual powered-off states, or for VMs the organisation does not actively use — may indicate an attacker leveraging dormant VMs for persistence or lateral movement. Attackers who compromise a Hyper-V host gain control over all guest VMs and can start, modify, or snapshot them without touching the guest OS security controls. This event should be baselined per VM and alerting configured for VMs not in the expected operational set. Correlate with Security EID 4688 on the host to identify the process that triggered the VM start (vmconnect.exe, powershell.exe, or unexpected processes are pivots).",
+      "details": "Generated when a virtual machine transitions to the running state. This event tracks the lifecycle of virtual machines on a Hyper-V host. Attackers who compromise a Hyper-V host gain control over all guest VMs and can start, modify, or snapshot them without touching the guest OS security controls.",
       "category": "Virtual Machine Lifecycle",
       "tags": [
         "hyper-v",
@@ -48,6 +48,10 @@
         {
           "id": 18512,
           "log": "HyperV"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -116,7 +120,7 @@
       "level": "Information",
       "title": "Virtual machine stopped",
       "summary": "A Hyper-V virtual machine was shut down or stopped.",
-      "details": "Generated when a virtual machine transitions to a stopped (powered off) state. Key fields: VmName, VmId. Unexpected VM shutdowns — especially for production systems during business hours — may indicate an attacker preparing to tamper with VM disk files offline, or ransomware shutting down VMs before encrypting VHDX files on the host storage. Modern ransomware targeting virtualised environments routinely stops all running VMs before encrypting VHDX/VHD files because open-disk encryption is blocked by Windows file locking. A wave of 13003 events across all VMs in rapid succession on a production Hyper-V cluster is a critical ransomware precursor indicator. Pair with EID 13002 for the full power-on/off cycle, and correlate with host file system activity for VHDX access after the VM stops.",
+      "details": "Generated when a virtual machine transitions to a stopped (powered off) state. Modern ransomware targeting virtualised environments routinely stops all running VMs before encrypting VHDX/VHD files because open-disk encryption is blocked by Windows file locking. A wave of 13003 events across all VMs in rapid succession on a production Hyper-V cluster is a critical ransomware precursor indicator.",
       "category": "Virtual Machine Lifecycle",
       "tags": [
         "hyper-v",
@@ -133,6 +137,10 @@
         {
           "id": 13004,
           "log": "HyperV"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -214,7 +222,7 @@
       "level": "Information",
       "title": "Virtual machine saved to state",
       "summary": "A Hyper-V virtual machine was saved to a saved-state file (hibernation).",
-      "details": "Generated when a VM is placed into a saved state (paused with state written to disk). This differs from shutdown (EID 13003) in that the VM memory is persisted to a .vsv file on the host storage. From a forensic perspective, the saved-state file contains a memory snapshot of the guest — including potentially active decryption keys, credential material, and in-memory process state. In an investigation, identifying and acquiring saved-state files for suspect VMs is a high-priority DFIR action. Adversaries may save a VM's state to access its VHDX file offline without triggering guest OS events, since the guest is frozen rather than shut down. Alternatively, sophisticated attackers may deliberately save state to preserve a foothold or tool state.",
+      "details": "Generated when a VM is placed into a saved state (paused with state written to disk). This differs from shutdown (EID 13003) in that the VM memory is persisted to a .vsv file on the host storage. The saved-state file contains a memory snapshot of the guest, including potentially active decryption keys, credential material, and in-memory process state. Adversaries may save a VM's state to access its VHDX file offline without triggering guest OS events, since the guest is frozen rather than shut down.",
       "category": "Virtual Machine Lifecycle",
       "tags": [
         "hyper-v",
@@ -273,6 +281,11 @@
           "name": "VmName",
           "xpath": "EventData/Data[@Name='VmName']",
           "description": "VM name; saved-state file on host storage is a forensic acquisition target"
+        },
+        {
+          "name": "VmId",
+          "xpath": "EventData/Data[@Name='VmId']",
+          "description": "VM GUID; correlate with other VM lifecycle events"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -285,7 +298,7 @@
       "level": "Information",
       "title": "Virtual machine checkpoint created",
       "summary": "A checkpoint (snapshot) was created for a Hyper-V virtual machine.",
-      "details": "Generated when a checkpoint is created for a VM. Checkpoints capture the complete VM state (memory, disk, device state) at a point in time. Key fields: VmName, VmId, CheckpointId (unique identifier for the checkpoint). From a security perspective, checkpoints are significant for two reasons: (1) Attackers may create a checkpoint to preserve a working malicious configuration as a rollback point — after defensive response, the attacker could revert the VM to the compromised pre-remediation state. (2) Ransomware operators may delete all checkpoints (observable by the absence of checkpoint events paired with disk file deletions) to prevent recovery. Unexplained checkpoint creation outside of backup windows, or creation followed by rapid deletion, are investigation triggers. Correlate with the checkpoint creation user/process via Security EID 4688 on the host.",
+      "details": "Generated when a checkpoint is created for a VM. Checkpoints capture the complete VM state (memory, disk, device state) at a point in time. Checkpoints are security-significant because attackers may create one to preserve a malicious configuration as a rollback point, and ransomware operators may delete all checkpoints to prevent recovery.",
       "category": "Virtual Machine Management",
       "tags": [
         "hyper-v",
@@ -303,6 +316,10 @@
         {
           "id": 13003,
           "log": "HyperV"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -358,6 +375,11 @@
           "name": "VmId",
           "xpath": "EventData/Data[@Name='VmId']",
           "description": "VM GUID; correlate with VHDX file access events on the host"
+        },
+        {
+          "name": "CheckpointId",
+          "xpath": "EventData/Data[@Name='CheckpointId']",
+          "description": "Unique identifier for the checkpoint"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -370,7 +392,7 @@
       "level": "Information",
       "title": "Virtual machine live migration initiated",
       "summary": "A live migration was started to move a running VM from one Hyper-V host to another.",
-      "details": "Generated on the source host when a live migration of a running VM begins. Live migration transfers the VM's memory pages and device state to a destination host while keeping the guest running. Key fields: VmName, VmId, and the destination host name/IP. Live migration between authorised cluster nodes is a routine administrative operation; however, an adversary who has compromised a Hyper-V host may initiate an unauthorised live migration to move a VM to an attacker-controlled host, effectively stealing the guest OS and its data. Indicators of malicious migration include: destination host not in the authorised cluster, migration outside of maintenance windows, or migration of high-value VMs (DCs, database servers) by non-service accounts. Correlate with cluster management events and the destination host's 13002 event to confirm where the VM landed.",
+      "details": "Generated on the source host when a live migration of a running VM begins. Live migration transfers the VM's memory pages and device state to a destination host while keeping the guest running. Live migration between authorised cluster nodes is a routine administrative operation. An adversary who has compromised a Hyper-V host may initiate an unauthorised live migration to move a VM to an attacker-controlled host, effectively stealing the guest OS and its data.",
       "category": "Virtual Machine Lifecycle",
       "tags": [
         "hyper-v",
@@ -442,6 +464,11 @@
           "name": "VmId",
           "xpath": "EventData/Data[@Name='VmId']",
           "description": "VM GUID; correlate with 13002 on the destination host to confirm where the VM was moved"
+        },
+        {
+          "name": "DestinationHost",
+          "xpath": "EventData/Data[@Name='DestinationHost']",
+          "description": "Destination host name or IP for the migration"
         }
       ],
       "lastReviewed": "2026-04-10"

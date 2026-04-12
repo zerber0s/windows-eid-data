@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DNS Server",
-    "version": "1.2.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-server.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "DNS query received",
       "summary": "The DNS server received and answered a query.",
-      "details": "Generated on the DNS server's Analytical channel for every query received and answered. Key fields: QNAME (queried name), QTYPE (record type), Source (client IP), Port, and the response RCODE. This is the primary event for DNS tunneling and C2-over-DNS detection. Threat actors use DNS as a covert channel by encoding data in subdomains (e.g., data.attacker.com) queried against a controlled authoritative server. Signatures: high query volume to a single domain, long or high-entropy subdomain labels, unusual QTYPE values (TXT, NULL, CNAME) with high frequency, or queries to newly registered domains. The Analytical channel is disabled by default and must be enabled explicitly.",
+      "details": "Generated on the DNS server's Analytical channel for every query received and answered. This is the primary event for DNS tunneling and C2-over-DNS detection. Threat actors use DNS as a covert channel by encoding data in subdomains (e.g., data.attacker.com) queried against a controlled authoritative server. Signatures include high query volume to a single domain, long or high-entropy subdomain labels, unusual QTYPE values (TXT, NULL, CNAME) with high frequency, or queries to newly registered domains. The Analytical channel is disabled by default and must be enabled explicitly.",
       "category": "DNS Query",
       "tags": [
         "dns",
@@ -77,7 +77,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Cluster queries by QNAME apex domain — high volume to a single domain from one client is highest fidelity",
+          "Cluster queries by QNAME apex domain \u2014 high volume to a single domain from one client is highest fidelity",
           "Flag high-entropy or long subdomain labels (>30 chars) as likely data encoding",
           "Unusual QTYPE values (TXT, NULL, MX) at high frequency from a workstation are strong C2 indicators",
           "Correlate Source IP with endpoints known to run sensitive data handling processes"
@@ -88,6 +88,33 @@
           "Legitimate DNS-SD (service discovery) generating high QTYPE=PTR/SRV volume"
         ]
       },
+      "keyFields": [
+        {
+          "name": "QNAME",
+          "xpath": "EventData/Data[@Name='QNAME']",
+          "description": "The queried domain name."
+        },
+        {
+          "name": "QTYPE",
+          "xpath": "EventData/Data[@Name='QTYPE']",
+          "description": "The DNS record type requested (A, AAAA, TXT, etc.)."
+        },
+        {
+          "name": "Source",
+          "xpath": "EventData/Data[@Name='Source']",
+          "description": "Client IP address that sent the query."
+        },
+        {
+          "name": "Port",
+          "xpath": "EventData/Data[@Name='Port']",
+          "description": "Client port number."
+        },
+        {
+          "name": "RCODE",
+          "xpath": "EventData/Data[@Name='RCODE']",
+          "description": "Response code returned by the server."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -106,7 +133,7 @@
       "level": "Warning",
       "title": "DNS query failed",
       "summary": "The DNS server received a query but returned a non-success response code.",
-      "details": "Generated when the DNS server responds to a query with a non-zero RCODE such as NXDOMAIN (name does not exist), SERVFAIL, REFUSED, or NOTIMP. Key fields: QNAME, QTYPE, Source IP, and RCODE. High rates of NXDOMAIN responses from a single client are a canonical indicator of DNS-based C2 beaconing or domain generation algorithm (DGA) traffic, where the malware queries a large list of pseudo-random domains until it finds one that resolves to the active C2 server. Correlate with threat intelligence on DGA patterns for known malware families.",
+      "details": "Generated when the DNS server responds to a query with a non-zero RCODE such as NXDOMAIN (name does not exist), SERVFAIL, REFUSED, or NOTIMP. High rates of NXDOMAIN responses from a single client are a canonical indicator of DNS-based C2 beaconing or domain generation algorithm (DGA) traffic, where the malware queries a large list of pseudo-random domains until it finds one that resolves to the active C2 server.",
       "category": "DNS Query",
       "tags": [
         "dns",
@@ -142,15 +169,38 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Count NXDOMAIN responses per source IP per hour — thresholds above ~50/hour from a single client warrant investigation",
+          "Count NXDOMAIN responses per source IP per hour \u2014 thresholds above ~50/hour from a single client warrant investigation",
           "Extract the apex domains from NXDOMAIN queries and check against DGA detection lists or VirusTotal",
-          "Correlate with proxy/firewall logs to see if the client also has unusual HTTP or TCP connections"
+          "Correlate with proxy/firewall logs to see if the client also has unusual HTTP or TCP connections",
+          "Correlate queried domain names with threat intelligence on DGA patterns for known malware families"
         ],
         "commonFalsePositives": [
           "Misconfigured applications with hard-coded hostnames that no longer resolve",
           "Development/test environments querying internal hostnames not registered in DNS"
         ]
       },
+      "keyFields": [
+        {
+          "name": "QNAME",
+          "xpath": "EventData/Data[@Name='QNAME']",
+          "description": "The queried domain name."
+        },
+        {
+          "name": "QTYPE",
+          "xpath": "EventData/Data[@Name='QTYPE']",
+          "description": "The DNS record type requested."
+        },
+        {
+          "name": "Source",
+          "xpath": "EventData/Data[@Name='Source']",
+          "description": "Client IP address that sent the query."
+        },
+        {
+          "name": "RCODE",
+          "xpath": "EventData/Data[@Name='RCODE']",
+          "description": "Response code returned (NXDOMAIN, SERVFAIL, REFUSED, etc.)."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -169,7 +219,7 @@
       "level": "Information",
       "title": "DNS dynamic update received",
       "summary": "The DNS server received a dynamic update request from a client.",
-      "details": "Generated when the DNS server receives a DNS dynamic update (RFC 2136) from a client. Key fields: UpdateName (the record being updated), Source IP, and the record data being added or changed. While legitimate clients and DHCP servers perform dynamic updates, adversaries with foothold on a network can register or modify DNS records to redirect traffic or establish persistence. In Active Directory environments, dynamic updates are authenticated via GSS-TSIG (Kerberos), but in non-AD zones or with DHCP relay configurations, unauthenticated updates may be possible. Pair with Audit channel EIDs 519/520 for the authoritative record of what was actually committed.",
+      "details": "Generated when the DNS server receives a DNS dynamic update (RFC 2136) from a client. While legitimate clients and DHCP servers perform dynamic updates, adversaries with a foothold on a network can register or modify DNS records to redirect traffic or establish persistence. In Active Directory environments, dynamic updates are authenticated via GSS-TSIG (Kerberos), but in non-AD zones or with DHCP relay configurations, unauthenticated updates may be possible.",
       "category": "DNS Dynamic Update",
       "tags": [
         "dns",
@@ -208,7 +258,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate Source IP with known DHCP server addresses — updates from non-DHCP client IPs are anomalous",
+          "Correlate Source IP with known DHCP server addresses \u2014 updates from non-DHCP client IPs are anomalous",
           "Pair with Audit EID 519 to confirm which updates were committed vs. rejected",
           "Check UpdateName against high-value hostnames (DCs, file servers, identity systems)"
         ],
@@ -217,6 +267,23 @@
           "Workstations in AD environments registering their own A/AAAA records via secure dynamic update"
         ]
       },
+      "keyFields": [
+        {
+          "name": "UpdateName",
+          "xpath": "EventData/Data[@Name='UpdateName']",
+          "description": "The DNS record being updated."
+        },
+        {
+          "name": "Source",
+          "xpath": "EventData/Data[@Name='Source']",
+          "description": "Client IP address that sent the update."
+        },
+        {
+          "name": "RecordData",
+          "xpath": "EventData/Data[@Name='RecordData']",
+          "description": "The record data being added or changed."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -235,7 +302,7 @@
       "level": "Information",
       "title": "DNS zone deleted",
       "summary": "A DNS zone was deleted from the server.",
-      "details": "Generated when a DNS zone is deleted from the server. Key fields: ZoneName, the identity of the administrator performing the deletion, and the deletion method (console, PowerShell, dnscmd). Zone deletion is an uncommon administrative action and a high-fidelity indicator of destructive activity or attacker manipulation of DNS infrastructure. An adversary with DNS admin access could delete forward or reverse lookup zones to cause name resolution failures, supporting a denial-of-service or covering tracks after injecting malicious records. Pair with EID 514 (zone updated) and EID 515/516 (record added/deleted) for full DNS infrastructure change tracking.",
+      "details": "Generated when a DNS zone is deleted from the server. Zone deletion is an uncommon administrative action and a high-fidelity indicator of destructive activity or attacker manipulation of DNS infrastructure. An adversary with DNS admin access could delete forward or reverse lookup zones to cause name resolution failures, supporting a denial-of-service or covering tracks after injecting malicious records.",
       "category": "DNS Zone Management",
       "tags": [
         "dns",
@@ -277,7 +344,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the admin account that performed the deletion — verify it was an authorized change",
+          "Identify the admin account that performed the deletion \u2014 verify it was an authorized change",
           "Check if the deletion was preceded by a zone transfer (EID 562/563) that may have exfiltrated zone data",
           "Correlate with Active Directory replication events if this is an AD-integrated zone"
         ],
@@ -286,6 +353,23 @@
           "Automated DNS management tools performing zone lifecycle operations"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The name of the deleted zone."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that performed the deletion."
+        },
+        {
+          "name": "DeletionMethod",
+          "xpath": "EventData/Data[@Name='DeletionMethod']",
+          "description": "How the deletion was performed (console, PowerShell, dnscmd)."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -304,7 +388,7 @@
       "level": "Information",
       "title": "DNS zone properties updated",
       "summary": "A DNS zone's configuration properties were modified.",
-      "details": "Generated when a zone's configuration is changed — for example, modifying dynamic update settings (from Secure to Nonsecure, or disabling entirely), changing the zone type (primary/secondary/stub), modifying replication scope, or updating DNSSEC settings. The most security-relevant change is switching dynamic updates from Secure-only to Nonsecure, which would allow unauthenticated clients to register or overwrite DNS records. Key fields: ZoneName, the property changed, and the administrator identity.",
+      "details": "Generated when a zone's configuration is changed -- for example, modifying dynamic update settings (from Secure to Nonsecure, or disabling entirely), changing the zone type (primary/secondary/stub), modifying replication scope, or updating DNSSEC settings. The most security-relevant change is switching dynamic updates from Secure-only to Nonsecure, which would allow unauthenticated clients to register or overwrite DNS records.",
       "category": "DNS Zone Management",
       "tags": [
         "dns",
@@ -337,7 +421,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Focus on zones where dynamic update policy was changed from Secure to Nonsecure or None",
-          "Verify zone type changes — converting a primary zone to a secondary may indicate exfil setup",
+          "Verify zone type changes \u2014 converting a primary zone to a secondary may indicate exfil setup",
           "Correlate the administrator identity with privileged account monitoring"
         ],
         "commonFalsePositives": [
@@ -345,6 +429,23 @@
           "DNSSEC signing operations modifying zone properties"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone whose properties were modified."
+        },
+        {
+          "name": "PropertyChanged",
+          "xpath": "EventData/Data[@Name='PropertyChanged']",
+          "description": "The specific zone property that was changed."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that made the change."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -363,7 +464,7 @@
       "level": "Information",
       "title": "DNS record created",
       "summary": "A DNS resource record was manually created in a zone.",
-      "details": "Generated when a DNS resource record is created manually by an administrator (via DNS Manager, PowerShell, or dnscmd). Key fields: ZoneName, RecordName, RecordType, RecordData, and the administrator identity. This is distinct from dynamic update creation (EID 519), which is generated by clients. Manual record creation by unauthorized personnel is a persistence mechanism — an adversary can create A or CNAME records pointing internal names to attacker-controlled IPs, facilitating internal phishing or credential harvesting.",
+      "details": "Generated when a DNS resource record is created manually by an administrator (via DNS Manager, PowerShell, or dnscmd). This is distinct from dynamic update creation (EID 519), which is generated by clients. Manual record creation by unauthorized personnel is a persistence mechanism -- an adversary can create A or CNAME records pointing internal names to attacker-controlled IPs, facilitating internal phishing or credential harvesting.",
       "category": "DNS Record Management",
       "tags": [
         "dns",
@@ -395,15 +496,42 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Check RecordData for external or non-RFC1918 IP addresses in internal zones — indicates DNS hijacking",
+          "Check RecordData for external or non-RFC1918 IP addresses in internal zones \u2014 indicates DNS hijacking",
           "Review RecordName for typosquatted names resembling high-value hosts (e.g., 'dc01' vs 'dc0l')",
           "Correlate the administrator identity with authorized DNS admins and change management records"
         ],
         "commonFalsePositives": [
-          "Routine administrative DNS management — adding A records for new servers",
+          "Routine administrative DNS management \u2014 adding A records for new servers",
           "Automated provisioning systems that create DNS records as part of server deployment"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone in which the record was created."
+        },
+        {
+          "name": "RecordName",
+          "xpath": "EventData/Data[@Name='RecordName']",
+          "description": "The name of the created DNS record."
+        },
+        {
+          "name": "RecordType",
+          "xpath": "EventData/Data[@Name='RecordType']",
+          "description": "The DNS record type (A, CNAME, MX, etc.)."
+        },
+        {
+          "name": "RecordData",
+          "xpath": "EventData/Data[@Name='RecordData']",
+          "description": "The data value of the record (IP address, target name, etc.)."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that created the record."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -422,7 +550,7 @@
       "level": "Information",
       "title": "DNS record deleted",
       "summary": "A DNS resource record was manually deleted from a zone.",
-      "details": "Generated when a DNS resource record is manually deleted by an administrator. Key fields: ZoneName, RecordName, RecordType, and administrator identity. Manual deletion of DNS records is a rare, high-signal event. Adversaries with DNS admin access may delete SRV or A records for domain controllers to cause authentication failures (denial of service) or remove records post-exploitation to cover tracks. Unexpected deletion of records for critical infrastructure (DC locator SRV records, MX records, or certificate authority records) warrants immediate investigation.",
+      "details": "Generated when a DNS resource record is manually deleted by an administrator. Manual deletion of DNS records is a rare, high-signal event. Adversaries with DNS admin access may delete SRV or A records for domain controllers to cause authentication failures (denial of service) or remove records post-exploitation to cover tracks.",
       "category": "DNS Record Management",
       "tags": [
         "dns",
@@ -454,15 +582,37 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Check deleted RecordType — SRV deletions (especially _ldap._tcp, _kerberos._tcp) cause AD authentication failures",
+          "Check deleted RecordType \u2014 SRV deletions (especially _ldap._tcp, _kerberos._tcp) cause AD authentication failures",
           "Correlate with EID 519/520 to distinguish manual admin deletion from dynamic update expiry",
-          "Review administrator identity — deletions by service accounts or non-DNS-admin identities are anomalous"
+          "Review administrator identity \u2014 deletions by service accounts or non-DNS-admin identities are anomalous"
         ],
         "commonFalsePositives": [
           "Cleanup of stale PTR or A records during server decommissioning",
           "Automated DNS management tools removing records as part of lifecycle management"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone from which the record was deleted."
+        },
+        {
+          "name": "RecordName",
+          "xpath": "EventData/Data[@Name='RecordName']",
+          "description": "The name of the deleted DNS record."
+        },
+        {
+          "name": "RecordType",
+          "xpath": "EventData/Data[@Name='RecordType']",
+          "description": "The DNS record type of the deleted record."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that performed the deletion."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -481,7 +631,7 @@
       "level": "Information",
       "title": "DNS record created via dynamic update",
       "summary": "A DNS resource record was registered or created by a client via the dynamic update protocol.",
-      "details": "Generated when the DNS server commits a dynamic update that creates a new resource record. Key fields: ZoneName, RecordName, RecordType, RecordData, and critically the Source IP of the client that sent the update. This event captures the DNS record insertion point — knowing which client IP registered which hostname allows detection of unauthorized or spoofed registrations. An attacker who has compromised a host on the network can register a DNS name pointing to a host they control (e.g., registering the name of a legitimate server with their own IP), facilitating man-in-the-middle attacks for subsequent connections to that name.",
+      "details": "Generated when the DNS server commits a dynamic update that creates a new resource record. This event captures the DNS record insertion point -- knowing which client IP registered which hostname allows detection of unauthorized or spoofed registrations. An attacker who has compromised a host on the network can register a DNS name pointing to a host they control, facilitating man-in-the-middle attacks for subsequent connections to that name.",
       "category": "DNS Dynamic Update",
       "tags": [
         "dns",
@@ -522,8 +672,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Verify that Source IP matches the legitimate owner of the registered hostname — mismatches indicate DNS spoofing",
-          "Check RecordData against expected IP ranges — updates registering external or unexpected IPs are anomalous",
+          "Verify that Source IP matches the legitimate owner of the registered hostname \u2014 mismatches indicate DNS spoofing",
+          "Check RecordData against expected IP ranges \u2014 updates registering external or unexpected IPs are anomalous",
           "Correlate with DHCP lease logs to confirm the Source IP is the authorized client for that hostname"
         ],
         "commonFalsePositives": [
@@ -531,6 +681,33 @@
           "Workstations updating their own A/AAAA records during IP address changes"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone in which the record was created."
+        },
+        {
+          "name": "RecordName",
+          "xpath": "EventData/Data[@Name='RecordName']",
+          "description": "The name of the created DNS record."
+        },
+        {
+          "name": "RecordType",
+          "xpath": "EventData/Data[@Name='RecordType']",
+          "description": "The DNS record type created."
+        },
+        {
+          "name": "RecordData",
+          "xpath": "EventData/Data[@Name='RecordData']",
+          "description": "The data value of the created record."
+        },
+        {
+          "name": "Source",
+          "xpath": "EventData/Data[@Name='Source']",
+          "description": "Client IP address that sent the dynamic update."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -549,7 +726,7 @@
       "level": "Information",
       "title": "DNS record deleted via dynamic update",
       "summary": "A DNS resource record was deleted by a client via the dynamic update protocol.",
-      "details": "Generated when the DNS server processes a dynamic update that deletes an existing resource record. Key fields: ZoneName, RecordName, RecordType, and Source IP. Deletions via dynamic update are used by clients when they change IP addresses (DHCP lease release) or when DHCP servers clean up stale records. Adversarial use: an attacker can delete a legitimate hostname's record and re-register it with their own IP (EID 519) — the sequence EID 520 (delete) → EID 519 (create with new IP) for the same RecordName from a different Source IP than the original is a strong indicator of DNS record hijacking.",
+      "details": "Generated when the DNS server processes a dynamic update that deletes an existing resource record. Deletions via dynamic update are used by clients when they change IP addresses (DHCP lease release) or when DHCP servers clean up stale records. Adversarial use: an attacker can delete a legitimate hostname's record and re-register it with their own IP (EID 519) -- the sequence EID 520 (delete) followed by EID 519 (create with new IP) for the same RecordName from a different Source IP than the original is a strong indicator of DNS record hijacking.",
       "category": "DNS Dynamic Update",
       "tags": [
         "dns",
@@ -585,8 +762,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Sequence: EID 520 delete → EID 519 create for same RecordName with different Source IP = DNS hijacking",
-          "Cross-reference DHCP logs — deletions that don't correspond to DHCP lease releases are anomalous",
+          "Sequence: EID 520 delete \u2192 EID 519 create for same RecordName with different Source IP = DNS hijacking",
+          "Cross-reference DHCP logs \u2014 deletions that don't correspond to DHCP lease releases are anomalous",
           "Prioritize deletions of SRV, MX, or A records for critical infrastructure names"
         ],
         "commonFalsePositives": [
@@ -594,6 +771,28 @@
           "Client deregistration during normal workstation shutdown or lease release"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone from which the record was deleted."
+        },
+        {
+          "name": "RecordName",
+          "xpath": "EventData/Data[@Name='RecordName']",
+          "description": "The name of the deleted DNS record."
+        },
+        {
+          "name": "RecordType",
+          "xpath": "EventData/Data[@Name='RecordType']",
+          "description": "The DNS record type of the deleted record."
+        },
+        {
+          "name": "Source",
+          "xpath": "EventData/Data[@Name='Source']",
+          "description": "Client IP address that sent the dynamic update."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -612,7 +811,7 @@
       "level": "Information",
       "title": "DNS zone transfer (AXFR) initiated",
       "summary": "A full zone transfer was initiated to a secondary DNS server.",
-      "details": "Generated when the DNS server initiates or receives a full zone transfer (AXFR). Zone transfers copy the entire zone data to a secondary DNS server. Key fields: ZoneName, destination server, and initiator identity. Unauthorized zone transfers are a significant reconnaissance technique — an attacker who can initiate a zone transfer to a server they control receives a complete inventory of all DNS records in the zone, revealing the full internal network topology, hostnames, IP addresses, and service locations. Zone transfers should be restricted to authorized secondary DNS servers via Allow Transfer configuration. The presence of an AXFR transfer to an unexpected destination is a critical indicator.",
+      "details": "Generated when the DNS server initiates or receives a full zone transfer (AXFR). Zone transfers copy the entire zone data to a secondary DNS server. Unauthorized zone transfers are a significant reconnaissance technique -- an attacker who can initiate a zone transfer to a server they control receives a complete inventory of all DNS records in the zone, revealing the full internal network topology, hostnames, IP addresses, and service locations. Zone transfers should be restricted to authorized secondary DNS servers via Allow Transfer configuration.",
       "category": "DNS Zone Transfer",
       "tags": [
         "dns",
@@ -654,6 +853,23 @@
           "DNS monitoring or backup tools performing zone data collection"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone being transferred."
+        },
+        {
+          "name": "DestinationServer",
+          "xpath": "EventData/Data[@Name='DestinationServer']",
+          "description": "The server receiving the zone transfer."
+        },
+        {
+          "name": "InitiatorIdentity",
+          "xpath": "EventData/Data[@Name='InitiatorIdentity']",
+          "description": "The identity that initiated the transfer."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -672,7 +888,7 @@
       "level": "Information",
       "title": "DNS zone transfer (IXFR) initiated",
       "summary": "An incremental zone transfer was initiated to a secondary DNS server.",
-      "details": "Generated when the DNS server initiates or services an incremental zone transfer (IXFR), which transfers only changes since the last SOA serial number. Key fields: ZoneName, destination server, and SOA serial range transferred. While less comprehensive than AXFR (EID 562), repeated IXFR transfers to an unauthorized destination can reconstruct full zone contents over time. The incremental nature also reveals the cadence and content of DNS changes, which may expose recently created attacker infrastructure records or identify newly added hosts of interest.",
+      "details": "Generated when the DNS server initiates or services an incremental zone transfer (IXFR), which transfers only changes since the last SOA serial number. While less comprehensive than AXFR (EID 562), repeated IXFR transfers to an unauthorized destination can reconstruct full zone contents over time. The incremental nature also reveals the cadence and content of DNS changes, which may expose recently created attacker infrastructure records or identify newly added hosts of interest.",
       "category": "DNS Zone Transfer",
       "tags": [
         "dns",
@@ -700,7 +916,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Apply same checks as EID 562 — verify destination is an authorized secondary server",
+          "Apply same checks as EID 562 \u2014 verify destination is an authorized secondary server",
           "High-frequency IXFR transfers to the same destination may be attempting to reconstruct full zone data incrementally"
         ],
         "commonFalsePositives": [
@@ -708,6 +924,23 @@
           "DNS monitoring solutions polling zone change history"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone being transferred."
+        },
+        {
+          "name": "DestinationServer",
+          "xpath": "EventData/Data[@Name='DestinationServer']",
+          "description": "The server receiving the incremental transfer."
+        },
+        {
+          "name": "SOASerialRange",
+          "xpath": "EventData/Data[@Name='SOASerialRange']",
+          "description": "The SOA serial number range transferred."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn800669(v=ws.11)"
@@ -726,7 +959,7 @@
       "level": "Information",
       "title": "DNS server policy created",
       "summary": "A DNS server-level policy was created.",
-      "details": "Generated when a DNS server-level policy is created. DNS policies (introduced in Windows Server 2016) control how the DNS server responds to queries based on client subnet, time of day, or other criteria — enabling split-horizon DNS, traffic management, and geo-location responses. An adversary with DNS admin access can create malicious response policies that redirect queries for legitimate hostnames to attacker-controlled IPs based on source subnet, effectively enabling targeted DNS hijacking that is invisible to clients outside the targeted subnet. Key fields: PolicyName, the administrator identity, and the policy scope.",
+      "details": "Generated when a DNS server-level policy is created. DNS policies (introduced in Windows Server 2016) control how the DNS server responds to queries based on client subnet, time of day, or other criteria -- enabling split-horizon DNS, traffic management, and geo-location responses. An adversary with DNS admin access can create malicious response policies that redirect queries for legitimate hostnames to attacker-controlled IPs based on source subnet, effectively enabling targeted DNS hijacking that is invisible to clients outside the targeted subnet.",
       "category": "DNS Policy Management",
       "tags": [
         "dns",
@@ -772,7 +1005,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Enumerate all DNS server and zone policies — unexpected policies are rare and high-fidelity",
+          "Enumerate all DNS server and zone policies \u2014 unexpected policies are rare and high-fidelity",
           "Review the policy criteria (client subnet, QNAME match) for targeting of specific internal subnets or hostnames",
           "Correlate the administrator identity with authorized DNS admin accounts"
         ],
@@ -781,6 +1014,23 @@
           "Authorized geo-routing or subnet-based response policies"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "The name of the created policy."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that created the policy."
+        },
+        {
+          "name": "PolicyScope",
+          "xpath": "EventData/Data[@Name='PolicyScope']",
+          "description": "The scope of the policy (server-level)."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
@@ -799,7 +1049,7 @@
       "level": "Information",
       "title": "DNS server policy modified",
       "summary": "A DNS server-level policy was modified.",
-      "details": "Generated when an existing DNS server-level policy is modified. Policy modifications can change the response behavior for targeted queries without creating a new policy, making them harder to detect than policy creation. Key fields: PolicyName and the administrator identity. Modifications to response rate limiting (RRL) policies or recursive resolution policies may indicate an attacker attempting to weaken DNS security controls.",
+      "details": "Generated when an existing DNS server-level policy is modified. Policy modifications can change the response behavior for targeted queries without creating a new policy, making them harder to detect than policy creation. Modifications to response rate limiting (RRL) policies or recursive resolution policies may indicate an attacker attempting to weaken DNS security controls.",
       "category": "DNS Policy Management",
       "tags": [
         "dns",
@@ -831,12 +1081,24 @@
       "notesGuidance": {
         "investigationPivots": [
           "Review old vs. new policy configuration to understand what changed",
-          "Flag modifications to RRL (response rate limiting) policies — disabling RRL enables DNS amplification"
+          "Flag modifications to RRL (response rate limiting) policies \u2014 disabling RRL enables DNS amplification"
         ],
         "commonFalsePositives": [
           "Authorized policy tuning during DNS infrastructure maintenance"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "The name of the modified policy."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that modified the policy."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
@@ -855,7 +1117,7 @@
       "level": "Information",
       "title": "DNS server policy deleted",
       "summary": "A DNS server-level policy was deleted.",
-      "details": "Generated when a DNS server-level policy is deleted. Policy deletion may indicate cleanup after malicious use (deleting an attacker-created redirect policy post-exploitation) or removal of legitimate security controls such as response rate limiting or recursion restrictions. Either context warrants investigation.",
+      "details": "Generated when a DNS server-level policy is deleted. Policy deletion may indicate cleanup after malicious use (deleting an attacker-created redirect policy post-exploitation) or removal of legitimate security controls such as response rate limiting or recursion restrictions.",
       "category": "DNS Policy Management",
       "tags": [
         "dns",
@@ -886,8 +1148,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Review the policy that was deleted — if it was a security control (RRL, recursion restriction), treat as tampering",
-          "Correlate with EID 577 creation events to identify policy lifecycle: create → use → delete pattern"
+          "Review the policy that was deleted \u2014 if it was a security control (RRL, recursion restriction), treat as tampering",
+          "Correlate with EID 577 creation events to identify policy lifecycle: create \u2192 use \u2192 delete pattern"
         ],
         "commonFalsePositives": [
           "Authorized policy cleanup after planned DNS infrastructure changes"
@@ -911,7 +1173,7 @@
       "level": "Information",
       "title": "DNS zone-level policy created",
       "summary": "A DNS policy was created at the zone level.",
-      "details": "Generated when a zone-level DNS policy is created. Zone policies apply to queries for names within a specific zone and can override server-level policies for that zone. This granularity makes zone policies a more targeted mechanism for DNS hijacking — an attacker can create a zone policy for a high-value zone (e.g., the internal AD domain) that redirects queries for specific hostnames (e.g., domain controllers, email servers) without affecting other zones. Key fields: ZoneName, PolicyName, and administrator identity.",
+      "details": "Generated when a zone-level DNS policy is created. Zone policies apply to queries for names within a specific zone and can override server-level policies for that zone. This granularity makes zone policies a more targeted mechanism for DNS hijacking -- an adversary can create a zone policy for a high-value zone (e.g., the internal AD domain) that redirects queries for specific hostnames without affecting other zones.",
       "category": "DNS Policy Management",
       "tags": [
         "dns",
@@ -943,13 +1205,30 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the ZoneName — policies on the internal AD DNS zone are highest risk",
+          "Identify the ZoneName \u2014 policies on the internal AD DNS zone are highest risk",
           "Review what the policy does: response override for specific QNAMEs is the most dangerous configuration"
         ],
         "commonFalsePositives": [
           "Authorized zone-level policies for split-horizon or selective forwarding configurations"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ZoneName",
+          "xpath": "EventData/Data[@Name='ZoneName']",
+          "description": "The zone to which the policy applies."
+        },
+        {
+          "name": "PolicyName",
+          "xpath": "EventData/Data[@Name='PolicyName']",
+          "description": "The name of the created zone policy."
+        },
+        {
+          "name": "AdminIdentity",
+          "xpath": "EventData/Data[@Name='AdminIdentity']",
+          "description": "The administrator account that created the policy."
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview"
@@ -999,7 +1278,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify what changed — new QNAME conditions or new response override targets are most suspicious",
+          "Identify what changed \u2014 new QNAME conditions or new response override targets are most suspicious",
           "Correlate with EID 257 Analytical events to see if the modified policy changed observed query responses"
         ],
         "commonFalsePositives": [

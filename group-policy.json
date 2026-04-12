@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Group Policy",
-    "version": "1.2.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/group-policy.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Machine Group Policy processing started",
       "summary": "The Group Policy client began processing machine (computer) policy.",
-      "details": "Generated when the Group Policy client starts a machine policy processing cycle. Key fields: PrincipalSamName (the machine account), PolicyElapsedTimeInSeconds, and the reason for processing (startup, periodic, manual). Machine policy processing occurs at startup and at regular intervals (default: 90 minutes with 0–30 minute random offset). In a DFIR context this event establishes the baseline processing pattern for the endpoint and can be used to detect forced or unexpected policy refreshes. An attacker who modifies a GPO (T1484.001) and then forces a gpupdate /force to apply the malicious policy will generate this event outside the normal processing schedule. Correlate with EID 5016 for the processing result and EID 5312 for the list of applied GPOs.",
+      "details": "Generated when the Group Policy client starts a machine policy processing cycle. Machine policy processing occurs at startup and at regular intervals (default: 90 minutes with 0-30 minute random offset). This event records the reason for processing (startup, periodic, or manual) and the machine account context.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -76,6 +76,18 @@
           "IT administrators running gpupdate /force during maintenance"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The machine account processing policy"
+        },
+        {
+          "name": "PolicyElapsedTimeInSeconds",
+          "xpath": "EventData/Data[@Name='PolicyElapsedTimeInSeconds']",
+          "description": "Time spent processing policy"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
@@ -94,7 +106,7 @@
       "level": "Information",
       "title": "User Group Policy processing started",
       "summary": "The Group Policy client began processing user policy for a logged-on user.",
-      "details": "Generated when user Group Policy processing begins for a logged-on account. Key fields: PrincipalSamName (the user account), IsBackgroundProcessing, and the reason for processing. User policy processing occurs at logon and periodically while the session is active. This event establishes the user policy processing baseline and helps detect forced user policy refreshes. An attacker with administrative access who modifies user-targeted GPOs (logon scripts, software installation, folder redirection) and forces a user policy refresh to apply changes immediately will generate this event outside normal logon timing.",
+      "details": "Generated when user Group Policy processing begins for a logged-on account. User policy processing occurs at logon and periodically while the session is active. The event records the user account, whether it is background processing, and the reason for processing.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -143,6 +155,18 @@
           "IT administrators running gpupdate /force /target:user for troubleshooting"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The user account whose policy is being processed"
+        },
+        {
+          "name": "IsBackgroundProcessing",
+          "xpath": "EventData/Data[@Name='IsBackgroundProcessing']",
+          "description": "Whether this is background (periodic) or foreground (logon) processing"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
@@ -161,7 +185,7 @@
       "level": "Information",
       "title": "Machine Group Policy processing completed successfully",
       "summary": "Machine Group Policy processing finished without errors.",
-      "details": "Generated when a machine Group Policy processing cycle completes successfully. Key fields: PrincipalSamName, PolicyElapsedTimeInSeconds, NumberOfGroupPolicyObjects, and IsBackgroundProcessing. The NumberOfGroupPolicyObjects field provides a quick count of applied GPOs — a sudden increase or decrease in applied GPO count compared to baseline may indicate that a GPO was added, removed, or that the machine's organizational unit (OU) membership changed. In persistence investigations, an unexpectedly added GPO that persists across processing cycles is a T1484.001 indicator. Correlate with EID 5312 for the actual list of applied GPOs.",
+      "details": "Generated when a machine Group Policy processing cycle completes successfully. Records the machine account, processing time, count of applied GPOs, and whether processing was foreground or background. A change in the NumberOfGroupPolicyObjects count compared to previous cycles may indicate a GPO was added, removed, or that the machine's OU membership changed.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -209,6 +233,28 @@
           "Normal successful machine policy refresh — fires every 90 minutes by default"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The machine account that completed policy processing"
+        },
+        {
+          "name": "PolicyElapsedTimeInSeconds",
+          "xpath": "EventData/Data[@Name='PolicyElapsedTimeInSeconds']",
+          "description": "Time spent processing policy; significant increases may indicate a new complex extension"
+        },
+        {
+          "name": "NumberOfGroupPolicyObjects",
+          "xpath": "EventData/Data[@Name='NumberOfGroupPolicyObjects']",
+          "description": "Count of GPOs applied during this cycle"
+        },
+        {
+          "name": "IsBackgroundProcessing",
+          "xpath": "EventData/Data[@Name='IsBackgroundProcessing']",
+          "description": "Whether processing was background (periodic) or foreground (startup)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
@@ -227,7 +273,7 @@
       "level": "Information",
       "title": "User Group Policy processing completed successfully",
       "summary": "User Group Policy processing finished without errors.",
-      "details": "Generated when user Group Policy processing completes successfully. Key fields: PrincipalSamName, PolicyElapsedTimeInSeconds, and NumberOfGroupPolicyObjects. The same GPO count monitoring approach from EID 5016 applies here: unexpected new GPOs in the user policy scope may indicate malicious policy addition targeting user-level settings (logon scripts, folder redirection, software installation). Correlate with EID 5313 for the explicit list of user GPOs applied.",
+      "details": "Generated when user Group Policy processing completes successfully. Records the user account, processing time, and count of applied GPOs. A change in GPO count compared to previous cycles may indicate a new or removed GPO in the user policy scope.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -275,6 +321,23 @@
           "Normal user logon GPO processing — fires at each logon and periodically"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The user account that completed policy processing"
+        },
+        {
+          "name": "PolicyElapsedTimeInSeconds",
+          "xpath": "EventData/Data[@Name='PolicyElapsedTimeInSeconds']",
+          "description": "Time spent processing user policy"
+        },
+        {
+          "name": "NumberOfGroupPolicyObjects",
+          "xpath": "EventData/Data[@Name='NumberOfGroupPolicyObjects']",
+          "description": "Count of user GPOs applied during this cycle"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
@@ -293,7 +356,7 @@
       "level": "Information",
       "title": "List of applicable machine Group Policy Objects",
       "summary": "The complete list of Group Policy Objects applied during machine policy processing.",
-      "details": "Generated alongside EID 5016 and records the explicit list of GPOs applied during machine policy processing. Key fields: the GPO names and GUIDs, their precedence order, and whether they are enabled. This is the highest-forensic-value Group Policy event for persistence detection — it provides a complete snapshot of which GPOs were applied at each processing cycle. An attacker who adds a malicious GPO will have its name and GUID appear here. Compare the GPO list across multiple cycles to detect additions or removals. The GUID can be used to locate the GPO in SYSVOL or Active Directory for further inspection.",
+      "details": "Generated alongside EID 5016 and records the explicit list of GPOs applied during machine policy processing. Provides a complete snapshot of GPO names, GUIDs, precedence order, and enabled state for each processing cycle. This is the primary Group Policy event for tracking which GPOs are applied to a machine over time.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -357,7 +420,7 @@
       "level": "Information",
       "title": "List of applicable user Group Policy Objects",
       "summary": "The complete list of Group Policy Objects applied during user policy processing.",
-      "details": "Generated alongside EID 5017 and records the explicit list of GPOs applied during user policy processing. Key fields: GPO names, GUIDs, and precedence. This is the user-policy equivalent of EID 5312 and provides the same forensic value for detecting malicious GPOs targeting users. A GPO containing logon scripts, software installation packages, or folder redirection targeting a specific user or group could be used for persistence, privilege escalation, or data access. The user GUID context makes it possible to determine whether a malicious GPO targets all users, a specific group, or a specific user account.",
+      "details": "Generated alongside EID 5017 and records the explicit list of GPOs applied during user policy processing. This is the user-policy equivalent of EID 5312, providing GPO names, GUIDs, and precedence order. The user context makes it possible to determine whether a GPO targets all users, a specific group, or a specific user account.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -421,7 +484,7 @@
       "level": "Error",
       "title": "Machine Group Policy processing completed with errors",
       "summary": "Machine Group Policy processing finished but one or more extensions reported errors.",
-      "details": "Generated when machine Group Policy processing completes with one or more client-side extension failures. Key fields: PrincipalSamName, the extension that failed, and the error code. Common legitimate failure causes include network unavailability during startup processing, unreachable SYSVOL shares, or Group Policy preferences that cannot be applied (e.g., drive map to an offline server). From a security perspective, repeated failures on specific extensions (Security Settings, Software Installation, Scripts) following a GPO modification event may indicate a malicious GPO that was applied but failed to execute its payload — or conversely, that a security control GPO is being disrupted. Correlate with EID 5312 to identify which GPOs were in scope during the failed processing cycle.",
+      "details": "Generated when machine Group Policy processing completes with one or more client-side extension failures. Records the machine account, the extension that failed, and the error code. Common legitimate failure causes include network unavailability during startup processing, unreachable SYSVOL shares, or Group Policy preferences targeting offline resources.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -466,6 +529,13 @@
           "Group Policy preferences targeting resources that are offline (drive maps, printer connections)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The machine account whose policy processing failed"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"
@@ -484,7 +554,7 @@
       "level": "Error",
       "title": "User Group Policy processing completed with errors",
       "summary": "User Group Policy processing finished but one or more extensions reported errors.",
-      "details": "Generated when user Group Policy processing completes with extension failures. Key fields: PrincipalSamName (the user whose policy failed), the failing extension, and error code. User policy failures are often benign (preferences targeting offline resources) but are significant when they affect security-relevant extensions or when they occur following a suspicious GPO modification. Failures in the Folder Redirection or Scripts extension for a privileged user immediately after a GPO was modified could indicate a malicious GPO was applied but failed to execute. Correlate with EID 5313 for the list of user GPOs that were in scope.",
+      "details": "Generated when user Group Policy processing completes with extension failures. Records the user account whose policy failed, the failing extension, and the error code. User policy failures are often benign (preferences targeting offline resources) but are significant when they affect security-relevant extensions such as Scripts or Folder Redirection.",
       "category": "Group Policy",
       "tags": [
         "group-policy",
@@ -529,6 +599,13 @@
           "Software installation GPOs targeting packages that have already been installed or removed"
         ]
       },
+      "keyFields": [
+        {
+          "name": "PrincipalSamName",
+          "xpath": "EventData/Data[@Name='PrincipalSamName']",
+          "description": "The user account whose policy processing failed"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dn789192(v=ws.11)"

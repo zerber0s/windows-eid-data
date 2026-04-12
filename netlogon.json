@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Netlogon",
-    "version": "1.1.2",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/netlogon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "AuditFailure",
       "title": "Session setup from computer failed to authenticate",
       "summary": "A computer account failed to authenticate to the domain during session setup.",
-      "details": "Generated when a computer account fails to establish an authenticated session with the domain controller via the Netlogon service. Key fields: ComputerName (the machine that failed to authenticate) and the failure reason. Common causes: the computer's machine account password has drifted (machine account password is older than the DC's copy), the computer was rejoined to the domain without the DC being notified, or the computer account was deleted/disabled. In attack contexts, this can indicate an attacker testing machine accounts with incorrect passwords (reconnaissance), or a rogue machine trying to authenticate with a mismatched computer account. DC-only event.",
+      "details": "Generated when a computer account fails to establish an authenticated session with the domain controller via the Netlogon service. Common causes include machine account password drift (machine account password is older than the DC's copy), the computer being rejoined to the domain without the DC being notified, or the computer account being deleted or disabled. In attack contexts, this can indicate an attacker testing machine accounts with incorrect passwords or a rogue machine trying to authenticate with a mismatched computer account. DC-only event.",
       "category": "Netlogon / Secure Channel",
       "tags": [
         "netlogon",
@@ -100,6 +100,13 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "ComputerName",
+          "xpath": "EventData/Data[@Name='ComputerName']",
+          "description": "The machine that failed to authenticate"
+        }
+      ],
       "lastReviewed": "2026-04-07"
     },
     {
@@ -110,7 +117,7 @@
       "level": "Warning",
       "title": "The system attempted to establish a Netlogon secure channel but failed",
       "summary": "The Netlogon service failed to establish a secure channel to a domain controller.",
-      "details": "Generated when the Netlogon service on a domain member (workstation, server, or DC) cannot establish a secure channel to a domain controller. Key fields: machine name and the reason for failure. Secure channel failures can indicate network connectivity issues, DC unavailability, or machine account problems. In attack contexts, this can be a pre-Zerologon indicator: early CVE-2020-1472 exploitation attempts that do not fully succeed may produce secure channel failures. Also generated when an attacker is attempting to manipulate the Netlogon secure channel negotiation. Correlate with 5827/5829 on the target DC for definitive Zerologon indicators. DC-side event.",
+      "details": "Generated when the Netlogon service on a domain member (workstation, server, or DC) cannot establish a secure channel to a domain controller. Secure channel failures can indicate network connectivity issues, DC unavailability, or machine account problems. In attack contexts, this can be a pre-Zerologon indicator: early CVE-2020-1472 exploitation attempts that do not fully succeed may produce secure channel failures. Also generated when an attacker is attempting to manipulate the Netlogon secure channel negotiation. DC-side event.",
       "category": "Netlogon / Secure Channel",
       "tags": [
         "netlogon",
@@ -183,6 +190,13 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "MachineName",
+          "xpath": "EventData/Data[@Name='MachineName']",
+          "description": "The machine that failed to establish a secure channel"
+        }
+      ],
       "lastReviewed": "2026-04-07"
     },
     {
@@ -193,7 +207,7 @@
       "level": "Error",
       "title": "Netlogon denied a vulnerable Netlogon secure channel connection from a machine account",
       "summary": "The Netlogon service blocked a vulnerable secure channel connection attempt — Zerologon exploitation attempt detected.",
-      "details": "Generated on domain controllers when the Netlogon service denies a connection that used the vulnerable Netlogon secure channel established by CVE-2020-1472 (Zerologon). This event was added by Microsoft's patch for Zerologon (KB4557222) and fires when the DC detects and blocks a connection using the vulnerable authentication protocol. Key fields: ComputerName (the machine attempting the connection — may be the attacker's machine or a spoofed machine account name). This is a high-confidence Zerologon exploitation attempt indicator — this event should never appear in a healthy environment. The complement is EID 5829, which fires when the DC allows a similarly vulnerable connection (indicating enforcement mode is not active). Requires DC to be patched with the Zerologon fix and running in enforcement mode (deployment phase 2 of the Zerologon patch). DC-only event.",
+      "details": "Generated on domain controllers when the Netlogon service denies a connection that used the vulnerable Netlogon secure channel established by CVE-2020-1472 (Zerologon). This event was added by Microsoft's patch for Zerologon (KB4557222) and fires when the DC detects and blocks a connection using the vulnerable authentication protocol. This is a high-confidence Zerologon exploitation attempt indicator and should never appear in a healthy environment. The complement is EID 5829, which fires when the DC allows a similarly vulnerable connection (indicating enforcement mode is not active). Requires DC to be patched with the Zerologon fix and running in enforcement mode. DC-only event.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",
@@ -321,7 +335,7 @@
       "level": "Error",
       "title": "Netlogon denied a vulnerable Netlogon secure channel connection using a trust account",
       "summary": "The Netlogon service blocked a vulnerable secure channel connection via a trust account — Zerologon variant detected.",
-      "details": "Closely related to EID 5827, this variant fires when the blocked vulnerable Netlogon connection used a trust account rather than a machine account. Trust accounts represent inter-domain trust relationships — a Zerologon attack targeting a trust account could allow an attacker to compromise a domain trust and gain cross-domain access. Key fields: AccountName (the trust account targeted), source IP or machine context. The same severity and investigation approach as 5827 applies, with the additional dimension that trust accounts control domain boundary security. DC-only event. Requires the same Zerologon patch as 5827.",
+      "details": "Closely related to EID 5827, this variant fires when the blocked vulnerable Netlogon connection used a trust account rather than a machine account. Trust accounts represent inter-domain trust relationships — a Zerologon attack targeting a trust account could allow an attacker to compromise a domain trust and gain cross-domain access. The same severity applies as EID 5827, with the additional dimension that trust accounts control domain boundary security. DC-only event. Requires the same Zerologon patch as 5827.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",
@@ -410,6 +424,13 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "The trust account targeted by the vulnerable connection attempt"
+        }
+      ],
       "lastReviewed": "2026-04-07"
     },
     {
@@ -420,7 +441,7 @@
       "level": "Warning",
       "title": "Netlogon allowed a vulnerable Netlogon secure channel connection",
       "summary": "The Netlogon service allowed a connection using the vulnerable Netlogon protocol — enforcement mode is not fully active.",
-      "details": "Generated on domain controllers when a connection using the vulnerable Netlogon secure channel protocol (the same one exploited by CVE-2020-1472 / Zerologon) was allowed rather than blocked. This event fires during the compatibility phase of the Zerologon patch, where enforcement mode has not yet been enabled (FullSecureChannelProtection = 0) and the DC logs the vulnerable connection without blocking it. This event is critical because it indicates: (1) the DC is not fully protected against Zerologon, and (2) a potentially active Zerologon exploitation attempt was allowed to proceed. In a fully patched, enforcement-mode DC, this event should not appear — its presence means either enforcement mode is disabled or a legacy device is using the vulnerable protocol. Key fields: ComputerName (the machine allowed to connect using the vulnerable channel). DC-only event.",
+      "details": "Generated on domain controllers when a connection using the vulnerable Netlogon secure channel protocol (the same one exploited by CVE-2020-1472 / Zerologon) was allowed rather than blocked. This event fires during the compatibility phase of the Zerologon patch, where enforcement mode has not yet been enabled (FullSecureChannelProtection = 0) and the DC logs the vulnerable connection without blocking it. This event is critical because it indicates the DC is not fully protected against Zerologon and a potentially active exploitation attempt was allowed to proceed. In a fully patched, enforcement-mode DC, this event should not appear. DC-only event.",
       "category": "Zerologon / Netlogon",
       "tags": [
         "netlogon",

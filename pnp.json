@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Plug and Play / Device Installation",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/pnp.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Device driver successfully installed",
       "summary": "Windows successfully installed device drivers for a new hardware device.",
-      "details": "Generated in the System event log by the Microsoft-Windows-UserPnP provider (source: Microsoft-Windows-UserPnP/DeviceInstall) when Windows completes the installation of drivers for a newly connected device. Key fields: DeviceInstanceId (encodes the device class, VID/PID, and serial number), DriverName (the installed INF/driver), DriverVersion, and DriverProvider. While USB devices generate corresponding events in the DriverFrameworks-UserMode log (see usb.json), this event covers all device classes including network adapters, Bluetooth controllers, PCIe cards, and other bus-connected hardware. From a BYOVD (Bring Your Own Vulnerable Driver) perspective, this event records driver installation for any device — including virtual devices or software-emulated devices. Malicious drivers installed via a kernel exploit or signed-driver abuse (e.g., a vulnerable legitimate driver signed with a stolen or test certificate) appear here. Key investigation pivots: DriverProvider should be a known hardware manufacturer (Intel, NVIDIA, Realtek, etc.); unknown or generic providers combined with an unusual DeviceInstanceId are suspicious. Unsigned or test-signed drivers (visible in DriverVersion details) on production systems indicate policy bypass. Correlate with System EID 7045 (new service installed) to confirm a kernel driver loaded as a service.",
+      "details": "Generated in the System event log by the Microsoft-Windows-UserPnP provider when Windows completes the installation of drivers for a newly connected device. This event covers all device classes including network adapters, Bluetooth controllers, PCIe cards, USB devices, and other bus-connected hardware, as well as virtual or software-emulated devices. From a BYOVD (Bring Your Own Vulnerable Driver) perspective, malicious drivers installed via kernel exploit or signed-driver abuse appear here alongside legitimate driver installations.",
       "category": "Device / Driver Installation",
       "tags": [
         "pnp",
@@ -124,6 +124,11 @@
           "name": "DriverProvider",
           "xpath": "EventData/Data[@Name='DriverProvider']",
           "description": "Vendor/publisher of the driver; unknown or generic publishers warrant review"
+        },
+        {
+          "name": "DriverVersion",
+          "xpath": "EventData/Data[@Name='DriverVersion']",
+          "description": "Version of the installed driver; test-signed drivers on production systems indicate Driver Signature Enforcement bypass"
         }
       ],
       "detectionRules": [
@@ -150,7 +155,7 @@
       "level": "Error",
       "title": "Device driver installation failed",
       "summary": "Windows failed to install device drivers for a new hardware device.",
-      "details": "Generated when Windows cannot successfully install drivers for a detected device. Key fields: DeviceInstanceId, DriverName (if a matching driver was found), and ErrorCode (the NTSTATUS or Win32 error code for the failure). Driver installation failures have two security-relevant scenarios: (1) A legitimate device failing to install due to driver compatibility or signing issues — common after Windows version upgrades. (2) A BYOVD attack where an attacker attempts to load a malicious or vulnerable driver but fails — this event records the failed attempt. ExceptionCode STATUS_INVALID_IMAGE_HASH (0xC0000428) indicates a driver signature verification failure, which on systems with Driver Signature Enforcement enabled means an unsigned or improperly signed driver was blocked. Multiple EID 20003 events with signing-related error codes followed eventually by EID 20001 may indicate an attacker iterating through driver signing bypass techniques until one succeeds. Correlate with Security log Policy Changes subcategory and Sysmon EID 6 (driver loaded) for the full driver installation picture.",
+      "details": "Generated when Windows cannot successfully install drivers for a detected device. Driver installation failures have two security-relevant scenarios: (1) a legitimate device failing to install due to driver compatibility or signing issues, common after Windows version upgrades; (2) a BYOVD attack where an attacker attempts to load a malicious or vulnerable driver but fails, and this event records the failed attempt. InstallStatus 0xC0000428 (STATUS_INVALID_IMAGE_HASH) indicates a driver signature verification failure, meaning an unsigned or improperly signed driver was blocked by Driver Signature Enforcement.",
       "category": "Device / Driver Installation",
       "tags": [
         "pnp",
@@ -186,7 +191,8 @@
           "Error code 0xC0000428 (STATUS_INVALID_IMAGE_HASH) indicates a blocked unsigned driver — check if the device was a software-enumerated (ROOT\\) device which would suggest a driver-loading exploit",
           "Multiple 20003 failures from the same DeviceInstanceId followed by a 20001 success indicates a persistent attacker attempting to load a driver",
           "ROOT\\ DeviceInstanceId on a machine without corresponding physical hardware indicates a virtual device being instantiated — common in BYOVD scenarios",
-          "Correlate with Sysmon EID 6 (DriverLoad) with Signature = 'Invalid' for a kernel-level view of blocked driver loads"
+          "Correlate with Sysmon EID 6 (DriverLoad) with Signature = 'Invalid' for a kernel-level view of blocked driver loads",
+          "Correlate with Security log Policy Changes subcategory for the full driver installation picture"
         ],
         "commonFalsePositives": [
           "New hardware with no compatible in-box Windows driver (requires manual driver installation)",

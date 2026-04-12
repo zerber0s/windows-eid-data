@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Network Policy Server Operational",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/nps-operational.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "NPS granted network access",
       "summary": "The Network Policy Server (NPS/RADIUS) granted network access to an authentication request.",
-      "details": "Generated in the NPS Operational log when NPS successfully authenticates a RADIUS request and grants access. This operational-channel version provides richer attribute detail than the equivalent Security log EID 6272 — it includes the RADIUS client IP (the NAS/switch/WAP sending the request), the matched Network Policy name, the EAP authentication type (PEAP-MSCHAPv2, EAP-TLS, etc.), the called station ID (identifies which network access device and port/SSID the user is connecting to), the calling station ID (MAC address of the connecting device), and the framed IP assigned. This event is the primary audit trail for 802.1X network access control (NAC) — who authenticated to which network segment, from which device, via which access point or switch. From a security perspective: (1) authentication using a credential type that should not be permitted (e.g., MSCHAPv2 when EAP-TLS certificate auth is required) may indicate a policy bypass, (2) the calling station ID (MAC address) can be compared against a known device inventory to detect rogue or unmanaged devices that obtained valid credentials, (3) RADIUS authentication from an unexpected NAS IP (not a managed switch or WAP) may indicate a rogue RADIUS client attempting to inject authentication.",
+      "details": "Generated in the NPS Operational log when NPS successfully authenticates a RADIUS request and grants access. This operational-channel version provides richer attribute detail than the equivalent Security log EID 6272 — it includes the RADIUS client IP (the NAS/switch/WAP sending the request), the matched Network Policy name, the EAP authentication type (PEAP-MSCHAPv2, EAP-TLS, etc.), the called station ID (identifies which network access device and port/SSID the user is connecting to), the calling station ID (MAC address of the connecting device), and the framed IP assigned. This event is the primary audit trail for 802.1X network access control (NAC) — who authenticated to which network segment, from which device, via which access point or switch.",
       "category": "Network Access Control",
       "tags": [
         "nps",
@@ -97,22 +97,32 @@
         {
           "name": "Client-IP-Address",
           "xpath": "EventData/Data[@Name='ClientIPAddress']",
-          "description": "RADIUS client (NAS) IP — the switch or WAP forwarding the auth request; unexpected IPs indicate rogue RADIUS clients"
+          "description": "RADIUS client (NAS) IP — the switch or WAP forwarding the auth request"
         },
         {
           "name": "NP-Policy-Name",
           "xpath": "EventData/Data[@Name='NPPolicyName']",
-          "description": "Network Policy that granted access; unexpected policy matches may indicate policy bypass"
+          "description": "Network Policy that granted access"
         },
         {
           "name": "Authentication-Type",
           "xpath": "EventData/Data[@Name='AuthenticationType']",
-          "description": "EAP method used (PEAP, EAP-TLS, MSCHAPv2); MSCHAPv2 where certificate auth is required is anomalous"
+          "description": "EAP method used (PEAP, EAP-TLS, MSCHAPv2)"
         },
         {
           "name": "Calling-Station-Id",
           "xpath": "EventData/Data[@Name='CallingStationId']",
-          "description": "MAC address of the connecting device; cross-reference against managed device inventory"
+          "description": "MAC address of the connecting device"
+        },
+        {
+          "name": "Called-Station-Id",
+          "xpath": "EventData/Data[@Name='CalledStationId']",
+          "description": "Network access device and port/SSID the user is connecting to"
+        },
+        {
+          "name": "Framed-IP-Address",
+          "xpath": "EventData/Data[@Name='FramedIPAddress']",
+          "description": "IP address assigned to the connecting device"
         }
       ],
       "detectionRules": [
@@ -123,7 +133,7 @@
           "notes": "Tune to your environment's required EAP type. Alert on any EAP method not in your approved authentication type list."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 6273,
@@ -133,7 +143,7 @@
       "level": "Warning",
       "title": "NPS denied network access",
       "summary": "The Network Policy Server (NPS/RADIUS) denied a network access authentication request.",
-      "details": "Generated when NPS denies a RADIUS authentication request. Key fields: the reason code (critical for distinguishing attack from misconfiguration), the user name, the RADIUS client IP, the calling station ID (device MAC), and the policy that evaluated the request. Reason codes include: 16 (Authentication failed — bad credentials), 48 (Account disabled in AD), 65 (EAP negotiation failure — client proposed an unacceptable method), 66 (Connection request matched a policy that denies access). High volumes of reason code 16 (bad credentials) from the same calling station ID or from the same NAS IP against multiple different usernames indicates a credential spray against 802.1X. An attacker who captures 802.1X PEAP-MSCHAPv2 challenge-response traffic (e.g., via a rogue access point) can perform offline cracking — EID 6273 denials may therefore be correlated with the start of an offline cracking window. Reason code 65 (EAP negotiation failure) may indicate a client or attacker attempting to negotiate a weaker EAP type that the server is configured to reject.",
+      "details": "Generated when NPS denies a RADIUS authentication request. The event records the reason code, user name, RADIUS client IP, calling station ID (device MAC), and the policy that evaluated the request. Reason codes include: 16 (authentication failed — bad credentials), 48 (account disabled in AD), 65 (EAP negotiation failure — client proposed an unacceptable method), 66 (connection request matched a policy that denies access).",
       "category": "Network Access Control",
       "tags": [
         "nps",
@@ -184,7 +194,9 @@
           "Reason code 16 (auth failure) for many different usernames from the same calling station ID or NAS IP indicates credential spray against 802.1X",
           "Reason code 65 (EAP negotiation failure) in bulk from a single device may indicate a tool probing for weaker EAP methods or an incorrectly configured supplicant",
           "Denials for a username that does not exist in AD (reason code 16 with an unknown UPN) indicate the attacker is guessing usernames as well as passwords",
-          "Correlate with WLAN EID 11002 (association failure) on the AP side — authentication failures that reach NPS are preceded by successful 802.11 association"
+          "Correlate with WLAN EID 11002 (association failure) on the AP side — authentication failures that reach NPS are preceded by successful 802.11 association",
+          "High volumes of reason code 16 from the same calling station ID or NAS IP against multiple different usernames indicates a credential spray against 802.1X",
+          "An attacker who captures 802.1X PEAP-MSCHAPv2 challenge-response traffic (e.g., via a rogue access point) can perform offline cracking — EID 6273 denials may be correlated with the start of an offline cracking window"
         ],
         "commonFalsePositives": [
           "Incorrectly configured devices (wrong SSID credential or expired certificate) generating repeated auth failures",
@@ -209,12 +221,17 @@
         {
           "name": "Client-IP-Address",
           "xpath": "EventData/Data[@Name='ClientIPAddress']",
-          "description": "RADIUS client (NAS) IP forwarding the denial; unexpected IPs indicate rogue NAS"
+          "description": "RADIUS client (NAS) IP forwarding the denial"
         },
         {
           "name": "Calling-Station-Id",
           "xpath": "EventData/Data[@Name='CallingStationId']",
-          "description": "MAC of the device attempting to connect; spray pattern is multiple usernames from same MAC"
+          "description": "MAC of the device attempting to connect"
+        },
+        {
+          "name": "User-Name",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "Account name that was denied access"
         }
       ],
       "detectionRules": [
@@ -225,7 +242,7 @@
           "notes": "Multiple users failing from the same MAC in a short window is the 802.1X spray signature. UniqueUsers > 3 in 5 minutes from one device is high confidence."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 4,
@@ -235,7 +252,7 @@
       "level": "Information",
       "title": "NPS RADIUS request processed",
       "summary": "NPS processed an IAS/RADIUS request and recorded all RADIUS attributes.",
-      "details": "Generated for each RADIUS request processed by NPS, recording the full set of RADIUS attributes and Vendor Specific Attributes (VSAs) received in the request. This event captures the raw RADIUS access-request data before policy evaluation — it includes attributes that may be filtered or not forwarded by the NAS, such as additional VSAs from specific switch or WAP vendors, the RADIUS message authenticator, and all connection metadata. From a security perspective, EID 4 is the most complete source of RADIUS request data and is used when a more granular attribute than those captured in EID 6272 or 6273 is needed for investigation. It is particularly useful for: (1) identifying unusual RADIUS attributes that may indicate a crafted or forged RADIUS request, (2) capturing VSAs from VPN concentrators or wireless controllers that encode additional context (session type, client OS, device posture), (3) forensic reconstruction of a RADIUS session when the access log was cleared but the operational log was not.",
+      "details": "Generated for each RADIUS request processed by NPS, recording the full set of RADIUS attributes and Vendor Specific Attributes (VSAs) received in the request. This event captures the raw RADIUS access-request data before policy evaluation — it includes attributes that may be filtered or not forwarded by the NAS, such as additional VSAs from specific switch or WAP vendors, the RADIUS message authenticator, and all connection metadata. EID 4 is the most complete source of RADIUS request data and provides more granular attributes than those captured in EID 6272 or 6273.",
       "category": "Network Access Control",
       "tags": [
         "nps",
@@ -285,7 +302,7 @@
       "windowsVersions": {
         "minVersion": "Windows Server 2008"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 2,
@@ -295,7 +312,7 @@
       "level": "Information",
       "title": "NPS connection request policy matched",
       "summary": "NPS evaluated a RADIUS request against its Connection Request Policy and identified the matching policy.",
-      "details": "Generated when NPS matches an incoming RADIUS connection request against a Connection Request Policy (CRP). CRPs determine how NPS handles the request: authenticate it locally, proxy it to a remote RADIUS server, or reject it outright. Key fields: the Connection Request Policy name matched, the RADIUS client, and the user identity. This event is earlier in the processing pipeline than EID 6272/6273 — it fires before Network Policy evaluation. From a security perspective, EID 2 is used to detect Connection Request Policy bypass attempts: if a request matches a less-restrictive CRP (e.g., a catch-all CRP rather than a specific NAS-IP-based CRP), the request may be evaluated by a broader policy than intended. An attacker who knows the NPS CRP configuration can craft RADIUS requests to match a weaker policy. Monitoring for requests matching the default CRP (rather than a specific CRP) from unexpected NAS IPs provides visibility into potential policy bypass attempts.",
+      "details": "Generated when NPS matches an incoming RADIUS connection request against a Connection Request Policy (CRP). CRPs determine how NPS handles the request: authenticate it locally, proxy it to a remote RADIUS server, or reject it outright. This event fires earlier in the processing pipeline than EID 6272/6273, before Network Policy evaluation.",
       "category": "Network Access Control",
       "tags": [
         "nps",
@@ -353,10 +370,20 @@
         {
           "name": "CRPolicyName",
           "xpath": "EventData/Data[@Name='CRPolicyName']",
-          "description": "Connection Request Policy matched; unexpected policy names indicate the request did not follow the expected evaluation path"
+          "description": "Connection Request Policy that matched the incoming request"
+        },
+        {
+          "name": "Client-IP-Address",
+          "xpath": "EventData/Data[@Name='ClientIPAddress']",
+          "description": "RADIUS client IP that sent the request"
+        },
+        {
+          "name": "User-Name",
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "User identity in the RADIUS request"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - WLAN AutoConfig",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wlan.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "WLAN AutoConfig successfully connected to a wireless network",
       "summary": "The WLAN AutoConfig service successfully associated and authenticated to a wireless network.",
-      "details": "Generated when Windows successfully connects to a wireless network including completion of 802.11 association and authentication (WPA2/WPA3/open). Key fields: InterfaceGuid (the wireless adapter), SSID (network name), BSSType (Infrastructure or Ad-Hoc), PHY type, and AuthenticationAlgorithm. From a security standpoint, unexpected connections to unfamiliar SSIDs, ad-hoc networks, or connections outside business hours on managed endpoints are investigation triggers. Rogue access points mimicking a corporate SSID (evil-twin attacks) generate a legitimate 8001 from the victim's perspective — pivot to BSSID (recorded in the associated 11001 event) and compare against the authorised list of corporate AP MAC addresses. Ad-hoc (peer-to-peer) connections are inherently untrusted and should be blocked by policy. Correlate with NetworkProfile EID 10000 to see the network category assigned after connection.",
+      "details": "Generated when Windows successfully connects to a wireless network including completion of 802.11 association and authentication (WPA2/WPA3/open). Unexpected connections to unfamiliar SSIDs, ad-hoc networks, or connections outside business hours on managed endpoints are notable. Rogue access points mimicking a corporate SSID (evil-twin attacks) generate a legitimate 8001 from the victim's perspective; the BSSID (recorded in the associated 11001 event) is the distinguishing field. Ad-hoc (peer-to-peer) connections are inherently untrusted.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -125,6 +125,11 @@
           "name": "AuthenticationAlgorithm",
           "xpath": "EventData/Data[@Name='AuthenticationAlgorithm']",
           "description": "Authentication method; Open (no auth) is highest risk on a managed device"
+        },
+        {
+          "name": "PHYType",
+          "xpath": "EventData/Data[@Name='PHYType']",
+          "description": "Wireless protocol type (802.11a/b/g/n/ac/ax)"
         }
       ],
       "detectionRules": [
@@ -150,7 +155,7 @@
       "level": "Error",
       "title": "WLAN AutoConfig failed to connect to a wireless network",
       "summary": "The WLAN AutoConfig service failed to associate or authenticate to a wireless network.",
-      "details": "Generated when a wireless connection attempt fails at the association or authentication phase. Key fields: InterfaceGuid, SSID, ReasonCode (the failure reason, e.g., authentication timeout, incorrect passphrase, RADIUS rejection). From a security perspective, repeated failures against known corporate SSIDs from a device may indicate a compromised or misconfigured credential. Failure against an unknown SSID may indicate an automated or attacker-driven probe. ReasonCode 0x0003 (authentication/security failure) on 802.1x networks indicates rejected EAP credentials — worth correlating with the NPS server's EID 6273 for the reason. High volumes of 8002 without successful 8001 events from a single device may indicate a deauthentication or jamming attack preventing connection.",
+      "details": "Generated when a wireless connection attempt fails at the association or authentication phase. Repeated failures against known corporate SSIDs from a device may indicate a compromised or misconfigured credential. Failure against an unknown SSID may indicate an automated or attacker-driven probe. ReasonCode 0x0003 (authentication/security failure) on 802.1x networks indicates rejected EAP credentials. High volumes of 8002 without successful 8001 events from a single device may indicate a deauthentication or jamming attack preventing connection.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -209,6 +214,11 @@
       },
       "keyFields": [
         {
+          "name": "InterfaceGuid",
+          "xpath": "EventData/Data[@Name='InterfaceGuid']",
+          "description": "GUID of the wireless network adapter"
+        },
+        {
           "name": "SSID",
           "xpath": "EventData/Data[@Name='SSID']",
           "description": "Target network name; failure against an unknown SSID is higher risk"
@@ -229,7 +239,7 @@
       "level": "Information",
       "title": "WLAN AutoConfig disconnected from a wireless network",
       "summary": "The WLAN AutoConfig service disconnected from a previously connected wireless network.",
-      "details": "Generated when a wireless session ends. Key fields: InterfaceGuid, SSID, Reason (DisconnectReason field — e.g., explicit disconnect by OS, AP deauthentication, signal loss). In a forensic context, this event combined with the preceding 8001 event provides a wireless session timeline. DisconnectReason 0x0004 (AP sent deauthentication) or 0x0008 (AP sent disassociation) may indicate a deauthentication attack forcing a reconnect, which is a precursor to a capture-the-handshake or evil-twin attack. Unexpected disconnections from corporate SSIDs followed immediately by 8001 events to a different SSID are a strong indicator of an evil-twin attack in progress.",
+      "details": "Generated when a wireless session ends. This event combined with the preceding 8001 event provides a wireless session timeline. DisconnectReason 0x0004 (AP sent deauthentication) or 0x0008 (AP sent disassociation) may indicate a deauthentication attack forcing a reconnect, which is a precursor to a capture-the-handshake or evil-twin attack. Unexpected disconnections from corporate SSIDs followed immediately by 8001 events to a different SSID are a strong indicator of an evil-twin attack in progress.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -287,6 +297,11 @@
       },
       "keyFields": [
         {
+          "name": "InterfaceGuid",
+          "xpath": "EventData/Data[@Name='InterfaceGuid']",
+          "description": "GUID of the wireless network adapter"
+        },
+        {
           "name": "SSID",
           "xpath": "EventData/Data[@Name='SSID']",
           "description": "Network disconnected from; pair with next 8001 event to detect SSID switching"
@@ -307,7 +322,7 @@
       "level": "Information",
       "title": "Wireless network association started",
       "summary": "The wireless adapter began the 802.11 association process with an access point.",
-      "details": "Generated at the start of the 802.11 association process, before authentication completes. Key fields: SSID, BSSID (the MAC address of the access point), PHY type, and InterfaceGuid. The BSSID field is the primary pivot for evil-twin detection — an evil-twin AP shares the target SSID but uses a different BSSID (MAC address). Maintaining a list of authorised AP MAC addresses and alerting on SSIDs matching corporate names with unexpected BSSIDs provides high-confidence detection. Correlate with EID 11001 (success) or EID 11002 (failure) for the outcome. The presence of a 11000 without a subsequent 11001 or 11002 may indicate an aborted association attempt.",
+      "details": "Generated at the start of the 802.11 association process, before authentication completes. The BSSID field is the primary field for evil-twin detection because an evil-twin AP shares the target SSID but uses a different BSSID (MAC address). The presence of a 11000 without a subsequent 11001 or 11002 may indicate an aborted association attempt.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -382,6 +397,11 @@
           "name": "PHYType",
           "xpath": "EventData/Data[@Name='PHYType']",
           "description": "Wireless protocol (802.11a/b/g/n/ac/ax); unexpected downgrades may indicate a downgrade attack"
+        },
+        {
+          "name": "InterfaceGuid",
+          "xpath": "EventData/Data[@Name='InterfaceGuid']",
+          "description": "GUID of the wireless network adapter"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -394,7 +414,7 @@
       "level": "Information",
       "title": "Wireless network association succeeded",
       "summary": "The wireless adapter successfully associated with an access point.",
-      "details": "Generated when the 802.11 association process completes successfully. At this point the client is associated with the AP but full network connectivity depends on subsequent authentication (WPA2/WPA3 handshake or 802.1x). Key fields: SSID, BSSID, AuthenticationAlgorithm, UnicastCipher, MulticastCipher. The cipher fields are security-critical: UnicastCipher = CCMP (AES) is expected for WPA2/WPA3; TKIP indicates a downgrade to WPA1 which is vulnerable to attacks. AuthenticationAlgorithm = 'Open80211' on a non-guest network is anomalous. Pair with EID 11000 for the start of the association and EID 8001 for confirmation of full connectivity.",
+      "details": "Generated when the 802.11 association process completes successfully. At this point the client is associated with the AP but full network connectivity depends on subsequent authentication (WPA2/WPA3 handshake or 802.1x). The cipher fields are security-critical: UnicastCipher = CCMP (AES) is expected for WPA2/WPA3, while TKIP indicates a downgrade to WPA1 which is vulnerable to attacks. AuthenticationAlgorithm = 'Open80211' on a non-guest network is anomalous.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -451,9 +471,19 @@
       },
       "keyFields": [
         {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Network name that was associated to"
+        },
+        {
           "name": "BSSID",
           "xpath": "EventData/Data[@Name='BSSID']",
           "description": "AP MAC address; correlate with authorised AP inventory"
+        },
+        {
+          "name": "AuthenticationAlgorithm",
+          "xpath": "EventData/Data[@Name='AuthenticationAlgorithm']",
+          "description": "Auth type; 'Open80211' on corporate SSID is anomalous"
         },
         {
           "name": "UnicastCipher",
@@ -461,9 +491,9 @@
           "description": "Encryption cipher; CCMP (AES) is expected; TKIP indicates WPA1 downgrade"
         },
         {
-          "name": "AuthenticationAlgorithm",
-          "xpath": "EventData/Data[@Name='AuthenticationAlgorithm']",
-          "description": "Auth type; 'Open80211' on corporate SSID is anomalous"
+          "name": "MulticastCipher",
+          "xpath": "EventData/Data[@Name='MulticastCipher']",
+          "description": "Multicast/broadcast encryption cipher"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -476,7 +506,7 @@
       "level": "Warning",
       "title": "Wireless network association failed",
       "summary": "The wireless adapter failed to associate with an access point.",
-      "details": "Generated when the 802.11 association process fails before authentication completes. Key fields: SSID, BSSID (the attempted AP), FailureReason. This event fires before any credential exchange; failures here indicate a physical or protocol-layer rejection rather than a credential issue. Repeated association failures to the same BSSID may indicate AP-side filtering (MAC address filtering blocking the device) or a protocol mismatch. Repeated failures followed by a successful association to a different BSSID for the same SSID is characteristic of deauthentication attacks forcing a client to an attacker-controlled AP.",
+      "details": "Generated when the 802.11 association process fails before authentication completes. This event fires before any credential exchange; failures here indicate a physical or protocol-layer rejection rather than a credential issue. Repeated association failures to the same BSSID may indicate AP-side filtering (MAC address filtering blocking the device) or a protocol mismatch. Repeated failures followed by a successful association to a different BSSID for the same SSID is characteristic of deauthentication attacks forcing a client to an attacker-controlled AP.",
       "category": "Wireless Network Connection",
       "tags": [
         "wifi",
@@ -532,6 +562,11 @@
         "minVersion": "Windows Vista / Server 2008"
       },
       "keyFields": [
+        {
+          "name": "SSID",
+          "xpath": "EventData/Data[@Name='SSID']",
+          "description": "Network name the association was attempted against"
+        },
         {
           "name": "BSSID",
           "xpath": "EventData/Data[@Name='BSSID']",

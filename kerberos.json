@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Kerberos",
-    "version": "1.2.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/kerberos.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "AuditSuccess",
       "title": "A Kerberos authentication ticket (TGT) was requested",
       "summary": "A Kerberos TGT was requested from the Key Distribution Center (KDC).",
-      "details": "DC-only event generated whenever a Kerberos Authentication Service Request (AS-REQ) is processed by the KDC. Key fields: TargetUserName (the account requesting the ticket), TicketEncryptionType (0x12=AES256, 0x11=AES128, 0x17=RC4, 0x18=DES — RC4 or DES indicates a downgrade), IpAddress (the requesting host), TicketOptions (bitmask of requested ticket flags), ResultCode (0x0=success, 0x6=username does not exist, 0x12=account disabled/locked/expired, 0x18=wrong password). AS-REP roasting: when an account has pre-authentication disabled (DONT_REQ_PREAUTH), an attacker can request a TGT without knowing the password and receive an encrypted blob to crack offline — these appear as successful 4768 events without a preceding pre-auth exchange, and no corresponding 4771 failure will be generated. Golden Ticket abuse: forged TGTs may appear with unusual TicketOptions or encryption types inconsistent with domain policy. IpAddresses that are not domain-joined machines requesting TGTs for privileged accounts are anomalous. This event also fires as AuditFailure for failed TGT requests.",
+      "details": "DC-only event generated whenever a Kerberos Authentication Service Request (AS-REQ) is processed by the KDC. Records the account requesting the ticket, the encryption type used, source IP, ticket options, and result code. Common result codes: 0x0=success, 0x6=username does not exist, 0x12=account disabled/locked/expired, 0x18=wrong password. Encryption types: 0x12=AES256, 0x11=AES128, 0x17=RC4, 0x18=DES. This event also fires as AuditFailure for failed TGT requests. When an account has pre-authentication disabled (DONT_REQ_PREAUTH), failed authentication attempts are not captured by EID 4771 and instead appear as successful 4768 events.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -113,7 +113,7 @@
         {
           "name": "TargetUserName",
           "xpath": "EventData/Data[@Name='TargetUserName']",
-          "description": "Account requesting the TGT; look for service accounts or computer accounts in unusual requests"
+          "description": "Account requesting the TGT"
         },
         {
           "name": "TicketEncryptionType",
@@ -128,7 +128,7 @@
         {
           "name": "IpAddress",
           "xpath": "EventData/Data[@Name='IpAddress']",
-          "description": "Source IP of the AS-REQ; non-DC IPs requesting TGTs for privileged accounts are suspicious"
+          "description": "Source IP of the AS-REQ"
         },
         {
           "name": "TicketOptions",
@@ -166,7 +166,7 @@
       "level": "AuditSuccess",
       "title": "A Kerberos service ticket was requested",
       "summary": "A Kerberos TGS service ticket was requested from the KDC.",
-      "details": "DC-only event generated whenever a Kerberos Ticket Granting Service Request (TGS-REQ) is processed by the KDC. Key fields: ServiceName (the SPN being requested — e.g., MSSQLSvc/server.domain.com), TicketEncryptionType (0x17=RC4 is the primary Kerberoasting indicator), IpAddress (the requesting host), TicketOptions (bitmask), ResultCode. Kerberoasting: an attacker requests TGS tickets for SPN-bearing service accounts using RC4 encryption (0x17), receives an encrypted blob hashed with the service account password, and cracks it offline. Detection indicators include bulk 4769 events for multiple SPNs from one source, or a single 4769 with RC4 for a high-privilege SPN. Silver Ticket: forged service tickets do not hit the KDC at all and therefore do not generate 4769 events — the absence of a 4769 for a targeted service while that service is being accessed is itself an indicator. RODC key compromise may be indicated by 4769 events for sensitive accounts originating from RODCs.",
+      "details": "DC-only event generated whenever a Kerberos Ticket Granting Service Request (TGS-REQ) is processed by the KDC. Records the requested service SPN, encryption type, source IP, ticket options, and result code. Forged service tickets (Silver Tickets) do not hit the KDC and therefore do not generate 4769 events.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -301,7 +301,7 @@
       "level": "AuditSuccess",
       "title": "A Kerberos service ticket was renewed",
       "summary": "A Kerberos service ticket was renewed by the KDC.",
-      "details": "DC-only event generated when a Kerberos service ticket is renewed before it expires. Key fields: ServiceName (the SPN for the renewed ticket), TicketEncryptionType, IpAddress. Ticket renewals are expected for long-running sessions such as RDP sessions, database connections, and print server connections. Adversaries using pass-the-ticket or overpass-the-hash may trigger anomalous renewals — a ticket being renewed from a different IpAddress than the original TGS request (EID 4769), or renewal of a high-privilege service ticket long after the associated logon session should have ended, are investigation pivots. Renewal of a krbtgt ticket, which should not normally occur, may indicate Golden Ticket abuse with an extended MaxRenewAge setting; cross-reference EID 4713 for Kerberos policy changes.",
+      "details": "DC-only event generated when a Kerberos service ticket is renewed before it expires. Records the service SPN, encryption type, source IP, and account. Ticket renewals are expected for long-running sessions such as RDP, database, and print server connections.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -401,7 +401,7 @@
       "level": "AuditFailure",
       "title": "Kerberos pre-authentication failed",
       "summary": "A Kerberos pre-authentication request failed at the KDC.",
-      "details": "DC-only event generated when the KDC fails to issue a TGT during pre-authentication. Key fields: TargetUserName (the account for which pre-auth failed), IpAddress (the client), FailureCode. Important failure codes: 0x17 (password expired), 0x18 (wrong password — brute force or spray indicator), 0x10 (certificate or smart card error), 0x12 (account disabled, locked, or expired), 0x25 (clock skew too large — Kerberos requires clocks within 5 minutes), 0x6 (client not found — username enumeration indicator). Important caveat: if an account has pre-authentication disabled (DONT_REQ_PREAUTH), authentication failures are NOT captured by this event — they appear as successes in EID 4768 and require offline cracking (AS-REP roasting). This event only fires for Kerberos authentication failures, not NTLM; failed NTLM authentications are recorded in EID 4625.",
+      "details": "DC-only event generated when the KDC fails to issue a TGT during pre-authentication. Records the target account, source IP, and failure code. Common failure codes: 0x17 (password expired), 0x18 (wrong password), 0x10 (certificate or smart card error), 0x12 (account disabled/locked/expired), 0x25 (clock skew too large), 0x6 (client not found). If an account has pre-authentication disabled (DONT_REQ_PREAUTH), failures are not captured here and instead appear as successes in EID 4768. This event only fires for Kerberos failures, not NTLM; failed NTLM authentications are recorded in EID 4625.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -531,7 +531,7 @@
       "level": "AuditFailure",
       "title": "A Kerberos service ticket request failed",
       "summary": "A Kerberos TGS service ticket request failed at the KDC.",
-      "details": "DC-only event generated when a TGS request fails — the client submitted a valid TGT but the service ticket request itself was rejected by the KDC. Key fields: ServiceName (the SPN that was requested), IpAddress (the requesting client), FailureCode. Common failure codes: 0x7 (server not found — the SPN does not exist, the primary indicator for SPN enumeration and scanning), 0x3d (inappropriate field in message), 0x32 (KDC cannot accommodate requested option). FailureCode 0x7 at volume from one source is the principal SPN enumeration indicator: tools such as Rubeus, Impacket, and PowerView enumerate all SPNs by requesting TGS tickets for each one, generating a burst of 4773 events with 0x7 for non-existent SPNs. Legitimate users rarely encounter 0x7 failures organically. This event is a useful precursor signal for Kerberoasting — SPN enumeration typically precedes targeted TGS requests against discovered service accounts.",
+      "details": "DC-only event generated when a TGS request fails. The client submitted a valid TGT but the service ticket request itself was rejected by the KDC. Records the requested SPN, source IP, and failure code. Common failure codes: 0x7 (server not found, SPN does not exist), 0x3d (inappropriate field in message), 0x32 (KDC cannot accommodate requested option).",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -622,7 +622,7 @@
       "level": "AuditFailure",
       "title": "A Kerberos TGT was denied because the device does not meet access control restrictions",
       "summary": "A Kerberos TGT request was denied because the device failed an authentication policy or Protected Users restriction.",
-      "details": "DC-only event generated when a Kerberos Authentication Service (AS) request is denied because the requesting device fails access control restrictions imposed by an Authentication Policy or Authentication Policy Silo. These policies, introduced in Windows Server 2012 R2, allow organisations to restrict which devices are authorised to obtain TGTs for specific high-value accounts — for example, requiring that an account can only authenticate from Privileged Access Workstations (PAWs). Key fields: TargetUserName (the account that was denied), TargetDomainName, IpAddress (the requesting device). A 4820 event indicates that the correct credentials were supplied but the device is not permitted to use them under the active authentication policy — this is expected behaviour when a compromised credential is used from an untrusted device. Correlate with EID 4820 volume from a specific IpAddress to detect credential theft attempts using a valid password from an attacker-controlled machine. Contrast: EID 4771 fires for pre-auth failures (wrong password); EID 4820 fires for correct password but policy-restricted device.",
+      "details": "DC-only event generated when a Kerberos Authentication Service (AS) request is denied because the requesting device fails access control restrictions imposed by an Authentication Policy or Authentication Policy Silo. These policies, introduced in Windows Server 2012 R2, restrict which devices are authorised to obtain TGTs for specific high-value accounts. A 4820 event indicates that the correct credentials were supplied but the device is not permitted to use them under the active authentication policy. EID 4771 fires for pre-auth failures (wrong password); EID 4820 fires for correct password but policy-restricted device.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -717,7 +717,7 @@
       "level": "AuditFailure",
       "title": "A Kerberos service ticket was denied because the user, device, or both do not meet access control restrictions",
       "summary": "A Kerberos TGS service ticket request was denied due to authentication policy or device restrictions.",
-      "details": "DC-only event generated when a TGS service ticket request is denied because the requesting user, device, or both fail the access control restrictions imposed by an Authentication Policy or Policy Silo. This is the TGS-phase equivalent of EID 4820 (which fires at the AS/TGT phase). Key fields: TargetUserName (the user requesting the service ticket), ServiceName (the target service SPN), IpAddress. This event is particularly valuable because it can fire even when the account has a valid TGT — the user authenticated successfully at AS but the service being accessed has additional device-level restrictions. Authentication Policy failures on high-value services (e.g., backup agents accessing domain controllers, SQL service accounts, Exchange services) are the primary investigation pivot. In a credential theft scenario, 4821 for a privileged service ticket indicates an attacker with a stolen TGT attempting to access restricted services from an unauthorised device.",
+      "details": "DC-only event generated when a TGS service ticket request is denied because the requesting user, device, or both fail the access control restrictions imposed by an Authentication Policy or Policy Silo. This is the TGS-phase equivalent of EID 4820 (which fires at the AS/TGT phase). This event can fire even when the account has a valid TGT, meaning the user authenticated successfully at AS but the service being accessed has additional device-level restrictions.",
       "category": "Kerberos Authentication",
       "tags": [
         "kerberos",
@@ -804,7 +804,7 @@
       "level": "AuditFailure",
       "title": "NTLM authentication failed because the account is a member of the Protected Users group",
       "summary": "An NTLM authentication attempt was denied because the account belongs to the Protected Users security group.",
-      "details": "DC-only event generated when an NTLM authentication attempt is rejected because the authenticating account is a member of the Protected Users global security group. The Protected Users group, introduced in Windows Server 2012 R2, enforces several security restrictions including: prohibiting NTLM authentication, prohibiting DES and RC4 Kerberos encryption, enforcing short TGT lifetimes, and preventing credential delegation. When an NTLM authentication is attempted for a Protected Users member — whether by a legacy application, an attacker using pass-the-hash, or an NTLM relay attack — the DC generates this event and denies the authentication. Key fields: TargetUserName, TargetDomainName, IpAddress. This event is a strong security indicator: it means an NTLM authentication was attempted for an account that should never use NTLM. NTLM relay and pass-the-hash attacks against Protected Users members will consistently generate 4822 and will never succeed — making this event a reliable indicator of attempted credential attack against a hardened account.",
+      "details": "DC-only event generated when an NTLM authentication attempt is rejected because the authenticating account is a member of the Protected Users global security group. The Protected Users group, introduced in Windows Server 2012 R2, enforces several security restrictions including prohibiting NTLM authentication, prohibiting DES and RC4 Kerberos encryption, enforcing short TGT lifetimes, and preventing credential delegation. When an NTLM authentication is attempted for a Protected Users member, the DC generates this event and denies the authentication.",
       "category": "Kerberos Authentication",
       "tags": [
         "ntlm",
@@ -912,7 +912,7 @@
       "level": "AuditFailure",
       "title": "NTLM authentication failed because access control restrictions are required",
       "summary": "An NTLM authentication was denied because the Authentication Policy requires Kerberos but NTLM was presented.",
-      "details": "DC-only event generated when an NTLM authentication attempt is denied because an Authentication Policy applied to the account requires that only Kerberos authentication be used. This differs from EID 4822 in that the restriction comes from an explicitly configured Authentication Policy (which can also restrict device access) rather than from Protected Users group membership. Key fields: TargetUserName, TargetDomainName, IpAddress, WorkstationName. Authentication Policies provide fine-grained control over which authentication protocols are permitted for specific accounts or silos. When an attacker attempts pass-the-hash or NTLM relay against an account covered by a strict Kerberos-only policy, they will receive this denial and EID 4823 will be generated on the DC. The combination of 4822 (Protected Users block) and 4823 (Policy block) together in proximity from the same source indicates an attacker systematically attempting NTLM authentication against hardened accounts — a red team or adversary reconnaissance pattern.",
+      "details": "DC-only event generated when an NTLM authentication attempt is denied because an Authentication Policy applied to the account requires that only Kerberos authentication be used. This differs from EID 4822 in that the restriction comes from an explicitly configured Authentication Policy rather than from Protected Users group membership. Authentication Policies provide fine-grained control over which authentication protocols are permitted for specific accounts or silos.",
       "category": "Kerberos Authentication",
       "tags": [
         "ntlm",

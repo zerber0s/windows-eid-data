@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Volume Shadow Copy Service",
-    "version": "1.0.2",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/vss.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Volume Shadow Copy operation complete",
       "summary": "A Volume Shadow Copy Service operation completed successfully, typically indicating a snapshot was created or a backup operation finished.",
-      "details": "Logged by the VSS provider in the Application log when a shadow copy operation completes successfully. Records the operation type (backup, restore, or shadow copy creation) and the volumes involved. Key field: Message (operation type and volume details). Provides the baseline of normal shadow copy activity in the environment; cessation of EID 25 events combined with VSS error events (8193, 8229) suggests shadow copies are no longer being created, a common ransomware pre-encryption step.",
+      "details": "Logged by the VSS provider in the Application log when a shadow copy operation completes successfully. Records the operation type (backup, restore, or shadow copy creation) and the volumes involved. Provides the baseline of normal shadow copy activity in the environment; cessation of EID 25 events combined with VSS error events (8193, 8229) suggests shadow copies are no longer being created, a common ransomware pre-encryption step.",
       "category": "Data Protection",
       "tags": [
         "vss",
@@ -109,7 +109,7 @@
           "rule": "title: VSS Shadow Copy Operation Complete\nstatus: informational\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 25\n    condition: selection\nfalsepositives:\n    - All legitimate backup operations\nlevel: informational\ntags:\n    - attack.impact\n    - attack.t1490"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 8193,
@@ -119,7 +119,7 @@
       "level": "Error",
       "title": "VSS error — shadow copy operation failed",
       "summary": "The Volume Shadow Copy Service encountered an error while attempting to create or manage a shadow copy, often indicating service disruption or ransomware-driven interference.",
-      "details": "Logged when a shadow copy operation fails due to an internal error during a Win32 API call. Message format: 'Volume Shadow Copy Service error: Unexpected error calling routine <routine>. hr = <HRESULT>.' Key field: Message (contains the failing routine name and HRESULT error code). Common HRESULTs: 0x80042306 (VSS_E_WRITERERROR_INCONSISTENTSNAPSHOT), 0x80070005 (E_ACCESSDENIED), 0x8004231f (VSS_E_UNEXPECTED_WRITER_ERROR), 0x80042302 (VSS_E_PROVIDER_VETO). Frequently observed during ransomware activity when shadow deletion commands disrupt the VSS service.",
+      "details": "Logged when a shadow copy operation fails due to an internal error during a Win32 API call. Message format: 'Volume Shadow Copy Service error: Unexpected error calling routine <routine>. hr = <HRESULT>.' Common HRESULTs: 0x80042306 (VSS_E_WRITERERROR_INCONSISTENTSNAPSHOT), 0x80070005 (E_ACCESSDENIED), 0x8004231f (VSS_E_UNEXPECTED_WRITER_ERROR), 0x80042302 (VSS_E_PROVIDER_VETO). Frequently observed during ransomware activity when shadow deletion commands disrupt the VSS service.",
       "category": "Impact",
       "tags": [
         "vss",
@@ -187,7 +187,7 @@
       "keyFields": [
         {
           "name": "Message",
-          "description": "Contains the failing Win32 API routine name and HRESULT error code; the HRESULT is the primary pivot for determining the failure cause"
+          "description": "Contains the failing Win32 API routine name and HRESULT error code indicating the failure cause"
         }
       ],
       "detectionRules": [
@@ -209,7 +209,7 @@
           "rule": "title: VSS Shadow Copy Operation Error\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8193\n    condition: selection\nfalsepositives:\n    - Backup software conflicts\n    - Antivirus blocking VSS access\n    - Low disk space\nlevel: medium\ntags:\n    - attack.impact\n    - attack.t1490"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 8224,
@@ -219,7 +219,7 @@
       "level": "Information",
       "title": "VSS service shutting down due to idle timeout",
       "summary": "The VSS service is shutting down after an idle period with no pending requests, which is normal behaviour but can mask deliberate service termination.",
-      "details": "Logged when the VSS service shuts itself down after the idle timeout period (default 10 minutes) with no pending requests. Message: 'The VSS service is shutting down due to idle timeout.' Under normal conditions, VSS starts on demand, completes its operation, and shuts down with this event. Key field: Message (fixed text confirming idle shutdown). Security value is in timing — an 8224 appearing outside of expected backup windows or immediately following a shadow deletion command warrants correlation with process creation events and System 7036.",
+      "details": "Logged when the VSS service shuts itself down after the idle timeout period (default 10 minutes) with no pending requests. Message: 'The VSS service is shutting down due to idle timeout.' Under normal conditions, VSS starts on demand, completes its operation, and shuts down with this event.",
       "category": "Defense Evasion",
       "tags": [
         "vss",
@@ -276,7 +276,8 @@
         "investigationPivots": [
           "Preceding process creation — check Sysmon 1 / Security 4688 for net.exe, sc.exe, or PowerShell with VSS stop commands in the 5 minutes before 8224",
           "Time since last 8224 — VSS should regularly cycle on/off during backup windows; an 8224 with no subsequent VSS activity for days may indicate VSS has been permanently stopped",
-          "System 7036 correlation — a service-stopped event for VSS in the System log at the same time as 8224 confirms the shutdown; check whether it was a clean idle stop or a forced termination"
+          "System 7036 correlation — a service-stopped event for VSS in the System log at the same time as 8224 confirms the shutdown; check whether it was a clean idle stop or a forced termination",
+          "An 8224 appearing outside of expected backup windows or immediately following a shadow deletion command is anomalous"
         ],
         "commonFalsePositives": [
           "Normal VSS idle shutdown after every completed backup job — this is expected behaviour",
@@ -294,7 +295,7 @@
       "keyFields": [
         {
           "name": "Message",
-          "description": "Confirms idle timeout shutdown; no additional structured fields — security value is in timing correlation rather than the event content itself"
+          "description": "Confirms idle timeout shutdown; security value is in timing correlation rather than the event content itself"
         }
       ],
       "detectionRules": [
@@ -310,7 +311,7 @@
           "rule": "title: VSS Service Idle Shutdown\nstatus: informational\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8224\n    condition: selection\nfalsepositives:\n    - All normal VSS idle shutdowns after backup completion\nlevel: informational\ntags:\n    - attack.impact\n    - attack.t1490\n    - attack.t1489"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 8229,
@@ -320,7 +321,7 @@
       "level": "Warning",
       "title": "VSS writer rejected a shadow copy event",
       "summary": "A VSS writer component refused to participate in a shadow copy operation, causing a partial or failed snapshot that may not be backup-consistent.",
-      "details": "Logged when a registered VSS writer rejects or errors on a shadow copy event during the freeze/thaw cycle. Message format: 'A VSS writer has rejected an event with error <HRESULT>. Changes that the writer made to the writer components and to the backup components document may not be stable.' Key field: Message (HRESULT error code and writer identification). Common VSS writers include NTDS, SqlServerWriter, Exchange Writer, WMI Writer, Registry Writer, and System Writer. Multiple writers failing simultaneously indicates systemic VSS disruption rather than an isolated application issue.",
+      "details": "Logged when a registered VSS writer rejects or errors on a shadow copy event during the freeze/thaw cycle. Message format: 'A VSS writer has rejected an event with error <HRESULT>. Changes that the writer made to the writer components and to the backup components document may not be stable.' Common VSS writers include NTDS, SqlServerWriter, Exchange Writer, WMI Writer, Registry Writer, and System Writer. Multiple writers failing simultaneously indicates systemic VSS disruption rather than an isolated application issue.",
       "category": "Impact",
       "tags": [
         "vss",
@@ -386,7 +387,7 @@
       "keyFields": [
         {
           "name": "Message",
-          "description": "Contains the HRESULT error code from the rejecting writer; cross-reference with vssadmin list writers output to identify which application's writer failed"
+          "description": "Contains the HRESULT error code from the rejecting writer and writer identification"
         }
       ],
       "detectionRules": [
@@ -402,7 +403,7 @@
           "rule": "title: VSS Writer Rejected Shadow Copy Event\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: VSS\n        EventID: 8229\n    condition: selection\nfalsepositives:\n    - Applications under heavy load during snapshot window\n    - Third-party backup agent VSS writer failures\nlevel: medium\ntags:\n    - attack.impact\n    - attack.t1490"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

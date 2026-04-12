@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Task Scheduler",
-    "version": "1.7.1",
-    "generatedAt": "2026-04-11T00:00:00Z",
+    "version": "1.8.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Task instance started",
       "summary": "Task Scheduler launched an instance of a task.",
-      "details": "Generated when Task Scheduler starts a task instance. This is the task-level start event, distinct from EID 200 (action started), which fires when the specific executable or script within the task begins. Key fields: TaskName and the user context under which the task was launched. EID 100 precedes EID 200 in the execution sequence: 100 → 200 → 201 → 102. Unexpected tasks launching — especially outside of normal business hours or for tasks not registered via standard software installers — warrant investigation.",
+      "details": "Generated when Task Scheduler starts a task instance. This is the task-level start event, distinct from EID 200 (action started), which fires when the specific executable or script within the task begins. EID 100 precedes EID 200 in the execution sequence: 100 -> 200 -> 201 -> 102.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -83,6 +83,13 @@
           "Windows built-in tasks (e.g., Defrag, Windows Defender scans, telemetry)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the task that was started"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -101,7 +108,7 @@
       "level": "Error",
       "title": "Task instance failed to start",
       "summary": "Task Scheduler failed to launch a task instance.",
-      "details": "Generated when Task Scheduler fails to start a task instance. Key fields: TaskName, the user context, and the error code (ResultCode). Common failure causes include missing executables, insufficient privileges, or a corrupted task definition. From an attacker perspective, a task that fails to start may indicate a partially deployed persistence mechanism — the task was registered (EID 106) but the payload is absent or blocked. Correlate EID 101 with EID 106 using TaskName to determine when the task was created and whether the failure aligns with a security tool removing the payload.",
+      "details": "Generated when Task Scheduler fails to start a task instance. Records the task name, user context, and error code (ResultCode). Common failure causes include missing executables, insufficient privileges, or a corrupted task definition. A task that fails to start may indicate a partially deployed persistence mechanism where the task was registered but the payload is absent or blocked.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -145,6 +152,18 @@
           "Tasks referencing paths that were moved or renamed during software updates"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the task that failed to start"
+        },
+        {
+          "name": "ResultCode",
+          "xpath": "EventData/Data[@Name='ResultCode']",
+          "description": "Error code indicating why the task failed to start"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -163,7 +182,7 @@
       "level": "Information",
       "title": "Task instance completed",
       "summary": "Task Scheduler finished running a task instance.",
-      "details": "Generated when a task instance finishes, complementing EID 100 (instance started). Key fields: TaskName, ResultCode, and the instance GUID. ResultCode 0 indicates clean completion; non-zero values indicate failure or abnormal termination. Pair EID 102 with EID 100 using TaskName and the instance GUID to measure execution duration. Very short durations for tasks that should run longer, or consistent non-zero result codes after recent task creation, may indicate detection and termination by a security tool.",
+      "details": "Generated when a task instance finishes, complementing EID 100 (instance started). Records the task name, result code, and instance GUID. ResultCode 0 indicates clean completion; non-zero values indicate failure or abnormal termination.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -214,6 +233,18 @@
           "Any legitimate scheduled task completing normally"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the completed task"
+        },
+        {
+          "name": "ResultCode",
+          "xpath": "EventData/Data[@Name='ResultCode']",
+          "description": "Exit code; 0 = success, non-zero indicates failure or termination"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -232,7 +263,7 @@
       "level": "Information",
       "title": "Task registered",
       "summary": "A new scheduled task was registered.",
-      "details": "Generated when a new scheduled task is registered in the Task Scheduler. Key field: TaskName (full path, e.g., \\Microsoft\\Windows\\TaskName). Complements Security EID 4698 but fires independently and may capture task registrations that do not generate a Security audit event depending on audit policy configuration. Tasks registered under the root folder (\\TaskName with no subfolder) rather than a vendor-specific subfolder are more commonly associated with manual or malicious creation.",
+      "details": "Generated when a new scheduled task is registered in the Task Scheduler. Complements Security EID 4698 but fires independently and may capture task registrations that do not generate a Security audit event depending on audit policy configuration. Tasks registered under the root folder rather than a vendor-specific subfolder are more commonly associated with manual creation.",
       "category": "Task Lifecycle",
       "tags": [
         "scheduled-task",
@@ -342,7 +373,7 @@
       "level": "Information",
       "title": "Task triggered on registration",
       "summary": "A scheduled task executed immediately upon being registered.",
-      "details": "Generated when a newly registered task is configured to run immediately at registration time (i.e., the task has a registration trigger). Most legitimate software uses time-based or event-based triggers, not registration triggers. Attackers commonly use registration triggers to execute a payload immediately upon task creation, combining persistence with instant execution. Correlate with the immediately preceding EID 106 (task registered) using TaskName to identify the task definition.",
+      "details": "Generated when a newly registered task is configured to run immediately at registration time (i.e., the task has a registration trigger). Most legitimate software uses time-based or event-based triggers, not registration triggers.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -438,7 +469,7 @@
       "level": "Warning",
       "title": "Task terminated",
       "summary": "A running task instance was terminated.",
-      "details": "Generated when a task instance is terminated — either forcibly by Task Scheduler (e.g., execution time limit exceeded), by a user, or due to an error condition. Key fields: TaskName and the instance GUID. From a DFIR perspective, a malicious task that was caught and terminated by a security tool will produce this event. Correlate with EID 100 using TaskName and the instance GUID to determine how long the task ran before termination and whether any follow-on activity (EID 200) occurred during that window.",
+      "details": "Generated when a task instance is terminated -- either forcibly by Task Scheduler (e.g., execution time limit exceeded), by a user, or due to an error condition. Records the task name and instance GUID.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -486,6 +517,13 @@
           "Admin-initiated task terminations via the Task Scheduler console"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the terminated task"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -504,7 +542,7 @@
       "level": "Information",
       "title": "Task triggered on event",
       "summary": "A scheduled task was triggered by a system event.",
-      "details": "Generated when a task is triggered by an event-based trigger (as opposed to a time-based schedule). Event-triggered tasks execute in response to specific Windows event log entries, making them a stealthier persistence mechanism than time-based tasks. Key fields: TaskName and the triggering event. Attackers commonly configure event-triggered tasks to fire on logon (Security EID 4624), on process creation, or on system startup, allowing execution without an obvious time-based trigger that might stand out in scheduling reviews.",
+      "details": "Generated when a task is triggered by an event-based trigger (as opposed to a time-based schedule). Event-triggered tasks execute in response to specific Windows event log entries, making them a stealthier persistence mechanism than time-based tasks. Records the task name and the triggering event.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -553,6 +591,13 @@
           "Windows built-in tasks triggered by system events (e.g., disk diagnostics, error reporting)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the event-triggered task"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -571,7 +616,7 @@
       "level": "Warning",
       "title": "Task action failed to start: executable not found",
       "summary": "A scheduled task's action could not start because the target executable was not found.",
-      "details": "Generated when Task Scheduler attempts to run a task but cannot locate the executable specified in the task's action. Surfaces residual persistence artifacts — malware payloads removed by security tooling while the task itself remains registered will continuously trigger this event. Correlate with EID 106 to retrieve the original task definition and the account that created it.",
+      "details": "Generated when Task Scheduler attempts to run a task but cannot locate the executable specified in the task's action. This event surfaces when a task's target binary has been removed while the task definition remains registered, causing repeated failures on each scheduled execution.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -670,7 +715,7 @@
       "level": "Information",
       "title": "Task updated",
       "summary": "An existing scheduled task was updated.",
-      "details": "Generated when the definition of an existing scheduled task is modified. Key field: TaskName. Does not include the new task XML content in this log — correlate with Security EID 4702 (TaskContentNew field) to review what changed. Modifications to tasks outside of known software update cycles, especially changes to the action executable or trigger conditions, are a persistence modification indicator.",
+      "details": "Generated when the definition of an existing scheduled task is modified. Records the task name. Does not include the new task XML content in this log -- Security EID 4702 contains the TaskContentNew field with the updated definition.",
       "category": "Task Lifecycle",
       "tags": [
         "scheduled-task",
@@ -720,6 +765,13 @@
           "Group Policy refreshes updating task definitions"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the modified task"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -738,7 +790,7 @@
       "level": "Information",
       "title": "Task removed",
       "summary": "A scheduled task was deleted.",
-      "details": "Generated when a scheduled task is removed from the Task Scheduler. Key field: TaskName. Deletion of a recently created or recently triggered task may indicate cleanup of a malicious persistence mechanism. Correlate TaskName with EID 106 and EID 200 to determine whether the task was ever executed before deletion.",
+      "details": "Generated when a scheduled task is removed from the Task Scheduler. Deletion of a recently created or recently triggered task may indicate cleanup of a persistence mechanism.",
       "category": "Task Lifecycle",
       "tags": [
         "scheduled-task",
@@ -850,7 +902,7 @@
       "level": "Information",
       "title": "Action started",
       "summary": "A scheduled task action (executable) began executing.",
-      "details": "Generated when a scheduled task action starts. Key fields: TaskName and ActionName (the executable or script path that was launched). This is the primary execution evidence event in the Task Scheduler log and is not captured by the Security log EIDs 4698-4702, which only cover task lifecycle (create/modify/delete/enable), not execution. Pivot on ActionName to identify what was run and correlate with Security EID 4688 to find the resulting process creation event.",
+      "details": "Generated when a scheduled task action starts. Records the task name and action name (the executable or script path that was launched). This is the primary execution evidence event in the Task Scheduler log and is not captured by the Security log EIDs 4698-4702, which only cover task lifecycle (create/modify/delete/enable), not execution.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -907,6 +959,18 @@
           "Windows built-in tasks (e.g., Defrag, Windows Defender scans)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the task whose action started"
+        },
+        {
+          "name": "ActionName",
+          "xpath": "EventData/Data[@Name='ActionName']",
+          "description": "Executable or script path that was launched by the task"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"
@@ -925,7 +989,7 @@
       "level": "Information",
       "title": "Action completed",
       "summary": "A scheduled task action finished executing.",
-      "details": "Generated when a scheduled task action finishes. Key fields: TaskName, ActionName, and ResultCode. A ResultCode of 0 indicates successful completion. Non-zero result codes may indicate the action failed or was terminated. Pair with EID 200 using TaskName to measure execution duration. Abnormally short execution times for tasks that should run longer, or consistent non-zero result codes, may indicate detection and termination by a security tool.",
+      "details": "Generated when a scheduled task action finishes. Records the task name, action name, and result code. A ResultCode of 0 indicates successful completion; non-zero values indicate the action failed or was terminated.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -972,6 +1036,23 @@
           "Any legitimate scheduled task completing normally"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TaskName",
+          "xpath": "EventData/Data[@Name='TaskName']",
+          "description": "Full path of the completed task"
+        },
+        {
+          "name": "ActionName",
+          "xpath": "EventData/Data[@Name='ActionName']",
+          "description": "Executable or script path that was run"
+        },
+        {
+          "name": "ResultCode",
+          "xpath": "EventData/Data[@Name='ResultCode']",
+          "description": "Exit code of the action; 0 = success"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/task-scheduler-start-page"

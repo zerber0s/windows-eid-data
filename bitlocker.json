@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BitLocker",
-    "version": "1.1.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bitlocker.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "BitLocker Drive Encryption was enabled on a volume",
       "summary": "BitLocker Drive Encryption was enabled on a volume.",
-      "details": "Generated when BitLocker Drive Encryption is successfully enabled on a drive volume. Key fields: VolumeName (the drive letter or volume label being encrypted), VolumeType (operating system drive, fixed data drive, or removable). In a well-managed enterprise, BitLocker enablement is a deliberate IT action — enablement on endpoints not in the standard BitLocker deployment list is anomalous. In ransomware scenarios, some ransomware strains (notably Ryuk and its successors) use BitLocker as the encryption engine, enabling it on all volumes to leverage Windows' own trusted encryption. Enablement of BitLocker on a large number of machines in a short window is a strong ransomware detonation indicator. Also used by attackers who have admin access to lock out legitimate users from their own data.",
+      "details": "Generated when BitLocker Drive Encryption is successfully enabled on a drive volume. In ransomware scenarios, some strains (notably Ryuk and its successors) use BitLocker as the encryption engine, enabling it on all volumes to leverage Windows' own trusted encryption. Enablement on a large number of machines in a short window is a strong ransomware detonation indicator.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -51,6 +51,10 @@
         {
           "id": 776,
           "log": "BitLocker"
+        },
+        {
+          "id": 524,
+          "log": "System"
         },
         {
           "id": 4719,
@@ -99,7 +103,19 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Drive letter or volume label being encrypted"
+        },
+        {
+          "name": "VolumeType",
+          "xpath": "EventData/Data[@Name='VolumeType']",
+          "description": "Type of volume: operating system drive, fixed data drive, or removable"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 771,
@@ -109,7 +125,7 @@
       "level": "Information",
       "title": "BitLocker Drive Encryption was disabled on a volume",
       "summary": "BitLocker Drive Encryption was disabled on a volume.",
-      "details": "Generated when BitLocker is fully disabled and the volume is decrypted. Key fields: VolumeName, VolumeType. BitLocker disablement is a high-severity event in enterprise environments — it reduces the data protection posture of the affected machine. In ransomware pre-staging contexts, adversaries may disable BitLocker on volumes before deploying their own ransomware payload to avoid performance degradation from double-encryption (encrypting already-encrypted data). The pattern of BitLocker disable followed by ransomware encryption is documented in Ryuk, Conti, and LockBit ransomware campaigns. Any BitLocker disablement without a corresponding authorized IT change ticket should be escalated. OS drive disablement is especially critical as it may indicate preparation for full disk encryption by ransomware or an attacker clearing BitLocker protectors to prevent recovery.",
+      "details": "Generated when BitLocker is fully disabled and the volume is decrypted. BitLocker disablement reduces the data protection posture of the affected machine. In ransomware pre-staging, adversaries may disable BitLocker on volumes before deploying their own payload to avoid performance degradation from double-encryption. The pattern of BitLocker disable followed by ransomware encryption is documented in Ryuk, Conti, and LockBit campaigns. OS drive disablement may indicate preparation for full disk encryption by ransomware or an attacker clearing BitLocker protectors to prevent recovery.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -185,12 +201,12 @@
         {
           "name": "VolumeName",
           "xpath": "EventData/Data[@Name='VolumeName']",
-          "description": "Volume on which BitLocker was disabled; system drive (C:) disable is highest priority"
+          "description": "Volume on which BitLocker was disabled"
         },
         {
           "name": "DriveType",
           "xpath": "EventData/Data[@Name='DriveType']",
-          "description": "Type of drive (fixed, removable); fixed drive disablement outside maintenance is suspicious"
+          "description": "Type of drive (fixed, removable)"
         }
       ],
       "detectionRules": [
@@ -213,7 +229,7 @@
           "notes": "Zero-noise rule in environments with BitLocker policy enforced. Any occurrence outside change management should page the incident response team."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 773,
@@ -223,7 +239,7 @@
       "level": "Information",
       "title": "A BitLocker key protector was removed from a volume",
       "summary": "A BitLocker key protector (TPM, password, or recovery key) was removed from an encrypted volume.",
-      "details": "Generated when a key protector is removed from a BitLocker-encrypted volume. BitLocker volumes can have multiple key protectors: TPM, TPM+PIN, password, recovery password (numerical key), and recovery key file. Key fields: VolumeName, KeyProtectorType (identifies which protector was removed). Removing all key protectors from a volume effectively makes it inaccessible after the next reboot (since there is no way to unlock it). Attackers may remove key protectors from critical volumes — particularly the OS drive — to render a machine unbootable or to prevent recovery, as part of a destructive or ransomware attack. Removing recovery keys specifically prevents IT from recovering encrypted data if the primary protector fails. Correlate with EID 774 to detect failed AD recovery key backup (indicating an attacker may have also blocked backup to AD).",
+      "details": "Generated when a key protector is removed from a BitLocker-encrypted volume. BitLocker volumes can have multiple key protectors: TPM, TPM+PIN, password, recovery password (numerical key), and recovery key file. Removing all key protectors from a volume effectively makes it inaccessible after the next reboot (since there is no way to unlock it). Removing recovery keys specifically prevents IT from recovering encrypted data if the primary protector fails.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -295,7 +311,19 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Volume from which the key protector was removed"
+        },
+        {
+          "name": "KeyProtectorType",
+          "xpath": "EventData/Data[@Name='KeyProtectorType']",
+          "description": "Type of key protector removed (TPM, password, recovery password, recovery key)"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 774,
@@ -305,7 +333,7 @@
       "level": "Warning",
       "title": "BitLocker Drive Encryption failed to back up recovery information to Active Directory",
       "summary": "BitLocker failed to back up recovery information to Active Directory.",
-      "details": "Generated when BitLocker attempts to back up recovery keys or TPM owner information to Active Directory and fails. Key fields: VolumeName, reason for failure. In well-managed environments with the GPO \"Do not enable BitLocker until recovery information is stored to AD DS\" configured, this failure would block BitLocker enablement. In environments without this strict policy, the failure is logged but BitLocker proceeds. Security implications: (1) the absence of a domain-stored recovery key leaves no domain-side recovery path if the primary protector fails; (2) in attack contexts, an attacker who has disrupted AD connectivity (e.g., disabled network access to DCs) may trigger this event while enabling their own encryption to ensure IT cannot recover data using domain-stored keys. Correlate with network connectivity events and DC availability around the same timeframe.",
+      "details": "Generated when BitLocker attempts to back up recovery keys or TPM owner information to Active Directory and fails. In well-managed environments with the GPO 'Do not enable BitLocker until recovery information is stored to AD DS' configured, this failure would block BitLocker enablement. In environments without this strict policy, the failure is logged but BitLocker proceeds. The absence of a domain-stored recovery key leaves no domain-side recovery path if the primary protector fails.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -365,7 +393,19 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Volume for which recovery information backup to AD failed"
+        },
+        {
+          "name": "FailureReason",
+          "xpath": "EventData/Data[@Name='FailureReason']",
+          "description": "Reason the AD backup failed (network, permission, or AD object error)"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 775,
@@ -375,7 +415,7 @@
       "level": "Information",
       "title": "BitLocker Drive Encryption successfully backed up recovery information to Active Directory",
       "summary": "BitLocker successfully backed up recovery information to Active Directory.",
-      "details": "Generated when BitLocker successfully stores recovery key or TPM owner information in Active Directory. Key fields: VolumeName. While generally a positive event (recovery information is now protected in AD), it also means the recovery key is now stored in AD and accessible to anyone with appropriate AD read permissions. In attack contexts, adversaries with access to Active Directory (e.g., via DCSync or Domain Admin compromise) can read BitLocker recovery keys stored in AD using Get-BitLockerVolume or direct AD queries against the msFVE-RecoveryInformation object class. A new 775 event followed by a query of the corresponding msFVE-RecoveryInformation object in AD (EID 4662 with the msFVE-RecoveryInformation object class) may indicate an attacker reading recovery keys to later decrypt or access encrypted volumes.",
+      "details": "Generated when BitLocker successfully stores recovery key or TPM owner information in Active Directory. The recovery key is now stored in AD and accessible to anyone with appropriate AD read permissions on the msFVE-RecoveryInformation object class. Adversaries with access to Active Directory (e.g., via DCSync or Domain Admin compromise) can read BitLocker recovery keys stored in AD to later decrypt or access encrypted volumes.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -445,7 +485,14 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "keyFields": [
+        {
+          "name": "VolumeName",
+          "xpath": "EventData/Data[@Name='VolumeName']",
+          "description": "Volume for which recovery information was backed up to AD"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 776,
@@ -455,7 +502,7 @@
       "level": "Information",
       "title": "BitLocker Drive Encryption was suspended on a volume",
       "summary": "BitLocker Drive Encryption was suspended on a volume.",
-      "details": "Generated when BitLocker is suspended on an encrypted volume. Suspension differs from disablement: suspended BitLocker leaves the volume data intact and encrypted, but stores the volume encryption key (FVEK) in the clear on disk (unprotected by key protectors), allowing the volume to be accessed without authentication. This is typically used by IT for firmware/BIOS updates that require temporary BitLocker suspension. Security implications: a suspended BitLocker volume is effectively unprotected — the encryption key is stored openly and the data is accessible without the TPM or recovery key. In attack scenarios, suspension (rather than full disablement) is a subtler approach that achieves the same goal of bypassing encryption while potentially evading monitoring that specifically looks for full disablement (EID 771). Ransomware pre-staging using suspension: attacker suspends BitLocker, deploys ransomware, ransomware reads and encrypts the now-accessible data or forces a reboot that clears the suspended state.",
+      "details": "Generated when BitLocker is suspended on an encrypted volume. Suspension differs from disablement: suspended BitLocker leaves the volume data intact and encrypted, but stores the volume encryption key (FVEK) in the clear on disk (unprotected by key protectors), allowing the volume to be accessed without authentication. This is typically used by IT for firmware/BIOS updates that require temporary BitLocker suspension. A suspended BitLocker volume is effectively unprotected — the encryption key is stored openly and the data is accessible without the TPM or recovery key. Suspension (rather than full disablement) is a subtler approach that achieves the same goal of bypassing encryption.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -531,12 +578,12 @@
         {
           "name": "VolumeName",
           "xpath": "EventData/Data[@Name='VolumeName']",
-          "description": "Volume on which BitLocker was suspended; suspension leaves data encrypted but removes the key protector temporarily"
+          "description": "Volume on which BitLocker was suspended"
         },
         {
           "name": "DriveType",
           "xpath": "EventData/Data[@Name='DriveType']",
-          "description": "Type of drive; system volume suspension is the most impactful for ransomware pre-staging"
+          "description": "Type of drive; system volume suspension is the most impactful"
         }
       ],
       "detectionRules": [
@@ -559,7 +606,7 @@
           "notes": "Correlate with EID 771 (disable) and endpoint process events for ransomware pre-staging chain detection."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

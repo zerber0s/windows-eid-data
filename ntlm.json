@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - NTLM Authentication",
-    "version": "1.4.0",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.5.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ntlm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Warning",
       "title": "Outbound NTLM authentication blocked",
       "summary": "An outbound NTLM authentication attempt was blocked by policy.",
-      "details": "Generated when an outbound NTLM authentication to a remote server is blocked by the 'Network Security: Restrict NTLM: Outgoing NTLM traffic to remote servers' policy. Key fields: TargetName (the server the client attempted to authenticate to), CallerProcessName, and ClientUserName. This event is useful for detecting forced NTLM authentication scenarios where malware or an adversary has redirected a victim's client toward an attacker-controlled SMB server to capture or relay NTLM credentials. The CallerProcessName field identifies the process that triggered the authentication — unexpected processes (browsers, Office applications) are high fidelity indicators of T1187 (Forced Authentication). Note: This channel requires NTLM auditing to be enabled via Group Policy.",
+      "details": "Generated when an outbound NTLM authentication to a remote server is blocked by the 'Network Security: Restrict NTLM: Outgoing NTLM traffic to remote servers' policy. This event is useful for detecting forced NTLM authentication scenarios where malware or an adversary has redirected a victim's client toward an attacker-controlled SMB server to capture or relay NTLM credentials. This channel requires NTLM auditing to be enabled via Group Policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -79,6 +79,23 @@
           "Misconfigured services attempting NTLM auth to servers outside the allowed list"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TargetName",
+          "xpath": "EventData/Data[@Name='TargetName']",
+          "description": "Server the client attempted to authenticate to"
+        },
+        {
+          "name": "CallerProcessName",
+          "xpath": "EventData/Data[@Name='CallerProcessName']",
+          "description": "Process that triggered the outbound NTLM authentication"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account whose credentials were used in the authentication attempt"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
@@ -105,7 +122,7 @@
       "level": "Warning",
       "title": "Incoming NTLM authentication blocked",
       "summary": "An incoming NTLM authentication to this server was blocked by policy.",
-      "details": "Generated when an incoming NTLM authentication request to this server is blocked by the 'Network Security: Restrict NTLM: Incoming NTLM traffic' policy. Key fields: CallingMachineHostName (the client initiating the auth), ClientUserName, CallerProcessName, and Status. This event on servers provides visibility into which clients and accounts are still using NTLM to authenticate, which is critical for detecting relay attacks and identifying legacy authentication patterns. In relay attack scenarios, the ClientUserName and CallingMachineHostName may belong to a different victim machine than the attacker. Note: Requires enabling 'Network Security: Restrict NTLM: Audit Incoming NTLM Traffic' or 'Deny all accounts' via Group Policy.",
+      "details": "Generated when an incoming NTLM authentication request to this server is blocked by the 'Network Security: Restrict NTLM: Incoming NTLM traffic' policy. This event provides visibility into which clients and accounts are still using NTLM to authenticate, which is critical for detecting relay attacks and identifying legacy authentication patterns. In relay attack scenarios, the ClientUserName and CallingMachineHostName may belong to a different victim machine than the attacker. Requires enabling 'Network Security: Restrict NTLM: Audit Incoming NTLM Traffic' or 'Deny all accounts' via Group Policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -161,6 +178,28 @@
           "Domain-joined clients authenticating to servers before Kerberos is available (startup timing)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CallingMachineHostName",
+          "xpath": "EventData/Data[@Name='CallingMachineHostName']",
+          "description": "Hostname of the client initiating the NTLM authentication"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account used in the authentication request"
+        },
+        {
+          "name": "CallerProcessName",
+          "xpath": "EventData/Data[@Name='CallerProcessName']",
+          "description": "Process handling the incoming authentication on the server"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "Authentication result status"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
@@ -179,7 +218,7 @@
       "level": "Information",
       "title": "NTLM client authentication attempted (audit)",
       "summary": "An outbound NTLM authentication from this client was recorded in audit mode.",
-      "details": "Generated when this system initiates an NTLM authentication as a client and the 'Network Security: Restrict NTLM: Audit Outgoing NTLM Traffic to Remote Servers' policy is set to 'Enable Auditing All'. Key fields: TargetName (the server being authenticated to), CallerProcessName, ClientUserName, and DomainName. This event provides full visibility into NTLM usage across the environment before enforcement is applied, making it essential for baselining NTLM traffic and identifying accounts or services that would break when NTLM restriction is enforced. Note: This event fires for all NTLM authentications, including legitimate ones, when auditing is enabled.",
+      "details": "Generated when this system initiates an NTLM authentication as a client and the 'Network Security: Restrict NTLM: Audit Outgoing NTLM Traffic to Remote Servers' policy is set to 'Enable Auditing All'. This event provides full visibility into NTLM usage across the environment before enforcement is applied, making it essential for baselining NTLM traffic and identifying accounts or services that would break when NTLM restriction is enforced. This event fires for all NTLM authentications, including legitimate ones, when auditing is enabled.",
       "category": "NTLM Authentication",
       "tags": [
         "ntlm",
@@ -224,6 +263,28 @@
           "Domain-joined hosts authenticating to workgroup or non-domain resources via NTLM"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TargetName",
+          "xpath": "EventData/Data[@Name='TargetName']",
+          "description": "Server being authenticated to"
+        },
+        {
+          "name": "CallerProcessName",
+          "xpath": "EventData/Data[@Name='CallerProcessName']",
+          "description": "Process that initiated the outbound NTLM authentication"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account used for the authentication"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain of the authenticating account"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
@@ -242,7 +303,7 @@
       "level": "Information",
       "title": "NTLM server authentication received (audit)",
       "summary": "This server received and processed an NTLM authentication request in audit mode.",
-      "details": "Generated when this system receives an incoming NTLM authentication as a server and the 'Network Security: Restrict NTLM: Audit Incoming NTLM Traffic' policy is enabled. Key fields: CallingMachineHostName, ClientUserName, CallerProcessName, and DomainName. This event provides the server-side view of all NTLM authentications, complementing EID 8001 on the client. In relay attack scenarios, the CallingMachineHostName may differ from the machine actually performing the relay — the real attacker machine appears only in network traffic, not this event. Correlate with EID 4624 in the Security log for logon success events.",
+      "details": "Generated when this system receives an incoming NTLM authentication as a server and the 'Network Security: Restrict NTLM: Audit Incoming NTLM Traffic' policy is enabled. This event provides the server-side view of all NTLM authentications, complementing EID 8001 on the client. In relay attack scenarios, the CallingMachineHostName may differ from the machine actually performing the relay; the real attacker machine appears only in network traffic, not this event.",
       "category": "NTLM Authentication",
       "tags": [
         "ntlm",
@@ -291,6 +352,28 @@
           "Non-domain clients (workgroup machines) that can only use NTLM"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CallingMachineHostName",
+          "xpath": "EventData/Data[@Name='CallingMachineHostName']",
+          "description": "Hostname of the client that sent the NTLM authentication"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account used in the authentication request"
+        },
+        {
+          "name": "CallerProcessName",
+          "xpath": "EventData/Data[@Name='CallerProcessName']",
+          "description": "Server-side process handling the authentication"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain of the authenticating account"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
@@ -309,7 +392,7 @@
       "level": "Information",
       "title": "NTLM passthrough authentication to domain controller (audit)",
       "summary": "An NTLM authentication was passed through to a domain controller for validation.",
-      "details": "Generated on a domain controller when it receives a passthrough NTLM authentication request from a member server or workstation. Key fields: CallingMachineHostName (the host forwarding the request), ClientUserName, and DomainName. On domain controllers this event provides insight into which member servers are receiving NTLM authentication and forwarding it for validation, helping to identify unexpected NTLM flows and legacy authentication paths. Overpass-the-hash (T1550.002) attacks that use a stolen NTLM hash to forge a Kerberos ticket do not generate this event — but traditional pass-the-hash via SMB will if auditing is enabled.",
+      "details": "Generated on a domain controller when it receives a passthrough NTLM authentication request from a member server or workstation. On domain controllers this event provides insight into which member servers are receiving NTLM authentication and forwarding it for validation, helping to identify unexpected NTLM flows and legacy authentication paths. Overpass-the-hash (T1550.002) attacks that use a stolen NTLM hash to forge a Kerberos ticket do not generate this event, but traditional pass-the-hash via SMB will if auditing is enabled.",
       "category": "NTLM Authentication",
       "tags": [
         "ntlm",
@@ -351,6 +434,23 @@
           "Workstations accessing resources on servers that do not have Kerberos configured"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CallingMachineHostName",
+          "xpath": "EventData/Data[@Name='CallingMachineHostName']",
+          "description": "Host forwarding the NTLM authentication request to the DC"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account being authenticated via passthrough"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain of the authenticating account"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"
@@ -369,7 +469,7 @@
       "level": "Warning",
       "title": "Incoming NTLM authentication to server blocked (audit)",
       "summary": "An incoming NTLM authentication request to this server was recorded as blocked or audited.",
-      "details": "Generated when an incoming NTLM authentication to this server is blocked or audited under the 'Network Security: Restrict NTLM: Incoming NTLM Traffic' policy set to 'Deny all domain accounts' or 'Audit all'. Key fields: CallingMachineHostName, ClientUserName, CallerProcessName, Status, and DomainName. This event is the enforcement-mode complement to EID 8002. When an NTLM relay attack succeeds, the relayed authentication may appear here as a successful authentication from an unexpected machine. A ClientUserName matching a privileged account arriving from an unexpected CallingMachineHostName is a high-fidelity indicator of credential relay.",
+      "details": "Generated when an incoming NTLM authentication to this server is blocked or audited under the 'Network Security: Restrict NTLM: Incoming NTLM Traffic' policy set to 'Deny all domain accounts' or 'Audit all'. This event is the enforcement-mode complement to EID 8002. When an NTLM relay attack succeeds, the relayed authentication may appear here as a successful authentication from an unexpected machine.",
       "category": "NTLM Authentication",
       "tags": [
         "ntlm",
@@ -430,6 +530,33 @@
           "Mixed-environment scenarios with non-domain members needing NTLM access"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CallingMachineHostName",
+          "xpath": "EventData/Data[@Name='CallingMachineHostName']",
+          "description": "Hostname of the machine that sent the NTLM authentication"
+        },
+        {
+          "name": "ClientUserName",
+          "xpath": "EventData/Data[@Name='ClientUserName']",
+          "description": "Account used in the authentication request"
+        },
+        {
+          "name": "CallerProcessName",
+          "xpath": "EventData/Data[@Name='CallerProcessName']",
+          "description": "Process handling the authentication on the server"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "Authentication result status"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "Domain of the authenticating account"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-restrict-ntlm-ntlm-authentication-in-this-domain"

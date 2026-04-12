@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Domain Services",
-    "version": "1.5.0",
-    "generatedAt": "2026-04-11T00:00:00Z",
+    "version": "1.6.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/active-directory.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Warning",
       "title": "Active Directory replication request denied",
       "summary": "A replication request to this domain controller was denied.",
-      "details": "Generated when a domain controller denies an inbound replication request. Key fields: SourceDC (the machine requesting replication) and the reason for denial. In DFIR contexts this event is relevant as a failed DCSync indicator: DCSync (T1003.006) works by mimicking domain controller replication using DRSUAPI calls (GetNCChanges). A non-DC machine requesting replication will be denied and may generate this event. However, note that a successful DCSync attack will NOT generate this event — it will be visible in Security log EID 4662 (Directory Service Object Access with the required replication permissions). This event primarily captures failed or unauthorized replication attempts. SourceDC that is not a known DC is a critical indicator. DC-only event.",
+      "details": "Generated when a domain controller denies an inbound replication request. In DFIR contexts this event is relevant as a failed DCSync indicator: DCSync (T1003.006) works by mimicking domain controller replication using DRSUAPI calls (GetNCChanges). A non-DC machine requesting replication will be denied and may generate this event. A successful DCSync attack will NOT generate this event; it will be visible in Security log EID 4662 (Directory Service Object Access with the required replication permissions). This event primarily captures failed or unauthorized replication attempts. DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -77,6 +77,18 @@
           "Azure AD Connect or third-party directory tools that use replication APIs for read-only sync"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SourceDC",
+          "xpath": "EventData/Data[@Name='SourceDC']",
+          "description": "The machine requesting replication; a non-DC source is a critical indicator"
+        },
+        {
+          "name": "DenialReason",
+          "xpath": "EventData/Data[@Name='DenialReason']",
+          "description": "The reason the replication request was denied"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/component-updates/directory-services-component-updates"
@@ -95,7 +107,7 @@
       "level": "Information",
       "title": "Expensive or inefficient LDAP query executed",
       "summary": "A domain controller processed an LDAP query that exceeded the configured expensive-query threshold.",
-      "details": "Generated on domain controllers when an LDAP query exceeds the threshold defined in the 'Field Engineering' diagnostics registry key (HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics, value '15 Field Engineering' = 5). This is the primary server-side indicator for BloodHound/SharpHound and other AD enumeration tools. Unlike client-side EID 257 (LDAP-Client debug log), this event fires on the DC itself and therefore captures enumeration from any source — including remote attackers who have already obtained credentials. Key fields: Client IP Address (the querying machine), User Name (the account performing the query), Search Base, Search Filter, and Search Scope. Filters characteristic of BloodHound include (objectClass=user), (objectClass=computer), (objectClass=group), (objectClass=trustedDomain), servicePrincipalName=*, adminCount=1, and msDS-AllowedToDelegateTo=*. A single host performing dozens of expensive LDAP queries against a DC in a short window — especially using filters that enumerate all users, all computers, or ACL attributes — is the canonical BloodHound collection signature. The Field Engineering registry key must be set to 5 to enable these events; the default value is 0 (disabled). Correlate with LDAP-Client EID 257 on the source endpoint for end-to-end coverage.",
+      "details": "Generated on domain controllers when an LDAP query exceeds the threshold defined in the 'Field Engineering' diagnostics registry key (HKLM\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Diagnostics, value '15 Field Engineering' = 5). This is the primary server-side indicator for BloodHound/SharpHound and other AD enumeration tools. Unlike client-side EID 257 (LDAP-Client debug log), this event fires on the DC itself and therefore captures enumeration from any source, including remote attackers who have already obtained credentials. Filters characteristic of BloodHound include (objectClass=user), (objectClass=computer), (objectClass=group), (objectClass=trustedDomain), servicePrincipalName=*, adminCount=1, and msDS-AllowedToDelegateTo=*. The Field Engineering registry key must be set to 5 to enable these events; the default value is 0 (disabled).",
       "category": "LDAP Enumeration",
       "tags": [
         "ldap",
@@ -229,7 +241,7 @@
       "level": "Warning",
       "title": "Lingering object replication error",
       "summary": "A domain controller attempted to replicate an object that exists as a lingering object on the source DC.",
-      "details": "Generated when a DC attempts to replicate an object whose tombstone lifetime has already expired on the destination DC but still exists on the source DC. Lingering objects arise when a DC is disconnected from the AD replication topology for longer than the tombstone lifetime (default 180 days) and then reconnected. From a security perspective, a DC that was offline for an extended period may represent: (1) a compromised DC that was air-gapped by defenders after detection and then reintroduced, (2) a DC restored from an old backup that reintroduces deleted accounts or credential objects, or (3) a clone or replica built from outdated media used in an attack. The presence of lingering objects on a DC that was not expected to be offline is a forensic indicator warranting investigation of the DC's history. Key fields: Source DC, object DN. Remediation requires either enabling Strict Replication Consistency or using repadmin /removelingeringobjects.",
+      "details": "Generated when a DC attempts to replicate an object whose tombstone lifetime has already expired on the destination DC but still exists on the source DC. Lingering objects arise when a DC is disconnected from the AD replication topology for longer than the tombstone lifetime (default 180 days) and then reconnected. A DC that was offline for an extended period may represent: (1) a compromised DC that was air-gapped by defenders after detection and then reintroduced, (2) a DC restored from an old backup that reintroduces deleted accounts or credential objects, or (3) a clone or replica built from outdated media.",
       "category": "AD Replication",
       "tags": [
         "active-directory",
@@ -306,7 +318,7 @@
       "level": "Warning",
       "title": "Directory partition backup overdue",
       "summary": "A directory partition on this domain controller has not been backed up within the backup latency interval.",
-      "details": "Generated when a directory partition has not been backed up within the configured backup latency threshold (default: tombstone lifetime / 2, typically 90 days). While primarily an operational health event, it is relevant to incident response because attackers deploying ransomware frequently delete or corrupt backups before initiating encryption. The presence of this event on multiple DCs shortly before a ransomware event indicates backup deletion or disruption as part of the attack chain. Conversely, the absence of this event on a well-managed DC that suddenly cannot be backed up may indicate an attacker has disrupted the backup agent or corrupted the backup target. Correlate with backup agent logs, VSS event log (EID 8193 from VSS, indicating shadow copy failures), and Task Scheduler events for backup task deletion.",
+      "details": "Generated when a directory partition has not been backed up within the configured backup latency threshold (default: tombstone lifetime / 2, typically 90 days). While primarily an operational health event, it is relevant to incident response because attackers deploying ransomware frequently delete or corrupt backups before initiating encryption. The presence of this event on multiple DCs shortly before a ransomware event indicates backup deletion or disruption as part of the attack chain.",
       "category": "AD Operational Health",
       "tags": [
         "active-directory",
@@ -362,7 +374,7 @@
       "level": "Warning",
       "title": "LDAP server signing requirements not enforced",
       "summary": "The LDAP server is not configured to require signing or sealing on all connections.",
-      "details": "Generated when the Active Directory LDAP server detects that signing or sealing is not required for all incoming LDAP connections. This is a configuration event fired at DC startup or when the LDAP signing policy is checked. LDAP connections without signing are vulnerable to relay attacks — an attacker who captures LDAP authentication can relay it to the DC to perform operations as the victim. This is a posture event rather than an attack event: it indicates the DC is susceptible to LDAP relay. The remediation is to set the 'Domain controller: LDAP server signing requirements' Group Policy to 'Require signing'. DC-only event.",
+      "details": "Generated when the Active Directory LDAP server detects that signing or sealing is not required for all incoming LDAP connections. This is a configuration event fired at DC startup or when the LDAP signing policy is checked. LDAP connections without signing are vulnerable to relay attacks, where an attacker who captures LDAP authentication can relay it to the DC to perform operations as the victim. This is a posture event rather than an attack event: it indicates the DC is susceptible to LDAP relay. DC-only event.",
       "category": "LDAP / Active Directory",
       "tags": [
         "active-directory",
@@ -426,7 +438,7 @@
       "level": "Warning",
       "title": "LDAP unsigned bind summary",
       "summary": "Hourly summary of LDAP connections that were made without signing or sealing.",
-      "details": "Generated approximately once per hour on domain controllers to report a summary count of LDAP binds received that did not use signing or sealing (LDAP Simple Binds or unsigned SASL binds). Key fields: NumberOfUnsignedBinds (total unsigned binds in the period). This event is a periodic summary companion to EID 2889, which fires per individual occurrence. When the count is non-zero, clients are authenticating to the DC without LDAP signing — these connections are vulnerable to relay attacks and credential interception. A sustained high count may indicate a legacy application or an adversary actively exploiting unsigned LDAP to relay credentials. Use EID 2889 to identify the specific clients. DC-only event.",
+      "details": "Generated approximately once per hour on domain controllers to report a summary count of LDAP binds received that did not use signing or sealing (LDAP Simple Binds or unsigned SASL binds). This event is a periodic summary companion to EID 2889, which fires per individual occurrence. When the count is non-zero, clients are authenticating to the DC without LDAP signing, making these connections vulnerable to relay attacks and credential interception. DC-only event.",
       "category": "LDAP / Active Directory",
       "tags": [
         "active-directory",
@@ -472,6 +484,13 @@
           "Third-party directory integration tools that use unsigned LDAP for compatibility"
         ]
       },
+      "keyFields": [
+        {
+          "name": "NumberOfUnsignedBinds",
+          "xpath": "EventData/Data[@Name='NumberOfUnsignedBinds']",
+          "description": "Total unsigned LDAP binds in the reporting period"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/enable-ldap-signing-in-windows-server"
@@ -490,7 +509,7 @@
       "level": "Warning",
       "title": "Client performed an unsigned LDAP bind",
       "summary": "A client made an LDAP Simple Bind or unsigned SASL bind to this domain controller.",
-      "details": "Generated per occurrence when a client performs an LDAP bind without signing or sealing — either a Simple Bind (credentials sent in plaintext or over an unprotected channel) or an unsigned SASL bind. Key fields: IPAddress (the client making the unsigned bind) and AccountName (the account used). LDAP Simple Binds transmit credentials without encryption or integrity protection, making them susceptible to interception. Adversaries performing LDAP relay attacks will appear here if they are forwarding captured LDAP authentication to the DC. A new, unknown IPAddress making Simple Binds with privileged AccountName values is a high-confidence relay indicator. Requires that the NTDS 'LDAP Interface Events' diagnostic key be set to 2 or higher. DC-only event.",
+      "details": "Generated per occurrence when a client performs an LDAP bind without signing or sealing, either a Simple Bind (credentials sent in plaintext or over an unprotected channel) or an unsigned SASL bind. LDAP Simple Binds transmit credentials without encryption or integrity protection, making them susceptible to interception. Requires that the NTDS 'LDAP Interface Events' diagnostic key be set to 2 or higher. DC-only event.",
       "prerequisites": [
         {
           "type": "registry",
@@ -557,6 +576,18 @@
           "Third-party directory sync or authentication proxy tools using Simple Binds for compatibility"
         ]
       },
+      "keyFields": [
+        {
+          "name": "IPAddress",
+          "xpath": "EventData/Data[@Name='IPAddress']",
+          "description": "IP address of the client making the unsigned LDAP bind"
+        },
+        {
+          "name": "AccountName",
+          "xpath": "EventData/Data[@Name='AccountName']",
+          "description": "The account used for the unsigned bind"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/enable-ldap-signing-in-windows-server"
@@ -575,7 +606,7 @@
       "level": "AuditSuccess",
       "title": "An operation was performed on an Active Directory object",
       "summary": "A security-relevant operation was performed on a directory service object.",
-      "details": "Generated when an operation (read, write, or extended right) is performed on an Active Directory object with auditing enabled on that object. Key fields: SubjectAccountName (who performed the operation), ObjectDN (the full distinguished name of the target object), ObjectClass (e.g., domainDNS, user, group), Properties (attributes accessed), and AccessMask. This event is the primary mechanism for detecting DCSync attacks: a successful DCSync will generate EID 4662 on the domain controller with ObjectClass=domainDNS and extended rights access including Replicating Directory Changes (1131f6aa-9c07-11d1-f79f-00c04fc2dcd2) and Replicating Directory Changes All (1131f6ad-9c07-11d1-f79f-00c04fc2dcd2). SubjectAccountName for a non-DC machine account making replication right calls is a DCSync indicator. Also used to audit AdminSDHolder modifications and ACL changes on sensitive objects. Requires configuring SACL (System Access Control List) auditing on the target AD objects. DC-only event.",
+      "details": "Generated when an operation (read, write, or extended right) is performed on an Active Directory object with auditing enabled on that object. This event is the primary mechanism for detecting DCSync attacks: a successful DCSync generates EID 4662 on the domain controller with ObjectClass=domainDNS and extended rights access including Replicating Directory Changes (1131f6aa-9c07-11d1-f79f-00c04fc2dcd2) and Replicating Directory Changes All (1131f6ad-9c07-11d1-f79f-00c04fc2dcd2). Also used to audit AdminSDHolder modifications and ACL changes on sensitive objects. Requires configuring SACL (System Access Control List) auditing on the target AD objects. DC-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -714,7 +745,7 @@
       "level": "AuditSuccess",
       "title": "A new trust was created to a domain",
       "summary": "A new trust relationship was established between domains or forests.",
-      "details": "Generated when a new trust relationship is created to another domain or forest. Key fields: DomainName (the trusted domain), TrustType (Windows domain trust vs. MIT Kerberos), TrustDirection (inbound, outbound, or bidirectional), and TrustAttributes (e.g., forest-transitive, cross-organization). Trust relationships fundamentally alter the AD security boundary — an attacker with Domain Admin privileges can create a new trust to an attacker-controlled domain to establish a persistent, stealthy access path. Bidirectional trusts or forest-transitive trusts with attacker-controlled domains can enable cross-domain credential abuse and lateral movement that persists even after password resets. Creation of unexpected trusts is a high-severity persistence indicator. DC-only event.",
+      "details": "Generated when a new trust relationship is created to another domain or forest. Trust relationships fundamentally alter the AD security boundary. Bidirectional trusts or forest-transitive trusts with attacker-controlled domains can enable cross-domain credential abuse and lateral movement that persists even after password resets. DC-only event.",
       "category": "Trust / Domain Configuration",
       "tags": [
         "active-directory",
@@ -761,6 +792,28 @@
           "Automated provisioning scripts that establish trusts as part of domain build processes"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "The trusted domain name"
+        },
+        {
+          "name": "TrustType",
+          "xpath": "EventData/Data[@Name='TrustType']",
+          "description": "Type of trust (Windows domain trust vs. MIT Kerberos)"
+        },
+        {
+          "name": "TrustDirection",
+          "xpath": "EventData/Data[@Name='TrustDirection']",
+          "description": "Trust direction (inbound, outbound, or bidirectional)"
+        },
+        {
+          "name": "TrustAttributes",
+          "xpath": "EventData/Data[@Name='TrustAttributes']",
+          "description": "Trust attributes (e.g., forest-transitive, cross-organization)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4706"
@@ -779,7 +832,7 @@
       "level": "AuditSuccess",
       "title": "A trust to a domain was removed",
       "summary": "An existing trust relationship to a domain was deleted.",
-      "details": "Generated when a trust relationship to another domain or forest is removed. Key fields: DomainName (the formerly trusted domain) and SubjectAccountName (who removed the trust). Trust removal can be both an attacker action and a defensive action — an attacker may remove a legitimate trust to create disruption or to mask a previously created malicious trust. In incident response, removal of the legitimate trust after creating a backdoor trust is a known anti-forensics tactic. Any unplanned or unauthorized trust removal should be investigated, particularly if paired temporally with EID 4706 (new trust creation). DC-only event.",
+      "details": "Generated when a trust relationship to another domain or forest is removed. Trust removal can be both an attacker action and a defensive action. An attacker may remove a legitimate trust to create disruption or to mask a previously created malicious trust. In incident response, removal of the legitimate trust after creating a backdoor trust is a known anti-forensics tactic. DC-only event.",
       "category": "Trust / Domain Configuration",
       "tags": [
         "active-directory",
@@ -824,6 +877,18 @@
           "Post-acquisition integration that removes redundant trusts after domain consolidation"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "The formerly trusted domain name"
+        },
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that removed the trust"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4707"
@@ -842,7 +907,7 @@
       "level": "AuditSuccess",
       "title": "Kerberos policy was changed",
       "summary": "The Kerberos authentication policy for the domain was modified.",
-      "details": "Generated when the Kerberos ticket policy for the domain is changed, including the maximum lifetime for user tickets (TGT lifetime), service tickets (TGS lifetime), ticket renewal lifetime, and clock skew tolerance. Key fields: SubjectAccountName (who made the change) and the before/after values for each policy parameter. Adversaries with domain admin access may extend TGT lifetimes to reduce Golden Ticket detection windows (longer lifetimes mean valid tickets persist for longer), or extend renewal periods to reduce authentication noise. In Golden Ticket attacks, extending the MaxTicketAge reduces the need for the attacker to re-acquire credentials. Any change to default Kerberos policy (TGT = 10 hours, service ticket = 10 hours, renewal = 7 days) without a change ticket is suspicious. DC-only event.",
+      "details": "Generated when the Kerberos ticket policy for the domain is changed, including the maximum lifetime for user tickets (TGT lifetime), service tickets (TGS lifetime), ticket renewal lifetime, and clock skew tolerance. Adversaries with domain admin access may extend TGT lifetimes to reduce Golden Ticket detection windows, or extend renewal periods to reduce authentication noise. In Golden Ticket attacks, extending the MaxTicketAge reduces the need for the attacker to re-acquire credentials. DC-only event.",
       "category": "Kerberos / Authentication Policy",
       "tags": [
         "active-directory",
@@ -899,6 +964,18 @@
           "Domain migration or consolidation activities requiring temporary policy adjustments"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that changed the Kerberos policy"
+        },
+        {
+          "name": "PolicyChanges",
+          "xpath": "EventData/Data[@Name='PolicyChanges']",
+          "description": "Before and after values for each modified Kerberos policy parameter"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4713"
@@ -917,7 +994,7 @@
       "level": "AuditSuccess",
       "title": "Trusted domain information was modified",
       "summary": "The attributes of an existing trust relationship were changed.",
-      "details": "Generated when an existing trust relationship is modified — for example, changing trust direction, trust type, trust attributes, or SID filtering settings. Key fields: DomainName (the trusted domain affected), and the old vs. new values of the trust attributes. SID filtering (also called quarantine) prevents SIDs from a trusted domain from being used to elevate privileges in the trusting domain. Attackers with domain admin access who want to enable SID History-based privilege escalation across a trust may disable SID filtering (set TrustAttributes to TREAT_AS_EXTERNAL or remove the QUARANTINE_DOMAIN flag). This is a high-value event for detecting cross-domain privilege escalation setup. DC-only event.",
+      "details": "Generated when an existing trust relationship is modified, for example changing trust direction, trust type, trust attributes, or SID filtering settings. SID filtering (also called quarantine) prevents SIDs from a trusted domain from being used to elevate privileges in the trusting domain. Attackers with domain admin access who want to enable SID History-based privilege escalation across a trust may disable SID filtering (set TrustAttributes to TREAT_AS_EXTERNAL or remove the QUARANTINE_DOMAIN flag). DC-only event.",
       "category": "Trust / Domain Configuration",
       "tags": [
         "active-directory",
@@ -967,6 +1044,18 @@
           "Administrative adjustments to enable specific authentication flows for application compatibility"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "The trusted domain whose trust attributes were modified"
+        },
+        {
+          "name": "TrustAttributes",
+          "xpath": "EventData/Data[@Name='TrustAttributes']",
+          "description": "Old and new trust attribute values; removal of QUARANTINE_DOMAIN flag is critical"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4716"
@@ -985,7 +1074,7 @@
       "level": "AuditSuccess",
       "title": "Domain Policy was changed",
       "summary": "The domain policy (password policy, lockout policy, or Kerberos policy) was modified.",
-      "details": "Generated when changes are made to the Default Domain Policy affecting password policy, account lockout policy, or Kerberos policy at the domain level. Key fields: SubjectAccountName (who made the change), DomainName, and the specific policy values modified. Adversaries with domain admin access may weaken the password policy (e.g., remove minimum length, disable complexity) to enable easier brute-force of newly set passwords, or increase the lockout threshold to allow more password spray attempts without triggering lockouts. Attackers may also extend the maximum password age to prevent forced password rotations that would disrupt compromised accounts. Any decrease in security posture of these policies is a high-severity finding. DC-only event.",
+      "details": "Generated when changes are made to the Default Domain Policy affecting password policy, account lockout policy, or Kerberos policy at the domain level. Adversaries with domain admin access may weaken the password policy (e.g., remove minimum length, disable complexity) to enable easier brute-force of newly set passwords, or increase the lockout threshold to allow more password spray attempts without triggering lockouts. DC-only event.",
       "category": "Domain Policy",
       "tags": [
         "active-directory",
@@ -1031,6 +1120,23 @@
           "Emergency changes to lockout policy during an incident to prevent widespread account lockout from a spray attack"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that modified the domain policy"
+        },
+        {
+          "name": "DomainName",
+          "xpath": "EventData/Data[@Name='DomainName']",
+          "description": "The domain whose policy was changed"
+        },
+        {
+          "name": "PolicyChanges",
+          "xpath": "EventData/Data[@Name='PolicyChanges']",
+          "description": "The specific policy values that were modified"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4739"
@@ -1049,7 +1155,7 @@
       "level": "AuditSuccess",
       "title": "SID History was added to an account",
       "summary": "A SID was successfully added to the SID History attribute of an account.",
-      "details": "Generated when a SID is successfully added to the SIDHistory attribute of a user or group object. Key fields: TargetAccountName (the account receiving the SID History entry), TargetDomainName, SubjectAccountName (who performed the action), and OldSidHistory/NewSidHistory (before and after values). SID History is a legitimate AD attribute designed to preserve access rights during domain migrations — when accounts are migrated from an old domain, the old SID is stored in SID History so existing ACLs still grant access. Adversaries abuse SID History to grant an account the effective privileges of any SID, including Enterprise Admin or Domain Admin SIDs from the current or a trusted domain, without visibly adding the account to those groups. This is a high-fidelity persistence indicator when seen outside a documented domain migration. Requires Audit Account Management policy.",
+      "details": "Generated when a SID is successfully added to the SIDHistory attribute of a user or group object. SID History is a legitimate AD attribute designed to preserve access rights during domain migrations. When accounts are migrated from an old domain, the old SID is stored in SID History so existing ACLs still grant access. Adversaries abuse SID History to grant an account the effective privileges of any SID, including Enterprise Admin or Domain Admin SIDs from the current or a trusted domain, without visibly adding the account to those groups. Requires Audit Account Management policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -1106,6 +1212,28 @@
           "Post-acquisition domain consolidation where accounts are migrated and retain SID History for ACL compatibility"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TargetAccountName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "The account receiving the SID History entry"
+        },
+        {
+          "name": "TargetDomainName",
+          "xpath": "EventData/Data[@Name='TargetDomainName']",
+          "description": "The domain of the target account"
+        },
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that performed the SID History injection"
+        },
+        {
+          "name": "SidHistory",
+          "xpath": "EventData/Data[@Name='SidHistory']",
+          "description": "The SID values added to the account's SID History attribute"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4765"
@@ -1124,7 +1252,7 @@
       "level": "AuditFailure",
       "title": "An attempt to add SID History to an account failed",
       "summary": "An attempt to add a SID to an account's SID History attribute was denied.",
-      "details": "Generated when an attempt to add a SID to the SIDHistory attribute of an account is rejected. Key fields: TargetAccountName (the account targeted), SubjectAccountName (who attempted the operation), and the failure reason. SID History modification failures can occur because the caller lacks the required privileges, or because the DC's security settings prevent SID History injection (e.g., when SID filtering is enabled on the trust). In an attack scenario, this event may indicate an adversary attempting to inject privileged SIDs into a user account and being blocked by DC-level controls. While less critical than a successful EID 4765, repeated failures targeting privileged SIDs from the same source indicate active SID injection attempts.",
+      "details": "Generated when an attempt to add a SID to the SIDHistory attribute of an account is rejected. SID History modification failures can occur because the caller lacks the required privileges, or because the DC's security settings prevent SID History injection (e.g., when SID filtering is enabled on the trust). This event may indicate an adversary attempting to inject privileged SIDs into a user account and being blocked by DC-level controls.",
       "category": "SID History / Privilege Escalation",
       "tags": [
         "active-directory",
@@ -1169,6 +1297,23 @@
           "Misconfigured migration scripts lacking the required SeNetworkLogonRight or replication privileges"
         ]
       },
+      "keyFields": [
+        {
+          "name": "TargetAccountName",
+          "xpath": "EventData/Data[@Name='TargetUserName']",
+          "description": "The account targeted for SID History injection"
+        },
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that attempted the SID History modification"
+        },
+        {
+          "name": "FailureReason",
+          "xpath": "EventData/Data[@Name='FailureReason']",
+          "description": "The reason the SID History modification was denied"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4766"
@@ -1187,7 +1332,7 @@
       "level": "AuditSuccess",
       "title": "An Active Directory replica source naming context was established",
       "summary": "A replication source naming context was established between two domain controllers.",
-      "details": "Generated when a domain controller establishes a new replication source for a naming context (NC). Key fields: DestinationDRA (the DC receiving replication), SourceDRA (the DC providing replication), NamingContext (the AD partition being replicated, e.g., DC=corp,DC=com), and Options. This event fires during legitimate DC-to-DC replication setup and is primarily useful for baselining the normal replication topology. In attack scenarios, a new unexpected source DC in the replication topology may indicate a rogue DC has been joined or that a DCSync source is masquerading as a DC. Correlate with EID 4932/4933 (sync begin/end) to understand replication activity. DC-only event.",
+      "details": "Generated when a domain controller establishes a new replication source for a naming context (NC). This event fires during legitimate DC-to-DC replication setup and is primarily useful for baselining the normal replication topology. A new unexpected source DC in the replication topology may indicate a rogue DC has been joined or that a DCSync source is masquerading as a DC. DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -1241,6 +1386,28 @@
           "Adding a new DC to an existing site triggers legitimate source NC establishment events"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DestinationDRA",
+          "xpath": "EventData/Data[@Name='DestinationDRA']",
+          "description": "The DC receiving replication"
+        },
+        {
+          "name": "SourceDRA",
+          "xpath": "EventData/Data[@Name='SourceDRA']",
+          "description": "The DC providing replication"
+        },
+        {
+          "name": "NamingContext",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "The AD partition being replicated (e.g., DC=corp,DC=com)"
+        },
+        {
+          "name": "Options",
+          "xpath": "EventData/Data[@Name='Options']",
+          "description": "Replication options bitmask"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4928"
@@ -1259,7 +1426,7 @@
       "level": "AuditSuccess",
       "title": "An Active Directory replica source naming context was removed",
       "summary": "A replication source naming context was removed from this domain controller.",
-      "details": "Generated when a replication source naming context is removed — typically during DC decommission, site link changes, or replication topology updates. Key fields: DestinationDRA, SourceDRA, NamingContext, and Options. This event is most useful for detecting cleanup after a DCSync attack or for tracking unauthorized changes to the replication topology. An attacker who established a rogue DC for DCSync purposes may trigger this event when removing it after credential extraction. Sudden removal of replication sources without a corresponding change management record is worth investigating. DC-only event.",
+      "details": "Generated when a replication source naming context is removed, typically during DC decommission, site link changes, or replication topology updates. This event is useful for detecting cleanup after a DCSync attack or for tracking unauthorized changes to the replication topology. An attacker who established a rogue DC for DCSync purposes may trigger this event when removing it after credential extraction. DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -1304,6 +1471,28 @@
           "Replication topology changes due to site link cost adjustments or AD Sites and Services reconfiguration"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DestinationDRA",
+          "xpath": "EventData/Data[@Name='DestinationDRA']",
+          "description": "The DC from which the replication source was removed"
+        },
+        {
+          "name": "SourceDRA",
+          "xpath": "EventData/Data[@Name='SourceDRA']",
+          "description": "The replication source that was removed"
+        },
+        {
+          "name": "NamingContext",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "The naming context that was being replicated"
+        },
+        {
+          "name": "Options",
+          "xpath": "EventData/Data[@Name='Options']",
+          "description": "Replication options bitmask"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4929"
@@ -1322,7 +1511,7 @@
       "level": "Information",
       "title": "Replica source naming context established",
       "summary": "A replication source naming context (NC) was established between two domain controllers.",
-      "details": "Generated when a replication source naming context is established — i.e., when one DC begins replicating a directory partition from another. In normal AD operation this fires during legitimate DC-to-DC replication cycles. Its primary security value is as a DCSync indicator: when an attacker with Replicating Directory Changes and Replicating Directory Changes All permissions (typically DA, EA, or Domain Controllers) calls the GetNCChanges RPC from a non-DC machine, this event fires on the targeted DC. The source address field will contain the attacker's IP address rather than a DC's IP. Key fields: Destination DSA Site Name and Address (should be a known DC), Source DSA Site Name and Address (should also be a known DC — alert if not). In a DCSync attack, the source address will be a workstation or server rather than a DC. Compare the source address against your DC inventory; any GetNCChanges from a non-DC IP is high confidence DCSync. Correlate with Security EID 4662 (operation performed on an object with DS-Replication-Get-Changes) and Security EID 4769 (Kerberos service ticket for DRSUAPI) on the same DC.",
+      "details": "Generated when a replication source naming context is established, i.e., when one DC begins replicating a directory partition from another. In normal AD operation this fires during legitimate DC-to-DC replication cycles. Its primary security value is as a DCSync indicator: when an attacker with Replicating Directory Changes and Replicating Directory Changes All permissions calls the GetNCChanges RPC from a non-DC machine, this event fires on the targeted DC with the source address containing the attacker's IP address rather than a DC's IP.",
       "category": "AD Replication",
       "tags": [
         "active-directory",
@@ -1400,7 +1589,7 @@
       "level": "Information",
       "title": "Replica source naming context removed",
       "summary": "A replication source naming context was removed — the replication session ended.",
-      "details": "Generated when a replication source naming context is removed, marking the end of a replication session. Pair with EID 4928 to bracket complete replication sessions. In DCSync attack investigation, the 4929 event confirms the replication session completed — meaning the attacker successfully retrieved the requested credentials. The absence of a 4929 after a suspicious 4928 (e.g., the session was interrupted by a security tool) is also investigatively relevant. Key fields mirror 4928: Source DSA Address and Naming Context. A DCSync attack pattern shows a 4928 immediately followed by 4929 from the same non-DC source, completing in seconds (full NTLM hash extraction via GetNCChanges is nearly instantaneous). Legitimate inter-DC replication sessions typically last longer and are from known DC addresses.",
+      "details": "Generated when a replication source naming context is removed, marking the end of a replication session. In DCSync attack investigation, the 4929 event confirms the replication session completed, meaning the attacker successfully retrieved the requested credentials. The absence of a 4929 after a suspicious 4928 (e.g., the session was interrupted by a security tool) is also notable. A DCSync attack pattern shows a 4928 immediately followed by 4929 from the same non-DC source, completing in seconds.",
       "category": "AD Replication",
       "tags": [
         "active-directory",
@@ -1466,7 +1655,7 @@
       "level": "AuditSuccess",
       "title": "An Active Directory replica source naming context was modified",
       "summary": "The attributes of a replication source naming context were changed.",
-      "details": "Generated when the parameters of an existing replication source naming context are modified — for example, changes to replication options, schedule, or transport. Key fields: DestinationDRA, SourceDRA, NamingContext, Options (before/after). While typically a benign administrative event, unexpected modifications to replication source attributes may indicate tampering with the replication topology to redirect data flows or suppress audit events. DC-only event.",
+      "details": "Generated when the parameters of an existing replication source naming context are modified, for example changes to replication options, schedule, or transport. While typically a benign administrative event, unexpected modifications to replication source attributes may indicate tampering with the replication topology to redirect data flows or suppress audit events. DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -1511,6 +1700,28 @@
           "Automated configuration management tools modifying replication settings as part of DC build processes"
         ]
       },
+      "keyFields": [
+        {
+          "name": "DestinationDRA",
+          "xpath": "EventData/Data[@Name='DestinationDRA']",
+          "description": "The DC whose replication source was modified"
+        },
+        {
+          "name": "SourceDRA",
+          "xpath": "EventData/Data[@Name='SourceDRA']",
+          "description": "The replication source that was modified"
+        },
+        {
+          "name": "NamingContext",
+          "xpath": "EventData/Data[@Name='NamingContext']",
+          "description": "The naming context affected"
+        },
+        {
+          "name": "Options",
+          "xpath": "EventData/Data[@Name='Options']",
+          "description": "Before and after replication options"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4930"
@@ -1529,7 +1740,7 @@
       "level": "AuditSuccess",
       "title": "Synchronization of a replica of an AD naming context has begun",
       "summary": "A domain controller has started synchronizing a naming context from a source DC.",
-      "details": "Generated at the start of an Active Directory naming context (partition) synchronization between DCs. Key fields: DestinationDRA (the DC receiving the sync), SourceDRA (the DC providing the data), NamingContext (the partition being synced, e.g., the domain NC or Schema NC), and Options. EID 4932 marks the start and EID 4933 marks the end of a sync cycle. In DCSync detection, a successful Mimikatz/Impacket DCSync attack results in GetNCChanges DRSUAPI calls that trigger both 4932 and 4933 on the target DC, with SourceDRA being the attacker's machine (not a registered DC). The combination of SourceDRA that is not a known DC plus a short sync duration (4932 to 4933 gap of seconds) is a high-fidelity DCSync indicator. Correlate with EID 4662 for the replication rights access check. DC-only event.",
+      "details": "Generated at the start of an Active Directory naming context (partition) synchronization between DCs. EID 4932 marks the start and EID 4933 marks the end of a sync cycle. In DCSync detection, a successful Mimikatz/Impacket DCSync attack results in GetNCChanges DRSUAPI calls that trigger both 4932 and 4933 on the target DC, with SourceDRA being the attacker's machine (not a registered DC). DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -1641,7 +1852,7 @@
       "level": "AuditSuccess",
       "title": "Synchronization of a replica of an AD naming context has ended",
       "summary": "A domain controller has completed synchronizing a naming context from a source DC.",
-      "details": "Generated at the completion of an Active Directory naming context synchronization. Key fields: DestinationDRA, SourceDRA, NamingContext, Options, and StatusCode (0 = success). This is the completion counterpart to EID 4932. Together, 4932 and 4933 bracket the full sync cycle — the elapsed time between them and the SourceDRA identity are the critical detection fields for DCSync. A StatusCode of 0 (success) combined with SourceDRA that is not a registered DC confirms a successful DCSync credential extraction. StatusCode non-zero may indicate a failed or blocked attempt. DC-only event.",
+      "details": "Generated at the completion of an Active Directory naming context synchronization. This is the completion counterpart to EID 4932. Together, 4932 and 4933 bracket the full sync cycle. A StatusCode of 0 (success) combined with SourceDRA that is not a registered DC confirms a successful DCSync credential extraction. StatusCode non-zero may indicate a failed or blocked attempt. DC-only event.",
       "category": "Active Directory Replication",
       "tags": [
         "active-directory",
@@ -1748,7 +1959,7 @@
       "level": "AuditSuccess",
       "title": "A directory service object was modified",
       "summary": "An attribute of an Active Directory object was changed.",
-      "details": "Generated when an attribute of an Active Directory object is modified and the object's SACL is configured to audit write operations. Key fields: SubjectAccountName (who made the change), ObjectDN (full distinguished name of the modified object), ObjectClass, AttributeLDAPDisplayName (which attribute was changed), and AttributeValue (new value). This event is extremely powerful for detecting AD object tampering — modifying the adminCount attribute to protect an account from AdminSDHolder cleanup, changing group membership via direct attribute write, modifying the msDS-AllowedToDelegateTo attribute for Kerberos delegation abuse, or altering the nTSecurityDescriptor attribute to change ACLs. Also used to detect AdminSDHolder backdoors (modifying CN=AdminSDHolder permissions) and ACL-based persistence (WriteDACL abuse). Requires SACL configuration and 'Audit Directory Service Changes' policy.",
+      "details": "Generated when an attribute of an Active Directory object is modified and the object's SACL is configured to audit write operations. This event detects AD object tampering: modifying the adminCount attribute, changing group membership via direct attribute write, modifying the msDS-AllowedToDelegateTo attribute for Kerberos delegation abuse, or altering the nTSecurityDescriptor attribute to change ACLs. Also used to detect AdminSDHolder backdoors and ACL-based persistence (WriteDACL abuse). Requires SACL configuration and 'Audit Directory Service Changes' policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -1887,7 +2098,7 @@
       "level": "AuditSuccess",
       "title": "A directory service object was created",
       "summary": "A new Active Directory object was created.",
-      "details": "Generated when a new object is created in Active Directory and the parent container's SACL is configured to audit object creation. Key fields: SubjectAccountName (who created the object), ObjectDN (full distinguished name of the new object), and ObjectClass. This event detects creation of rogue AD objects used for persistence or privilege escalation: new user accounts in privileged OUs, new group policy objects (GPO) linked to sensitive OUs, new service principal names (SPN) on user accounts for Kerberoasting, creation of new computer objects for Kerberos delegation abuse (RBCD), and creation of new GPOs. ObjectClass = groupPolicyContainer, user, or computer in unexpected containers is high priority. Requires SACL configuration on parent containers and 'Audit Directory Service Changes' policy.",
+      "details": "Generated when a new object is created in Active Directory and the parent container's SACL is configured to audit object creation. This event detects creation of rogue AD objects used for persistence or privilege escalation: new user accounts in privileged OUs, new group policy objects (GPO) linked to sensitive OUs, new service principal names (SPN) on user accounts for Kerberoasting, creation of new computer objects for Kerberos delegation abuse (RBCD), and creation of new GPOs. Requires SACL configuration on parent containers and 'Audit Directory Service Changes' policy.",
       "prerequisites": [
         {
           "type": "policy",
@@ -1991,7 +2202,7 @@
       "level": "AuditSuccess",
       "title": "A directory service object was undeleted",
       "summary": "A previously deleted Active Directory object was restored from the AD Recycle Bin.",
-      "details": "Generated when a deleted Active Directory object is restored (undeleted) from the AD Recycle Bin. Key fields: SubjectAccountName (who performed the restore), ObjectDN (the restored object's distinguished name), and ObjectClass. While typically a benign recovery operation, undeleting AD objects can be used by attackers to resurface previously deleted accounts or groups, recovering their original SIDs, group memberships, and potentially privileges — without triggering the standard account creation events (EID 4720). This allows privilege restoration that bypasses monitoring for new account creation. ObjectClass = user or group restorations should be verified against authorized recovery tickets. Requires AD Recycle Bin feature enabled.",
+      "details": "Generated when a deleted Active Directory object is restored (undeleted) from the AD Recycle Bin. While typically a benign recovery operation, undeleting AD objects can be used to resurface previously deleted accounts or groups, recovering their original SIDs, group memberships, and potentially privileges, without triggering the standard account creation events (EID 4720). This allows privilege restoration that bypasses monitoring for new account creation. Requires AD Recycle Bin feature enabled.",
       "category": "Active Directory Object Modification",
       "tags": [
         "active-directory",
@@ -2037,6 +2248,23 @@
           "Disaster recovery procedures restoring deleted objects as part of incident remediation"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that performed the object restore"
+        },
+        {
+          "name": "ObjectDN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "Distinguished name of the restored object"
+        },
+        {
+          "name": "ObjectClass",
+          "xpath": "EventData/Data[@Name='ObjectClass']",
+          "description": "LDAP class of the restored object (user, group, etc.)"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5138"
@@ -2055,7 +2283,7 @@
       "level": "AuditSuccess",
       "title": "A directory service object was moved",
       "summary": "An Active Directory object was moved to a different container or OU.",
-      "details": "Generated when an AD object is moved from one container or organizational unit (OU) to another. Key fields: SubjectAccountName, ObjectDN (new location), OldObjectDN (previous location), and ObjectClass. Moving AD objects can have significant security implications: moving a user or computer out of a security-sensitive OU may cause Group Policy application to change, potentially reducing security controls applied to that object. Adversaries may move accounts out of tightly controlled OUs (e.g., 'Privileged Users' OU with JEA or tiering policies) into less-restricted OUs to weaken applied policies. Moving a computer account to an OU with different Group Policy can be used to disable endpoint security controls. OldObjectDN containing high-security OUs combined with movement to a less-restricted OU is suspicious.",
+      "details": "Generated when an AD object is moved from one container or organizational unit (OU) to another. Moving AD objects can have significant security implications: moving a user or computer out of a security-sensitive OU may cause Group Policy application to change, potentially reducing security controls applied to that object. Moving a computer account to an OU with different Group Policy can change applied endpoint security controls.",
       "category": "Active Directory Object Modification",
       "tags": [
         "active-directory",
@@ -2101,6 +2329,28 @@
           "Automated identity management tools moving objects as part of lifecycle management (e.g., moving terminated users to a disabled accounts OU)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "The account that moved the object"
+        },
+        {
+          "name": "ObjectDN",
+          "xpath": "EventData/Data[@Name='ObjectDN']",
+          "description": "New distinguished name (location) of the moved object"
+        },
+        {
+          "name": "OldObjectDN",
+          "xpath": "EventData/Data[@Name='OldObjectDN']",
+          "description": "Previous distinguished name (location) before the move"
+        },
+        {
+          "name": "ObjectClass",
+          "xpath": "EventData/Data[@Name='ObjectClass']",
+          "description": "LDAP class of the moved object"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5139"
@@ -2119,7 +2369,7 @@
       "level": "AuditSuccess",
       "title": "A directory service object was deleted",
       "summary": "An Active Directory object was deleted.",
-      "details": "Generated when an AD object is deleted (moved to the Deleted Objects container or permanently removed if Recycle Bin is not enabled). Key fields: SubjectAccountName, ObjectDN (the deleted object's DN before deletion), and ObjectClass. Adversaries may delete AD objects as part of anti-forensics (deleting logs, evidence-related accounts) or to cause disruption (deleting computer accounts to break domain authentication). Deletion of security-critical objects — domain controller computer accounts, privileged user accounts, critical GPOs, or group objects — without change tickets is a critical finding. In ransomware scenarios, deletion of backup-related AD accounts or GPOs that manage recovery tools may precede encryption. Requires SACL configuration and 'Audit Directory Service Changes' policy.",
+      "details": "Generated when an AD object is deleted (moved to the Deleted Objects container or permanently removed if Recycle Bin is not enabled). Adversaries may delete AD objects as part of anti-forensics (deleting evidence-related accounts) or to cause disruption (deleting computer accounts to break domain authentication). In ransomware scenarios, deletion of backup-related AD accounts or GPOs that manage recovery tools may precede encryption. Requires SACL configuration and 'Audit Directory Service Changes' policy.",
       "prerequisites": [
         {
           "type": "policy",

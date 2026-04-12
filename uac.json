@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - User Account Control",
-    "version": "1.0.2",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/uac.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "UAC auto-elevation — process elevated without user prompt",
       "summary": "A process was automatically elevated to administrator privileges by UAC without displaying a consent dialog, using the auto-elevation path reserved for signed Windows binaries.",
-      "details": "Logged by the Microsoft-Windows-UAC provider when UAC grants a process administrator privileges via auto-elevation, without displaying a consent prompt. Auto-elevation is reserved for digitally-signed Microsoft binaries in System32 or SysWOW64. Key fields: ExePath (path of the elevated executable), UserName (account under which elevation occurred). The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. Auto-elevation is the mechanism exploited by most documented UAC bypass techniques; binaries elevated from outside System32/SysWOW64 are an immediate IOC.",
+      "details": "Logged by the Microsoft-Windows-UAC provider when UAC grants a process administrator privileges via auto-elevation, without displaying a consent prompt. Auto-elevation is reserved for digitally-signed Microsoft binaries in System32 or SysWOW64. The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. Auto-elevation is the mechanism exploited by most documented UAC bypass techniques.",
       "category": "Privilege Escalation",
       "tags": [
         "uac",
@@ -105,11 +105,13 @@
       "keyFields": [
         {
           "name": "ExePath",
-          "description": "Full path of the auto-elevated executable; non-System32/SysWOW64 paths are the primary IOC"
+          "xpath": "EventData/Data[@Name='ExePath']",
+          "description": "Full path of the auto-elevated executable"
         },
         {
           "name": "UserName",
-          "description": "The user account under which the auto-elevation occurred; service accounts or unexpected users are high-priority"
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "The user account under which the auto-elevation occurred"
         }
       ],
       "detectionRules": [
@@ -131,7 +133,7 @@
           "rule": "title: UAC Auto-Elevation Event\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 4\n    filter_system32:\n        ExePath|startswith:\n            - 'C:\\Windows\\System32\\'\n            - 'C:\\Windows\\SysWOW64\\'\n            - 'C:\\Windows\\WinSxS\\'\n    condition: selection and not filter_system32\nfalsepositives:\n    - Microsoft signed tools outside System32 (rare)\nlevel: high\ntags:\n    - attack.privilege_escalation\n    - attack.defense_evasion\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 5,
@@ -141,7 +143,7 @@
       "level": "Information",
       "title": "UAC consent prompt displayed to user",
       "summary": "UAC displayed an elevation consent dialog to the user for a process requesting administrative privileges, recording whether the user approved or denied.",
-      "details": "Logged when the UAC consent UI (consent.exe) presents an elevation prompt to the user. Records the executable requesting elevation, the requesting user, the privilege requested, and the user's response. Key fields: ExePath (binary requesting elevation), UserName (user prompted), Decision (approved or denied). The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. Approved elevations for executables in user-writable locations (Temp, AppData) are the primary security signal; denied elevations also record the attempt and binary path.",
+      "details": "Logged when the UAC consent UI (consent.exe) presents an elevation prompt to the user. Records the executable requesting elevation, the requesting user, the privilege requested, and the user's response (approved or denied). The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event.",
       "category": "Privilege Escalation",
       "tags": [
         "uac",
@@ -196,7 +198,7 @@
           "Executable path in the consent prompt — installers in %TEMP%, %APPDATA%, or user-writable directories are suspicious; expected elevation sources are %ProgramFiles% or %SystemRoot%",
           "User response — an approved prompt for a suspicious binary is higher priority than a denied one, but both indicate the elevation attempt occurred",
           "Frequency — more than 2-3 EID 5 events per day for a non-administrative user is anomalous on a managed workstation",
-          "Correlation with Security 4688 / Sysmon 1 — confirm what process started immediately after an approved consent (EID 5 approved → elevated process creation should follow within seconds)"
+          "Correlation with Security 4688 / Sysmon 1 — confirm what process started immediately after an approved consent (EID 5 approved followed by elevated process creation should follow within seconds)"
         ],
         "commonFalsePositives": [
           "Software installation and updates initiated by users (legitimate installers triggering UAC prompts)",
@@ -215,15 +217,18 @@
       "keyFields": [
         {
           "name": "ExePath",
-          "description": "Path of the executable requesting elevation; the primary triage field — binaries in user-writable directories are high-priority"
+          "xpath": "EventData/Data[@Name='ExePath']",
+          "description": "Path of the executable requesting elevation"
         },
         {
           "name": "UserName",
-          "description": "The user who was prompted; non-admin users receiving elevation prompts for non-installer binaries warrant investigation"
+          "xpath": "EventData/Data[@Name='UserName']",
+          "description": "The user who was prompted for elevation consent"
         },
         {
           "name": "Decision",
-          "description": "Whether the user approved or denied the elevation prompt; approved elevations for suspicious binaries are immediately actionable"
+          "xpath": "EventData/Data[@Name='Decision']",
+          "description": "Whether the user approved or denied the elevation prompt"
         }
       ],
       "detectionRules": [
@@ -239,7 +244,7 @@
           "rule": "title: UAC Consent Prompt Presented to User\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 5\n    filter_programfiles:\n        ExePath|startswith:\n            - 'C:\\Program Files\\'\n            - 'C:\\Program Files (x86)\\'\n            - 'C:\\Windows\\'\n    condition: selection and not filter_programfiles\nfalsepositives:\n    - User-initiated software installations from Downloads or Desktop\n    - IT-managed tools deployed to non-standard paths\nlevel: medium\ntags:\n    - attack.privilege_escalation\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 33,
@@ -249,7 +254,7 @@
       "level": "Information",
       "title": "Application Information service started",
       "summary": "The Application Information (AIS) service, which underpins UAC elevation prompts and token filtering, has started successfully.",
-      "details": "Logged when the Application Information service (AIS / AppInfo) starts successfully. The AIS is the Windows service responsible for processing UAC elevation requests, running consent.exe for interactive prompts, and creating elevated tokens for approved processes. Key field: Message (confirms AIS startup; no additional structured fields). The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. EID 33 is expected once per boot; a subsequent occurrence after EID 34 (service stop) during the same session indicates an unexpected service restart.",
+      "details": "Logged when the Application Information service (AIS / AppInfo) starts successfully. The AIS is the Windows service responsible for processing UAC elevation requests, running consent.exe for interactive prompts, and creating elevated tokens for approved processes. The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. EID 33 is expected once per boot; a subsequent occurrence after EID 34 (service stop) during the same session indicates an unexpected service restart.",
       "category": "Defense Evasion",
       "tags": [
         "uac",
@@ -324,6 +329,7 @@
       "keyFields": [
         {
           "name": "Message",
+          "xpath": "EventData/Data[@Name='Message']",
           "description": "Confirms AIS startup; security value is in timing and recurrence rather than event content"
         }
       ],
@@ -340,7 +346,7 @@
           "rule": "title: Application Information Service Started\nstatus: informational\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 33\n    condition: selection\nfalsepositives:\n    - Normal system boot\nlevel: informational\ntags:\n    - attack.defense_evasion\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 34,
@@ -350,7 +356,7 @@
       "level": "Information",
       "title": "Application Information service stopped",
       "summary": "The Application Information (AIS) service, which underpins UAC elevation functionality, has stopped — an unexpected stop outside of system shutdown may indicate UAC enforcement disruption.",
-      "details": "Logged when the Application Information service (AIS / AppInfo) stops. Under normal conditions, the AIS runs continuously from boot to shutdown and does not stop except during system restart or explicit administrator action. Key field: Message (confirms AIS shutdown; no additional structured fields). The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. EID 34 is expected only at system shutdown (followed by System 6006/1074); a mid-session occurrence without a shutdown event indicates the service was deliberately stopped.",
+      "details": "Logged when the Application Information service (AIS / AppInfo) stops. Under normal conditions, the AIS runs continuously from boot to shutdown and does not stop except during system restart or explicit administrator action. The Microsoft-Windows-UAC/Operational channel must be enabled to collect this event. EID 34 is expected only at system shutdown (followed by System 6006/1074); a mid-session occurrence without a shutdown event indicates the service was deliberately stopped.",
       "category": "Defense Evasion",
       "tags": [
         "uac",
@@ -436,7 +442,8 @@
       "keyFields": [
         {
           "name": "Message",
-          "description": "Confirms AIS shutdown; security value is in timing — mid-session occurrence is an IOC"
+          "xpath": "EventData/Data[@Name='Message']",
+          "description": "Confirms AIS shutdown; security value is in timing — mid-session occurrence is notable"
         }
       ],
       "detectionRules": [
@@ -458,7 +465,7 @@
           "rule": "title: Application Information Service Stopped\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 34\n    condition: selection\nfalsepositives:\n    - Normal system shutdown sequence\nlevel: high\ntags:\n    - attack.defense_evasion\n    - attack.privilege_escalation\n    - attack.t1548.002\n    - attack.t1562.001"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

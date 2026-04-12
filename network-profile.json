@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Network Profile",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/network-profile.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Network connected — category assigned",
       "summary": "The machine connected to a network and Windows assigned it a network location category.",
-      "details": "Generated when Windows connects to a network and assigns it a location category. Key fields: Name (the network name), Category (0 = Public, 1 = Private, 2 = Domain), Description, and SubjectUserName. The Category assignment is critical from a security perspective because it determines which Windows Firewall profile is applied: Domain profile (Category 2) is typically most permissive for corporate tools; Public profile (Category 0) is most restrictive; Private profile (Category 1) is intermediate. Adversaries can manipulate the network category to force a switch away from the Domain profile, bypassing stricter domain-enforced firewall rules. A domain-joined machine assigned Category 0 (Public) instead of Category 2 (Domain) indicates it cannot reach a domain controller — potentially due to a network segmentation change, VPN misconfiguration, or deliberate manipulation. Category changes should be correlated with Firewall EID 2052 (profile switch) and DNS/DHCP events to understand the network state change.",
+      "details": "Generated when Windows connects to a network and assigns it a location category (0 = Public, 1 = Private, 2 = Domain). The category determines which Windows Firewall profile is applied: Domain profile (Category 2) is typically most permissive, Public (Category 0) is most restrictive, and Private (Category 1) is intermediate. A domain-joined machine receiving Category 0 instead of Category 2 indicates it cannot reach a domain controller, which may result from network segmentation changes, VPN misconfiguration, or deliberate manipulation.",
       "category": "Network Configuration",
       "tags": [
         "network",
@@ -66,7 +66,8 @@
           "Category = 0 (Public) on a domain-joined machine indicates it cannot see a DC — verify network connectivity and investigate if intentional isolation is not expected",
           "Category changes from 2 (Domain) to 0 (Public) on a DC-joined host during active use may indicate network coercion (e.g., LLMNR poisoning causing domain detection failure)",
           "Name field showing an unknown network name on a managed endpoint warrants SSID/DNS investigation",
-          "Correlate with Firewall EID 2052 to confirm the firewall profile switched in lockstep with the category change"
+          "Correlate with Firewall EID 2052 to confirm the firewall profile switched in lockstep with the category change",
+          "Correlate with DNS and DHCP events to understand the full network state change"
         ],
         "commonFalsePositives": [
           "Domain-joined laptops connecting to home or hotel networks that receive Public category legitimately",
@@ -92,6 +93,11 @@
           "name": "Category",
           "xpath": "EventData/Data[@Name='Category']",
           "description": "0 = Public (restrictive), 1 = Private (moderate), 2 = Domain (permissive); unexpected Public on domain-joined machine is high interest"
+        },
+        {
+          "name": "Description",
+          "xpath": "EventData/Data[@Name='Description']",
+          "description": "Description of the connected network"
         },
         {
           "name": "SubjectUserName",
@@ -122,7 +128,7 @@
       "level": "Information",
       "title": "Network disconnected",
       "summary": "The machine disconnected from a network and its associated profile was removed.",
-      "details": "Generated when Windows disconnects from a network. Key fields: Name (the network name) and SubjectUserName. From a forensic perspective, this event brackets the end of a network session. Unexpected disconnections from corporate networks during business hours — especially followed immediately by connection to an unknown network (EID 10000) — may indicate network spoofing, rogue DHCP, or a physical cable swap. In lateral movement scenarios, an attacker on a compromised endpoint may disconnect it from the corporate network to break monitoring or telemetry before executing destructive actions. Correlate with WLAN EID 8003 for the wireless layer disconnection (if applicable), and with Firewall EID 2052 for the resulting firewall profile change.",
+      "details": "Generated when Windows disconnects from a network and its associated profile is removed. This event brackets the end of a network session. Unexpected disconnections from corporate networks during business hours, especially when followed immediately by a connection to an unknown network (EID 10000), may indicate network spoofing, rogue DHCP, or a physical cable swap.",
       "category": "Network Configuration",
       "tags": [
         "network",
@@ -159,7 +165,9 @@
         "investigationPivots": [
           "Unexpected disconnection from a corporate domain network during active business hours is the primary pivot",
           "10001 immediately followed by a 10000 for an unknown network indicates the interface was reconnected to a different (possibly rogue) network",
-          "Correlate with Firewall EID 2052 — if the firewall profile switches from Domain to Public simultaneously, security posture of the endpoint degraded"
+          "Correlate with Firewall EID 2052 — if the firewall profile switches from Domain to Public simultaneously, security posture of the endpoint degraded",
+          "Correlate with WLAN EID 8003 for the wireless layer disconnection if applicable",
+          "An attacker on a compromised endpoint may disconnect it from the corporate network to break monitoring or telemetry before executing destructive actions"
         ],
         "commonFalsePositives": [
           "User disconnecting a network cable or disabling Wi-Fi",
@@ -180,6 +188,11 @@
           "name": "Name",
           "xpath": "EventData/Data[@Name='Name']",
           "description": "Name of the network disconnected from; pair with subsequent 10000 to detect network switching"
+        },
+        {
+          "name": "SubjectUserName",
+          "xpath": "EventData/Data[@Name='SubjectUserName']",
+          "description": "User associated with the disconnection event"
         }
       ],
       "lastReviewed": "2026-04-10"

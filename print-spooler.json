@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Print Spooler",
-    "version": "1.2.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/print-spooler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Print spooler service stopped",
       "summary": "The Windows Print Spooler service was stopped.",
-      "details": "Generated when the Windows Print Spooler service (spoolsv.exe) stops. The spooler is a SYSTEM-level service, and stopping it is a common attacker action in two contexts: (1) as a defensive measure before attempting a PrintNightmare exploit that requires the service to be in a specific state, or (2) as a disruption tactic in ransomware attacks where halting the spooler prevents detection via printer-based canaries and removes persistence mechanisms that may rely on print processor DLLs. Unexpected stops of the spooler outside of maintenance windows should be investigated. Correlate with System log EID 7036 (service stopped) for additional process context and with Security log EID 4688 to identify what process stopped the service.",
+      "details": "Generated when the Windows Print Spooler service (spoolsv.exe) stops. The spooler is a SYSTEM-level service, and stopping it is a common attacker action in two contexts: (1) as a step before attempting a PrintNightmare exploit that requires the service to be in a specific state, or (2) as a disruption tactic in ransomware attacks where halting the spooler prevents detection via printer-based canaries and removes persistence mechanisms that may rely on print processor DLLs.",
       "category": "Print Spooler",
       "tags": [
         "print-spooler",
@@ -43,6 +43,10 @@
         {
           "id": 7036,
           "log": "System"
+        },
+        {
+          "id": 4688,
+          "log": "Security"
         }
       ],
       "mitreAttack": [
@@ -71,7 +75,8 @@
         "investigationPivots": [
           "Correlate with Security log EID 4688 or Sysmon EID 1 to identify what process stopped the spooler",
           "Check System log EID 7036 for the service control manager record of the stop",
-          "A spooler stop immediately followed by a start and EID 316 (driver install) is a strong PrintNightmare sequence indicator"
+          "A spooler stop immediately followed by a start and EID 316 (driver install) is a strong PrintNightmare sequence indicator",
+          "Unexpected stops outside of maintenance windows are anomalous"
         ],
         "commonFalsePositives": [
           "Authorized maintenance stopping the spooler on servers where printing is not required",
@@ -86,7 +91,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 307,
@@ -96,7 +101,7 @@
       "level": "Information",
       "title": "Document printed",
       "summary": "A document was sent to a printer and spooled.",
-      "details": "Generated when a document is submitted to the print spooler. Key fields: Param1 (document name), Param2 (UserName who printed), Param3 (ClientMachine — the machine that sent the job), Param4 (printer name), and Param5 (printer port/path). In DFIR contexts this event is useful for detecting data staging and exfiltration via printing: an unusual document name printed by an unexpected user to a network printer or virtual printer (PDF/XPS) immediately before an incident may indicate deliberate data extraction. The ClientMachine field reveals whether the job was submitted locally or from a remote host, which is significant when investigating unauthorized access to shared printers.",
+      "details": "Generated when a document is submitted to the print spooler. Records the document name, submitting user, source machine, printer name, and printer port/path.",
       "category": "Print Spooler",
       "tags": [
         "print-spooler",
@@ -141,7 +146,34 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "keyFields": [
+        {
+          "name": "Param1",
+          "xpath": "EventData/Data[@Name='Param1']",
+          "description": "Document name submitted for printing"
+        },
+        {
+          "name": "Param2",
+          "xpath": "EventData/Data[@Name='Param2']",
+          "description": "User who submitted the print job"
+        },
+        {
+          "name": "Param3",
+          "xpath": "EventData/Data[@Name='Param3']",
+          "description": "Client machine that sent the print job"
+        },
+        {
+          "name": "Param4",
+          "xpath": "EventData/Data[@Name='Param4']",
+          "description": "Printer name the job was sent to"
+        },
+        {
+          "name": "Param5",
+          "xpath": "EventData/Data[@Name='Param5']",
+          "description": "Printer port or path"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 316,
@@ -151,7 +183,7 @@
       "level": "Information",
       "title": "New printer driver installed",
       "summary": "A printer driver was installed or loaded by the Print Spooler.",
-      "details": "Generated when a printer driver is installed or loaded by the spooler service. Key fields: DriverName, Environment (processor architecture), and Version. This is the primary detection event for PrintNightmare (CVE-2021-1675 / CVE-2021-34527) and related Print Spooler exploitation techniques. The exploit works by calling AddPrinterDriverEx() to load a malicious DLL as a printer driver, executing it in the context of SYSTEM. High-fidelity indicators: DriverName that is not a known printer vendor, driver loaded from a user-writable path (C:\\Windows\\System32\\spool\\drivers\\x64\\3\\... followed by a newly dropped DLL), or driver installation on a server with no printing role. Correlate with Sysmon EID 7 (image load) at the same timestamp to observe the DLL load event.",
+      "details": "Generated when a printer driver is installed or loaded by the spooler service. This is the primary detection event for PrintNightmare (CVE-2021-1675 / CVE-2021-34527) and related Print Spooler exploitation techniques. The exploit works by calling AddPrinterDriverEx() to load a malicious DLL as a printer driver, executing it in the context of SYSTEM.",
       "category": "Print Spooler",
       "tags": [
         "print-spooler",
@@ -224,7 +256,24 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-10"
+      "keyFields": [
+        {
+          "name": "DriverName",
+          "xpath": "EventData/Data[@Name='DriverName']",
+          "description": "Name of the printer driver installed or loaded"
+        },
+        {
+          "name": "Environment",
+          "xpath": "EventData/Data[@Name='Environment']",
+          "description": "Processor architecture of the driver (e.g., Windows x64)"
+        },
+        {
+          "name": "Version",
+          "xpath": "EventData/Data[@Name='Version']",
+          "description": "Driver version number"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     },
     {
       "id": 808,
@@ -234,7 +283,7 @@
       "level": "Error",
       "title": "Print spooler failed to install printer driver",
       "summary": "The Print Spooler failed to install a printer driver from a driver package.",
-      "details": "Generated when the Print Spooler service fails to install or load a printer driver from a package. Key fields: PrinterDriverName, Status (HRESULT error code), and the path being referenced. This event may appear during a failed or partially successful PrintNightmare exploit attempt where the driver payload could not be loaded (e.g., the target DLL did not exist, was blocked by AV, or the exploit path was invalid). The absence of a paired EID 316 (successful driver install) when EID 808 appears can confirm the attempt failed. Repeated EID 808 events targeting unusual paths or with non-standard driver names indicate exploit activity even when the attack did not succeed.",
+      "details": "Generated when the Print Spooler service fails to install or load a printer driver from a package. This event may appear during a failed or partially successful PrintNightmare exploit attempt where the driver payload could not be loaded (e.g., the target DLL did not exist, was blocked by AV, or the exploit path was invalid). The absence of a paired EID 316 (successful driver install) when EID 808 appears can confirm the attempt failed.",
       "category": "Print Spooler",
       "tags": [
         "print-spooler",
@@ -265,7 +314,8 @@
         "investigationPivots": [
           "A cluster of EID 808 events followed by a successful EID 316 indicates a PrintNightmare exploit sequence",
           "Check the driver path referenced in the failure — attacker-controlled UNC paths (\\\\attacker\\share\\malicious.dll) are high fidelity",
-          "Correlate with network connection events to detect outbound SMB connections to unusual hosts around the same time"
+          "Correlate with network connection events to detect outbound SMB connections to unusual hosts around the same time",
+          "Repeated EID 808 events targeting unusual paths or with non-standard driver names indicate exploit activity even when the attack did not succeed"
         ],
         "commonFalsePositives": [
           "Failed driver installation due to missing or incompatible driver files during legitimate printer setup",
@@ -280,7 +330,19 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "keyFields": [
+        {
+          "name": "PrinterDriverName",
+          "xpath": "EventData/Data[@Name='PrinterDriverName']",
+          "description": "Name of the printer driver that failed to install"
+        },
+        {
+          "name": "Status",
+          "xpath": "EventData/Data[@Name='Status']",
+          "description": "HRESULT error code indicating why the driver installation failed"
+        }
+      ],
+      "lastReviewed": "2026-04-12"
     }
   ]
 }

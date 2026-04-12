@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "1.9.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.10.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Engine Lifecycle State Changed: Started",
       "summary": "PowerShell engine started.",
-      "details": "Generated when a PowerShell engine session starts. The HostApplication field is the most valuable field — it records the full command line used to invoke PowerShell, including any encoded arguments. Suspicious values include base64-encoded -EncodedCommand strings, unusual host processes (not powershell.exe or powershell_ise.exe), or invocation from scripting engines. Correlate with 403 to track session duration.",
+      "details": "Generated when a PowerShell engine session starts. The HostApplication field records the full command line used to invoke PowerShell, including any encoded arguments.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -64,6 +64,23 @@
           "Scheduled tasks and software agents invoking PowerShell for automation"
         ]
       },
+      "keyFields": [
+        {
+          "name": "HostApplication",
+          "xpath": "EventData/Data[@Name='HostApplication']",
+          "description": "Full command line used to invoke PowerShell, including arguments and encoded commands"
+        },
+        {
+          "name": "HostName",
+          "xpath": "EventData/Data[@Name='HostName']",
+          "description": "Name of the PowerShell host process (e.g., ConsoleHost, ServerRemoteHost)"
+        },
+        {
+          "name": "EngineVersion",
+          "xpath": "EventData/Data[@Name='EngineVersion']",
+          "description": "Version of the PowerShell engine that started"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -82,7 +99,7 @@
       "level": "Information",
       "title": "Engine Lifecycle State Changed: Stopped",
       "summary": "PowerShell engine stopped.",
-      "details": "Generated when a PowerShell engine session ends. Pair with event 400 to calculate session duration. Abnormally short sessions may indicate one-liner or fileless execution. Absence of a matching 403 after 400 may indicate a crash or forceful termination.",
+      "details": "Generated when a PowerShell engine session ends. Records the same lifecycle metadata as EID 400 for the session that is stopping.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -115,6 +132,18 @@
           "Any normal PowerShell session ending"
         ]
       },
+      "keyFields": [
+        {
+          "name": "HostApplication",
+          "xpath": "EventData/Data[@Name='HostApplication']",
+          "description": "Full command line of the PowerShell session that ended"
+        },
+        {
+          "name": "HostName",
+          "xpath": "EventData/Data[@Name='HostName']",
+          "description": "Name of the PowerShell host process that stopped"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -133,7 +162,7 @@
       "level": "Information",
       "title": "Command Started",
       "summary": "PowerShell command execution started.",
-      "details": "Generated at the start of each command execution in the classic Windows PowerShell log. Records the command name in the CommandLine field. High volume in normal operation — most useful when correlated with 4103 or 4104 for context on specific command invocations. Pairs with 501 to track command duration.",
+      "details": "Generated at the start of each command execution in the classic Windows PowerShell log. Records the command name in the CommandLine field. High volume in normal operation.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -171,6 +200,13 @@
           "High-volume event during any PowerShell session — filter to specific command names of interest"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CommandLine",
+          "xpath": "EventData/Data[@Name='CommandLine']",
+          "description": "Name of the command being executed"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -189,7 +225,7 @@
       "level": "Information",
       "title": "Command Stopped",
       "summary": "PowerShell command execution completed.",
-      "details": "Generated when a command execution ends in the classic Windows PowerShell log. Pairs with 500 to track command lifecycle. On its own, limited investigative value — use in conjunction with 4103 or 4104 to reconstruct full execution context.",
+      "details": "Generated when a command execution ends in the classic Windows PowerShell log. Records the completion of the command started in EID 500.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -223,6 +259,13 @@
           "Any normal command completion during a PowerShell session"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CommandLine",
+          "xpath": "EventData/Data[@Name='CommandLine']",
+          "description": "Name of the command that completed execution"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -241,7 +284,7 @@
       "level": "Information",
       "title": "Provider Lifecycle State Changed: Started",
       "summary": "PowerShell provider started.",
-      "details": "Generated when a PowerShell provider is loaded into the session. The ProviderName field identifies the provider. Monitor for WSMan provider (indicates PowerShell remoting), Registry provider (registry manipulation), Certificate provider (certificate store access), and FileSystem provider. Unexpected providers in non-interactive sessions may indicate attacker tradecraft.",
+      "details": "Generated when a PowerShell provider is loaded into the session. The ProviderName field identifies which provider was loaded (e.g., WSMan, Registry, Certificate, FileSystem).",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -275,6 +318,13 @@
           "All standard providers (FileSystem, Registry, Certificate, etc.) load during normal interactive PowerShell sessions"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ProviderName",
+          "xpath": "EventData/Data[@Name='ProviderName']",
+          "description": "Name of the PowerShell provider that was loaded into the session"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -293,7 +343,7 @@
       "level": "Information",
       "title": "Pipeline Execution Details",
       "summary": "Classic-log pipeline execution details recorded.",
-      "details": "Generated in the classic Windows PowerShell log with pipeline execution details including command name and pipeline ID. Lower fidelity than the operational log event 4103 — does not capture full parameters or script content. Present on older systems where the operational log or module logging is not configured. Superseded by 4103 on modern, properly configured systems.",
+      "details": "Generated in the classic Windows PowerShell log with pipeline execution details including command name and pipeline ID. Lower fidelity than EID 4103 as it does not capture full parameters or script content. Present on older systems where the operational log or module logging is not configured.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -327,6 +377,18 @@
           "Any pipeline execution in a PowerShell session"
         ]
       },
+      "keyFields": [
+        {
+          "name": "CommandLine",
+          "xpath": "EventData/Data[@Name='CommandLine']",
+          "description": "Name of the command executed in the pipeline"
+        },
+        {
+          "name": "PipelineId",
+          "xpath": "EventData/Data[@Name='PipelineId']",
+          "description": "Identifier of the pipeline execution"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_eventlogs"
@@ -345,7 +407,7 @@
       "level": "Warning",
       "title": "PowerShell Error",
       "summary": "Error during PowerShell pipeline execution.",
-      "details": "Generated when an error occurs during pipeline execution in the operational log. Error messages in the ErrorRecord field may reveal attack artifacts — failed execution attempts, blocked cmdlets, missing modules, or access denied errors. Clusters of 4100 events targeting specific commands (e.g., Invoke-Mimikatz, Add-MpPreference) can indicate active attack or defense evasion failure. Correlate with 4104 for the script that triggered the error.",
+      "details": "Generated when an error occurs during pipeline execution in the operational log. The ErrorRecord field captures the error message, including command names, module names, and file paths involved in the failure.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -381,6 +443,18 @@
           "Interactive users running commands with incorrect syntax"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ErrorRecord",
+          "xpath": "EventData/Data[@Name='ErrorRecord']",
+          "description": "Full error message from the failed pipeline execution"
+        },
+        {
+          "name": "ScriptBlockId",
+          "xpath": "EventData/Data[@Name='ScriptBlockId']",
+          "description": "GUID linking to the EID 4104 script block that generated the error"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
@@ -399,7 +473,7 @@
       "level": "Information",
       "title": "Module Logging",
       "summary": "Module logging captured full pipeline execution with parameters.",
-      "details": "Generated when module logging is enabled via GPO (Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell > Turn on Module Logging). Records the full command with all parameter values, pipeline input/output, and the user context. Higher fidelity than classic log event 800. Required GPO setting per module or wildcard (*). Correlate with 4104 for script block content.",
+      "details": "Generated when module logging is enabled via GPO (Computer Configuration > Administrative Templates > Windows Components > Windows PowerShell > Turn on Module Logging). Records the full command with all parameter values, pipeline input/output, and the user context. Higher fidelity than classic log EID 800. Requires GPO setting per module or wildcard (*).",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -504,7 +578,7 @@
       "level": "Information",
       "title": "Script Block Logging",
       "summary": "Full script block content captured.",
-      "details": "The highest-value PowerShell event. Generated when script block logging is enabled (GPO: Turn on PowerShell Script Block Logging). Captures the full text of every compiled script block after deobfuscation — meaning even obfuscated or encoded scripts appear in cleartext here. Level 3 (Warning) is generated automatically without any GPO requirement when AMSI flags a script block as suspicious. Large scripts are split across multiple sequential events sharing a MessageNumber/MessageTotal field. Pivot on ScriptBlockText for IOC matching, SubjectUserName, and HostApplication.",
+      "details": "Generated when script block logging is enabled (GPO: Turn on PowerShell Script Block Logging). Captures the full text of every compiled script block after deobfuscation, meaning even obfuscated or encoded scripts appear in cleartext. Level 3 (Warning) is generated automatically without GPO when AMSI flags a script block as suspicious. Large scripts are split across multiple sequential events sharing a MessageNumber/MessageTotal field.",
       "prerequisites": [
         {
           "type": "policy",
@@ -626,7 +700,7 @@
       "level": "Information",
       "title": "Started Invocation",
       "summary": "Script block invocation started.",
-      "details": "Generated at the start of a script block invocation. Pairs with 4106 to bracket execution time. The ScriptBlockId field links back to the 4104 event that captured the script content. Useful for correlating execution timing with other log sources (e.g., network, process creation).",
+      "details": "Generated at the start of a script block invocation. The ScriptBlockId field links back to the EID 4104 event that captured the script content.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -664,6 +738,13 @@
           "Any legitimate script block invocation"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ScriptBlockId",
+          "xpath": "EventData/Data[@Name='ScriptBlockId']",
+          "description": "GUID linking to the EID 4104 event containing the script block content"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
@@ -682,7 +763,7 @@
       "level": "Information",
       "title": "Completed Invocation",
       "summary": "Script block invocation completed.",
-      "details": "Generated when a script block invocation ends. Pairs with 4105 to track execution duration. The ScriptBlockId field links back to the 4104 event that captured the script content. Absence of a matching 4106 after 4105 may indicate a crash, forced termination, or runspace hijack.",
+      "details": "Generated when a script block invocation ends. The ScriptBlockId field links back to the EID 4104 event that captured the script content.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -720,6 +801,13 @@
           "Any legitimate script block completing normally"
         ]
       },
+      "keyFields": [
+        {
+          "name": "ScriptBlockId",
+          "xpath": "EventData/Data[@Name='ScriptBlockId']",
+          "description": "GUID linking to the EID 4104 event containing the script block content"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows"
@@ -738,7 +826,7 @@
       "level": "Information",
       "title": "PowerShell console host is starting up",
       "summary": "An interactive PowerShell console (ConsoleHost) session is initialising.",
-      "details": "Generated at the start of an interactive PowerShell console session (powershell.exe or pwsh.exe launched interactively). This event distinguishes interactive console sessions from non-interactive script execution — a 40961 event is expected for a human-operated terminal but should not appear for scripted automation, scheduled tasks, or WinRM-based remoting (which use the 'ServerRemoteHost' host rather than 'ConsoleHost'). The absence of 40961/40962 lifecycle events alongside 4103/4104 execution events indicates the PowerShell execution is non-interactive (automated or remote). Conversely, unexpected 40961 events from a service account, during off-hours, or on a server that has no expected interactive use indicate a human operator is present — potentially a threat actor. On servers, interactive PowerShell console sessions are high-fidelity indicators of hands-on keyboard activity. Correlate with Security EID 4688 (process creation) for powershell.exe to confirm the parent process context.",
+      "details": "Generated at the start of an interactive PowerShell console session (powershell.exe or pwsh.exe launched interactively). This event distinguishes interactive console sessions from non-interactive script execution. A 40961 event fires for human-operated terminals but not for scripted automation, scheduled tasks, or WinRM-based remoting (which use ServerRemoteHost rather than ConsoleHost). The absence of 40961/40962 lifecycle events alongside 4103/4104 execution events indicates non-interactive (automated or remote) execution.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -803,7 +891,7 @@
       "level": "Information",
       "title": "PowerShell console host is ready for user input",
       "summary": "An interactive PowerShell console (ConsoleHost) session is fully initialised and awaiting input.",
-      "details": "Generated when an interactive PowerShell ConsoleHost session completes initialisation and presents the prompt to the user. This event follows EID 40961 and confirms the interactive session is fully ready. Pair with EID 40961 to bracket the console session lifecycle, and with the classic Windows PowerShell log EID 403 to confirm when the session ended. The primary security value of this event is confirming hands-on keyboard activity: a 40962 event combined with subsequent 4103/4104 execution events and Sysmon network connections builds a complete picture of an interactive attacker session. The distinction between 40961 (starting) and 40962 (ready) is subtle but allows calculation of console initialisation time — unusually fast initialisation (near-simultaneous 40961 and 40962) can indicate a headless automation framework invoking PowerShell in a way that mimics interactive mode.",
+      "details": "Generated when an interactive PowerShell ConsoleHost session completes initialisation and presents the prompt to the user. This event follows EID 40961 and confirms the interactive session is fully ready. The distinction between 40961 (starting) and 40962 (ready) allows calculation of console initialisation time.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",
@@ -865,7 +953,7 @@
       "level": "Information",
       "title": "PowerShell is authenticating to remote server",
       "summary": "PowerShell is performing a WSMan/WinRM authentication handshake to a remote host.",
-      "details": "Generated when Windows PowerShell authenticates to a remote server via WSMan (WinRM/PSRemoting). Key fields: Server (the remote host address or name), AuthMechanism (the authentication method — Kerberos, NTLM, Negotiate, Basic, CredSSP), and UserName (the account used). This event fires on the initiating (client) machine and records outbound PowerShell remoting connections before session establishment. Security relevance: (1) Lateral movement via PSRemoting generates this event — an attacker using Enter-PSSession, Invoke-Command, or PSRemoting-based tools to move laterally will produce 53504 on the source host. (2) The AuthMechanism field exposes credential handling: Basic sends credentials in cleartext and should never appear in production; CredSSP delegates full credentials to the remote host and enables credential theft from the remote host. (3) NTLM-based PSRemoting (AuthMechanism = NTLM) does not require Kerberos but is vulnerable to relay attacks — flag NTLM remoting to unusual targets. Correlate with WinRM EID 6 on the destination host (WSMan connection established) for the server-side view.",
+      "details": "Generated when Windows PowerShell authenticates to a remote server via WSMan (WinRM/PSRemoting). This event fires on the initiating (client) machine and records outbound PowerShell remoting connections before session establishment. The Server field records the remote host, AuthMechanism records the authentication method (Kerberos, NTLM, Negotiate, Basic, CredSSP), and UserName records the account used.",
       "category": "PowerShell Execution",
       "tags": [
         "powershell",

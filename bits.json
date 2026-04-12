@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - BITS Client",
-    "version": "1.5.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.6.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/bits.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "BITS job created",
       "summary": "A new BITS transfer job was created.",
-      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Key fields: jobTitle, jobId, jobOwner (the account that created the job), and ProcessPath (the executable that called the BITS API). ProcessPath is the primary forensic pivot — legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBAS abuse — bitsadmin.exe is a LOLBin (binary), while PowerShell's Start-BitsTransfer and wscript.exe represent the Scripts category of LOLBAS. Correlate jobId with EID 59 and 60 to track what was transferred.",
+      "details": "Generated when a new Background Intelligent Transfer Service (BITS) job is created. Legitimate BITS consumers include svchost.exe, Windows Update components, and known software updaters. Creation by unusual processes such as cmd.exe, powershell.exe, wscript.exe, or from user-writable paths is a strong indicator of LOLBAS abuse -- bitsadmin.exe is a LOLBin (binary), while PowerShell's Start-BitsTransfer and wscript.exe represent the Scripts category of LOLBAS.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
@@ -71,15 +71,36 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "ProcessPath identifies what created the job — flag anything outside of known system or software update processes",
-          "Correlate jobId with EID 59 to identify the download URL",
-          "jobOwner reveals the account context under which the transfer was initiated"
+          "Correlate jobId with EID 59 to identify the download URL and EID 60 to track transfer completion",
+          "Flag ProcessPath values outside of known system or software update processes"
         ],
         "commonFalsePositives": [
           "Windows Update and Microsoft software updaters",
           "Third-party software using BITS for legitimate background downloads"
         ]
       },
+      "keyFields": [
+        {
+          "name": "jobTitle",
+          "xpath": "EventData/Data[@Name='jobTitle']",
+          "description": "Name assigned to the BITS job"
+        },
+        {
+          "name": "jobId",
+          "xpath": "EventData/Data[@Name='jobId']",
+          "description": "Unique identifier for the BITS job; use to correlate across EID 59 and 60"
+        },
+        {
+          "name": "jobOwner",
+          "xpath": "EventData/Data[@Name='jobOwner']",
+          "description": "Account that created the job"
+        },
+        {
+          "name": "ProcessPath",
+          "xpath": "EventData/Data[@Name='ProcessPath']",
+          "description": "Executable that called the BITS API"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
@@ -98,7 +119,7 @@
       "level": "Information",
       "title": "BITS job modified",
       "summary": "An existing BITS transfer job was modified.",
-      "details": "Generated when an existing BITS job is modified — for example, when a file is added to or removed from the job, the priority changes, or the transfer URL is updated. Key fields: jobId, jobName, jobOwner, and the type of modification. Adversaries using BITS for persistence or staged downloads often modify existing jobs to update C2 URLs, change destination paths, or re-add files after completion. A sequence of EID 3 (job created) followed by multiple EID 4 (modifications) for the same jobId — especially modifications that change the remote URL to an external address — warrants investigation.",
+      "details": "Generated when an existing BITS job is modified, such as when a file is added to or removed from the job, the priority changes, or the transfer URL is updated. Adversaries using BITS for persistence or staged downloads often modify existing jobs to update C2 URLs, change destination paths, or re-add files after completion.",
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
@@ -139,8 +160,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
+          "A sequence of EID 3 followed by multiple EID 4 modifications for the same jobId, especially URL changes to external addresses, indicates staged abuse",
           "Repeated URL modifications to a single jobId suggest a rotating C2 infrastructure",
-          "Correlate jobOwner with expected service accounts — BITS job modifications by SYSTEM or a user-context process are both valid but serve different attack patterns",
           "Check if the modified destination path points to a startup folder, scheduled task directory, or script location"
         ],
         "commonFalsePositives": [
@@ -148,6 +169,23 @@
           "Legitimate software installers adding files to an existing BITS job during download"
         ]
       },
+      "keyFields": [
+        {
+          "name": "jobId",
+          "xpath": "EventData/Data[@Name='jobId']",
+          "description": "Unique identifier for the BITS job being modified"
+        },
+        {
+          "name": "jobName",
+          "xpath": "EventData/Data[@Name='jobName']",
+          "description": "Name of the BITS job"
+        },
+        {
+          "name": "jobOwner",
+          "xpath": "EventData/Data[@Name='jobOwner']",
+          "description": "Account that owns the job"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
@@ -166,7 +204,7 @@
       "level": "Information",
       "title": "BITS service stopped",
       "summary": "The Background Intelligent Transfer Service stopped.",
-      "details": "Generated when the BITS service (Background Intelligent Transfer Service) stops. The BITS service stopping unexpectedly or being explicitly stopped is a potential defense evasion or anti-forensic indicator — some malware stops BITS after using it for staging to remove the transfer evidence, or stops it to prevent legitimate Windows Update transfers while maintaining persistence. Key fields: the reason for the service stop. Unexpected BITS service stops outside of Windows maintenance windows warrant investigation, particularly when correlated with BITS job creation events earlier in the timeline.",
+      "details": "Generated when the BITS service (Background Intelligent Transfer Service) stops. The BITS service stopping unexpectedly or being explicitly stopped is a potential defense evasion or anti-forensic indicator. Some malware stops BITS after using it for staging to remove the transfer evidence, or stops it to prevent legitimate Windows Update transfers while maintaining persistence.",
       "category": "BITS Service Lifecycle",
       "tags": [
         "bits",
@@ -225,7 +263,7 @@
       "level": "Information",
       "title": "BITS job transfer started",
       "summary": "A BITS job began transferring data; URL recorded.",
-      "details": "Generated when a BITS job begins actively transferring data. Key fields: jobTitle, jobId, jobOwner, bytesTotal, fileCount, and url (the remote URL being downloaded from or uploaded to). The url field is the highest-value forensic artifact in the BITS log — it reveals the C2 server, staging server, or exfiltration endpoint. Attackers commonly use bitsadmin.exe or PowerShell's Start-BitsTransfer to download payloads from attacker-controlled infrastructure. Correlate jobId with EID 3 to identify the creating process.",
+      "details": "Generated when a BITS job begins actively transferring data. The url field is the highest-value forensic artifact in the BITS log, revealing the C2 server, staging server, or exfiltration endpoint. Attackers commonly use bitsadmin.exe or PowerShell's Start-BitsTransfer to download payloads from attacker-controlled infrastructure.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
@@ -274,6 +312,38 @@
           "Legitimate software downloading updates via BITS"
         ]
       },
+      "keyFields": [
+        {
+          "name": "jobTitle",
+          "xpath": "EventData/Data[@Name='jobTitle']",
+          "description": "Name of the BITS job"
+        },
+        {
+          "name": "jobId",
+          "xpath": "EventData/Data[@Name='jobId']",
+          "description": "Unique identifier for the BITS job"
+        },
+        {
+          "name": "jobOwner",
+          "xpath": "EventData/Data[@Name='jobOwner']",
+          "description": "Account that owns the job"
+        },
+        {
+          "name": "url",
+          "xpath": "EventData/Data[@Name='url']",
+          "description": "Remote URL being downloaded from or uploaded to"
+        },
+        {
+          "name": "bytesTotal",
+          "xpath": "EventData/Data[@Name='bytesTotal']",
+          "description": "Total bytes to be transferred"
+        },
+        {
+          "name": "fileCount",
+          "xpath": "EventData/Data[@Name='fileCount']",
+          "description": "Number of files in the transfer job"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
@@ -292,7 +362,7 @@
       "level": "Information",
       "title": "BITS job transfer stopped",
       "summary": "A BITS job finished transferring data (completed or halted).",
-      "details": "Generated when a BITS job stops transferring, either because it completed successfully or was interrupted. Key fields: jobTitle, jobId, jobOwner, bytesTransferred, and url. Correlate bytesTransferred with bytesTotal from EID 59 to determine if the transfer completed fully. A transfer that stopped significantly short of bytesTotal may indicate detection and intervention, network interruption, or a partial exfiltration. Pair with EID 3 using jobId to link the full transfer lifecycle from job creation to completion.",
+      "details": "Generated when a BITS job stops transferring, either because it completed successfully or was interrupted. A transfer that stopped significantly short of bytesTotal (from EID 59) may indicate detection and intervention, network interruption, or a partial exfiltration.",
       "category": "BITS Transfer",
       "tags": [
         "bits",
@@ -339,6 +409,33 @@
           "Any legitimate BITS transfer completing normally"
         ]
       },
+      "keyFields": [
+        {
+          "name": "jobTitle",
+          "xpath": "EventData/Data[@Name='jobTitle']",
+          "description": "Name of the BITS job"
+        },
+        {
+          "name": "jobId",
+          "xpath": "EventData/Data[@Name='jobId']",
+          "description": "Unique identifier for the BITS job"
+        },
+        {
+          "name": "jobOwner",
+          "xpath": "EventData/Data[@Name='jobOwner']",
+          "description": "Account that owns the job"
+        },
+        {
+          "name": "bytesTransferred",
+          "xpath": "EventData/Data[@Name='bytesTransferred']",
+          "description": "Number of bytes actually transferred; compare with bytesTotal from EID 59"
+        },
+        {
+          "name": "url",
+          "xpath": "EventData/Data[@Name='url']",
+          "description": "Remote URL involved in the transfer"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"
@@ -357,7 +454,7 @@
       "level": "Warning",
       "title": "BITS job error",
       "summary": "A BITS transfer job encountered an error.",
-      "details": "Generated when a BITS job fails or is cancelled due to an error. Key fields: jobId, jobName, jobOwner, the file URL that failed, the destination path, and the error code (HRESULT or HTTP status). This event is forensically valuable even when the transfer ultimately fails — it records the remote URL and local destination that were attempted, revealing C2 infrastructure or staging paths. Repeated BITS errors against the same external host from multiple endpoints is a lateral movement or beaconing indicator. HTTP 403/404/401 error codes indicate the attacker's infrastructure was reachable but the specific resource was unavailable or access-controlled.",
+      "details": "Generated when a BITS job fails or is cancelled due to an error. This event is forensically valuable even when the transfer ultimately fails because it records the remote URL and local destination that were attempted, revealing C2 infrastructure or staging paths. Repeated BITS errors against the same external host from multiple endpoints is a lateral movement or beaconing indicator. HTTP 403/404/401 error codes indicate the attacker's infrastructure was reachable but the specific resource was unavailable or access-controlled.",
       "category": "BITS Job Lifecycle",
       "tags": [
         "bits",
@@ -407,6 +504,33 @@
           "Legitimate software updaters using BITS that encounter server-side errors"
         ]
       },
+      "keyFields": [
+        {
+          "name": "jobId",
+          "xpath": "EventData/Data[@Name='jobId']",
+          "description": "Unique identifier for the BITS job that failed"
+        },
+        {
+          "name": "jobName",
+          "xpath": "EventData/Data[@Name='jobName']",
+          "description": "Name of the BITS job"
+        },
+        {
+          "name": "jobOwner",
+          "xpath": "EventData/Data[@Name='jobOwner']",
+          "description": "Account that owns the job"
+        },
+        {
+          "name": "url",
+          "xpath": "EventData/Data[@Name='url']",
+          "description": "Remote URL that the transfer attempted to reach"
+        },
+        {
+          "name": "errorCode",
+          "xpath": "EventData/Data[@Name='errorCode']",
+          "description": "HRESULT or HTTP status code indicating the failure reason"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/win32/bits/bits-start-page"

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DCOM",
-    "version": "1.0.2",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dcom.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Error",
       "title": "DCOM unable to communicate with remote computer",
       "summary": "DCOM failed to establish a connection to a remote computer, indicating a network, firewall, or RPC availability issue on the destination.",
-      "details": "Logged by the Microsoft-Windows-DistributedCOM provider in the System log when the local DCOM infrastructure cannot contact a remote host. Message format: 'DCOM was unable to communicate with the computer <computername> using any of the currently known IP addresses.' Key field: param1 (target computer name or IP). Uncommon in healthy environments; appears during DCOM-based lateral movement attempts when the target is unreachable or firewalled, and during normal operations when management tools reference decommissioned hosts.",
+      "details": "Logged by the Microsoft-Windows-DistributedCOM provider in the System log when the local DCOM infrastructure cannot contact a remote host. Uncommon in healthy environments; appears during DCOM-based lateral movement attempts when the target is unreachable or firewalled, and during normal operations when management tools reference decommissioned hosts.",
       "category": "Lateral Movement",
       "tags": [
         "dcom",
@@ -118,7 +118,7 @@
       "level": "Error",
       "title": "COM server failed to register with DCOM within timeout",
       "summary": "A COM server (identified by CLSID) did not register with the DCOM service control manager within the required timeout period, indicating a crash, injection, or startup failure.",
-      "details": "Logged when DCOM launches a COM server process and that process fails to call CoRegisterClassObject within the default 120-second timeout. Message format: 'The server {<CLSID>} did not register with DCOM within the required timeout.' Key field: param1 (CLSID of the failing COM server). Resolve the CLSID via HKLM\\SOFTWARE\\Classes\\CLSID\\{GUID}. A hijacked COM server that does not implement the expected interface will fail to register, making this event a secondary indicator of COM hijacking activity.",
+      "details": "Logged when DCOM launches a COM server process and that process fails to call CoRegisterClassObject within the default 120-second timeout. A hijacked COM server that does not implement the expected interface will fail to register, making this event a secondary indicator of COM hijacking activity.",
       "category": "Defense Evasion",
       "tags": [
         "dcom",
@@ -231,7 +231,7 @@
       "level": "Warning",
       "title": "DCOM application-specific permissions denied activation",
       "summary": "A user or process attempted to activate or launch a COM server but was denied by the application-specific DCOM security permissions, generating a high-volume but security-relevant access denial record.",
-      "details": "Logged when a caller is denied Local or Remote Activation or Launch permission by the application-specific DCOM security descriptor. Message format: 'The application-specific permission settings do not grant Local [Activation|Launch] permission for the COM Server application with CLSID {<CLSID>} and APPID {<AppID>} to the user <domain\\user> from address <IP>...' Key fields: param3 (CLSID), param4 (AppID), param8 (caller username), param12 (source IP). High volume in most environments due to Windows background COM activity; param12 distinguishes remote activation attempts from local noise.",
+      "details": "Logged when a caller is denied Local or Remote Activation or Launch permission by the application-specific DCOM security descriptor. High volume in most environments due to Windows background COM activity. Remote activation attempts (from non-local addresses) are the highest-priority signal for DCOM lateral movement.",
       "category": "Lateral Movement",
       "tags": [
         "dcom",
@@ -359,7 +359,7 @@
       "level": "Error",
       "title": "DCOM unable to communicate with computer via any known IP",
       "summary": "DCOM exhausted all known IP addresses for a remote computer and could not establish a connection, indicating network-level blocking or host unreachability.",
-      "details": "Logged after DCOM exhausts all known IP addresses for a remote host without successfully establishing a connection. Message format: 'DCOM was unable to communicate with the computer <computername> using any of the currently known IP addresses.' Key field: param1 (target computer name). Similar to EID 10009 but explicitly indicates all resolved addresses were tried; both events often appear together. Isolated occurrences indicate offline or decommissioned hosts; a burst from one source across multiple targets in a short window suggests automated lateral movement.",
+      "details": "Logged after DCOM exhausts all known IP addresses for a remote host without successfully establishing a connection. Similar to EID 10009 but explicitly indicates all resolved addresses were tried; both events often appear together. Isolated occurrences indicate offline or decommissioned hosts, while a burst from one source across multiple targets in a short window suggests automated lateral movement.",
       "category": "Lateral Movement",
       "tags": [
         "dcom",

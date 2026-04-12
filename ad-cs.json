@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Certificate Services",
-    "version": "1.2.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.3.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ad-cs.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -32,7 +32,7 @@
       "level": "AuditSuccess",
       "title": "The audit filter for Certificate Services changed",
       "summary": "The audit filter settings for the Certification Authority were modified.",
-      "details": "Generated when the auditing configuration for a Certificate Authority (CA) is changed — specifically, which categories of CA events are audited (e.g., certificate requests, revocation, configuration changes, backup/restore). Key fields: SubjectAccountName (who changed the filter) and the new audit filter bitmask. CA audit settings govern whether events like 4886 (certificate request received), 4887 (certificate issued), and 4888 (request denied) are logged at all. An attacker who has compromised a CA may disable auditing of certificate issuance events (by zeroing out the audit filter) to prevent detection of ESC-based certificate abuse. Reduction or zeroing of the audit filter without change authorization is a critical finding. CA-only event.",
+      "details": "Generated when the auditing configuration for a Certificate Authority (CA) is changed, specifically which categories of CA events are audited (e.g., certificate requests, revocation, configuration changes, backup/restore). CA audit settings govern whether events like 4886 (certificate request received), 4887 (certificate issued), and 4888 (request denied) are logged at all. An attacker who has compromised a CA may disable auditing of certificate issuance events (by zeroing out the audit filter) to prevent detection of ESC-based certificate abuse. CA-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -85,6 +85,18 @@
           "CA reconfiguration during PKI refresh or upgrade projects"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectAccountName']",
+          "description": "Account that changed the audit filter"
+        },
+        {
+          "name": "AuditFilter",
+          "xpath": "EventData/Data[@Name='AuditFilter']",
+          "description": "New audit filter bitmask; a value of 0 means all CA auditing is disabled"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4885"
@@ -103,7 +115,7 @@
       "level": "AuditSuccess",
       "title": "Certificate Services received a certificate request",
       "summary": "A client submitted a certificate request to the Certification Authority.",
-      "details": "Generated when a CA receives a certificate request. Key fields: Requester (SubjectAccountName of who submitted the request), RequestID (internal CA tracking number), Attributes (including the certificate template name and SAN if specified). This is the intake event for all certificate issuance workflows — pair with EID 4887 (approved), 4888 (denied), or 4889 (pending) to track the full request lifecycle. In AD CS attack contexts (ESC1-ESC8), this event reveals the template being abused: ESC1 abuse involves a requester specifying an arbitrary Subject Alternative Name (SAN) with a privileged account's UPN or DNS name in the request. Attributes field containing SubjectAltName with a value not matching the requester's identity is a high-confidence ESC1 indicator. CA-only event.",
+      "details": "Generated when a CA receives a certificate request. This is the intake event for all certificate issuance workflows; pair with EID 4887 (approved), 4888 (denied), or 4889 (pending) to track the full request lifecycle. In AD CS attack contexts (ESC1-ESC8), this event reveals the template being abused: ESC1 abuse involves a requester specifying an arbitrary Subject Alternative Name (SAN) with a privileged account's UPN or DNS name in the request. CA-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -162,6 +174,23 @@
           "MDM/endpoint management platforms requesting device certificates"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RequesterName",
+          "xpath": "EventData/Data[@Name='RequesterName']",
+          "description": "Account that submitted the certificate request"
+        },
+        {
+          "name": "RequestID",
+          "xpath": "EventData/Data[@Name='RequestID']",
+          "description": "Internal CA tracking number for the request"
+        },
+        {
+          "name": "Attributes",
+          "xpath": "EventData/Data[@Name='Attributes']",
+          "description": "Request attributes including certificate template name and SAN if specified"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4886"
@@ -180,7 +209,7 @@
       "level": "AuditSuccess",
       "title": "Certificate Services approved a certificate request and issued a certificate",
       "summary": "The CA approved a certificate request and issued a signed certificate to the requester.",
-      "details": "Generated when a CA approves a certificate request and issues a certificate. Key fields: Requester (SubjectAccountName), RequestID (matches the EID 4886 intake event), Attributes (template name, SAN, and other request attributes), and the issued certificate's serial number. This is the highest-value AD CS event for attack detection because it confirms a certificate was actually issued — not just requested. In ESC attacks, this event confirms successful exploitation: ESC1 (SAN abuse with privileged UPN), ESC3 (enrollment agent certificate used to request on behalf of another user), and ESC6 (EDITF_ATTRIBUTESUBJECTALTNAME2 flag enabling arbitrary SAN on any template). The issued certificate can be used for PKINIT authentication to obtain a TGT as any user, enabling persistent privileged access that survives password resets. CA-only event.",
+      "details": "Generated when a CA approves a certificate request and issues a certificate. This is the highest-value AD CS event for attack detection because it confirms a certificate was actually issued, not just requested. In ESC attacks, this event confirms successful exploitation: ESC1 (SAN abuse with privileged UPN), ESC3 (enrollment agent certificate used to request on behalf of another user), and ESC6 (EDITF_ATTRIBUTESUBJECTALTNAME2 flag enabling arbitrary SAN on any template). The issued certificate can be used for PKINIT authentication to obtain a TGT as any user, enabling persistent privileged access that survives password resets. CA-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -321,7 +350,7 @@
       "level": "AuditFailure",
       "title": "Certificate Services denied a certificate request",
       "summary": "The CA rejected a certificate request from a requester.",
-      "details": "Generated when a CA denies a certificate request. Key fields: Requester (SubjectAccountName), RequestID, Attributes (including the requested template and any SAN fields), and the denial reason. Denials can occur because the requester lacks enrollment permissions on the template, the request fails policy validation, a CA manager denied a pending request, or the request was blocked by issuance requirements. In attack contexts, repeated denials targeting the same template from the same Requester indicate an adversary probing for exploitable templates — a pattern consistent with Certify/Certipy enumeration followed by exploitation attempts. Denial reason codes revealing 'Denied by Policy Module' vs. 'Access Denied' help distinguish misconfigured requests from unauthorized ones. CA-only event.",
+      "details": "Generated when a CA denies a certificate request. Denials can occur because the requester lacks enrollment permissions on the template, the request fails policy validation, a CA manager denied a pending request, or the request was blocked by issuance requirements. In attack contexts, repeated denials targeting the same template from the same Requester indicate an adversary probing for exploitable templates, a pattern consistent with Certify/Certipy enumeration followed by exploitation attempts. Denial reason codes revealing 'Denied by Policy Module' vs. 'Access Denied' help distinguish misconfigured requests from unauthorized ones. CA-only event.",
       "category": "Certificate Request",
       "tags": [
         "ad-cs",
@@ -368,6 +397,28 @@
           "Renewal requests that fail because the issuing CA has changed or the template was updated"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RequesterName",
+          "xpath": "EventData/Data[@Name='RequesterName']",
+          "description": "Account that submitted the denied request"
+        },
+        {
+          "name": "RequestID",
+          "xpath": "EventData/Data[@Name='RequestID']",
+          "description": "Internal CA tracking number for the denied request"
+        },
+        {
+          "name": "Attributes",
+          "xpath": "EventData/Data[@Name='Attributes']",
+          "description": "Request attributes including template name and SAN fields"
+        },
+        {
+          "name": "Disposition",
+          "xpath": "EventData/Data[@Name='Disposition']",
+          "description": "Denial reason code"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4888"
@@ -386,7 +437,7 @@
       "level": "AuditSuccess",
       "title": "Certificate Services set the status of a certificate request to pending",
       "summary": "A certificate request is awaiting CA manager approval before issuance.",
-      "details": "Generated when a CA places a certificate request into a pending (held) state, requiring a CA manager to manually review and approve or deny it before the certificate is issued. Key fields: Requester (SubjectAccountName), RequestID, and Attributes (template and request details). Pending is typically configured on high-value templates (e.g., code signing, sub-CA) to require human review. In attack contexts, an adversary may submit requests for high-privilege templates expecting them to be approved without scrutiny — particularly if the CA is misconfigured (ESC4: template with weak CA manager approval settings, or ESC7: CA manager permissions granted to non-admin accounts). Pending requests that are subsequently approved via EID 4887 without a corresponding change ticket should be investigated. CA-only event.",
+      "details": "Generated when a CA places a certificate request into a pending (held) state, requiring a CA manager to manually review and approve or deny it before the certificate is issued. Pending is typically configured on high-value templates (e.g., code signing, sub-CA) to require human review. In attack contexts, an adversary may submit requests for high-privilege templates expecting them to be approved without scrutiny, particularly if the CA is misconfigured (ESC4: template with weak CA manager approval settings, or ESC7: CA manager permissions granted to non-admin accounts). CA-only event.",
       "category": "Certificate Request",
       "tags": [
         "ad-cs",
@@ -432,6 +483,23 @@
           "Certificate renewal requests for templates with CA manager approval requirements"
         ]
       },
+      "keyFields": [
+        {
+          "name": "RequesterName",
+          "xpath": "EventData/Data[@Name='RequesterName']",
+          "description": "Account that submitted the pending request"
+        },
+        {
+          "name": "RequestID",
+          "xpath": "EventData/Data[@Name='RequestID']",
+          "description": "Internal CA tracking number for the pending request"
+        },
+        {
+          "name": "Attributes",
+          "xpath": "EventData/Data[@Name='Attributes']",
+          "description": "Request attributes including template and request details"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4889"
@@ -450,7 +518,7 @@
       "level": "AuditSuccess",
       "title": "The audit settings for Certificate Services changed",
       "summary": "The audit configuration for the Certification Authority was modified.",
-      "details": "Generated when the audit settings (audit filter bitmask) for the CA are changed via the CA management console or certutil. Key fields: SubjectAccountName (who made the change) and the old vs. new audit filter values. The CA audit filter controls which event categories are logged — requests, issuance, revocation, configuration changes, and backup/restore. This event differs from EID 4885 (which tracks filter application) — EID 4890 specifically records the configuration change action itself. An adversary who has compromised the CA with CA Admin privileges may disable issuance auditing (EID 4887) to hide certificate abuse. Any reduction in the audit filter value without change authorization is a high-severity finding. CA-only event.",
+      "details": "Generated when the audit settings (audit filter bitmask) for the CA are changed via the CA management console or certutil. The CA audit filter controls which event categories are logged: requests, issuance, revocation, configuration changes, and backup/restore. This event differs from EID 4885 (which tracks filter application); EID 4890 specifically records the configuration change action itself. An adversary who has compromised the CA with CA Admin privileges may disable issuance auditing (EID 4887) to hide certificate abuse. CA-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -502,6 +570,23 @@
           "CA upgrade or migration activities that reset audit settings to defaults"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectAccountName']",
+          "description": "Account that changed the audit settings"
+        },
+        {
+          "name": "OldAuditFilter",
+          "xpath": "EventData/Data[@Name='OldAuditFilter']",
+          "description": "Previous audit filter bitmask value"
+        },
+        {
+          "name": "NewAuditFilter",
+          "xpath": "EventData/Data[@Name='NewAuditFilter']",
+          "description": "New audit filter bitmask value; lower than previous indicates reduced auditing"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4890"
@@ -520,7 +605,7 @@
       "level": "AuditSuccess",
       "title": "A configuration entry changed in Certificate Services",
       "summary": "A configuration setting within the Certification Authority was modified.",
-      "details": "Generated when a configuration entry in the CA's registry or database is changed — this includes changes to CA extensions, policy modules, exit modules, validity periods, key recovery agent settings, and the EDITF_ATTRIBUTESUBJECTALTNAME2 flag. Key fields: SubjectAccountName (who made the change), Node (the registry path of the changed CA setting), and NewValue. The EDITF_ATTRIBUTESUBJECTALTNAME2 flag is directly tied to ESC6 attacks: when this flag is set on the CA, any template with an arbitrary SAN in the request will be honored, enabling any user with enrollment rights to specify a privileged UPN in the SAN field. A change to this flag (Node containing 'EditFlags' or 'SubjectAltName') is an ESC6 enablement indicator. Changes to ValidityPeriod/ValidityPeriodUnits (extending certificate lifetimes) can also indicate preparation for long-lived certificate persistence. CA-only event.",
+      "details": "Generated when a configuration entry in the CA's registry or database is changed, including changes to CA extensions, policy modules, exit modules, validity periods, key recovery agent settings, and the EDITF_ATTRIBUTESUBJECTALTNAME2 flag. The EDITF_ATTRIBUTESUBJECTALTNAME2 flag is directly tied to ESC6 attacks: when this flag is set on the CA, any template with an arbitrary SAN in the request will be honored, enabling any user with enrollment rights to specify a privileged UPN in the SAN field. Changes to ValidityPeriod/ValidityPeriodUnits (extending certificate lifetimes) can also indicate preparation for long-lived certificate persistence. CA-only event.",
       "prerequisites": [
         {
           "type": "policy",
@@ -594,6 +679,23 @@
           "CA reconfiguration during PKI architecture changes (e.g., adding a new policy module)"
         ]
       },
+      "keyFields": [
+        {
+          "name": "SubjectAccountName",
+          "xpath": "EventData/Data[@Name='SubjectAccountName']",
+          "description": "Account that made the configuration change"
+        },
+        {
+          "name": "Node",
+          "xpath": "EventData/Data[@Name='Node']",
+          "description": "Registry path of the changed CA setting; EditFlags or SubjectAltName paths indicate ESC6"
+        },
+        {
+          "name": "NewValue",
+          "xpath": "EventData/Data[@Name='NewValue']",
+          "description": "New value of the configuration entry"
+        }
+      ],
       "source": {
         "name": "Microsoft Learn",
         "url": "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4891"

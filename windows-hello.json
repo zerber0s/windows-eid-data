@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Hello for Business",
-    "version": "1.0.0",
-    "generatedAt": "2026-04-10T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/windows-hello.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Windows Hello for Business provisioning started",
       "summary": "A user initiated Windows Hello for Business provisioning to register a new credential with the identity provider.",
-      "details": "Generated when a user begins the Windows Hello for Business (WHfB) provisioning process — registering a new asymmetric key pair (PIN, fingerprint, or face) with Entra ID, Active Directory, or a hybrid identity provider. Provisioning creates a new device-bound credential: a private key protected by the TPM (or software, if no TPM) and a corresponding public key registered with the identity provider. Key fields: the user UPN, the device identifier, and the provisioning method (TPM vs software, cloud vs on-premises). From a security perspective, unexpected provisioning events are high-confidence IOCs: WHfB provisioning on a device where no WHfB credential previously existed — particularly for privileged accounts (Global Admin, Domain Admin) — may indicate an attacker with temporary access to the device is registering a persistent credential that will survive password resets. Provisioning also occurs when a device is rebuilt or when existing credentials are explicitly deleted. Pair with EID 3011 to confirm provisioning completed.",
+      "details": "Generated when a user begins the Windows Hello for Business (WHfB) provisioning process — registering a new asymmetric key pair (PIN, fingerprint, or face) with Entra ID, Active Directory, or a hybrid identity provider. Provisioning creates a new device-bound credential: a private key protected by the TPM (or software, if no TPM) and a corresponding public key registered with the identity provider. Provisioning also occurs when a device is rebuilt or when existing credentials are explicitly deleted.",
       "category": "Credential Management",
       "tags": [
         "windows-hello",
@@ -102,6 +102,16 @@
           "name": "UserId",
           "xpath": "EventData/Data[@Name='UserId']",
           "description": "UPN or SID of the user provisioning WHfB credentials"
+        },
+        {
+          "name": "DeviceId",
+          "xpath": "EventData/Data[@Name='DeviceId']",
+          "description": "Device identifier where provisioning is occurring"
+        },
+        {
+          "name": "ProvisioningMethod",
+          "xpath": "EventData/Data[@Name='ProvisioningMethod']",
+          "description": "Provisioning method used (TPM vs software, cloud vs on-premises)"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -114,7 +124,7 @@
       "level": "Information",
       "title": "Windows Hello for Business provisioning completed",
       "summary": "Windows Hello for Business provisioning completed successfully — a new credential key pair was registered.",
-      "details": "Generated when WHfB provisioning completes successfully and the new key pair has been registered with the identity provider (Entra ID, AD, or hybrid). At this point the user can authenticate using the new WHfB gesture (PIN, fingerprint, face). Key fields: user UPN, device identifier. This is the confirmation event that provisioning succeeded — pair with EID 3010 to bracket the full provisioning workflow. From a security perspective, EID 3011 confirms that a new persistent credential now exists for the user on this device. In an attack scenario where an adversary completes provisioning using a compromised account and temporary device access, EID 3011 is the point at which the backdoor credential is fully established. The attacker can now authenticate as the user to cloud resources from this device even after the user's password is changed, as WHfB credentials are independent of password authentication.",
+      "details": "Generated when WHfB provisioning completes successfully and the new key pair has been registered with the identity provider (Entra ID, AD, or hybrid). At this point the user can authenticate using the new WHfB gesture (PIN, fingerprint, face). This is the confirmation event that provisioning succeeded. WHfB credentials are independent of password authentication, so a registered credential persists even after a password change.",
       "category": "Credential Management",
       "tags": [
         "windows-hello",
@@ -168,6 +178,11 @@
           "name": "UserId",
           "xpath": "EventData/Data[@Name='UserId']",
           "description": "UPN or SID of the user whose WHfB credential was registered"
+        },
+        {
+          "name": "DeviceId",
+          "xpath": "EventData/Data[@Name='DeviceId']",
+          "description": "Device identifier where the credential was registered"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -180,7 +195,7 @@
       "level": "Error",
       "title": "Windows Hello for Business provisioning failed",
       "summary": "Windows Hello for Business provisioning failed and no new credential was registered.",
-      "details": "Generated when the WHfB provisioning process fails before completing. Key fields: the error code, the failure phase (MFA completion, TPM attestation, key registration, DC-side validation), and the user UPN. Provisioning failures are investigated in two contexts: (1) operationally, to identify misconfigured WHfB policy, TPM attestation failures, or certificate trust issues preventing rollout, and (2) from a security angle, repeated provisioning failures for the same user across multiple devices may indicate an attacker probing WHfB provisioning as a persistence mechanism but being blocked by policy (e.g., Intune compliance requirement, MFA requirement they cannot satisfy). Error codes mapping to TPM attestation failure (the TPM certificate cannot be validated by the enterprise attestation CA) should be monitored on managed devices, as they indicate the device may be using software keys rather than hardware-protected keys, reducing the security assurance of the WHfB credential.",
+      "details": "Generated when the WHfB provisioning process fails before completing. Common failure phases include MFA completion, TPM attestation, key registration, and DC-side validation. Provisioning failures can indicate misconfigured WHfB policy, TPM attestation failures, or certificate trust issues preventing rollout. Error codes mapping to TPM attestation failure indicate the device may be using software keys rather than hardware-protected keys, reducing the security assurance of the WHfB credential.",
       "category": "Credential Management",
       "tags": [
         "windows-hello",
@@ -235,6 +250,16 @@
           "name": "ErrorCode",
           "xpath": "EventData/Data[@Name='ErrorCode']",
           "description": "Hex error code indicating why provisioning failed; TPM attestation errors vs network/policy errors have different response paths"
+        },
+        {
+          "name": "FailurePhase",
+          "xpath": "EventData/Data[@Name='FailurePhase']",
+          "description": "Phase at which provisioning failed (MFA completion, TPM attestation, key registration, DC-side validation)"
+        },
+        {
+          "name": "UserId",
+          "xpath": "EventData/Data[@Name='UserId']",
+          "description": "UPN of the user whose provisioning failed"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -247,7 +272,7 @@
       "level": "Information",
       "title": "NGC key registered",
       "summary": "A Next-Generation Credential (NGC) key was created and registered for this device and user.",
-      "details": "Generated when a Next-Generation Credential (NGC) key — the cryptographic key pair underlying Windows Hello for Business — is registered. The private key is bound to the device TPM (or stored in software if no TPM). Key fields: the key ID (a unique identifier for the registered key), the user UPN, and whether the key is TPM-backed (hardware) or software-backed. The key ID is a critical pivot for tracking credential lifecycle: correlate EID 5308 with EID 5309 (key deletion) to track full key lifetime. In an attack investigation, an unexpected 5308 for a privileged account on a device not associated with that user is an IOC. In Azure AD environments, the corresponding cloud event is an 'Add authentication method' operation in the Entra ID audit log with method type 'Windows Hello for Business'. An attacker who registers an NGC key gains the ability to authenticate to cloud and on-premises resources using a phishing-resistant credential that survives password resets.",
+      "details": "Generated when a Next-Generation Credential (NGC) key — the cryptographic key pair underlying Windows Hello for Business — is registered. The private key is bound to the device TPM (or stored in software if no TPM). In Azure AD environments, the corresponding cloud event is an 'Add authentication method' operation in the Entra ID audit log with method type 'Windows Hello for Business'. An attacker who registers an NGC key gains the ability to authenticate to cloud and on-premises resources using a phishing-resistant credential that survives password resets.",
       "category": "Credential Management",
       "tags": [
         "windows-hello",
@@ -301,7 +326,17 @@
         {
           "name": "KeyId",
           "xpath": "EventData/Data[@Name='KeyId']",
-          "description": "Unique identifier of the registered NGC key; use to track key lifecycle (registration → deletion) and correlate with Entra ID authentication methods"
+          "description": "Unique identifier of the registered NGC key; use to track key lifecycle (registration to deletion) and correlate with Entra ID authentication methods"
+        },
+        {
+          "name": "UserId",
+          "xpath": "EventData/Data[@Name='UserId']",
+          "description": "UPN of the user for whom the key was registered"
+        },
+        {
+          "name": "TpmBacked",
+          "xpath": "EventData/Data[@Name='TpmBacked']",
+          "description": "Whether the key is TPM-backed (hardware) or software-backed"
         }
       ],
       "lastReviewed": "2026-04-10"
@@ -314,7 +349,7 @@
       "level": "Information",
       "title": "NGC key deleted",
       "summary": "A Next-Generation Credential (NGC) key was deleted from this device.",
-      "details": "Generated when an NGC key is deleted from the device. Key deletion occurs when: (1) the user explicitly resets or removes their Windows Hello for Business credential, (2) the device is reset or rebuilt, (3) an administrator remotely wipes the device credential, or (4) an attacker deletes existing credentials to force re-enrollment (potentially with attacker-controlled credentials). Key fields: the key ID (to correlate with the registration event EID 5308) and the user UPN. The primary security concern for EID 5309 is unexpected deletion of NGC keys — particularly if not followed by a new EID 5308 registration (indicating the credential was removed without replacement). An attacker may delete a user's existing WHfB credential to force fallback to password authentication, which is then more susceptible to credential theft. The deletion of credentials for multiple users in quick succession on a server is highly anomalous.",
+      "details": "Generated when an NGC key is deleted from the device. Key deletion occurs when the user explicitly resets or removes their WHfB credential, the device is reset or rebuilt, an administrator remotely wipes the device credential, or an attacker deletes existing credentials to force re-enrollment. An attacker may delete a user's existing WHfB credential to force fallback to password authentication, which is then more susceptible to credential theft.",
       "category": "Credential Management",
       "tags": [
         "windows-hello",
@@ -369,6 +404,11 @@
           "name": "KeyId",
           "xpath": "EventData/Data[@Name='KeyId']",
           "description": "Key ID of the deleted credential; correlate with EID 5308 to identify which registration event this key corresponds to"
+        },
+        {
+          "name": "UserId",
+          "xpath": "EventData/Data[@Name='UserId']",
+          "description": "UPN of the user whose key was deleted"
         }
       ],
       "lastReviewed": "2026-04-10"

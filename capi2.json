@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - CAPI2",
-    "version": "1.3.1",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/capi2.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -27,7 +27,7 @@
       "level": "Information",
       "title": "Certificate chain built",
       "summary": "A certificate chain was constructed for validation.",
-      "details": "Generated when the Windows Cryptographic API (CAPI2) constructs a certificate chain for validation. Key fields: SubjectCert (the leaf certificate being validated), IssuerCert, ChainContext, and Result (success or failure with error code). This event fires for every certificate validation the operating system performs — TLS connections, code signing verification, document signing, etc. At baseline volume it is extremely noisy. Its forensic value lies in failures: a chain build failure indicates a certificate that cannot be verified against a trusted root, which may indicate use of a self-signed cert, a private CA not installed in the trust store, or a revoked/expired certificate. Note: this channel is disabled by default and must be enabled via wevtutil or Event Viewer before events are collected.",
+      "details": "Generated when the Windows Cryptographic API (CAPI2) constructs a certificate chain for validation. This event fires for every certificate validation the operating system performs — TLS connections, code signing verification, document signing, etc. At baseline volume it is extremely noisy. A chain build failure indicates a certificate that cannot be verified against a trusted root, which may point to a self-signed cert, a private CA not installed in the trust store, or a revoked/expired certificate. This channel is disabled by default and must be enabled via wevtutil or Event Viewer before events are collected.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -84,6 +84,28 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "SubjectCert",
+          "xpath": "EventData/Data[@Name='SubjectCert']",
+          "description": "The leaf certificate being validated"
+        },
+        {
+          "name": "IssuerCert",
+          "xpath": "EventData/Data[@Name='IssuerCert']",
+          "description": "The issuer certificate in the chain"
+        },
+        {
+          "name": "ChainContext",
+          "xpath": "EventData/Data[@Name='ChainContext']",
+          "description": "Context handle for the constructed certificate chain"
+        },
+        {
+          "name": "Result",
+          "xpath": "EventData/Data[@Name='Result']",
+          "description": "Success or failure with error code for the chain build operation"
+        }
+      ],
       "lastReviewed": "2026-04-03"
     },
     {
@@ -94,7 +116,7 @@
       "level": "Information",
       "title": "Certificate chain policy verified",
       "summary": "A certificate chain was evaluated against a chain policy (e.g., SSL, authenticode).",
-      "details": "Generated when a constructed certificate chain is evaluated against a specific chain policy — for example, the SSL policy (for TLS), the authenticode policy (for code signing), or the base policy. Key fields: ChainContext, PolicyOID (the policy being checked), Result, and the specific policy error flags. This event reveals why a certificate was accepted or rejected at the policy level, beyond just chain construction. From a security standpoint, a chain policy verification failure on an authenticode policy for a recently executed binary indicates unsigned or improperly signed code. In TLS inspection and proxy detection scenarios, a chain policy failure may indicate a root CA mismatch caused by SSL interception. Note: requires CAPI2 operational log to be enabled.",
+      "details": "Generated when a constructed certificate chain is evaluated against a specific chain policy — for example, the SSL policy (for TLS), the authenticode policy (for code signing), or the base policy. This event reveals why a certificate was accepted or rejected at the policy level, beyond just chain construction. A chain policy verification failure on an authenticode policy for a recently executed binary indicates unsigned or improperly signed code. In TLS inspection and proxy detection scenarios, a chain policy failure may indicate a root CA mismatch caused by SSL interception. Requires CAPI2 operational log to be enabled.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -151,6 +173,23 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "ChainContext",
+          "xpath": "EventData/Data[@Name='ChainContext']",
+          "description": "Context handle for the certificate chain being evaluated"
+        },
+        {
+          "name": "PolicyOID",
+          "xpath": "EventData/Data[@Name='PolicyOID']",
+          "description": "The chain policy being checked (e.g., SSL, authenticode, base)"
+        },
+        {
+          "name": "Result",
+          "xpath": "EventData/Data[@Name='Result']",
+          "description": "Success or failure with specific policy error flags"
+        }
+      ],
       "lastReviewed": "2026-04-03"
     },
     {
@@ -161,7 +200,7 @@
       "level": "Information",
       "title": "CRL or OCSP object retrieved",
       "summary": "The crypto subsystem fetched a Certificate Revocation List (CRL) or OCSP response from a URL.",
-      "details": "Generated when CryptRetrieveObjectByUrl is called to fetch a CRL, OCSP staple, or certificate from a remote URL as part of revocation checking. Key fields: URL (the CRL Distribution Point or OCSP responder URL being contacted) and Result. This event is useful for detecting adversarial certificate infrastructure: if a binary's signing certificate references a CRL Distribution Point (CDP) at an attacker-controlled domain, this event will record the URL fetch when the binary is executed or verified. An unusual CDP or OCSP URL (non-Microsoft, non-major-CA) correlated with execution of a newly dropped binary may indicate use of an attacker-signed certificate. Also useful for detecting environments where certificate revocation checking is failing (Result=failure) because CRL endpoints are unreachable.",
+      "details": "Generated when CryptRetrieveObjectByUrl is called to fetch a CRL, OCSP staple, or certificate from a remote URL as part of revocation checking. This event records the URL contacted and the result of the fetch. It fires during any certificate validation that includes revocation checking, including TLS handshakes and code signing verification. Also useful for detecting environments where certificate revocation checking is failing because CRL endpoints are unreachable.",
       "category": "Certificate Validation",
       "tags": [
         "capi2",
@@ -215,6 +254,18 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "URL",
+          "xpath": "EventData/Data[@Name='URL']",
+          "description": "The CRL Distribution Point or OCSP responder URL being contacted"
+        },
+        {
+          "name": "Result",
+          "xpath": "EventData/Data[@Name='Result']",
+          "description": "Success or failure of the URL fetch operation"
+        }
+      ],
       "lastReviewed": "2026-04-10"
     },
     {
@@ -225,7 +276,7 @@
       "level": "Information",
       "title": "Certificate revocation check performed",
       "summary": "A revocation check was performed against a certificate in a chain.",
-      "details": "Generated when Windows performs a revocation check (CRL or OCSP) against a specific certificate. Key fields: CertificateThumbprint, CertificateIssuer, RevocationCheckResult, and the CRL/OCSP endpoint used. A result of CERT_E_REVOKED indicates the certificate is on a revocation list — this is a critical finding when correlated with recently executed code, as it means a revoked signing certificate was used to sign a binary. Adversaries occasionally use certificates that were valid at signing time but have since been revoked, or certificates revoked due to compromise. CERT_E_REVOKED combined with an execution event for the corresponding binary is a strong indicator of malicious signed code. Note: requires CAPI2 operational log to be enabled.",
+      "details": "Generated when Windows performs a revocation check (CRL or OCSP) against a specific certificate. A result of CERT_E_REVOKED indicates the certificate is on a revocation list. Adversaries occasionally use certificates that were valid at signing time but have since been revoked, or certificates revoked due to compromise. Requires CAPI2 operational log to be enabled.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -281,6 +332,23 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "CertificateThumbprint",
+          "xpath": "EventData/Data[@Name='CertificateThumbprint']",
+          "description": "Thumbprint of the certificate being checked for revocation"
+        },
+        {
+          "name": "CertificateIssuer",
+          "xpath": "EventData/Data[@Name='CertificateIssuer']",
+          "description": "Issuer of the certificate being checked"
+        },
+        {
+          "name": "RevocationCheckResult",
+          "xpath": "EventData/Data[@Name='RevocationCheckResult']",
+          "description": "Result of the revocation check (e.g., CERT_E_REVOKED)"
+        }
+      ],
       "lastReviewed": "2026-04-03"
     },
     {
@@ -291,7 +359,7 @@
       "level": "Information",
       "title": "X.509 chain policy verified",
       "summary": "An X.509 certificate chain was evaluated against a trust or application policy.",
-      "details": "Generated when an X.509 certificate chain is evaluated against a configured trust or application policy, such as the Basic Constraints policy, Enhanced Key Usage (EKU) policy, or a custom application policy. Key fields: CertificateThumbprint, PolicyOID, and Result. Failures indicate a certificate is being used outside its intended scope — for example, a certificate with an EKU of 'Client Authentication' being used for 'Code Signing', which is a common indicator of certificate misuse. In attacks involving stolen or forged certificates, EKU mismatches may be present if the attacker used a certificate not intended for the context in which they're deploying it. Note: requires CAPI2 operational log to be enabled.",
+      "details": "Generated when an X.509 certificate chain is evaluated against a configured trust or application policy, such as the Basic Constraints policy, Enhanced Key Usage (EKU) policy, or a custom application policy. Failures indicate a certificate is being used outside its intended scope — for example, a certificate with an EKU of 'Client Authentication' being used for 'Code Signing'. In attacks involving stolen or forged certificates, EKU mismatches may be present if the attacker used a certificate not intended for the context in which they deployed it. Requires CAPI2 operational log to be enabled.",
       "prerequisites": [
         {
           "type": "log-enablement",
@@ -348,6 +416,23 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
+      "keyFields": [
+        {
+          "name": "CertificateThumbprint",
+          "xpath": "EventData/Data[@Name='CertificateThumbprint']",
+          "description": "Thumbprint of the certificate being evaluated against the policy"
+        },
+        {
+          "name": "PolicyOID",
+          "xpath": "EventData/Data[@Name='PolicyOID']",
+          "description": "The trust or application policy OID being checked"
+        },
+        {
+          "name": "Result",
+          "xpath": "EventData/Data[@Name='Result']",
+          "description": "Success or failure of the policy evaluation"
+        }
+      ],
       "lastReviewed": "2026-04-03"
     }
   ]

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Exchange",
-    "version": "1.0.2",
-    "generatedAt": "2026-04-07T00:00:00Z",
+    "version": "1.1.0",
+    "generatedAt": "2026-04-12T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/exchange.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -32,7 +32,7 @@
       "level": "Information",
       "title": "Exchange management cmdlet successfully executed",
       "summary": "An Exchange management cmdlet was executed successfully via EMS (Exchange Management Shell) or EAC. Records every administrative action taken through Exchange's management layer.",
-      "details": "Generated for every successful Exchange management cmdlet execution. The event captures the cmdlet name, parameters used, the calling user, and the object modified. This is the primary audit trail for Exchange administration and the first place to look when investigating mailbox data exposure, unauthorized rule creation, or privilege escalation within Exchange. Attackers who gain Exchange admin rights will appear here when exporting mailboxes, adding forwarding rules, or creating new administrator accounts.\n\nHigh-risk cmdlets to monitor:\n- New-MailboxExportRequest / New-MailboxSearch (data exfiltration)\n- Set-Mailbox -ForwardingAddress / -DeliverToMailboxAndForward (email forwarding)\n- Add-RoleGroupMember / New-ManagementRoleAssignment (privilege escalation)\n- Set-TransportRule / New-TransportRule (mail flow manipulation)\n- New-MailboxPermission / Add-MailboxPermission (delegation abuse)",
+      "details": "Generated for every successful Exchange management cmdlet execution. The event captures the cmdlet name, parameters used, the calling user, and the object modified. This is the primary audit trail for Exchange administration. High-risk cmdlets include New-MailboxExportRequest, New-MailboxSearch (data exfiltration), Set-Mailbox with ForwardingAddress or DeliverToMailboxAndForward (email forwarding), Add-RoleGroupMember and New-ManagementRoleAssignment (privilege escalation), New-TransportRule and Set-TransportRule (mail flow manipulation), and Add-MailboxPermission (delegation abuse).",
       "category": "Exchange Administration",
       "tags": [
         "exchange",
@@ -160,7 +160,7 @@
       "level": "Warning",
       "title": "Exchange management cmdlet failed",
       "summary": "An Exchange management cmdlet execution failed. May indicate permission errors, misconfigured environments, or an attacker probing Exchange RBAC permissions.",
-      "details": "Generated when an Exchange management cmdlet fails to execute. While individual failures are common (permission denied, object not found), patterns of repeated failures across different cmdlets from the same account can indicate reconnaissance of Exchange RBAC permissions — an attacker mapping what level of access they have before escalating.\n\nAlso relevant for detecting compromised accounts that have lost access (e.g., password reset during incident response) still attempting administrative actions.",
+      "details": "Generated when an Exchange management cmdlet fails to execute. Individual failures are common (permission denied, object not found), but patterns of repeated failures across different cmdlets from the same account can indicate reconnaissance of Exchange RBAC permissions. Also fires when compromised accounts that have lost access (e.g., after a password reset during incident response) continue attempting administrative actions.",
       "category": "Exchange Administration",
       "tags": [
         "exchange",
@@ -250,7 +250,7 @@
       "level": "Error",
       "title": "IIS: ISAPI filter or extension error",
       "summary": "An IIS ISAPI filter or extension encountered an error. Can indicate web application exploitation attempts, particularly ProxyLogon (CVE-2021-26855) which abuses the OWA ISAPI filter.",
-      "details": "ISAPI filter/extension errors in IIS are often benign, but clusters of EID 115 events on Exchange servers are associated with ProxyLogon exploitation (CVE-2021-26855). During ProxyLogon, attackers send malformed requests to the Exchange OWA ISAPI filter to bypass authentication. The resulting ISAPI errors may precede web shell deployment.\n\nAlso relevant for other IIS-based exploitation such as ASP.NET deserialization attacks against Exchange (CVE-2021-26857) and older OWA vulnerabilities.\n\nAlone this event has low fidelity, but spikes in frequency on Exchange servers — especially correlated with EID 1309 (ASP.NET exceptions) and IIS access logs showing POST requests to /ecp/ or /owa/ from unexpected IPs — constitute a high-confidence ProxyLogon/ProxyShell indicator.",
+      "details": "Generated when an IIS ISAPI filter or extension encounters an error. ISAPI errors are often benign, but clusters on Exchange servers are associated with ProxyLogon exploitation (CVE-2021-26855), where malformed requests to the Exchange OWA ISAPI filter bypass authentication. Also associated with ASP.NET deserialization attacks against Exchange (CVE-2021-26857) and older OWA vulnerabilities.",
       "category": "Web Server",
       "tags": [
         "iis",
@@ -339,7 +339,7 @@
       "level": "Error",
       "title": "ASP.NET unhandled exception in web application",
       "summary": "An unhandled ASP.NET exception occurred in a web application. On Exchange or IIS servers, spikes in this event — especially with specific ExceptionTypes — are associated with ProxyShell exploitation (CVE-2021-34473/34523/31207) and web shell activity.",
-      "details": "ASP.NET unhandled exceptions are common in normal operation, but specific patterns on Exchange servers indicate exploitation. During ProxyShell (CVE-2021-34473/34523/31207), attackers trigger a chain of bugs in Exchange's backend that causes ASP.NET exceptions as part of the exploit. Clusters of 1309 events with Microsoft.Exchange exception types, followed by unusual files appearing in Exchange virtual directories, are a high-confidence ProxyShell indicator.\n\nAlso associated with:\n- CVE-2021-26857 (Exchange deserialization) — triggers Microsoft.Exchange.Diagnostics.UnifiedTracing exceptions\n- Web shell interactions causing application crashes or unexpected code paths\n- Exploit attempts against Outlook Web App (OWA) deserialization endpoints\n\nInvestigate when: frequency spikes on Exchange servers; ExceptionType contains Microsoft.Exchange; RequestUrl includes /ecp/, /owa/, /autodiscover/, or /mapi/.",
+      "details": "Generated when an unhandled ASP.NET exception occurs in a web application. ASP.NET unhandled exceptions are common in normal operation, but specific patterns on Exchange servers indicate exploitation. During ProxyShell (CVE-2021-34473/34523/31207), attackers trigger a chain of bugs that cause ASP.NET exceptions as part of the exploit. Also associated with CVE-2021-26857 (Exchange deserialization), web shell interactions causing unexpected code paths, and exploit attempts against OWA deserialization endpoints.",
       "category": "Web Server",
       "tags": [
         "iis",
@@ -422,7 +422,8 @@
           "Check for new .aspx/.ashx files in C:\\inetpub\\, Exchange OWA or ECP directories after exception spikes",
           "Review w3wp.exe child processes in Sysmon EID 1 — web shells often spawn cmd.exe or powershell.exe",
           "Correlate RequestUrl with IIS access logs to identify the source IP",
-          "Check EID 115 on the same host for ISAPI errors — combined with 1309 = high confidence exploit chain"
+          "Check EID 115 on the same host for ISAPI errors — combined with 1309 = high confidence exploit chain",
+          "Frequency spikes on Exchange servers where ExceptionType contains Microsoft.Exchange and RequestUrl includes /ecp/, /owa/, /autodiscover/, or /mapi/ are high-confidence exploitation indicators"
         ],
         "commonFalsePositives": [
           "Broken client requests causing ASP.NET errors",
