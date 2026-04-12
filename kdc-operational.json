@@ -27,9 +27,16 @@
       "level": "Warning",
       "title": "KDC encountered an error while validating a certificate during PKINIT",
       "summary": "The KDC failed to validate a client certificate presented during PKINIT (certificate-based Kerberos) authentication.",
-      "details": "Generated on a Domain Controller when the KDC encounters an error while validating a certificate submitted for PKINIT (Public Key Initial Authentication) Kerberos authentication. PKINIT allows clients to authenticate to Kerberos using X.509 certificates instead of passwords — this is the mechanism used by smart cards, Windows Hello for Business, and ADCS-based Kerberos authentication. Key fields: AccountName (client attempting authentication), CertSubject, CertIssuer, CertSerialNumber, and FailureCode. From a DFIR perspective, EID 14 surfaces ADCS attack failures: ESC attacks (e.g., ESC1, ESC8) that request a certificate with another user's UPN will generate this event at the KDC if the certificate fails chain validation, template authorization, or SAN matching. Also relevant for detecting Shadow Credentials abuse (T1649) where an attacker-written msDS-KeyCredentialLink certificate is rejected by the KDC. Correlate with Security EID 4768 (TGT request) failures and AD CS EID 4886/4888 (certificate request/denied) on the CA.",
+      "details": "Generated on a Domain Controller when the KDC encounters an error while validating a certificate submitted for PKINIT (Public Key Initial Authentication) Kerberos authentication. PKINIT allows clients to authenticate to Kerberos using X.509 certificates — the mechanism behind smart cards, Windows Hello for Business, and ADCS-based Kerberos authentication.",
       "category": "Kerberos/Authentication",
-      "tags": ["kerberos", "pkinit", "adcs", "certificate", "authentication-failure", "shadow-credentials"],
+      "tags": [
+        "kerberos",
+        "pkinit",
+        "adcs",
+        "certificate",
+        "authentication-failure",
+        "shadow-credentials"
+      ],
       "relatedEventIds": [
         {
           "id": 16,
@@ -152,9 +159,16 @@
       "level": "Error",
       "title": "KDC encountered a certificate that could not be mapped to a user account",
       "summary": "The KDC could not map a client certificate to an Active Directory user account during PKINIT authentication.",
-      "details": "Generated on a Domain Controller when the KDC receives a certificate-based Kerberos authentication request (PKINIT) but cannot map the certificate to a valid user account in Active Directory. Mapping failures occur when: (1) the certificate's Subject Alternative Name (SAN) UPN does not match any UPN in AD; (2) the certificate's subject does not match any account via altSecurityIdentities; or (3) the certificate was issued for an account that no longer exists. Key fields: AccountName, CertSubject, and CertIssuer. DFIR relevance: This event is a critical indicator for ADCS ESC attacks where an attacker-obtained certificate contains a forged or non-existent UPN. It also surfaces Shadow Credentials (T1649) attacks where the msDS-KeyCredentialLink certificate belongs to a deleted or mismatched account. An attacker iterating through forged certificates to find a valid mapping will generate a series of EID 16 failures followed eventually by a successful EID 27 (or Security EID 4768 with success).",
+      "details": "Generated on a Domain Controller when the KDC receives a PKINIT authentication request but cannot map the presented certificate to a valid Active Directory account. Mapping failures occur when the certificate's SAN UPN does not match any AD account, the subject does not match via altSecurityIdentities, or the account no longer exists.",
       "category": "Kerberos/Authentication",
-      "tags": ["kerberos", "pkinit", "adcs", "certificate", "shadow-credentials", "mapping-failure"],
+      "tags": [
+        "kerberos",
+        "pkinit",
+        "adcs",
+        "certificate",
+        "shadow-credentials",
+        "mapping-failure"
+      ],
       "relatedEventIds": [
         {
           "id": 14,
@@ -261,9 +275,16 @@
       "level": "Warning",
       "title": "KDC PKINIT certificate validation failed due to policy or trust",
       "summary": "A certificate presented for PKINIT Kerberos authentication was rejected due to policy or trust constraints.",
-      "details": "Generated when the KDC rejects a certificate during PKINIT authentication specifically because of a policy or trust constraint — such as the certificate not being issued by a trusted CA, failing CRL/OCSP revocation checking, or not meeting the domain's PKINIT certificate requirements. Key fields: AccountName, CertSubject, CertIssuer, and FailureCode. Distinguished from EID 14 (general PKINIT error) by its focus on policy and trust failures rather than structural certificate errors. This event may surface: (1) attacker-forged certificates issued by a rogue CA not in the NTAuth store; (2) revoked certificates from a legitimate CA being used after compromise; (3) certificates from an expired or untrusted CA. Correlate with AD CS EID 4886 (request) and EID 4887 (issued) on the CA, and with the domain's NTAuth certificate store to assess CA trust status.",
+      "details": "Generated when the KDC rejects a certificate during PKINIT authentication due to a policy or trust constraint — such as the certificate not being issued by a trusted CA, failing CRL/OCSP revocation checking, or not meeting PKINIT certificate requirements. Distinct from EID 14 (structural validation errors) by its focus on policy and trust failures.",
       "category": "Kerberos/Authentication",
-      "tags": ["kerberos", "pkinit", "certificate", "trust", "policy", "adcs"],
+      "tags": [
+        "kerberos",
+        "pkinit",
+        "certificate",
+        "trust",
+        "policy",
+        "adcs"
+      ],
       "relatedEventIds": [
         {
           "id": 14,
@@ -347,9 +368,15 @@
       "level": "Information",
       "title": "Kerberos authentication succeeded using a certificate (PKINIT)",
       "summary": "A client successfully authenticated to Kerberos using a certificate via PKINIT.",
-      "details": "Generated on a Domain Controller when a client successfully authenticates to Kerberos using a certificate (PKINIT). This is the success counterpart to EIDs 14, 16, and 21. Key fields: AccountName, CertSubject, CertIssuer, CertSerialNumber, and CertThumbprint. Successful PKINIT authentications are normal in environments using smart cards or Windows Hello for Business, but EID 27 also records successful certificate-based Kerberos authentication from ADCS ESC attacks. A TGT obtained via PKINIT grants all the privileges of the impersonated account. Baseline PKINIT authentication patterns per account and alert on: (1) accounts that do not normally use certificate authentication; (2) PKINIT success from unexpected source hosts; (3) certificate thumbprints not matching known enrolled certificates. Correlate with Security EID 4768 (TGT issued) immediately following to confirm the TGT was issued and identify the client IP address.",
+      "details": "Generated on a Domain Controller when a client successfully authenticates to Kerberos using a certificate (PKINIT). Success counterpart to EIDs 14, 16, and 21. A TGT obtained via PKINIT grants all the privileges of the impersonated account — including in ADCS ESC attack scenarios.",
       "category": "Kerberos/Authentication",
-      "tags": ["kerberos", "pkinit", "certificate", "authentication", "adcs"],
+      "tags": [
+        "kerberos",
+        "pkinit",
+        "certificate",
+        "authentication",
+        "adcs"
+      ],
       "relatedEventIds": [
         {
           "id": 14,

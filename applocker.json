@@ -439,7 +439,7 @@
       "level": "Warning",
       "title": "AppLocker audited packaged app installation (audit mode)",
       "summary": "A packaged (UWP/MSIX) app installation was allowed but would have been blocked in enforcement mode.",
-      "details": "Generated when AppLocker is in audit mode and a UWP or MSIX packaged application installation would have been blocked by the active rule set but was permitted to proceed. Key fields: FileName (package name or path), UserName, and RuleId. This event is distinct from EID 8020 (execution audited) — EID 8022 fires at installation time, while EID 8020 fires when the already-installed app runs. Malicious MSIX packages have been widely used as phishing delivery vectors (MSIX AppInstaller abuse, CVE-2021-43890). EID 8022 captures the installation of packages that fall outside the allow policy before they are executed. Correlate with EID 8020 to track when an audited-but-installed package is subsequently launched.",
+      "details": "Generated when AppLocker is in audit mode and a UWP or MSIX packaged application installation would have been blocked by the active rule set but was permitted to proceed. Distinct from EID 8020 (execution audited) — EID 8022 fires at installation time, while EID 8020 fires when the already-installed app runs. Malicious MSIX packages have been widely used as phishing delivery vectors (MSIX AppInstaller abuse, CVE-2021-43890). Correlate with EID 8020 to track when an audited-but-installed package is subsequently launched.",
       "prerequisites": [
         {
           "type": "policy",
@@ -522,7 +522,7 @@
       "level": "Error",
       "title": "AppLocker blocked packaged app installation (enforcement mode)",
       "summary": "A packaged (UWP/MSIX) app installation was blocked by AppLocker policy.",
-      "details": "Generated when AppLocker actively blocks the installation of a UWP or MSIX packaged application in enforcement mode. Key fields: FileName (package name or path), UserName, and RuleId. This event captures blocked package installation attempts before execution, making it the earliest detection point in the MSIX phishing kill chain. Malicious MSIX packages delivered via phishing links (AppInstaller abuse) will generate EID 8023 if the AppLocker packaged app deployment policy is in enforcement mode, providing a block-and-alert before the payload runs. The combination of this event and EID 8021 (execution blocked) indicates that both installation and execution of the package were successfully prevented. Investigate the delivery method by correlating with browser activity and any AppInstaller.exe process creation events.",
+      "details": "Generated when AppLocker actively blocks the installation of a UWP or MSIX packaged application in enforcement mode. The earliest detection point in the MSIX phishing kill chain — fires at installation time before execution is possible. The combination of EID 8023 (install blocked) and EID 8021 (execution blocked) confirms both installation and execution were prevented.",
       "prerequisites": [
         {
           "type": "policy",

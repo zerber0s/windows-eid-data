@@ -27,9 +27,14 @@
       "level": "Information",
       "title": "Certificate enrollment initiated",
       "summary": "The Certificate Services client initiated auto-enrollment for a certificate.",
-      "details": "Generated when the Certificate Services client begins the auto-enrollment process for a certificate template. Auto-enrollment fires when a user logs on or Group Policy refreshes and the client determines that a certificate matching an assigned template is not yet present in the user's certificate store. Key fields: the certificate template name and the requesting user context. This event is the client-side counterpart to the CA-side Security EID 4886 (certificate request received). In ADCS attack detection, EID 1003 establishes the baseline of normal auto-enrollment activity per user and template — unexpected enrollment initiations for sensitive templates (authentication, code signing, EFS) from users who do not normally use those templates may indicate an ESC exploitation attempt. Correlate with EID 1004 (enrollment succeeded) or EID 1005 (enrollment failed) to determine the outcome.",
+      "details": "Generated when the Certificate Services client begins the auto-enrollment process for a certificate template. Auto-enrollment fires at user logon or Group Policy refresh when the client determines a certificate for an assigned template is not yet in the store. Client-side counterpart to CA-side Security EID 4886 (certificate request received).",
       "category": "Certificate Lifecycle",
-      "tags": ["certificate", "auto-enrollment", "pki", "adcs"],
+      "tags": [
+        "certificate",
+        "auto-enrollment",
+        "pki",
+        "adcs"
+      ],
       "relatedEventIds": [
         {
           "id": 1004,
@@ -108,9 +113,15 @@
       "level": "Information",
       "title": "Certificate issued and installed",
       "summary": "A certificate was successfully issued by the CA and installed into the user's certificate store.",
-      "details": "Generated when the Certificate Services client successfully receives an issued certificate from the CA and installs it into the user's certificate store. This is the client-side confirmation of a successful certificate issuance — the CA-side confirmation is Security EID 4887 (certificate issued). Key fields: certificate template name, thumbprint, subject name, subject alternative name(s), issuing CA, and validity period. From a DFIR perspective, this event establishes the endpoint record of certificate installation. Correlate EID 1004 with CA EID 4887 using the thumbprint to complete the certificate lifecycle chain. An unexpected certificate with a Client Authentication or Smart Card Logon EKU installed into the user store — especially for a template the user was not assigned — confirms a successful ADCS ESC exploitation. The thumbprint from this event can be used to track subsequent PKINIT authentications via KDC EID 27.",
+      "details": "Generated when the Certificate Services client successfully receives and installs a certificate from the CA into the user's certificate store. Client-side confirmation of successful issuance — the CA-side counterpart is Security EID 4887 (certificate issued).",
       "category": "Certificate Lifecycle",
-      "tags": ["certificate", "issuance", "pki", "adcs", "credential-access"],
+      "tags": [
+        "certificate",
+        "issuance",
+        "pki",
+        "adcs",
+        "credential-access"
+      ],
       "relatedEventIds": [
         {
           "id": 1003,
@@ -219,9 +230,15 @@
       "level": "Error",
       "title": "Certificate auto-enrollment failed",
       "summary": "The Certificate Services client failed to complete certificate auto-enrollment.",
-      "details": "Generated when certificate auto-enrollment fails on the client side. Key fields: certificate template name, error code, and the reason for failure. Common failure causes include: the user lacks enrollment permissions for the template, the CA is unavailable, the certificate request was denied by the CA (generates CA-side EID 4888), or a certificate policy module rejected the request. From a DFIR perspective, repeated EID 1005 failures for authentication templates from an unexpected account context may indicate an attacker probing ADCS enrollment permissions or attempting to exploit a misconfigured template that is denying requests due to a policy guard. Correlate with CA-side EID 4888 (request denied) for the full request-to-denial chain.",
+      "details": "Generated when certificate auto-enrollment fails on the client side. Common causes: missing enrollment permissions, CA unavailability, policy module rejection, or an explicit CA denial (generates CA-side EID 4888). Correlate with CA-side EID 4888 for the full request-to-denial chain.",
       "category": "Certificate Lifecycle",
-      "tags": ["certificate", "auto-enrollment", "failure", "pki", "adcs"],
+      "tags": [
+        "certificate",
+        "auto-enrollment",
+        "failure",
+        "pki",
+        "adcs"
+      ],
       "relatedEventIds": [
         {
           "id": 1003,
@@ -301,9 +318,15 @@
       "level": "Information",
       "title": "Certificate removed from the certificate store",
       "summary": "A certificate was removed from the user's certificate store.",
-      "details": "Generated when a certificate is removed from the user's certificate store. Key fields: certificate thumbprint, subject name, issuer, and the reason for removal (e.g., expiry, manual deletion, superseded by renewal). Certificate removal events can indicate: (1) attacker cleanup — removing a certificate that was used for authentication after an ESC attack to destroy evidence; (2) defensive response — security tooling or an incident responder removing a malicious certificate; (3) legitimate renewal — an expiring certificate being replaced by a new one. Correlate EID 1006 with EID 1004 using the thumbprint to establish the full install-to-removal lifecycle. A certificate that was installed via an unexpected template (flagged by EID 1004) and then removed shortly after a PKINIT authentication (KDC EID 27) is strong evidence of ADCS exploitation followed by cleanup.",
+      "details": "Generated when a certificate is removed from the user's certificate store. Correlate with EID 1004 using the thumbprint to establish the full install-to-removal lifecycle.",
       "category": "Certificate Lifecycle",
-      "tags": ["certificate", "removal", "pki", "adcs", "defense-evasion"],
+      "tags": [
+        "certificate",
+        "removal",
+        "pki",
+        "adcs",
+        "defense-evasion"
+      ],
       "relatedEventIds": [
         {
           "id": 1004,
@@ -407,9 +430,14 @@
       "level": "Warning",
       "title": "Certificate is expiring soon",
       "summary": "A certificate in the user's store is approaching its expiration date.",
-      "details": "Generated when the Certificate Services client detects that a certificate in the user's store is nearing its expiration date and triggers an auto-renewal attempt or notification. Key fields: certificate thumbprint, subject name, issuer, and expiration date. While primarily a certificate management health event, EID 20 has forensic utility: an expiration warning for a certificate that was not previously observed in EID 1003/1004 events (i.e., it was installed outside of normal auto-enrollment) indicates a certificate that may have been manually imported or installed by an attacker. Correlate with EID 1004 to verify whether the certificate's installation was logged. A certificate present in the store with no corresponding EID 1004 may indicate it was imported directly (e.g., from a stolen PFX file) rather than enrolled through normal channels.",
+      "details": "Generated when the Certificate Services client detects that a certificate in the user's store is nearing its expiration date and triggers an auto-renewal attempt or notification.",
       "category": "Certificate Lifecycle",
-      "tags": ["certificate", "expiry", "pki", "anomaly-detection"],
+      "tags": [
+        "certificate",
+        "expiry",
+        "pki",
+        "anomaly-detection"
+      ],
       "relatedEventIds": [
         {
           "id": 1003,

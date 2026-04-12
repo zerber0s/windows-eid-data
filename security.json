@@ -692,7 +692,7 @@
       "level": "AuditSuccess",
       "title": "A handle to an object was closed",
       "summary": "An open object handle was closed, completing the handle lifecycle.",
-      "details": "Generated when a handle opened with auditing (EID 4656) is closed. Completes the 4656 (handle opened) → 4663 (object accessed) → 4658 (handle closed) lifecycle chain critical for LSASS credential-dumping detection. In LSASS-dump scenarios the sequence is: 4656 (handle to lsass.exe requested with PROCESS_VM_READ), 4663 (memory read performed), 4658 (handle closed). Without 4658 the handle lifecycle is incomplete and the time window of access cannot be determined. Key fields: HandleId (links to the matching 4656), SubjectUserName, ProcessId, and ObjectType. This event is generated for every audited handle close and can be high volume if object access auditing is broadly enabled — focus monitoring on HandleId values that appeared in 4656 events on sensitive objects (lsass.exe, SAM, NTDS).",
+      "details": "Generated when a handle opened with auditing (EID 4656) is closed. Completes the 4656→4663→4658 lifecycle chain for LSASS credential-dumping detection — without EID 4658 the access time window cannot be determined.",
       "category": "Object Access",
       "tags": [
         "handle",
@@ -777,7 +777,7 @@
       "level": "AuditSuccess",
       "title": "An object was deleted",
       "summary": "An audited file, registry key, or other object was deleted.",
-      "details": "Generated when a file, registry key, or other auditable object is deleted, provided the object has a SACL granting audit access on the DELETE operation. Completes the object access triad alongside EID 4656 (handle opened) and EID 4663 (access performed). Key fields: HandleId (links to the matching 4656), SubjectUserName, ObjectType, and ProcessId. DFIR relevance: attackers deleting evidence files, removing registry persistence keys, or wiping staging areas will generate this event if the targeted objects have SACLs. Note that HandleId links to the earlier 4656 event that identifies ObjectName, since EID 4660 itself does not include the object path.",
+      "details": "Generated when an auditable object is deleted, provided the object has a SACL configured for the DELETE operation. Completes the object access triad alongside EID 4656 (handle opened) and EID 4663 (access performed). EID 4660 does not include the deleted object path — HandleId must be correlated with the matching EID 4656 to retrieve ObjectName.",
       "category": "Object Access",
       "tags": [
         "file-access",
@@ -1409,7 +1409,7 @@
       "level": "AuditSuccess",
       "title": "An attempt was made to duplicate a handle to an object",
       "summary": "A process attempted to duplicate an object handle into another process.",
-      "details": "Generated when a handle to an object is duplicated from one process into another, provided Audit Handle Manipulation is enabled. Key fields: SourceHandleId, SourceProcessId, TargetHandleId, TargetProcessId, and SubjectUserName. This event is a key indicator for LSASS credential-dumping techniques that use handle duplication rather than a direct process-open call. Tools like ProcDump and custom malware may obtain an LSASS handle by duplicating an existing handle from a trusted process (such as a security product or svchost.exe that already holds an LSASS handle), bypassing direct-open detection at EID 4656. The attack pattern: SourceProcessId is the trusted process with an existing LSASS handle; TargetProcessId is the attacker process. Correlate TargetProcessId with EID 4688 CommandLine to identify the receiving process.",
+      "details": "Generated when a handle to an object is duplicated from one process into another, provided Audit Handle Manipulation is enabled. Surfaces handle-duplication LSASS credential-dumping — attackers can avoid direct-open detection (EID 4656) by duplicating an existing handle from a trusted process.",
       "category": "Credential Access",
       "tags": [
         "handle",
@@ -2079,7 +2079,7 @@
       "level": "AuditSuccess",
       "title": "A scheduled task was disabled",
       "summary": "A scheduled task was disabled.",
-      "details": "Generated every time a scheduled task is disabled. Key fields: SubjectUserName and TaskName. Attackers disable scheduled tasks to suppress security tool operations — common targets include Windows Defender definition update tasks, antivirus scan schedules, backup tasks, and security monitoring agents that rely on scheduled tasks for their update or health-check cycle. An unexpected task disablement, especially targeting tasks in \\Microsoft\\Windows\\Windows Defender\\ or security vendor paths, is a defense evasion indicator. Correlate with EID 4700 (task enabled) and Task Scheduler EID 200 (task action) to determine the before/after execution state.",
+      "details": "Generated every time a scheduled task is disabled. Correlate with EID 4700 (task enabled) to identify disablement windows and Task Scheduler EID 200 to confirm whether the task ran before being disabled.",
       "category": "Defense Evasion",
       "tags": [
         "scheduled-task",
@@ -2663,7 +2663,7 @@
       "level": "AuditSuccess",
       "title": "The audit policy (SACL) on an object was changed",
       "summary": "The SACL governing auditing on a specific object was modified.",
-      "details": "Generated when the SACL (System Access Control List) portion of an object's security descriptor is changed, specifically when the auditing rules controlling which access operations generate audit events are modified. This is distinct from EID 4719 (system-wide audit policy change) and EID 4907 (auditing settings changed on an open handle): EID 4715 records direct changes to an object's SACL. Attackers with write permissions to an object may modify its SACL to remove auditing entries, preventing future access from generating EID 4656, 4663, or 4660. Key fields: SubjectUserName, ObjectName, ObjectType, OldSd (old security descriptor), and NewSd (new security descriptor). SACL removal from sensitive objects such as NTDS.dit, SAM, or LSASS may be a precursor to credential access operations.",
+      "details": "Generated when the SACL portion of an object's security descriptor is changed, modifying which access operations generate audit events. Distinct from EID 4719 (system-wide audit policy) and EID 4907 (in-session SACL change on an open handle).",
       "category": "Defense Evasion",
       "tags": [
         "audit-policy",
@@ -3159,7 +3159,7 @@
       "level": "AuditSuccess",
       "title": "A security-enabled global group was created",
       "summary": "A new security-enabled global group was created.",
-      "details": "Generated when a security-enabled global group is created in Active Directory or locally. Global security groups are the primary group type for organizing users and assigning permissions within a domain. Attackers who establish a foothold in Active Directory may create new global security groups to aggregate compromised accounts, establish persistent privilege structures, or build a shadow administration infrastructure. Key fields: SubjectUserName (account that created the group), TargetUserName (new group name), and TargetSid (newly assigned SID). Correlate with subsequent EID 4728 events to detect rapid population of the newly created group.",
+      "details": "Generated when a security-enabled global group is created in Active Directory or locally. Correlate with subsequent EID 4728 events to detect rapid membership population after group creation.",
       "category": "Group Management",
       "tags": [
         "group-created",
@@ -3368,7 +3368,7 @@
       "level": "AuditSuccess",
       "title": "A security-enabled global group was deleted",
       "summary": "A security-enabled global group was deleted.",
-      "details": "Generated when a security-enabled global group is deleted. Deletion may indicate attacker cleanup of a previously created persistence group, or a disruptive action targeting legitimate groups used by security tooling or service accounts. Key fields: SubjectUserName and TargetUserName (deleted group name). Correlate EID 4730 with EID 4727 to detect groups created and subsequently deleted within a short timeframe — a creation-then-deletion pattern is characteristic of attacker cleanup. Deletion of groups that service accounts or applications depend on for permissions causes downstream authentication failures.",
+      "details": "Generated when a security-enabled global group is deleted. Correlate with EID 4727 to identify groups created and deleted in a short window — a common attacker cleanup pattern.",
       "category": "Defense Evasion",
       "tags": [
         "group-deleted",
@@ -4121,7 +4121,7 @@
       "level": "AuditSuccess",
       "title": "A security-enabled universal group was created",
       "summary": "A new security-enabled universal group was created.",
-      "details": "Generated when a security-enabled universal group is created. Universal security groups can contain members from any domain in the forest and can be assigned permissions in any domain, making them the broadest-scope group type in Active Directory. Attacker-created universal groups may be used to establish persistent forest-wide privilege without appearing in domain-specific group membership reviews. Key fields: SubjectUserName and TargetUserName (new group name). Universal group creation by non-admin accounts or during off-hours is anomalous. Correlate with subsequent EID 4756 events to detect rapid population.",
+      "details": "Generated when a security-enabled universal group is created. Universal groups can span all domains in a forest and are the broadest-scope group type in Active Directory. Correlate with subsequent EID 4756 events to detect rapid post-creation population.",
       "category": "Group Management",
       "tags": [
         "group-created",
@@ -4333,7 +4333,7 @@
       "level": "AuditSuccess",
       "title": "A security-enabled universal group was deleted",
       "summary": "A security-enabled universal group was deleted.",
-      "details": "Generated when a security-enabled universal group is deleted. Because universal groups span all domains in the forest, deletion of a widely-used universal group can cause broad authentication and access failures across the entire forest. Key fields: SubjectUserName and TargetUserName (deleted group name). Correlate with EID 4754 (group created) to detect creation-then-deletion cleanup patterns. Deletion of built-in universal groups such as Enterprise Admins is a critical indicator — these groups should never be deleted in production environments.",
+      "details": "Generated when a security-enabled universal group is deleted. Deletion of widely-used universal groups can cause authentication failures across the entire forest. Correlate with EID 4754 to identify groups created and deleted in a short window.",
       "category": "Defense Evasion",
       "tags": [
         "group-deleted",
@@ -4410,7 +4410,7 @@
       "level": "AuditSuccess",
       "title": "A group's type was changed",
       "summary": "The scope or type of an Active Directory group was modified.",
-      "details": "Generated when the type or scope of an Active Directory group is changed — for example, converting a distribution group to a security group, or changing a global group to a universal group. Group type conversions are a subtle privilege manipulation technique: attackers may convert a distribution group (which cannot be used for permission assignments) to a security group to make it usable in ACLs, or convert an existing global group to universal scope to enable forest-wide access. Key fields: SubjectUserName, TargetUserName (group name), and GroupTypeChange (shows old and new type values). The conversion of a distribution group containing privileged users into a security group is particularly high-risk as it silently grants those users new access rights corresponding to the group's ACL memberships.",
+      "details": "Generated when the type or scope of an Active Directory group is changed — for example, converting a distribution group to a security group, or changing a global group to a universal group.",
       "category": "Privilege Escalation",
       "tags": [
         "group-management",
@@ -5428,7 +5428,7 @@
       "level": "AuditSuccess",
       "title": "Boot Configuration Data loaded",
       "summary": "The Boot Configuration Data (BCD) store was loaded at system startup.",
-      "details": "Generated at every system boot when the Boot Configuration Data (BCD) store is loaded. The BCD store contains the boot configuration — boot entries, bootloader settings, and feature flags — that governs how the OS starts. This event is used to detect boot-level persistence and pre-OS tampering. Key fields include flags for KernelDebugEnabled, HypervisorDebugEnabled, CodeIntegrityEnabled, TestSigningEnabled, and WinPEEnabled. An attacker who modifies BCD to enable test-signing mode (TestSigningEnabled: Yes) can load unsigned kernel drivers, effectively bypassing driver signature enforcement. Disabling CodeIntegrity (CodeIntegrityEnabled: No) removes kernel module signing checks. Enabling KernelDebugging exposes the kernel to debugger-level manipulation. Establish a BCD baseline from initial boot events and alert on any deviation. Correlate with preceding bcdedit.exe process creation events (EID 4688) by unexpected accounts before the BCD change took effect.",
+      "details": "Generated at every system boot when the Boot Configuration Data (BCD) store is loaded. The BCD store contains the boot configuration and feature flags that govern OS startup.",
       "category": "Persistence/Defense Evasion",
       "tags": [
         "boot",
@@ -5809,7 +5809,7 @@
       "level": "AuditSuccess",
       "title": "Auditing settings on an object were changed",
       "summary": "The SACL on an audited object was modified.",
-      "details": "Generated when the auditing settings (SACL) of an object are changed while the object is being accessed under an active handle. Complements EID 4715 (SACL changed via a security descriptor write) and records in-session modifications to object-level audit policy. Key fields: SubjectUserName, ObjectName, ObjectType, OldSd (old SACL), and NewSd (new SACL). Attackers who remove SACL entries from sensitive files or registry keys mid-session effectively blind audit logging for subsequent operations on those objects. Removing the SACL from NTDS.dit, the SAM database, or LSASS before performing a credential access operation is a documented defense evasion technique.",
+      "details": "Generated when the auditing settings (SACL) of an object are changed mid-session while being accessed under an active handle. Complements EID 4715 (SACL changed via a security descriptor write) and captures in-session audit policy modifications.",
       "category": "Defense Evasion",
       "tags": [
         "audit-policy",
@@ -5907,7 +5907,7 @@
       "level": "AuditSuccess",
       "title": "Per User Audit Policy was changed",
       "summary": "The per-user audit policy for a specific account was modified.",
-      "details": "Generated when the per-user audit policy is changed for a specific user account. Windows supports granular per-user audit policies that override the system-wide audit policy for individual accounts. Attackers with administrative privileges may use per-user audit policy to exempt their own account (or a compromised service account) from auditing, suppressing events like EID 4624 (logon), EID 4688 (process creation), and EID 4663 (object access) for that specific account. Key fields: SubjectUserName (who made the change), TargetUserName (the account whose audit policy was modified), CategoryId (which audit category was changed), and AuditPolicyChanges (old and new settings). Per-user audit policies are rarely used in production environments — any occurrence outside of documented security engineering work warrants immediate investigation.",
+      "details": "Generated when the per-user audit policy is changed for a specific user account. Per-user policies override the system-wide audit policy for individual accounts.",
       "category": "Defense Evasion",
       "tags": [
         "audit-policy",
@@ -6176,7 +6176,7 @@
       "level": "AuditSuccess",
       "title": "Special groups have been assigned to a new logon",
       "summary": "A logon matched the Special Groups monitoring list.",
-      "details": "Generated when a user logs on and is a member of one or more groups listed in the Special Groups registry value (HKLM\\System\\CurrentControlSet\\Control\\Lsa\\Audit\\SpecialGroups). This event provides targeted high-value account monitoring: administrators configure SpecialGroups with the SIDs of privileged or sensitive groups, and Windows generates EID 4964 whenever a member of those groups logs on. Unlike broad group monitoring via EID 4728, this event fires at logon time and directly correlates group membership with an active session. Key fields: SubjectUserName (the user logging on), SubjectLogonId (links to EID 4624), and SidList (the matched special group SIDs). Especially useful for monitoring accounts with Domain Admin, Enterprise Admin, or other privileged memberships to detect unexpected or anomalous privileged logons.",
+      "details": "Generated when a user logs on who is a member of a group listed in the SpecialGroups registry value (HKLM\\System\\CurrentControlSet\\Control\\Lsa\\Audit\\SpecialGroups). Fires at logon time and directly correlates group membership with an active session. Requires SpecialGroups to be pre-configured with monitored group SIDs.",
       "category": "Authentication/Privilege Escalation",
       "tags": [
         "authentication",

@@ -342,7 +342,7 @@
       "level": "Information",
       "title": "Task triggered on registration",
       "summary": "A scheduled task executed immediately upon being registered.",
-      "details": "Generated when a newly registered task is configured to run immediately at registration time (i.e., the task has a registration trigger). This is a distinct and high-value event: most legitimate software uses time-based or event-based triggers, not registration triggers. Attackers commonly use registration triggers to execute a payload immediately upon task creation, combining the persistence mechanism with instant execution in a single operation. This pattern avoids the need to wait for a scheduled time or trigger event. Key fields: TaskName. Correlate EID 107 with the immediately preceding EID 106 (task registered) using TaskName to identify the task definition. Then correlate with EID 200 (action started) and EID 4688 (process created) to trace what was executed.",
+      "details": "Generated when a newly registered task is configured to run immediately at registration time (i.e., the task has a registration trigger). Most legitimate software uses time-based or event-based triggers, not registration triggers. Attackers commonly use registration triggers to execute a payload immediately upon task creation, combining persistence with instant execution. Correlate with the immediately preceding EID 106 (task registered) using TaskName to identify the task definition.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
@@ -571,7 +571,7 @@
       "level": "Warning",
       "title": "Task action failed to start: executable not found",
       "summary": "A scheduled task's action could not start because the target executable was not found.",
-      "details": "Generated when Task Scheduler attempts to run a task but cannot locate the executable specified in the task's action. Key fields: TaskName, ActionName (the missing executable path), and ResultCode. This event surfaces residual persistence artifacts: malware that installs a scheduled task pointing to a dropped payload may have the payload removed by a security tool or defender while the task itself remains in the scheduler. Repeated EID 126 events for the same TaskName over an extended period indicate a persistence task that is still registered even though its payload has been eliminated. This event is a useful starting point for cleaning up stale attacker-created tasks that security tools have defanged but not fully removed. Correlate with EID 106 to retrieve the original task definition and the account that created it.",
+      "details": "Generated when Task Scheduler attempts to run a task but cannot locate the executable specified in the task's action. Surfaces residual persistence artifacts — malware payloads removed by security tooling while the task itself remains registered will continuously trigger this event. Correlate with EID 106 to retrieve the original task definition and the account that created it.",
       "category": "Task Execution",
       "tags": [
         "scheduled-task",
