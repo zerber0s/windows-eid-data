@@ -1,0 +1,492 @@
+{
+  "dataset": {
+    "name": "Scenario Enrichment",
+    "version": "0.1.0",
+    "generatedAt": "2026-05-04T00:00:00Z"
+  },
+  "entries": [
+    {
+      "name": "Mimikatz",
+      "type": "tool",
+      "keywords": ["mimikatz", "credential", "lsass", "pass-the-hash", "pth", "golden ticket", "dcsync", "sekurlsa", "kerberos", "ntlm hash"],
+      "summary": "Post-exploitation tool that dumps LSASS for plaintext passwords, NTLM hashes, and Kerberos tickets. Supports DCSync, Golden/Silver Ticket, and Pass-the-Hash.",
+      "relatedEventIds": [4624, 4625, 4648, 4672, 4768, 4769, 4771]
+    },
+    {
+      "name": "Cobalt Strike",
+      "type": "tool",
+      "keywords": ["cobalt strike", "beacon", "c2", "command and control", "apt", "post-exploitation", "malleable"],
+      "summary": "Commercial adversary simulation framework using Beacon implants for C2. Supports lateral movement, credential harvesting, and payload staging via HTTP/S, DNS, and SMB channels.",
+      "relatedEventIds": [1, 3, 7, 8, 11, 4624, 4688, 7045]
+    },
+    {
+      "name": "Impacket",
+      "type": "tool",
+      "keywords": ["impacket", "psexec", "wmiexec", "smbexec", "atexec", "dcomexec", "secretsdump", "ntlmrelayx"],
+      "summary": "Python toolkit for crafting network protocols. Includes PsExec, WMIExec, SMBExec, SecretsDump, and NTLMRelayx for remote execution, credential dumping, and relay attacks.",
+      "relatedEventIds": [4624, 4648, 4672, 4688, 7045, 5140, 5145]
+    },
+    {
+      "name": "BloodHound",
+      "type": "tool",
+      "keywords": ["bloodhound", "sharphound", "active directory", "ad recon", "attack path", "acl", "graph"],
+      "summary": "AD reconnaissance tool that maps attack paths via graph analysis. SharpHound collector enumerates users, groups, sessions, ACLs, and trust relationships.",
+      "relatedEventIds": [4624, 4662, 4799, 5145]
+    },
+    {
+      "name": "Rubeus",
+      "type": "tool",
+      "keywords": ["rubeus", "kerberoasting", "asreproasting", "kerberos", "tgt", "tgs", "s4u", "delegation"],
+      "summary": "C# Kerberos abuse toolkit. Performs Kerberoasting, AS-REP Roasting, constrained/unconstrained delegation abuse, and ticket manipulation.",
+      "relatedEventIds": [4768, 4769, 4771, 4770]
+    },
+    {
+      "name": "CrackMapExec / NetExec",
+      "type": "tool",
+      "keywords": ["crackmapexec", "cme", "netexec", "nxc", "spray", "password spray", "smb", "winrm", "lateral"],
+      "summary": "Network pentest tool for mass authentication testing across SMB, WinRM, LDAP, MSSQL. Used for password spraying, credential validation, and command execution.",
+      "relatedEventIds": [4624, 4625, 4648, 4776, 5140, 5145]
+    },
+    {
+      "name": "PsExec",
+      "type": "tool",
+      "keywords": ["psexec", "sysinternals", "remote execution", "service", "lateral movement", "admin share"],
+      "summary": "Sysinternals remote execution utility. Creates a temporary service on the target via admin shares (ADMIN$). Widely used legitimately and by attackers for lateral movement.",
+      "relatedEventIds": [4624, 4648, 4672, 4688, 7045, 5140, 5145]
+    },
+    {
+      "name": "PowerSploit / PowerView",
+      "type": "tool",
+      "keywords": ["powersploit", "powerview", "invoke-mimikatz", "get-netuser", "get-netcomputer", "ad enumeration"],
+      "summary": "PowerShell post-exploitation framework. PowerView module provides AD enumeration (users, groups, GPOs, trusts). Often loaded reflectively to avoid disk detection.",
+      "relatedEventIds": [4103, 4104, 800, 4688]
+    },
+    {
+      "name": "SharpHound",
+      "type": "tool",
+      "keywords": ["sharphound", "bloodhound", "collector", "ad enumeration", "ldap", "session"],
+      "summary": "BloodHound's .NET data collector. Queries LDAP, enumerates sessions, local groups, and ACLs across the domain to map attack paths.",
+      "relatedEventIds": [4624, 4662, 4799, 5145]
+    },
+    {
+      "name": "Certify / Certipy",
+      "type": "tool",
+      "keywords": ["certify", "certipy", "ad cs", "esc1", "esc4", "esc8", "certificate", "pki", "adcs"],
+      "summary": "AD Certificate Services exploitation tools. Enumerate vulnerable templates and exploit ESC1-ESC8 misconfigurations for privilege escalation via certificate abuse.",
+      "relatedEventIds": [4886, 4887, 4768]
+    },
+    {
+      "name": "Sliver",
+      "type": "tool",
+      "keywords": ["sliver", "c2", "implant", "command and control", "mtls", "wireguard"],
+      "summary": "Open-source C2 framework with mTLS, WireGuard, HTTP/S, and DNS transports. Supports process injection, pivoting, and extension loading.",
+      "relatedEventIds": [1, 3, 7, 8, 4624, 4688]
+    },
+    {
+      "name": "Brute Ratel",
+      "type": "tool",
+      "keywords": ["brute ratel", "brc4", "badger", "c2", "edr evasion"],
+      "summary": "Commercial C2 framework designed for EDR evasion. Badger implants use syscall-level techniques to avoid userland API hooks.",
+      "relatedEventIds": [1, 3, 7, 4688, 4624]
+    },
+    {
+      "name": "LaZagne",
+      "type": "tool",
+      "keywords": ["lazagne", "credential", "browser password", "wifi password", "credential harvesting"],
+      "summary": "Multi-platform credential recovery tool. Extracts passwords from browsers, WiFi, mail clients, databases, and Windows credential stores.",
+      "relatedEventIds": [4663, 4656, 4688]
+    },
+    {
+      "name": "Seatbelt",
+      "type": "tool",
+      "keywords": ["seatbelt", "ghostpack", "situational awareness", "host recon", "enumeration"],
+      "summary": "GhostPack .NET host-survey tool. Collects OS info, installed software, firewall rules, browser data, credential files, and security product status.",
+      "relatedEventIds": [4688, 4663]
+    },
+    {
+      "name": "Responder",
+      "type": "tool",
+      "keywords": ["responder", "llmnr", "nbt-ns", "mdns", "poisoning", "ntlm relay", "netntlm"],
+      "summary": "LLMNR/NBT-NS/mDNS poisoner and rogue authentication server. Captures NetNTLM hashes by responding to broadcast name resolution queries.",
+      "relatedEventIds": [4624, 4625, 4776, 8004]
+    },
+    {
+      "name": "Covenant",
+      "type": "tool",
+      "keywords": ["covenant", "grunt", "c2", "dotnet", "command and control"],
+      "summary": ".NET C2 framework using Grunt implants. Supports task-based execution, SMB lateral movement, and .NET assembly loading.",
+      "relatedEventIds": [1, 3, 4624, 4688, 7045]
+    },
+    {
+      "name": "ADFind",
+      "type": "tool",
+      "keywords": ["adfind", "joeware", "ldap", "ad enumeration", "domain recon", "active directory"],
+      "summary": "Command-line AD query tool. Used by attackers for domain enumeration — users, computers, OUs, trusts, subnets, and GPOs via LDAP queries.",
+      "relatedEventIds": [4662, 4624, 4688]
+    },
+    {
+      "name": "Chisel",
+      "type": "tool",
+      "keywords": ["chisel", "tunnel", "pivot", "proxy", "socks", "port forward"],
+      "summary": "TCP/UDP tunnel over HTTP using SSH protocol. Used for pivoting and port forwarding through firewalls to reach internal networks.",
+      "relatedEventIds": [3, 5156, 4688]
+    },
+    {
+      "name": "LSASS Dump",
+      "type": "technique",
+      "keywords": ["lsass", "dump", "procdump", "comsvcs", "minidump", "credential dump", "task manager"],
+      "summary": "Dumping the LSASS process memory to extract credentials. Methods include procdump, comsvcs.dll MiniDump, Task Manager, and direct memory reads.",
+      "relatedEventIds": [1, 10, 4656, 4663, 4688]
+    },
+    {
+      "name": "Kerberoasting",
+      "type": "technique",
+      "keywords": ["kerberoasting", "spn", "service principal", "tgs", "service ticket", "offline crack"],
+      "summary": "Requesting TGS tickets for SPNs and cracking them offline to recover service account passwords. No special privileges required beyond domain authentication.",
+      "relatedEventIds": [4769, 4770]
+    },
+    {
+      "name": "AS-REP Roasting",
+      "type": "technique",
+      "keywords": ["asreproasting", "asrep", "preauth", "preauthentication", "roasting"],
+      "summary": "Requesting AS-REP for accounts with Kerberos pre-authentication disabled, then cracking the encrypted portion offline for the password.",
+      "relatedEventIds": [4768, 4771]
+    },
+    {
+      "name": "DCSync",
+      "type": "technique",
+      "keywords": ["dcsync", "drsuapi", "replication", "ntds", "domain controller", "krbtgt"],
+      "summary": "Simulating domain controller replication via DRSUAPI to pull password hashes from AD. Requires Replicating Directory Changes privileges.",
+      "relatedEventIds": [4662, 4624, 4742]
+    },
+    {
+      "name": "Golden Ticket",
+      "type": "technique",
+      "keywords": ["golden ticket", "krbtgt", "tgt", "forged", "kerberos", "persistence"],
+      "summary": "Forging a TGT using the compromised KRBTGT hash. Grants unrestricted domain access and persists until the KRBTGT password is reset twice.",
+      "relatedEventIds": [4768, 4769, 4624, 4672]
+    },
+    {
+      "name": "Silver Ticket",
+      "type": "technique",
+      "keywords": ["silver ticket", "service ticket", "tgs", "forged", "service account"],
+      "summary": "Forging a TGS for a specific service using its NTLM hash. Bypasses KDC and provides targeted access without touching the domain controller.",
+      "relatedEventIds": [4624, 4634, 4672]
+    },
+    {
+      "name": "Pass-the-Hash",
+      "type": "technique",
+      "keywords": ["pass-the-hash", "pth", "ntlm", "hash", "overpass", "lateral"],
+      "summary": "Authenticating with an NTLM hash instead of a plaintext password. Enables lateral movement without knowing the actual password.",
+      "relatedEventIds": [4624, 4625, 4648, 4672, 8004]
+    },
+    {
+      "name": "Pass-the-Ticket",
+      "type": "technique",
+      "keywords": ["pass-the-ticket", "ptt", "kerberos", "ticket", "stolen", "inject"],
+      "summary": "Injecting stolen Kerberos tickets into a session to impersonate another user. Works with both TGTs and service tickets.",
+      "relatedEventIds": [4624, 4648, 4768, 4769]
+    },
+    {
+      "name": "DLL Sideloading",
+      "type": "technique",
+      "keywords": ["dll sideloading", "dll hijack", "search order", "proxy", "side-loading"],
+      "summary": "Placing a malicious DLL where a legitimate program will load it due to search order. Executes attacker code under a trusted process.",
+      "relatedEventIds": [7, 4688, 3033, 3065]
+    },
+    {
+      "name": "Process Injection",
+      "type": "technique",
+      "keywords": ["process injection", "inject", "hollowing", "shellcode", "createremotethread"],
+      "summary": "Injecting code into a running process for execution under its context. Techniques include CreateRemoteThread, process hollowing, and APC injection.",
+      "relatedEventIds": [1, 8, 10, 4688]
+    },
+    {
+      "name": "NTLM Relay",
+      "type": "technique",
+      "keywords": ["ntlm relay", "relay", "ntlmrelayx", "coercion", "petitpotam", "printerbug"],
+      "summary": "Forwarding captured NTLM authentication to another service. Combined with coercion attacks (PetitPotam, PrinterBug) to escalate privileges.",
+      "relatedEventIds": [4624, 4625, 4776, 8004]
+    },
+    {
+      "name": "Scheduled Task Persistence",
+      "type": "technique",
+      "keywords": ["scheduled task", "schtasks", "at", "persistence", "task scheduler"],
+      "summary": "Creating or modifying scheduled tasks to execute payloads at system startup, user logon, or on a recurring schedule for persistence.",
+      "relatedEventIds": [106, 140, 141, 200, 201, 4698, 4699, 4700, 4702]
+    },
+    {
+      "name": "WMI Persistence",
+      "type": "technique",
+      "keywords": ["wmi", "event subscription", "filter", "consumer", "mof", "persistence"],
+      "summary": "Using WMI event subscriptions (filter + consumer + binding) to trigger payload execution on system events. Survives reboots without file-based indicators.",
+      "relatedEventIds": [5857, 5858, 5859, 5860, 5861]
+    },
+    {
+      "name": "Living Off the Land (LOLBins)",
+      "type": "technique",
+      "keywords": ["lolbin", "lolbas", "living off the land", "certutil", "mshta", "regsvr32", "rundll32", "bitsadmin", "msiexec"],
+      "summary": "Using built-in Windows binaries for malicious purposes — downloading payloads, executing code, or bypassing application controls without dropping custom tools.",
+      "relatedEventIds": [1, 4688, 4104, 800]
+    },
+    {
+      "name": "PowerShell Cradle",
+      "type": "technique",
+      "keywords": ["powershell", "cradle", "download", "iex", "invoke-expression", "encoded", "bypass"],
+      "summary": "One-liner PowerShell commands that download and execute code in memory. Often encoded or obfuscated to evade detection. IEX(New-Object Net.WebClient).DownloadString pattern.",
+      "relatedEventIds": [4103, 4104, 800, 4688]
+    },
+    {
+      "name": "Log Clearing / Indicator Removal",
+      "type": "technique",
+      "keywords": ["log clearing", "wevtutil", "clear-eventlog", "indicator removal", "tamper", "audit"],
+      "summary": "Clearing Windows event logs to remove evidence of activity. Done via wevtutil, Clear-EventLog, or direct manipulation of .evtx files.",
+      "relatedEventIds": [1100, 1102, 104, 4688]
+    },
+    {
+      "name": "Registry Run Key Persistence",
+      "type": "technique",
+      "keywords": ["registry", "run key", "runonce", "persistence", "startup", "autorun"],
+      "summary": "Adding entries to HKLM/HKCU Run or RunOnce registry keys to execute programs at user logon. One of the most common persistence mechanisms.",
+      "relatedEventIds": [13, 4657, 4688]
+    },
+    {
+      "name": "Service Creation Persistence",
+      "type": "technique",
+      "keywords": ["service", "sc create", "new-service", "persistence", "system service"],
+      "summary": "Installing a new Windows service that runs a malicious binary. Executes as SYSTEM and persists across reboots. Commonly seen with PsExec.",
+      "relatedEventIds": [7045, 4697, 7009, 4688]
+    },
+    {
+      "name": "Token Impersonation",
+      "type": "technique",
+      "keywords": ["token", "impersonation", "delegation", "privilege", "potato", "rotten", "juicy", "sweet"],
+      "summary": "Stealing or manipulating Windows access tokens to escalate privileges or impersonate other users. Potato family exploits abuse service account tokens for SYSTEM.",
+      "relatedEventIds": [4624, 4672, 4648, 4688]
+    },
+    {
+      "name": "DPAPI Abuse",
+      "type": "technique",
+      "keywords": ["dpapi", "masterkey", "credential", "backup key", "domain backup"],
+      "summary": "Abusing Windows Data Protection API to decrypt user secrets (browser passwords, saved credentials). Domain backup key allows decrypting any domain user's DPAPI blobs.",
+      "relatedEventIds": [4692, 4693, 4695, 4688]
+    },
+    {
+      "name": "Shadow Credentials",
+      "type": "technique",
+      "keywords": ["shadow credentials", "msds-keycredentiallink", "whisker", "pkinit", "certificate"],
+      "summary": "Adding rogue key credentials to a target's msDS-KeyCredentialLink attribute, then using PKINIT to authenticate as that target and obtain their NTLM hash.",
+      "relatedEventIds": [4624, 4662, 4768, 5136]
+    },
+    {
+      "name": "AD CS Escalation (ESC1-ESC8)",
+      "type": "technique",
+      "keywords": ["esc1", "esc2", "esc3", "esc4", "esc6", "esc8", "ad cs", "certificate template", "enrollee"],
+      "summary": "Exploiting misconfigured AD Certificate Services templates to obtain certificates for arbitrary users, enabling domain privilege escalation.",
+      "relatedEventIds": [4886, 4887, 4768, 4624]
+    },
+    {
+      "name": "LSASS Memory",
+      "type": "definition",
+      "keywords": ["lsass", "local security authority", "authentication", "credential store"],
+      "summary": "Local Security Authority Subsystem Service — the Windows process that handles authentication and stores credentials in memory. Primary target for credential dumping.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "NTDS.dit",
+      "type": "definition",
+      "keywords": ["ntds", "ntds.dit", "domain database", "active directory database", "dit"],
+      "summary": "The Active Directory database file on domain controllers containing all domain objects including password hashes. Extractable via ntdsutil, Volume Shadow Copy, or DCSync.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "SAM Database",
+      "type": "definition",
+      "keywords": ["sam", "security accounts manager", "local accounts", "registry hive"],
+      "summary": "Security Accounts Manager — registry hive storing local user account password hashes. Extractable via reg save, Volume Shadow Copy, or in-memory techniques.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Prefetch",
+      "type": "definition",
+      "keywords": ["prefetch", "pf", "forensic artifact", "execution evidence", "timeline"],
+      "summary": "Windows artifact (.pf files in C:\\Windows\\Prefetch) that records program execution with timestamps, run counts, and loaded files. Key evidence for timeline analysis.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Master File Table (MFT)",
+      "type": "definition",
+      "keywords": ["mft", "$mft", "master file table", "ntfs", "filesystem", "timestamp"],
+      "summary": "NTFS metadata structure recording all file entries with creation, modification, access, and entry-modified timestamps. Critical for filesystem timeline forensics.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "USN Journal",
+      "type": "definition",
+      "keywords": ["usn", "journal", "change journal", "$usnjrnl", "file changes", "ntfs"],
+      "summary": "NTFS Update Sequence Number Journal — logs filesystem changes (create, delete, rename, write) with timestamps. Survives file deletion and is key for tracking file activity.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Shimcache / AppCompatCache",
+      "type": "definition",
+      "keywords": ["shimcache", "appcompatcache", "application compatibility", "execution", "forensic"],
+      "summary": "Registry-based artifact tracking executables the OS checked for compatibility. Records file path, size, and last-modified timestamp. Proves file existed on disk.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Amcache",
+      "type": "definition",
+      "keywords": ["amcache", "amcache.hve", "execution", "sha1", "installed programs"],
+      "summary": "Registry hive recording application execution and installation with SHA1 hashes, file paths, and timestamps. Persists after file deletion.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "SRUM (System Resource Usage Monitor)",
+      "type": "definition",
+      "keywords": ["srum", "srudb", "resource usage", "network usage", "application usage"],
+      "summary": "Windows database tracking 30-60 days of application resource usage — network bytes sent/received per-app, CPU time, and energy usage. Proves application activity.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Volume Shadow Copy",
+      "type": "definition",
+      "keywords": ["vss", "shadow copy", "volume shadow", "snapshot", "vssadmin", "previous versions"],
+      "summary": "Windows snapshot service preserving point-in-time copies of files. Attackers use it to extract SAM/NTDS.dit; defenders use it to recover deleted evidence.",
+      "relatedEventIds": [8224, 8225]
+    },
+    {
+      "name": "Windows Event Forwarding (WEF)",
+      "type": "definition",
+      "keywords": ["wef", "wec", "event forwarding", "subscription", "centralized logging"],
+      "summary": "Built-in Windows mechanism to forward event logs from source computers to a collector. Enables centralized log analysis without third-party agents.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "ETW (Event Tracing for Windows)",
+      "type": "definition",
+      "keywords": ["etw", "event tracing", "provider", "consumer", "trace", "kernel"],
+      "summary": "Windows kernel-level tracing framework. Security products hook ETW providers for visibility. Attackers may patch ETW to blind detection (ETW tampering).",
+      "relatedEventIds": []
+    },
+    {
+      "name": "AMSI (Antimalware Scan Interface)",
+      "type": "definition",
+      "keywords": ["amsi", "antimalware", "scan interface", "bypass", "powershell", "script block"],
+      "summary": "Windows API that exposes script content to security products before execution. Covers PowerShell, VBScript, JScript, and .NET. Targeted for bypass by attackers.",
+      "relatedEventIds": [4104]
+    },
+    {
+      "name": "Lateral Movement",
+      "type": "definition",
+      "keywords": ["lateral movement", "pivot", "move laterally", "spread", "hop"],
+      "summary": "Post-compromise technique of moving from one system to another within a network. Common methods: RDP, PsExec, WMI, SMB, WinRM, DCOM, scheduled tasks.",
+      "relatedEventIds": [4624, 4648, 4672, 7045, 5140, 5145]
+    },
+    {
+      "name": "Privilege Escalation",
+      "type": "definition",
+      "keywords": ["privilege escalation", "privesc", "escalate", "admin", "system", "elevate"],
+      "summary": "Gaining higher-level permissions than initially obtained. Local privesc targets SYSTEM; domain privesc targets Domain Admin. Methods include token abuse, exploits, and misconfigs.",
+      "relatedEventIds": [4672, 4624, 4648, 4688]
+    },
+    {
+      "name": "Persistence",
+      "type": "definition",
+      "keywords": ["persistence", "maintain access", "backdoor", "survive reboot", "implant"],
+      "summary": "Techniques ensuring continued access after initial compromise. Survives reboots, password changes, or remediation. Common: services, tasks, registry, DLL hijack, WMI.",
+      "relatedEventIds": [7045, 4697, 4698, 13]
+    },
+    {
+      "name": "Indicators of Compromise (IOCs)",
+      "type": "definition",
+      "keywords": ["ioc", "indicator", "compromise", "hash", "ip", "domain", "artifact"],
+      "summary": "Observable artifacts indicating a security breach — file hashes, IP addresses, domain names, registry keys, or behavioral patterns used for detection and hunting.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Threat Hunting",
+      "type": "definition",
+      "keywords": ["threat hunting", "hunt", "hypothesis", "proactive", "detection"],
+      "summary": "Proactive security practice of searching for threats not caught by automated detections. Uses hypotheses, behavioral analytics, and anomaly detection across log data.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "MITRE ATT&CK",
+      "type": "definition",
+      "keywords": ["mitre", "att&ck", "attack", "framework", "tactics", "techniques", "procedures"],
+      "summary": "Knowledge base of adversary tactics, techniques, and procedures (TTPs) based on real-world observations. 14 tactics from Reconnaissance through Impact.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Sigma Rules",
+      "type": "definition",
+      "keywords": ["sigma", "detection rule", "generic", "siem", "yaml"],
+      "summary": "Generic, open-source signature format for SIEM detection rules. Platform-agnostic YAML format that can be converted to Splunk SPL, Elastic KQL, and others.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "YARA Rules",
+      "type": "definition",
+      "keywords": ["yara", "pattern", "malware", "classification", "signature", "rule"],
+      "summary": "Pattern-matching tool for malware classification. Rules define byte patterns, strings, and conditions to identify malicious files or memory content.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Timeline Analysis",
+      "type": "definition",
+      "keywords": ["timeline", "supertimeline", "plaso", "chronological", "forensic analysis"],
+      "summary": "Forensic technique of assembling timestamped artifacts (events, files, registry) into chronological order to reconstruct attacker activity and dwell time.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Memory Forensics",
+      "type": "definition",
+      "keywords": ["memory forensics", "volatility", "ram", "memory dump", "process", "injection"],
+      "summary": "Analyzing RAM captures to find running processes, network connections, injected code, encryption keys, and artifacts invisible on disk. Key tool: Volatility.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Unconstrained Delegation",
+      "type": "technique",
+      "keywords": ["unconstrained delegation", "delegation", "tgt", "trusted for delegation", "printer bug"],
+      "summary": "AD misconfiguration where a server caches client TGTs. Attackers coerce high-privilege accounts (e.g. DC) to authenticate, then steal their TGT for impersonation.",
+      "relatedEventIds": [4624, 4768, 4769]
+    },
+    {
+      "name": "Constrained Delegation Abuse",
+      "type": "technique",
+      "keywords": ["constrained delegation", "s4u", "s4u2self", "s4u2proxy", "resource-based", "rbcd"],
+      "summary": "Abusing S4U2Self/S4U2Proxy Kerberos extensions to impersonate users to specific services. Resource-Based Constrained Delegation (RBCD) is exploitable with write access to msDS-AllowedToActOnBehalfOfOtherIdentity.",
+      "relatedEventIds": [4624, 4768, 4769]
+    },
+    {
+      "name": "Group Policy Abuse",
+      "type": "technique",
+      "keywords": ["gpo", "group policy", "gpp", "cpassword", "sysvol", "scheduled task"],
+      "summary": "Exploiting Group Policy for persistence or lateral movement. Includes GPP password recovery (cpassword), malicious GPO creation for code execution across OUs.",
+      "relatedEventIds": [4739, 5136, 4688, 4698]
+    },
+    {
+      "name": "BITS Job Abuse",
+      "type": "technique",
+      "keywords": ["bits", "background intelligent transfer", "bitsadmin", "download", "persistence"],
+      "summary": "Abusing Background Intelligent Transfer Service for stealthy file downloads and persistent execution. BITS jobs survive reboots and transfer data at low priority.",
+      "relatedEventIds": [59, 60, 61, 4688]
+    },
+    {
+      "name": "Print Spooler Exploitation",
+      "type": "technique",
+      "keywords": ["print spooler", "printnightmare", "printerbug", "spoolsv", "cve-2021-34527", "cve-2021-1675"],
+      "summary": "Exploiting the Windows Print Spooler service for remote code execution (PrintNightmare) or NTLM coercion (PrinterBug/SpoolSample) for relay attacks.",
+      "relatedEventIds": [316, 808, 7045, 4688]
+    },
+    {
+      "name": "COM/DCOM Abuse",
+      "type": "technique",
+      "keywords": ["com", "dcom", "mmc20", "shellwindows", "shellbrowserwindow", "lateral"],
+      "summary": "Using COM/DCOM objects for lateral movement and code execution. Abusable objects include MMC20.Application, ShellWindows, and ShellBrowserWindow.",
+      "relatedEventIds": [4624, 4688, 10028]
+    }
+  ]
+}
