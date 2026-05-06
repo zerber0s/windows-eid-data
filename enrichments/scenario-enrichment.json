@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "Scenario Enrichment",
-    "version": "0.1.0",
-    "generatedAt": "2026-05-04T00:00:00Z"
+    "version": "0.2.0",
+    "generatedAt": "2026-05-06T00:00:00Z"
   },
   "entries": [
     {
@@ -487,6 +487,370 @@
       "keywords": ["com", "dcom", "mmc20", "shellwindows", "shellbrowserwindow", "lateral"],
       "summary": "Using COM/DCOM objects for lateral movement and code execution. Abusable objects include MMC20.Application, ShellWindows, and ShellBrowserWindow.",
       "relatedEventIds": [4624, 4688, 10028]
+    },
+    {
+      "name": "Metasploit / Meterpreter",
+      "type": "tool",
+      "keywords": ["metasploit", "msf", "meterpreter", "msfvenom", "exploit", "payload", "reverse shell"],
+      "summary": "Open-source exploitation framework with the Meterpreter in-memory payload. Provides exploit modules, post-exploitation tooling, process migration, and pivoting.",
+      "relatedEventIds": [1, 3, 7, 4624, 4688, 7045]
+    },
+    {
+      "name": "Empire / Starkiller",
+      "type": "tool",
+      "keywords": ["empire", "starkiller", "powershell empire", "c2", "agent", "stager"],
+      "summary": "PowerShell and Python C2 framework with a web UI (Starkiller). Provides modules for credential theft, lateral movement, and AD enumeration via in-memory PowerShell agents.",
+      "relatedEventIds": [4103, 4104, 800, 4624, 4688]
+    },
+    {
+      "name": "Mythic",
+      "type": "tool",
+      "keywords": ["mythic", "c2", "apollo", "athena", "poseidon", "command and control", "agent"],
+      "summary": "Multi-agent C2 framework with a web UI and pluggable payloads (Apollo for .NET, Athena for cross-platform, Poseidon for macOS/Linux). Designed for collaborative red-team operations.",
+      "relatedEventIds": [1, 3, 4624, 4688]
+    },
+    {
+      "name": "Havoc",
+      "type": "tool",
+      "keywords": ["havoc", "demon", "c2", "command and control", "implant"],
+      "summary": "Modern open-source C2 framework using the Demon implant. Supports indirect syscalls, sleep obfuscation, and modular extensions; observed in real-world intrusions.",
+      "relatedEventIds": [1, 3, 7, 4624, 4688]
+    },
+    {
+      "name": "Volatility",
+      "type": "tool",
+      "keywords": ["volatility", "vol", "memory forensics", "ram analysis", "plugin", "process list"],
+      "summary": "Open-source memory forensics framework. Parses RAM captures to enumerate processes, network connections, loaded modules, injected code, and credential material.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "KAPE",
+      "type": "tool",
+      "keywords": ["kape", "kroll artifact", "triage", "collection", "targets", "modules"],
+      "summary": "Kroll Artifact Parser and Extractor. Collects forensic artifacts (registry, event logs, browser data, prefetch) from live or mounted systems and runs parsing modules.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Velociraptor",
+      "type": "tool",
+      "keywords": ["velociraptor", "vql", "dfir", "endpoint visibility", "hunt", "artifact"],
+      "summary": "Open-source endpoint visibility and DFIR platform using VQL (Velociraptor Query Language) to hunt across fleets. Collects artifacts, monitors processes, and runs YARA scans at scale.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Hashcat",
+      "type": "tool",
+      "keywords": ["hashcat", "password crack", "offline crack", "wordlist", "rule", "gpu", "ntlm hash"],
+      "summary": "GPU-accelerated password cracker supporting hundreds of hash modes (NTLM, NetNTLMv2, Kerberos TGS, AS-REP). Standard tool for cracking output of Kerberoasting and AS-REP Roasting.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "AMSI Bypass",
+      "type": "technique",
+      "keywords": ["amsi bypass", "amsi", "patch", "amsiscanbuffer", "amsiinitfailed", "powershell bypass"],
+      "summary": "Disabling the Antimalware Scan Interface to evade in-memory script scanning. Common methods include patching amsi.dll!AmsiScanBuffer in memory or setting amsiInitFailed via reflection.",
+      "relatedEventIds": [4104, 4688]
+    },
+    {
+      "name": "ETW Patching",
+      "type": "technique",
+      "keywords": ["etw patching", "etw bypass", "etweventwrite", "ntdll patch", "blind edr"],
+      "summary": "Patching ntdll!EtwEventWrite (or related providers) in memory to suppress Event Tracing for Windows telemetry. Blinds EDR products that rely on ETW for visibility.",
+      "relatedEventIds": [4688]
+    },
+    {
+      "name": "UAC Bypass",
+      "type": "technique",
+      "keywords": ["uac bypass", "user account control", "fodhelper", "eventvwr", "sdclt", "icmluautil", "auto-elevate"],
+      "summary": "Abusing auto-elevating Windows binaries or COM objects to obtain a high-integrity process without a UAC prompt. Common targets include fodhelper.exe, eventvwr.exe, sdclt.exe, and ICMLuaUtil.",
+      "relatedEventIds": [4624, 4672, 4688, 13]
+    },
+    {
+      "name": "BYOVD (Bring Your Own Vulnerable Driver)",
+      "type": "technique",
+      "keywords": ["byovd", "vulnerable driver", "kernel", "edr kill", "rtcore64", "gigabyte", "signed driver"],
+      "summary": "Loading a legitimately signed but vulnerable kernel driver to gain ring-0 execution. Used to disable EDR/AV from the kernel; abused drivers include RTCore64, gdrv, and various OEM utilities.",
+      "relatedEventIds": [7045, 6, 4688]
+    },
+    {
+      "name": "Coercion Attacks",
+      "type": "technique",
+      "keywords": ["coercion", "petitpotam", "printerbug", "spoolsample", "dfscoerce", "shadowcoerce", "authentication coercion"],
+      "summary": "Forcing a Windows host (often a domain controller) to authenticate to an attacker-controlled endpoint via MS-EFSR, MS-RPRN, MS-DFSNM, or MS-FSRVP. Output is typically relayed (NTLM Relay) for privilege escalation.",
+      "relatedEventIds": [4624, 4625, 4776, 5145]
+    },
+    {
+      "name": "Password Spraying",
+      "type": "technique",
+      "keywords": ["password spray", "spraying", "low-and-slow", "common password", "lockout evasion"],
+      "summary": "Attempting a small number of common passwords against many accounts to avoid account lockout. Targets SMB, LDAP, OWA, ADFS, AzureAD, and on-prem Kerberos endpoints.",
+      "relatedEventIds": [4625, 4771, 4776]
+    },
+    {
+      "name": "Web Shell Deployment",
+      "type": "technique",
+      "keywords": ["web shell", "webshell", "aspx", "jsp", "php", "iis", "china chopper", "godzilla", "behinder"],
+      "summary": "Dropping a small server-side script (ASPX, PHP, JSP) into a web-accessible directory to provide persistent remote command execution. Often runs under the web server process (w3wp.exe on IIS).",
+      "relatedEventIds": [4663, 4688, 4624]
+    },
+    {
+      "name": "Ransomware Lifecycle",
+      "type": "technique",
+      "keywords": ["ransomware", "double extortion", "encryption", "ransom note", "exfil", "lockbit", "blackcat", "alphv"],
+      "summary": "End-to-end intrusion pattern: initial access, recon, credential theft, lateral movement, data exfiltration, shadow copy and backup destruction, then mass file encryption with a ransom note.",
+      "relatedEventIds": [4624, 4663, 4688, 7045, 8224]
+    },
+    {
+      "name": "Shadow Copy Deletion",
+      "type": "technique",
+      "keywords": ["vssadmin", "delete shadows", "wmic shadowcopy", "anti-forensics", "ransomware preparation"],
+      "summary": "Deleting Volume Shadow Copies via vssadmin, wmic, or PowerShell to prevent file recovery. A near-universal precursor to ransomware encryption and a strong anti-forensics signal.",
+      "relatedEventIds": [8224, 524, 4688]
+    },
+    {
+      "name": "Defender Tampering",
+      "type": "technique",
+      "keywords": ["defender tampering", "set-mppreference", "exclusion", "disable defender", "tamper protection", "asr bypass"],
+      "summary": "Disabling Microsoft Defender, adding broad path/process exclusions, or stopping its services to enable follow-on tooling. Often performed via Set-MpPreference, registry edits, or BYOVD.",
+      "relatedEventIds": [5001, 5007, 5010, 4688]
+    },
+    {
+      "name": "DCShadow",
+      "type": "technique",
+      "keywords": ["dcshadow", "rogue dc", "replication", "drsuapi", "schema", "stealth persistence"],
+      "summary": "Registering a rogue domain controller and pushing arbitrary AD object changes via replication. Bypasses normal change auditing and is used for stealth persistence (SID history, AdminSDHolder, krbtgt).",
+      "relatedEventIds": [4742, 4662, 5137, 5141]
+    },
+    {
+      "name": "Kerberos",
+      "type": "definition",
+      "keywords": ["kerberos", "krb5", "ticket", "authentication protocol", "realm"],
+      "summary": "Network authentication protocol used by Active Directory. Clients obtain a TGT from the KDC, then exchange it for service tickets (TGS) to access resources without resending credentials.",
+      "relatedEventIds": [4768, 4769, 4770, 4771, 4772, 4773]
+    },
+    {
+      "name": "NTLM",
+      "type": "definition",
+      "keywords": ["ntlm", "nt lan manager", "ntlmv2", "netntlm", "challenge response", "legacy auth"],
+      "summary": "Microsoft challenge-response authentication protocol predating Kerberos. Still used for local accounts, workgroup auth, and fallback scenarios; vulnerable to relay and offline cracking.",
+      "relatedEventIds": [4624, 4625, 4776, 8004]
+    },
+    {
+      "name": "TGT (Ticket Granting Ticket)",
+      "type": "definition",
+      "keywords": ["tgt", "ticket granting ticket", "krbtgt", "kerberos", "as-rep"],
+      "summary": "Initial Kerberos ticket issued by the KDC after pre-authentication, encrypted with the krbtgt account's key. Presented to request service tickets (TGS) without re-authenticating.",
+      "relatedEventIds": [4768, 4771]
+    },
+    {
+      "name": "TGS (Service Ticket)",
+      "type": "definition",
+      "keywords": ["tgs", "service ticket", "tgs-rep", "spn", "kerberos"],
+      "summary": "Kerberos service ticket issued by the KDC for a specific SPN, encrypted with the service account's key. Presented to the target service to authenticate the user.",
+      "relatedEventIds": [4769, 4770]
+    },
+    {
+      "name": "KDC (Key Distribution Center)",
+      "type": "definition",
+      "keywords": ["kdc", "key distribution center", "as", "tgs", "authentication service"],
+      "summary": "Kerberos service running on every domain controller. Comprises the Authentication Service (AS, issues TGTs) and the Ticket-Granting Service (TGS, issues service tickets).",
+      "relatedEventIds": [4768, 4769, 4771]
+    },
+    {
+      "name": "Krbtgt Account",
+      "type": "definition",
+      "keywords": ["krbtgt", "kerberos service account", "tgt key", "golden ticket"],
+      "summary": "Disabled domain account whose password hash encrypts every TGT issued in the domain. Compromise enables Golden Ticket forgery; remediation requires resetting the password twice.",
+      "relatedEventIds": [4768, 4769, 4742]
+    },
+    {
+      "name": "Active Directory",
+      "type": "definition",
+      "keywords": ["active directory", "ad", "directory service", "domain", "forest", "ou"],
+      "summary": "Microsoft's directory service for Windows domains. Stores users, computers, groups, GPOs, and security policy in a hierarchical structure (forest → domain → OU) replicated across domain controllers.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Domain Controller",
+      "type": "definition",
+      "keywords": ["domain controller", "dc", "ad ds", "ntds", "kdc", "global catalog"],
+      "summary": "Windows server hosting Active Directory Domain Services. Authenticates users, enforces policy, replicates the AD database (NTDS.dit), and runs the KDC for Kerberos.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "LDAP",
+      "type": "definition",
+      "keywords": ["ldap", "lightweight directory access protocol", "389", "636", "ldaps", "bind", "search"],
+      "summary": "Protocol used to query and modify Active Directory (TCP 389, or 636 for LDAPS). Underpins AD enumeration tools (BloodHound, ADFind) and many privilege-escalation attacks against the directory.",
+      "relatedEventIds": [1644, 4662]
+    },
+    {
+      "name": "Group Policy (GPO)",
+      "type": "definition",
+      "keywords": ["gpo", "group policy", "sysvol", "gpt.ini", "gpresult", "gpupdate"],
+      "summary": "Active Directory mechanism for centrally configuring user and computer settings. GPOs are stored in SYSVOL, linked to OUs/domains/sites, and applied at logon and refresh intervals.",
+      "relatedEventIds": [5136, 5137, 5141, 4739]
+    },
+    {
+      "name": "LAPS",
+      "type": "definition",
+      "keywords": ["laps", "local administrator password solution", "ms-mcs-admpwd", "windows laps", "random local password"],
+      "summary": "Microsoft solution that randomizes the local Administrator password on each domain-joined host and stores it in a protected AD attribute. Reading the attribute is a high-value attacker target.",
+      "relatedEventIds": [4662]
+    },
+    {
+      "name": "Credential Guard",
+      "type": "definition",
+      "keywords": ["credential guard", "vbs", "virtualization-based security", "lsaiso", "isolated lsa"],
+      "summary": "Windows feature that uses Virtualization-Based Security to isolate LSA secrets (NTLM hashes, Kerberos TGTs) in a hypervisor-protected process (lsaiso.exe). Blocks classic LSASS credential dumping.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Sysmon",
+      "type": "definition",
+      "keywords": ["sysmon", "system monitor", "sysinternals", "microsoft-windows-sysmon", "etw provider"],
+      "summary": "Sysinternals service and ETW provider that writes detailed process, network, file, registry, and image-load events to its own channel. Heavily used for endpoint visibility and detection engineering.",
+      "relatedEventIds": [1, 3, 7, 8, 10, 11, 13, 22]
+    },
+    {
+      "name": "C2 (Command and Control)",
+      "type": "definition",
+      "keywords": ["c2", "command and control", "beacon", "implant", "callback", "tasking"],
+      "summary": "Channel an attacker uses to issue commands to and receive output from compromised hosts. Modern C2 commonly uses HTTPS, DNS, or domain-fronted transports with sleep/jitter to blend with normal traffic.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Rclone",
+      "type": "tool",
+      "keywords": ["rclone", "exfiltration", "cloud sync", "mega", "s3", "data theft", "double extortion"],
+      "summary": "Open-source cloud storage sync utility frequently abused to exfiltrate data to attacker-controlled MEGA, Dropbox, S3, or WebDAV endpoints. Common in ransomware double-extortion playbooks.",
+      "relatedEventIds": [3, 4688]
+    },
+    {
+      "name": "Phishing / Spear-phishing",
+      "type": "technique",
+      "keywords": ["phishing", "spearphishing", "spear-phishing", "email", "lure", "attachment", "link", "credential harvest"],
+      "summary": "Sending tailored email or message lures to trick users into opening attachments, clicking malicious links, or entering credentials on attacker-controlled pages. The dominant initial-access vector across intrusion data.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "RMM Abuse",
+      "type": "technique",
+      "keywords": ["rmm", "remote management", "anydesk", "screenconnect", "connectwise", "atera", "splashtop", "teamviewer", "remote access tool"],
+      "summary": "Installing or co-opting legitimate remote monitoring and management software (AnyDesk, ScreenConnect, Atera, Splashtop, TeamViewer) for stealthy persistent access. Blends with admin activity and bypasses controls that block traditional C2 binaries.",
+      "relatedEventIds": [7045, 4624, 4688]
+    },
+    {
+      "name": "ACL / DACL Abuse",
+      "type": "technique",
+      "keywords": ["acl", "dacl", "genericall", "writedacl", "genericwrite", "writeowner", "ad permissions", "object takeover"],
+      "summary": "Exploiting permissive ACLs on AD objects (GenericAll, WriteDACL, WriteOwner, GenericWrite, WriteProperty) to take control of users, groups, computers, or GPOs. Core of BloodHound attack-path findings.",
+      "relatedEventIds": [4662, 5136, 4670]
+    },
+    {
+      "name": "RDP Session Hijacking",
+      "type": "technique",
+      "keywords": ["rdp hijack", "tscon", "session hijack", "terminal services", "session takeover", "system context"],
+      "summary": "Using tscon (or service-based equivalents) from a SYSTEM context to attach to another user's disconnected RDP session without their password. Yields an authenticated interactive session as the target user.",
+      "relatedEventIds": [4624, 4778, 4779, 4688]
+    },
+    {
+      "name": "HTML Smuggling",
+      "type": "technique",
+      "keywords": ["html smuggling", "blob", "javascript", "data uri", "browser delivery", "iso delivery", "lnk delivery"],
+      "summary": "Embedding an encoded payload inside an HTML page so it is reconstructed and saved by the user's browser via a JavaScript Blob. Bypasses email and web gateways that scan the originating HTML for malicious content.",
+      "relatedEventIds": [15, 4663]
+    },
+    {
+      "name": "LNK / ISO Container Delivery",
+      "type": "technique",
+      "keywords": ["lnk delivery", "iso", "img", "vhd", "container", "mark of the web", "motw bypass", "macro replacement"],
+      "summary": "Wrapping a malicious LNK and supporting payload inside an ISO, IMG, or VHD container to evade Mark-of-the-Web propagation. Became a dominant delivery pattern after Microsoft began blocking macros from internet-sourced Office files.",
+      "relatedEventIds": [1, 11, 4688]
+    },
+    {
+      "name": "Process Hollowing",
+      "type": "technique",
+      "keywords": ["process hollowing", "runpe", "image replacement", "ntunmapviewofsection", "createprocess suspended"],
+      "summary": "Spawning a legitimate process in a suspended state, unmapping its image, writing attacker code in its place, then resuming execution. The process appears to be the original benign binary in tooling that relies on the process name.",
+      "relatedEventIds": [1, 8, 10, 4688]
+    },
+    {
+      "name": "PowerShell Logging Bypass",
+      "type": "technique",
+      "keywords": ["powershell logging bypass", "scriptblock logging", "module logging", "transcription", "logsettings", "reflection"],
+      "summary": "Disabling Script Block Logging, Module Logging, or transcription via reflection on PowerShell internals (e.g. setting GroupPolicySettings on the cached PSEtwLogProvider). Suppresses 4103/4104 records for follow-on commands in the same session.",
+      "relatedEventIds": [4103, 4104, 4688]
+    },
+    {
+      "name": "LSA Secrets",
+      "type": "definition",
+      "keywords": ["lsa secrets", "policy secrets", "hklm security", "service account password", "registry secret"],
+      "summary": "Encrypted secrets stored under HKLM\\SECURITY\\Policy\\Secrets — including service account passwords, DPAPI machine keys, and cached domain credentials. Distinct from LSASS in-memory credentials and accessible with SYSTEM and SeBackupPrivilege.",
+      "relatedEventIds": [4663, 4688]
+    },
+    {
+      "name": "PowerShell Logs",
+      "type": "definition",
+      "keywords": ["powershell logs", "scriptblock logging", "module logging", "pipeline execution", "transcription", "4103", "4104", "800"],
+      "summary": "PowerShell's three logging tiers — Module Logging (4103, pipeline parameters), Script Block Logging (4104, decoded script content), and Transcription (full session text). EID 800 on the Windows PowerShell channel records pipeline execution for legacy v2-style logs.",
+      "relatedEventIds": [4103, 4104, 800, 400]
+    },
+    {
+      "name": "WDAC / AppLocker",
+      "type": "definition",
+      "keywords": ["wdac", "windows defender application control", "applocker", "app control", "code integrity", "allowlist"],
+      "summary": "Microsoft application-control technologies that enforce policies on which executables, scripts, and DLLs may run. AppLocker is rule-based and user-mode; WDAC is policy-driven, kernel-enforced, and the recommended modern control.",
+      "relatedEventIds": [8003, 8004, 3076, 3077]
+    },
+    {
+      "name": "ASR (Attack Surface Reduction)",
+      "type": "definition",
+      "keywords": ["asr", "attack surface reduction", "defender", "rule", "block", "office macro", "lsass protection"],
+      "summary": "Microsoft Defender feature set that blocks common attack behaviors via per-rule policies — Office child processes, credential theft from LSASS, obfuscated scripts, USB execution, and more. Each rule has audit and block modes.",
+      "relatedEventIds": [1121, 1122]
+    },
+    {
+      "name": "LNK Files",
+      "type": "definition",
+      "keywords": ["lnk", "shortcut", "shell link", "target path", "delivery", "forensic artifact"],
+      "summary": "Windows shell shortcut format pointing to a target path with arguments, working directory, icon, and machine identifiers. Used both as a phishing payload and as a forensic artifact recording user file access.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "ShellBags",
+      "type": "definition",
+      "keywords": ["shellbags", "bagmru", "shell folders", "ntuser.dat", "usrclass.dat", "folder access"],
+      "summary": "Per-user registry artifacts (BagMRU, Bags) recording every folder a user has browsed in Explorer, including remote shares, removable media, and now-deleted folders. Survives folder deletion and proves user awareness of a path.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Jump Lists",
+      "type": "definition",
+      "keywords": ["jump lists", "automaticdestinations", "customdestinations", "recently used", "appid"],
+      "summary": "Per-application recently-used file lists stored under each user's profile (AutomaticDestinations and CustomDestinations). Records file paths, timestamps, and the AppID of the program that opened them.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "UserAssist",
+      "type": "definition",
+      "keywords": ["userassist", "gui execution", "explorer launch", "rot13", "ntuser.dat"],
+      "summary": "Per-user registry artifact (HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist) tracking GUI-launched programs with run counts and last-execution timestamps. Names are ROT13-encoded.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Pagefile / Hiberfile",
+      "type": "definition",
+      "keywords": ["pagefile", "pagefile.sys", "hiberfile", "hiberfil.sys", "swap", "memory residue", "crashdump"],
+      "summary": "Disk files that hold paged-out (pagefile.sys) or hibernation (hiberfil.sys) memory contents. Frequently contain credentials, keys, and decoded payloads recoverable long after the originating process has exited.",
+      "relatedEventIds": []
+    },
+    {
+      "name": "Mass File Encryption",
+      "type": "technique",
+      "keywords": ["mass file encryption", "ransomware encryption", "extension rename", "ransom note", "file rewrite", "aes", "rsa", "impact phase"],
+      "summary": "Final ransomware impact phase: rapid enumeration and rewrite of user, server, and share files with an attacker-controlled extension, followed by a ransom note dropped into each affected directory. Often parallelized across local drives and SMB shares from a single staging host.",
+      "relatedEventIds": [4663, 4656, 4660]
     }
   ]
 }
