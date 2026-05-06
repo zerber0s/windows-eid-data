@@ -1,7 +1,7 @@
 {
   "dataset": {
     "name": "Scenario Enrichment",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "generatedAt": "2026-05-06T00:00:00Z"
   },
   "entries": [
@@ -595,7 +595,7 @@
     },
     {
       "name": "Ransomware Lifecycle",
-      "type": "technique",
+      "type": "definition",
       "keywords": ["ransomware", "double extortion", "encryption", "ransom note", "exfil", "lockbit", "blackcat", "alphv"],
       "summary": "End-to-end intrusion pattern: initial access, recon, credential theft, lateral movement, data exfiltration, shadow copy and backup destruction, then mass file encryption with a ransom note.",
       "relatedEventIds": [4624, 4663, 4688, 7045, 8224]
