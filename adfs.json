@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Federation Services",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/adfs.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -164,8 +164,8 @@
               "tacticName": "Credential Access"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -211,7 +211,7 @@
           "description": "User identity requesting the token"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 501,

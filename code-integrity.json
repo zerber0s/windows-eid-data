@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Code Integrity",
-    "version": "1.4.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.5.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/code-integrity.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -62,12 +62,12 @@
           ]
         },
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -104,7 +104,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3003,
@@ -138,8 +138,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -170,7 +170,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3004,
@@ -204,8 +204,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -236,7 +236,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3033,
@@ -290,8 +290,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -332,7 +332,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3034,
@@ -530,8 +530,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -577,7 +577,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 / Server 2016"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3077,
@@ -622,8 +622,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         },
@@ -679,7 +679,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 / Server 2016"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3089,
@@ -713,8 +713,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -754,7 +754,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 / Server 2016"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3099,
@@ -788,8 +788,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -825,7 +825,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 / Server 2016"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

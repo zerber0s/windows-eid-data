@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Exchange",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/exchange.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -103,7 +103,7 @@
         },
         {
           "techniqueId": "T1098.002",
-          "techniqueName": "Account Manipulation: Exchange Email Delegate Permissions",
+          "techniqueName": "Account Manipulation: Additional Email Delegate Permissions",
           "tactics": [
             {
               "tacticId": "TA0003",
@@ -117,7 +117,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -150,7 +150,7 @@
         "name": "Microsoft Learn — Exchange Server Admin Audit Logging",
         "url": "https://learn.microsoft.com/en-us/exchange/policy-and-compliance/admin-audit-logging/admin-audit-logging"
       },
-      "lastReviewed": "2026-04-08"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 2,

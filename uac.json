@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - User Account Control",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/uac.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -66,10 +66,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
             }
           ]
         }
@@ -133,7 +129,7 @@
           "rule": "title: UAC Auto-Elevation Event\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 4\n    filter_system32:\n        ExePath|startswith:\n            - 'C:\\Windows\\System32\\'\n            - 'C:\\Windows\\SysWOW64\\'\n            - 'C:\\Windows\\WinSxS\\'\n    condition: selection and not filter_system32\nfalsepositives:\n    - Microsoft signed tools outside System32 (rare)\nlevel: high\ntags:\n    - attack.privilege_escalation\n    - attack.defense_evasion\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-12"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 5,
@@ -178,10 +174,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
             }
           ]
         }
@@ -244,7 +236,7 @@
           "rule": "title: UAC Consent Prompt Presented to User\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 5\n    filter_programfiles:\n        ExePath|startswith:\n            - 'C:\\Program Files\\'\n            - 'C:\\Program Files (x86)\\'\n            - 'C:\\Windows\\'\n    condition: selection and not filter_programfiles\nfalsepositives:\n    - User-initiated software installations from Downloads or Desktop\n    - IT-managed tools deployed to non-standard paths\nlevel: medium\ntags:\n    - attack.privilege_escalation\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-12"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 33,
@@ -292,10 +284,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
             }
           ]
         }
@@ -346,7 +334,7 @@
           "rule": "title: Application Information Service Started\nstatus: informational\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 33\n    condition: selection\nfalsepositives:\n    - Normal system boot\nlevel: informational\ntags:\n    - attack.defense_evasion\n    - attack.t1548.002"
         }
       ],
-      "lastReviewed": "2026-04-12"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 34,
@@ -395,20 +383,16 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
             }
           ]
         },
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -465,7 +449,7 @@
           "rule": "title: Application Information Service Stopped\nstatus: experimental\nlogsource:\n    product: windows\n    service: uac-operational\n    definition: Requires Microsoft-Windows-UAC/Operational channel enabled via wevtutil\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-UAC\n        EventID: 34\n    condition: selection\nfalsepositives:\n    - Normal system shutdown sequence\nlevel: high\ntags:\n    - attack.defense_evasion\n    - attack.privilege_escalation\n    - attack.t1548.002\n    - attack.t1562.001"
         }
       ],
-      "lastReviewed": "2026-04-12"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

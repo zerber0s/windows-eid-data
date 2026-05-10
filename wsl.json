@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Subsystem for Linux",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wsl.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -57,7 +57,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -72,12 +72,12 @@
           ]
         },
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -132,7 +132,7 @@
           "notes": "Use an allowlist of known-good computers or users to suppress FPs. Kali Linux distribution name is high confidence."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 2,
@@ -162,7 +162,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -192,7 +192,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1607 / Server 2019"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - System",
-    "version": "1.12.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.13.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/system.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -182,12 +182,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1070.001",
-          "techniqueName": "Indicator Removal: Clear Windows Event Logs",
+          "techniqueId": "T1685.005",
+          "techniqueName": "Disable or Modify Tools: Clear Windows Event Logs",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -210,7 +210,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 219,
@@ -246,12 +246,12 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
         {
-          "techniqueId": "T1215",
+          "techniqueId": "T1547.006",
           "techniqueName": "Kernel Modules and Extensions",
           "tactics": [
             {
@@ -293,7 +293,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 1014,

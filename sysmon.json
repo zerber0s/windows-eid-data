@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Sysmon",
-    "version": "1.7.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.8.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/sysmon.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -62,7 +62,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -154,7 +154,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 2,
@@ -179,7 +179,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -226,7 +226,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3,
@@ -384,12 +384,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -431,7 +431,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 5,
@@ -533,7 +533,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -595,7 +595,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-10",
+      "lastReviewed": "2026-05-10",
       "relatedEventIds": [
         {
           "id": 3001,
@@ -639,12 +639,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1574.002",
-          "techniqueName": "Hijack Execution Flow: DLL Side-Loading",
+          "techniqueId": "T1574.001",
+          "techniqueName": "Hijack Execution Flow: DLL",
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -654,7 +654,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -719,7 +719,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 8,
@@ -750,7 +750,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -760,7 +760,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -830,7 +830,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 9,
@@ -954,7 +954,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1024,7 +1024,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 11,
@@ -1166,8 +1166,12 @@
           "techniqueName": "Modify Registry",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
             }
           ]
         },
@@ -1219,7 +1223,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 13,
@@ -1252,8 +1256,12 @@
           "techniqueName": "Modify Registry",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
             }
           ]
         },
@@ -1305,7 +1313,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 14,
@@ -1338,8 +1346,12 @@
           "techniqueName": "Modify Registry",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
+            },
+            {
+              "tacticId": "TA0003",
+              "tacticName": "Persistence"
             }
           ]
         },
@@ -1349,7 +1361,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1390,7 +1402,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 15,
@@ -1421,7 +1433,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -1430,8 +1442,8 @@
           "techniqueName": "Subvert Trust Controls: Mark-of-the-Web Bypass",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -1478,7 +1490,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 16,
@@ -1504,12 +1516,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -1546,7 +1558,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 17,
@@ -2073,7 +2085,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -2130,7 +2142,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 24,
@@ -2157,16 +2169,6 @@
       "mitreAttack": [
         {
           "techniqueId": "T1115",
-          "techniqueName": "Clipboard Data",
-          "tactics": [
-            {
-              "tacticId": "TA0009",
-              "tacticName": "Collection"
-            }
-          ]
-        },
-        {
-          "techniqueId": "T1414",
           "techniqueName": "Clipboard Data",
           "tactics": [
             {
@@ -2217,7 +2219,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 25,
@@ -2252,7 +2254,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -2262,7 +2264,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -2329,7 +2331,7 @@
           "notes": "Requires Sysmon 13+ with ProcessTampering enabled in the Sysmon configuration. No false positives in practice."
         }
       ],
-      "lastReviewed": "2026-03-30"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 26,
@@ -2378,7 +2380,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -2425,7 +2427,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 27,
@@ -2580,7 +2582,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -2633,7 +2635,7 @@
       "windowsVersions": {
         "minVersion": "Windows 7 / Server 2008 R2"
       },
-      "lastReviewed": "2026-04-04"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 29,

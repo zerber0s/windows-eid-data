@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - NTLM Authentication",
-    "version": "1.5.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.6.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ntlm.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -154,15 +154,11 @@
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
-          "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
+          "techniqueName": "Adversary-in-the-Middle: Name Resolution Poisoning and SMB Relay",
           "tactics": [
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0008",
-              "tacticName": "Lateral Movement"
             }
           ]
         }
@@ -208,7 +204,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 8001,
@@ -328,15 +324,11 @@
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
-          "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
+          "techniqueName": "Adversary-in-the-Middle: Name Resolution Poisoning and SMB Relay",
           "tactics": [
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0008",
-              "tacticName": "Lateral Movement"
             }
           ]
         }
@@ -382,7 +374,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-02"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 8003,
@@ -496,15 +488,11 @@
       "mitreAttack": [
         {
           "techniqueId": "T1557.001",
-          "techniqueName": "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay",
+          "techniqueName": "Adversary-in-the-Middle: Name Resolution Poisoning and SMB Relay",
           "tactics": [
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0008",
-              "tacticName": "Lateral Movement"
             }
           ]
         },
@@ -573,7 +561,7 @@
       "windowsVersions": {
         "minVersion": "Windows Vista / Server 2008"
       },
-      "lastReviewed": "2026-04-05"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

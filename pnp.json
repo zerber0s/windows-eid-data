@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Plug and Play / Device Installation",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/pnp.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -67,7 +67,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -145,7 +145,7 @@
           "notes": "Filter list is illustrative. Expand with known driver publishers in your environment. Unknown publishers should be reviewed, not necessarily alerted on blindly."
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 20003,

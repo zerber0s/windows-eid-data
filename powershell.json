@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - PowerShell",
-    "version": "1.10.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.11.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/powershell.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -628,7 +628,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -690,7 +690,7 @@
           "notes": "High confidence rule; these strings rarely appear in legitimate scripts."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4105,

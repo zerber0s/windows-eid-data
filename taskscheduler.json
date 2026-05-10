@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Task Scheduler",
-    "version": "1.8.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.9.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/taskscheduler.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -836,7 +836,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -892,7 +892,7 @@
           "notes": "Base rule; correlate with EID 106 creation events for higher fidelity attacker cleanup detection."
         }
       ],
-      "lastReviewed": "2026-03-29"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 200,

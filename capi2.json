@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - CAPI2",
-    "version": "1.4.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.5.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/capi2.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -59,8 +59,8 @@
           "techniqueName": "Subvert Trust Controls",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -106,7 +106,7 @@
           "description": "Success or failure with error code for the chain build operation"
         }
       ],
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 13,
@@ -148,8 +148,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -190,7 +190,7 @@
           "description": "Success or failure with specific policy error flags"
         }
       ],
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 30,
@@ -229,8 +229,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -266,7 +266,7 @@
           "description": "Success or failure of the URL fetch operation"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 40,
@@ -307,8 +307,8 @@
           "techniqueName": "Subvert Trust Controls: Code Signing",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -349,7 +349,7 @@
           "description": "Result of the revocation check (e.g., CERT_E_REVOKED)"
         }
       ],
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 70,
@@ -391,8 +391,8 @@
           "techniqueName": "Subvert Trust Controls: Install Root Certificate",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -433,7 +433,7 @@
           "description": "Success or failure of the policy evaluation"
         }
       ],
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

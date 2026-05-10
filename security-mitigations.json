@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Security Mitigations (Exploit Protection)",
-    "version": "1.4.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.5.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/security-mitigations.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -49,7 +49,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -89,7 +89,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 2,
@@ -129,7 +129,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -182,7 +182,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 3,
@@ -387,15 +387,15 @@
       "mitreAttack": [
         {
           "techniqueId": "T1574.001",
-          "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
+          "techniqueName": "Hijack Execution Flow: DLL",
           "tactics": [
             {
-              "tacticId": "TA0004",
-              "tacticName": "Privilege Escalation"
+              "tacticId": "TA0005",
+              "tacticName": "Stealth"
             },
             {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
             }
           ]
         }
@@ -435,7 +435,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 6,
@@ -462,15 +462,15 @@
       "mitreAttack": [
         {
           "techniqueId": "T1574.001",
-          "techniqueName": "Hijack Execution Flow: DLL Search Order Hijacking",
+          "techniqueName": "Hijack Execution Flow: DLL",
           "tactics": [
             {
-              "tacticId": "TA0004",
-              "tacticName": "Privilege Escalation"
+              "tacticId": "TA0005",
+              "tacticName": "Stealth"
             },
             {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
             }
           ]
         }
@@ -509,7 +509,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 7,
@@ -536,16 +536,16 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1574.002",
-          "techniqueName": "Hijack Execution Flow: DLL Side-Loading",
+          "techniqueId": "T1574.001",
+          "techniqueName": "Hijack Execution Flow: DLL",
           "tactics": [
             {
-              "tacticId": "TA0004",
-              "tacticName": "Privilege Escalation"
+              "tacticId": "TA0005",
+              "tacticName": "Stealth"
             },
             {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
             }
           ]
         }
@@ -585,7 +585,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 8,
@@ -611,16 +611,16 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1574.002",
-          "techniqueName": "Hijack Execution Flow: DLL Side-Loading",
+          "techniqueId": "T1574.001",
+          "techniqueName": "Hijack Execution Flow: DLL",
           "tactics": [
             {
-              "tacticId": "TA0004",
-              "tacticName": "Privilege Escalation"
+              "tacticId": "TA0005",
+              "tacticName": "Stealth"
             },
             {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
+              "tacticId": "TA0002",
+              "tacticName": "Execution"
             }
           ]
         }
@@ -659,7 +659,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 9,
@@ -841,7 +841,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -886,7 +886,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 12,
@@ -930,7 +930,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -975,7 +975,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 13,
@@ -1011,7 +1011,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1051,7 +1051,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 14,
@@ -1082,7 +1082,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1121,7 +1121,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 15,
@@ -1157,7 +1157,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1196,7 +1196,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 16,
@@ -1228,7 +1228,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1267,7 +1267,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 17,
@@ -1299,7 +1299,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -1343,7 +1343,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 18,
@@ -1374,7 +1374,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -1417,7 +1417,7 @@
       "windowsVersions": {
         "minVersion": "Windows 10 1709 / Server 2019"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 19,

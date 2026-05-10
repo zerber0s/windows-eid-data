@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Domain Services",
-    "version": "1.6.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.7.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/active-directory.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -266,7 +266,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0003",
@@ -308,7 +308,7 @@
           "description": "Distinguished name of the lingering object; privileged account or group DNs are highest priority"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 2089,
@@ -774,8 +774,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -822,7 +822,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4707,
@@ -860,8 +860,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -897,7 +897,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4713,
@@ -947,8 +947,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -984,7 +984,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4716,
@@ -1027,8 +1027,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -1064,7 +1064,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4739,
@@ -1103,8 +1103,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -1145,7 +1145,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4765,
@@ -1192,10 +1192,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
             }
           ]
         }
@@ -1242,7 +1238,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4766,
@@ -1278,10 +1274,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
             }
           ]
         }
@@ -1322,7 +1314,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4928,
@@ -1683,8 +1675,12 @@
           "techniqueName": "Domain or Tenant Policy Modification: Group Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
             }
           ]
         }
@@ -1730,7 +1726,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4932,
@@ -2003,8 +1999,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         },
@@ -2088,7 +2084,7 @@
           "notes": "Tune object list to environment-specific privileged groups."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 5137,
@@ -2148,8 +2144,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -2192,7 +2188,7 @@
           "description": "LDAP object class created; groupPolicyContainer (GPO), user, computer, group are common targets"
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 5138,
@@ -2312,8 +2308,12 @@
           "techniqueName": "Domain or Tenant Policy Modification: Group Policy Modification",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
+            },
+            {
+              "tacticId": "TA0004",
+              "tacticName": "Privilege Escalation"
             }
           ]
         }
@@ -2359,7 +2359,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 5141,
@@ -2409,7 +2409,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         },
@@ -2461,7 +2461,7 @@
           "description": "LDAP class of the deleted object"
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

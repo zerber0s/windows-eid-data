@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Network Profile",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/network-profile.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -51,12 +51,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.004",
-          "techniqueName": "Impair Defenses: Disable or Modify System Firewall",
+          "techniqueId": "T1686",
+          "techniqueName": "Disable or Modify System Firewall",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -118,7 +118,7 @@
           "rule": "title: Public Network Profile Assigned on Managed Endpoint\nstatus: experimental\nlogsource:\n    product: windows\n    service: network-profile\ndetection:\n    selection:\n        EventID: 10000\n        Category: '0'\n    condition: selection\nfalsepositives:\n    - Remote workers connecting to home or public networks\n    - VPN connection establishment before domain detection completes\nlevel: low"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 10001,
@@ -151,12 +151,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.001",
-          "techniqueName": "Impair Defenses: Disable or Modify Tools",
+          "techniqueId": "T1685",
+          "techniqueName": "Disable or Modify Tools",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -195,7 +195,7 @@
           "description": "User associated with the disconnection event"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

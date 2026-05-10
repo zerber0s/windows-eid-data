@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows Error Reporting",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/wer.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -66,7 +66,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -145,7 +145,7 @@
           "rule": "title: Critical System Process Crash Detected\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\ndetection:\n    selection:\n        Source: 'Application Error'\n        EventID: 1000\n        FaultingApplicationName:\n            - 'lsass.exe'\n            - 'services.exe'\n            - 'csrss.exe'\n    condition: selection\nfalsepositives:\n    - Buggy third-party security software crashing system processes\n    - Memory corruption due to hardware faults\nlevel: high"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 1001,

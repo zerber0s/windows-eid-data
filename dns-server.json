@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DNS Server",
-    "version": "1.3.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dns-server.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -77,7 +77,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Cluster queries by QNAME apex domain \u2014 high volume to a single domain from one client is highest fidelity",
+          "Cluster queries by QNAME apex domain — high volume to a single domain from one client is highest fidelity",
           "Flag high-entropy or long subdomain labels (>30 chars) as likely data encoding",
           "Unusual QTYPE values (TXT, NULL, MX) at high frequency from a workstation are strong C2 indicators",
           "Correlate Source IP with endpoints known to run sensitive data handling processes"
@@ -169,7 +169,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Count NXDOMAIN responses per source IP per hour \u2014 thresholds above ~50/hour from a single client warrant investigation",
+          "Count NXDOMAIN responses per source IP per hour — thresholds above ~50/hour from a single client warrant investigation",
           "Extract the apex domains from NXDOMAIN queries and check against DGA detection lists or VirusTotal",
           "Correlate with proxy/firewall logs to see if the client also has unusual HTTP or TCP connections",
           "Correlate queried domain names with threat intelligence on DGA patterns for known malware families"
@@ -258,7 +258,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Correlate Source IP with known DHCP server addresses \u2014 updates from non-DHCP client IPs are anomalous",
+          "Correlate Source IP with known DHCP server addresses — updates from non-DHCP client IPs are anomalous",
           "Pair with Audit EID 519 to confirm which updates were committed vs. rejected",
           "Check UpdateName against high-value hostnames (DCs, file servers, identity systems)"
         ],
@@ -344,7 +344,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the admin account that performed the deletion \u2014 verify it was an authorized change",
+          "Identify the admin account that performed the deletion — verify it was an authorized change",
           "Check if the deletion was preceded by a zone transfer (EID 562/563) that may have exfiltrated zone data",
           "Correlate with Active Directory replication events if this is an AD-integrated zone"
         ],
@@ -421,7 +421,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Focus on zones where dynamic update policy was changed from Secure to Nonsecure or None",
-          "Verify zone type changes \u2014 converting a primary zone to a secondary may indicate exfil setup",
+          "Verify zone type changes — converting a primary zone to a secondary may indicate exfil setup",
           "Correlate the administrator identity with privileged account monitoring"
         ],
         "commonFalsePositives": [
@@ -496,12 +496,12 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Check RecordData for external or non-RFC1918 IP addresses in internal zones \u2014 indicates DNS hijacking",
+          "Check RecordData for external or non-RFC1918 IP addresses in internal zones — indicates DNS hijacking",
           "Review RecordName for typosquatted names resembling high-value hosts (e.g., 'dc01' vs 'dc0l')",
           "Correlate the administrator identity with authorized DNS admins and change management records"
         ],
         "commonFalsePositives": [
-          "Routine administrative DNS management \u2014 adding A records for new servers",
+          "Routine administrative DNS management — adding A records for new servers",
           "Automated provisioning systems that create DNS records as part of server deployment"
         ]
       },
@@ -575,16 +575,16 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Check deleted RecordType \u2014 SRV deletions (especially _ldap._tcp, _kerberos._tcp) cause AD authentication failures",
+          "Check deleted RecordType — SRV deletions (especially _ldap._tcp, _kerberos._tcp) cause AD authentication failures",
           "Correlate with EID 519/520 to distinguish manual admin deletion from dynamic update expiry",
-          "Review administrator identity \u2014 deletions by service accounts or non-DNS-admin identities are anomalous"
+          "Review administrator identity — deletions by service accounts or non-DNS-admin identities are anomalous"
         ],
         "commonFalsePositives": [
           "Cleanup of stale PTR or A records during server decommissioning",
@@ -621,7 +621,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 519,
@@ -672,8 +672,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Verify that Source IP matches the legitimate owner of the registered hostname \u2014 mismatches indicate DNS spoofing",
-          "Check RecordData against expected IP ranges \u2014 updates registering external or unexpected IPs are anomalous",
+          "Verify that Source IP matches the legitimate owner of the registered hostname — mismatches indicate DNS spoofing",
+          "Check RecordData against expected IP ranges — updates registering external or unexpected IPs are anomalous",
           "Correlate with DHCP lease logs to confirm the Source IP is the authorized client for that hostname"
         ],
         "commonFalsePositives": [
@@ -762,8 +762,8 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Sequence: EID 520 delete \u2192 EID 519 create for same RecordName with different Source IP = DNS hijacking",
-          "Cross-reference DHCP logs \u2014 deletions that don't correspond to DHCP lease releases are anomalous",
+          "Sequence: EID 520 delete → EID 519 create for same RecordName with different Source IP = DNS hijacking",
+          "Cross-reference DHCP logs — deletions that don't correspond to DHCP lease releases are anomalous",
           "Prioritize deletions of SRV, MX, or A records for critical infrastructure names"
         ],
         "commonFalsePositives": [
@@ -916,7 +916,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Apply same checks as EID 562 \u2014 verify destination is an authorized secondary server",
+          "Apply same checks as EID 562 — verify destination is an authorized secondary server",
           "High-frequency IXFR transfers to the same destination may be attempting to reconstruct full zone data incrementally"
         ],
         "commonFalsePositives": [
@@ -997,15 +997,15 @@
               "tacticName": "Credential Access"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Enumerate all DNS server and zone policies \u2014 unexpected policies are rare and high-fidelity",
+          "Enumerate all DNS server and zone policies — unexpected policies are rare and high-fidelity",
           "Review the policy criteria (client subnet, QNAME match) for targeting of specific internal subnets or hostnames",
           "Correlate the administrator identity with authorized DNS admin accounts"
         ],
@@ -1039,7 +1039,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 578,
@@ -1081,7 +1081,7 @@
       "notesGuidance": {
         "investigationPivots": [
           "Review old vs. new policy configuration to understand what changed",
-          "Flag modifications to RRL (response rate limiting) policies \u2014 disabling RRL enables DNS amplification"
+          "Flag modifications to RRL (response rate limiting) policies — disabling RRL enables DNS amplification"
         ],
         "commonFalsePositives": [
           "Authorized policy tuning during DNS infrastructure maintenance"
@@ -1141,15 +1141,15 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Review the policy that was deleted \u2014 if it was a security control (RRL, recursion restriction), treat as tampering",
-          "Correlate with EID 577 creation events to identify policy lifecycle: create \u2192 use \u2192 delete pattern"
+          "Review the policy that was deleted — if it was a security control (RRL, recursion restriction), treat as tampering",
+          "Correlate with EID 577 creation events to identify policy lifecycle: create → use → delete pattern"
         ],
         "commonFalsePositives": [
           "Authorized policy cleanup after planned DNS infrastructure changes"
@@ -1163,7 +1163,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 580,
@@ -1205,7 +1205,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify the ZoneName \u2014 policies on the internal AD DNS zone are highest risk",
+          "Identify the ZoneName — policies on the internal AD DNS zone are highest risk",
           "Review what the policy does: response override for specific QNAMEs is the most dangerous configuration"
         ],
         "commonFalsePositives": [
@@ -1278,7 +1278,7 @@
       ],
       "notesGuidance": {
         "investigationPivots": [
-          "Identify what changed \u2014 new QNAME conditions or new response override targets are most suspicious",
+          "Identify what changed — new QNAME conditions or new response override targets are most suspicious",
           "Correlate with EID 257 Analytical events to see if the modified policy changed observed query responses"
         ],
         "commonFalsePositives": [
@@ -1327,7 +1327,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             }
           ]
         }
@@ -1349,7 +1349,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-03"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

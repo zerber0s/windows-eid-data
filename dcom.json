@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - DCOM",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/dcom.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -170,7 +170,7 @@
           "tactics": [
             {
               "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticName": "Stealth"
             },
             {
               "tacticId": "TA0004",
@@ -221,7 +221,7 @@
           "rule": "title: COM Server Registration Timeout — Possible COM Hijacking\nstatus: experimental\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-DistributedCOM\n        EventID: 10010\n    condition: selection\nfalsepositives:\n    - Windows servicing and update processes\n    - Software installers registering COM objects\nlevel: low\ntags:\n    - attack.persistence\n    - attack.t1546.015"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 10016,
@@ -284,10 +284,6 @@
             {
               "tacticId": "TA0004",
               "tacticName": "Privilege Escalation"
-            },
-            {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
             }
           ]
         }
@@ -349,7 +345,7 @@
           "rule": "title: DCOM Remote Activation Denied — Possible Lateral Movement\nstatus: experimental\nlogsource:\n    product: windows\n    service: system\ndetection:\n    selection:\n        Provider_Name: Microsoft-Windows-DistributedCOM\n        EventID: 10016\n    filter_local:\n        Message|contains:\n            - 'from address 127.'\n            - 'from address ::1'\n            - 'from address Local'\n    condition: selection and not filter_local\nfalsepositives:\n    - Legitimate remote COM activation from management tools\nlevel: medium\ntags:\n    - attack.lateral_movement\n    - attack.t1021.003"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 10028,

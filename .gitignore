@@ -1,2 +1,4 @@
 CLAUDE.md
 .DS_Store
+scripts/.cache/
+scripts/mitre-v*-report.json

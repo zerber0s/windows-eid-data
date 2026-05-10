@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Active Directory Certificate Services",
-    "version": "1.3.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/ad-cs.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -63,12 +63,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.002",
-          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "techniqueId": "T1685.001",
+          "techniqueName": "Disable or Modify Tools: Disable or Modify Windows Event Log",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -105,7 +105,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4886,
@@ -153,10 +153,6 @@
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
             }
           ]
         }
@@ -199,7 +195,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4887,
@@ -249,24 +245,6 @@
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
-            }
-          ]
-        },
-        {
-          "techniqueId": "T1550.003",
-          "techniqueName": "Use Alternate Authentication Material: Pass the Certificate",
-          "tactics": [
-            {
-              "tacticId": "TA0008",
-              "tacticName": "Lateral Movement"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
             }
           ]
         }
@@ -340,7 +318,7 @@
           "notes": "Baseline; tune with CertificateTemplate allowlist for known-safe templates that legitimately use SANs."
         }
       ],
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4888,
@@ -549,12 +527,12 @@
       ],
       "mitreAttack": [
         {
-          "techniqueId": "T1562.002",
-          "techniqueName": "Impair Defenses: Disable Windows Event Logging",
+          "techniqueId": "T1685.001",
+          "techniqueName": "Disable or Modify Tools: Disable or Modify Windows Event Log",
           "tactics": [
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -595,7 +573,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     },
     {
       "id": 4891,
@@ -644,10 +622,6 @@
             {
               "tacticId": "TA0006",
               "tacticName": "Credential Access"
-            },
-            {
-              "tacticId": "TA0003",
-              "tacticName": "Persistence"
             }
           ]
         },
@@ -660,8 +634,8 @@
               "tacticName": "Privilege Escalation"
             },
             {
-              "tacticId": "TA0005",
-              "tacticName": "Defense Evasion"
+              "tacticId": "TA0112",
+              "tacticName": "Defense Impairment"
             }
           ]
         }
@@ -704,7 +678,7 @@
       "windowsVersions": {
         "minVersion": "Server 2008"
       },
-      "lastReviewed": "2026-04-07"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }

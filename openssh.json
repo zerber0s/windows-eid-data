@@ -1,8 +1,8 @@
 {
   "dataset": {
     "name": "EID Quick Reference - Windows OpenSSH Server",
-    "version": "1.1.0",
-    "generatedAt": "2026-04-12T00:00:00Z",
+    "version": "1.2.0",
+    "generatedAt": "2026-05-10T00:00:00Z",
     "id": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/openssh.json",
     "schema": "https://raw.githubusercontent.com/zerber0s/windows-eid-data/main/schema.json",
     "license": {
@@ -58,10 +58,6 @@
             {
               "tacticId": "TA0008",
               "tacticName": "Lateral Movement"
-            },
-            {
-              "tacticId": "TA0001",
-              "tacticName": "Initial Access"
             }
           ]
         },
@@ -148,7 +144,7 @@
           "rule": "title: SSH Authentication Accepted via Password on Windows Host\nstatus: experimental\nlogsource:\n    product: windows\n    service: application\n    definition: Source must be 'OpenSSH SSH Server'\ndetection:\n    selection:\n        EventID: 4\n        Message|contains: 'Accepted password'\n    condition: selection\nfalsepositives:\n    - Hosts where password authentication is intentionally permitted\n    - Legacy automation that cannot use key-based auth\nlevel: medium"
         }
       ],
-      "lastReviewed": "2026-04-10"
+      "lastReviewed": "2026-05-10"
     }
   ]
 }
