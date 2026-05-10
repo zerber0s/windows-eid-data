@@ -1,8 +1,8 @@
 # Windows EID Data
 
-Structured JSON reference for Windows Event IDs — what each event means, when it fires, what fields matter, and how to use it for investigation and threat hunting. Sourced from and consistent with [Microsoft Learn](https://learn.microsoft.com/) documentation, with MITRE ATT&CK mappings on every entry that warrants one.
+Structured JSON reference for Windows Event IDs - what each event means, when it fires, what fields matter, and how to use it for investigation and threat hunting. Sourced from and consistent with [Microsoft Learn](https://learn.microsoft.com/) documentation, with [MITRE ATT&CK](https://attack.mitre.org) mappings on every entry that warrants one.
 
-Maintained as the data source for the [EIDVault](https://apps.apple.com/) iOS app, but published as a standalone reference for anyone who finds it useful.
+Maintained as the data source for the [EIDVault](https://apps.apple.com/us/app/eidvault/id6761655272) iOS app, but published as a standalone reference for anyone who finds it useful.
 
 ## Layout
 
